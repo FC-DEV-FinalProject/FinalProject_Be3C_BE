@@ -15,20 +15,6 @@ import java.time.LocalDateTime;
 @Table(name = "method")
 public class Method {
 
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-        methodCreatedDate = now;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        modifiedDate = now;
-    }
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -52,5 +38,5 @@ public class Method {
 
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
-    
+
 }
