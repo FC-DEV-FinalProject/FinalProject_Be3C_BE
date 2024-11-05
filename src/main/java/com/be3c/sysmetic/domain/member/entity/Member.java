@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.user.entity;
+package com.be3c.sysmetic.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

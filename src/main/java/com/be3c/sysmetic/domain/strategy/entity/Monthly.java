@@ -12,23 +12,33 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "method")
-public class Method {
+@Table(name = "monthly")
+public class Monthly {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "strategy_id", nullable = false)
+    private Strategy strategy;
 
-    @Column(name = "open_status", nullable = false)
-    private Character openStatus;
+    @Column(name = "month_id", nullable = false)
+    private Integer month;
 
-    @Column(name = "explanation", nullable = false)
-    private String explanation;
+    @Column(name = "average_monthly_wage", nullable = false)
+    private Double averageMonthlyWage;
 
-    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
-    private LocalDateTime methodCreatedDate;
+    @Column(name = "monthly_profit_loss_amount", nullable = false)
+    private Double monthlyProfitLossAmount;
+
+    @Column(name = "monthly_profit_rate", nullable = false)
+    private Double monthlyProfitRate;
+
+    @Column(name = "accumulated_profit_loss_amount", nullable = false)
+    private Double accumulatedProfitLossAmount;
+
+    @Column(name = "accumulated_profit_loss_rate", nullable = false)
+    private Double accumulatedProfitLossRate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;

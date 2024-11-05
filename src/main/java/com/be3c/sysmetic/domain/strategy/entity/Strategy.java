@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
-import com.be3c.sysmetic.domain.user.entity.Member;
+import com.be3c.sysmetic.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -20,20 +20,22 @@ public class Strategy {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ManyToOne -> 연관관계 주인 - Member
-    // @ManyToOne
-    // @JoinColumn(name = "member_id", nullable = false)
-    // private Member trader;
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member trader;
 
-    // @OneToOne
-    // @JoinColumn(name = "method_id", nullable = false)
-    // private Method method;
+    @OneToOne // 단방향 매핑
+    @JoinColumn(name = "method_id", nullable = false)
+    private Method method;
 
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
-    @Column(name = "strategyCycle", nullable = false)
-    private Character strategyCycle;
+    @Column(name = "strategy_name", length = 30, nullable = false)
+    private String name;
+
+    @Column(name = "strategy_cycle", nullable = false)
+    private Character cycle;
 
     @Column(name = "min_operation_amount", nullable = false)
     private Double minOperationAmount;

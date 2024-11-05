@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.user.entity;
+package com.be3c.sysmetic.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,33 +13,28 @@ import java.time.LocalDateTime;
 //@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
-@Table(name = "member_state_change_log")
-public class MemberStateChangeLog {
+@Table(name = "reset_password_log")
+public class ResetPasswordLog {
     /*
-        id : 회원상태변화이력 식별번호
-        member : 상태가 변경된 회원
-        email : 회원의 이메일
-        manager : 상태를 변경한 관리자 (강제탈퇴된 경우에만 기재 필요)
-        stateChangeCode : 회원상태 변화 코드
+        id : 비밀번호재설정이력 식별번호
+        tryIp : 시도한 ip
+        member : 시도한 회원 id
+        tryDate : 시도일자
      */
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "try_ip", nullable = false)
+    private String tryIp;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "email", nullable = false)
-    private String email;
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private Member manager;
-
-    @Column(name = "state_change_code", nullable = false)
-    private String stateChangeCode;
+    @Column(name = "try_date", nullable = false)
+    private LocalDateTime tryDate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;

@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.user.entity;
+package com.be3c.sysmetic.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 //@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
-@Table(name = "member_role_change_log")
-public class MemberRoleChangeLog {
+@Table(name = "member_state_change_log")
+public class MemberStateChangeLog {
     /*
-        id : 회원등급변경 식별번호
-        member : 등급이 변경될 회원
-        admin : 등급을 변경한 수퍼매니저
-        roleChangeCode : 변경될 등급 (이전 등급이 아님)
+        id : 회원상태변화이력 식별번호
+        member : 상태가 변경된 회원
+        email : 회원의 이메일
+        manager : 상태를 변경한 관리자 (강제탈퇴된 경우에만 기재 필요)
+        stateChangeCode : 회원상태 변화 코드
      */
 
     @Id
@@ -30,12 +31,15 @@ public class MemberRoleChangeLog {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private Member admin;
+    @Column(name = "email", nullable = false)
+    private String email;
 
-    @Column(name = "role_change_code", nullable = false)
-    private String roleChangeCode;
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Member manager;
+
+    @Column(name = "state_change_code", nullable = false)
+    private String stateChangeCode;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;

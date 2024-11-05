@@ -38,6 +38,8 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'           // 추가
+	testAnnotationProcessor 'org.projectlombok:lombok'   // 추가
 
 	// DevTools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

@@ -12,23 +12,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "method")
-public class Method {
+@Table(name = "account_image")
+public class AccountImage {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "strategy", nullable = false)
+    private Strategy strategy;
 
-    @Column(name = "open_status", nullable = false)
-    private Character openStatus;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @Column(name = "explanation", nullable = false)
-    private String explanation;
-
-    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
-    private LocalDateTime methodCreatedDate;
+    @Column(name = "account_image_created_date", nullable = false, columnDefinition = "Timestamp default now()")
+    private LocalDateTime accountImageCreatedDate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
@@ -39,6 +37,6 @@ public class Method {
     @Column(name = "modified_by", nullable = false)
     private Long modifiedBy;
 
-    @Column(name = "modified_date", nullable = false, columnDefinition = "Timestamp default now() on update now()")
+    @Column(name = "modified_date", nullable = false,  columnDefinition = "Timestamp default now() on update now()")
     private LocalDateTime modifiedDate;
 }

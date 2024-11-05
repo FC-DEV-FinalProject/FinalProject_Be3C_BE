@@ -12,23 +12,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "method")
-public class Method {
-
+@Table(name = "strategy_stock_reference")
+public class StrategyStockReference {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "strategy_id", nullable = false)
+    private Strategy strategy;
 
-    @Column(name = "open_status", nullable = false)
-    private Character openStatus;
-
-    @Column(name = "explanation", nullable = false)
-    private String explanation;
-
-    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
-    private LocalDateTime methodCreatedDate;
+    @ManyToOne
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;

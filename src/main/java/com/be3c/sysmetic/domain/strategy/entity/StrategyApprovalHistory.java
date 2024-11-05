@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
+import com.be3c.sysmetic.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,23 +13,24 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "method")
-public class Method {
-
+@Table(name = "strategy_approval_history")
+public class StrategyApprovalHistory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member manager;
 
-    @Column(name = "open_status", nullable = false)
-    private Character openStatus;
+    @ManyToOne
+    @JoinColumn(name = "strategy_id", nullable = false)
+    private Strategy strategy;
 
-    @Column(name = "explanation", nullable = false)
-    private String explanation;
+    @Column(name = "status_code", nullable = false)
+    private String statusCode;
 
-    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
-    private LocalDateTime methodCreatedDate;
+    @Column(name = "strategy_approval_date", nullable = false)
+    private LocalDateTime strategyApprovalDate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
