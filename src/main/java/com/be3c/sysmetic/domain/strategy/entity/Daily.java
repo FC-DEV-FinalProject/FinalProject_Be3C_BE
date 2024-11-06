@@ -71,5 +71,4 @@ public class Daily {
 
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
-
 }

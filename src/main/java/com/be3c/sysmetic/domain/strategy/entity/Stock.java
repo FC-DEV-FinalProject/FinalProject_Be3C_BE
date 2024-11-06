@@ -43,5 +43,4 @@ public class Stock extends BaseEntity {
     @CreatedDate
     @Column(name = "stock_created_date", nullable = false)
     private LocalDateTime stockCreatedDate;
-
 }
