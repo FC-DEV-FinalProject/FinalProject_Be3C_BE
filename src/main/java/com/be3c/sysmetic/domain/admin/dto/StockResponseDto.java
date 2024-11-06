@@ -11,6 +11,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 public class StockResponseDto {
-    private Stock stock;
+    private Long id;
+    private String name;
     private String filepath;
 }
