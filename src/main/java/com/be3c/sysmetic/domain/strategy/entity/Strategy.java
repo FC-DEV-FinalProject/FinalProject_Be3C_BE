@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +23,7 @@ public class Strategy {
         modifiedDate = now;
         strategyCreatedDate = now;
         strategyModifiedDate = now;
-        // followerCount = 0L;
+        followerCount = 0L;
         kpRatio = 0.0;
         smScore = 0.0;
         mdd = 0.0;
@@ -62,7 +61,7 @@ public class Strategy {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "follower_count", nullable = false)
+    @Column(name = "follower_count")
     private Long followerCount;
 
     @Column(name = "mdd")
