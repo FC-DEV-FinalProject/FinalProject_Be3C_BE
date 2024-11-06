@@ -17,6 +17,5 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findByName(String name);
     Optional<Stock> findByNameAndStatusCode(String name, String statusCode);
 
-    @Query("SELECT s FROM Stock s WHERE s.statusCode = 'US001' ORDER BY s.createdDate")
-    Page<List<Stock>> findUsingItemPage(Pageable pageable);
+    Page<Stock> findAllByStatusCode(Pageable pageable, String statusCode);
 }
