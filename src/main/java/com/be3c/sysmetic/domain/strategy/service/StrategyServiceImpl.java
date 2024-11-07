@@ -10,29 +10,26 @@ import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Service
 public class StrategyServiceImpl implements StrategyService {
 
-    @Autowired
-    private StrategyRepository strategyRepository;
+    private final StrategyRepository strategyRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private MethodRepository methodRepository;
+    private final MethodRepository methodRepository;
 
-    @Autowired
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
-    @Autowired
-    private StrategyStockReferenceRepository strategyStockReferenceRepository;
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     @Override
     @Transactional
@@ -84,8 +81,8 @@ public class StrategyServiceImpl implements StrategyService {
     }
 
     void checkStock(List<Long> idList) {
-        if (idList == null) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage());
+        if (idList == null || idList.isEmpty()) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
         }
     }
 
