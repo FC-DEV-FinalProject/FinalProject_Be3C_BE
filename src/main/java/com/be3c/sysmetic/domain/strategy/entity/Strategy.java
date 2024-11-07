@@ -16,36 +16,14 @@ import java.time.LocalDateTime;
 @Table(name = "strategy")
 public class Strategy {
 
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-        strategyCreatedDate = now;
-        strategyModifiedDate = now;
-        followerCount = 0L;
-        kpRatio = 0.0;
-        smScore = 0.0;
-        mdd = 0.0;
-        // accumProfitLossRate = 0.0;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        modifiedDate = now;
-        strategyModifiedDate = now;
-    }
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ManyToOne -> 연관관계 주인 - Member
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @ManyToOne(fetch = FetchType.LAZY)      // Unique 제약 조건 생겨서 @OneToOne -> @ManyToOne으로 변경
+    @ManyToOne
     @JoinColumn(name = "method_id", unique = false, nullable = false)
     private Method method;
 
@@ -77,9 +55,8 @@ public class Strategy {
     private Double smScore;
 
     // 누적수익률 추가
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.00")
-    @Column(name = "accum_profit_loss_rate", nullable = true)
-    private Double accumProfitLossRate;
+    @Column(name = "accum_profit_rate", nullable = false)
+    private Double accumProfitRate;
 
     @Column(name = "strategy_created_date", nullable = false)
     private LocalDateTime strategyCreatedDate;
