@@ -1,6 +1,7 @@
 # app properties
 database.properties
 cloud.properties
+application-test.properties
 
 HELP.md
 build/
