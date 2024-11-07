@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -9,6 +10,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,14 @@ public class MethodController {
         매매 방식 삭제
      */
 
+    /*
+        중복 확인 메서드
+        1. url에 문자 or 숫자로 이루어진 값이 넘어온다면 이 메서드로 넘어온다.
+        2. url의 값을 name에 저장한다.
+        3. 해당 값으로 SELECT WHERE name = :name을 진행한다.
+        4. SELECT 값이 존재한다면? DEPLICATE_RESOURCE 코드를 반환한다.
+        5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
+     */
     @GetMapping("/admin/method/{name:^(?!\\d+$).+}")
     public ResponseEntity<ApiResponse<String>> duplCheck(
             @PathVariable String name
@@ -45,16 +55,18 @@ public class MethodController {
                 .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 이름입니다."));
     }
 
+    /*
+        1. 만약 숫자로만 이루어진 값이 PathVariable로 넘어온다면, 해당 메서드로 진입한다.
+        2.
+     */
     @GetMapping("/admin/method/{id:[0-9]+}")
     public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
             @PathVariable Long id
     ) throws Exception {
         try {
-            MethodGetResponseDto find_method = methodService.findById(id);
-
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(find_method));
-        } catch (NullPointerException e) {
+                    .body(ApiResponse.success(methodService.findById(id)));
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 데이터가 없습니다."));
         }
@@ -68,7 +80,7 @@ public class MethodController {
             Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
-        } catch(NoSuchElementException e) {
+        } catch(NoSuchElementException e ) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
@@ -86,6 +98,28 @@ public class MethodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        }
+    }
+
+    /*
+        매매 방식 수정 메서드
+        1. HttpMethod가 put이라면, 이 메서드로 온다.
+        2. MethodService.updateMethod를 호출한다.
+     */
+    @PutMapping("/admin/method")
+    public ResponseEntity<ApiResponse<String>> putMethod(
+            @RequestBody MethodPutRequestDto method_put_request
+    ) throws Exception {
+        try {
+            if(methodService.updateMethod(method_put_request)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
