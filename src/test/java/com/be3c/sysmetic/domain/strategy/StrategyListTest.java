@@ -34,7 +34,6 @@ public class StrategyListTest {
         Method m = Method.builder()
                 .name("Manual")
                 .statusCode("MS001")
-                .explanation("매뉴얼")
                 .createdBy(1L)
                 .modifiedBy(1L)
                 .build();

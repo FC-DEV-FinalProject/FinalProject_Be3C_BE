@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -21,17 +22,16 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyListController {
 
-    // StrategyListService를 @Autowired로 주입받음 ?
     private final StrategyListService strategyListService;
 
     /*
-        getStrategyList : 전략 목록 페이지 조회 요청
+        getStrategyPage : 전략 목록 페이지 조회 요청
         전략 10개를 수익률 기준으로 페이징
     */
     @GetMapping("/strategy/list")
     // 페이징된 Strategy 목록을 포함하는 응답 형식을 가진 ApiResponse 객체 -> ResponseEntity로 보냄
-    public ResponseEntity<ApiResponse<Page<Strategy>>> getStrategyList(@RequestParam(defaultValue = "0") Integer pageNum) throws Exception {
-        /* Exception 잡기 추후 정의 */
+    public ResponseEntity<ApiResponse<Page<Strategy>>> getStrategyPage(@RequestParam(defaultValue = "0") Integer pageNum) throws Exception {
+        /* ExceptionHandler 추후 정의 */
 
         Page<Strategy> strategyList = strategyListService.findStrategyPage(pageNum);
 

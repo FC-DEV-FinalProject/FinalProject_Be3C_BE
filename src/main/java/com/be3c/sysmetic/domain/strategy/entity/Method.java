@@ -38,9 +38,6 @@ public class Method {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
-    @Column(name = "explanation", nullable = false)
-    private String explanation;
-
     @Column(name = "method_created_date", nullable = false)
     private LocalDateTime methodCreatedDate;
 

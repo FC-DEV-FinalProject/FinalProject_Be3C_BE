@@ -6,9 +6,6 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface StrategyListService {
-
-    /*
-        findStrategyPage : 매개변수로 넘어온 page에 해당하는 Strategy를 모두 찾음
-    */
+    // findStrategyPage : 매개변수로 넘어온 page에 해당하는 Strategy를 모두 찾음
     Page<Strategy> findStrategyPage(Integer pageNum);
 }

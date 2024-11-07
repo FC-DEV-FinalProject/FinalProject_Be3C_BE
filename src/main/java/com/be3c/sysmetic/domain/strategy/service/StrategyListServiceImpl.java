@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,8 @@ public class StrategyListServiceImpl implements StrategyListService {
 
     @Override
     public Page<Strategy> findStrategyPage(Integer pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, 10);     // sort 지정 안했음
-        return strategyListRepository.findByAccumProfitRate(pageable);
+        Pageable pageable = PageRequest.of(pageNumber,10, Sort.by(Sort.Order.desc("accumProfitRate")));
+        String statusCode = "ST001";        // 공개중인 전략
+        return strategyListRepository.findAllByStatusCode(statusCode, pageable);
     }
 }

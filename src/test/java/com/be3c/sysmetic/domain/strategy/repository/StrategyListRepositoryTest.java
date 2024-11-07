@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,7 +86,6 @@ public class StrategyListRepositoryTest {
         Method method = Method.builder()
                 .name("Manual")
                 .statusCode("MS001")
-                .explanation("매뉴얼")
                 .createdBy(1L)
                 .modifiedBy(1L)
                 .build();
@@ -154,6 +151,7 @@ public class StrategyListRepositoryTest {
         // 요소 하나씩 출력하기 - 메서드 참조 ::
         strategyList.forEach(System.out::println);
         System.out.println("==========================================");
+        assertNotNull(strategyList);
         assertEquals(strategyList.get(0), strategyRepository.findAll().get(0));
         assertEquals(strategyList.get(1), strategyRepository.findAll().get(1));
         // assertEquals(strategyList.get(0).getId(), strategyRepository.findAll().get(0).getId());
