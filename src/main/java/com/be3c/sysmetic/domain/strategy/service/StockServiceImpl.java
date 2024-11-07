@@ -1,8 +1,8 @@
-package com.be3c.sysmetic.domain.admin.service;
+package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.admin.dto.StockPutRequestDto;
-import com.be3c.sysmetic.domain.admin.entity.Stock;
-import com.be3c.sysmetic.domain.admin.repository.StockRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
+import com.be3c.sysmetic.domain.strategy.entity.Stock;
+import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -25,7 +24,8 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public Stock findItemById(Long id) {
-        Optional<Stock> findStock = stockRepository.findByIdAndStatusCode(id, Code.valueOf("USING_STATE").getCode());
+        Optional<Stock> findStock = stockRepository.findByIdAndStatusCode
+                (id, Code.valueOf("USING_STATE").getCode());
         if(findStock.isPresent()) {
             return findStock.get();
         }

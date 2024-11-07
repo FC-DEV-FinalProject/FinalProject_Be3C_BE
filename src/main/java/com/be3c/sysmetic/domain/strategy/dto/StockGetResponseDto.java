@@ -1,6 +1,5 @@
-package com.be3c.sysmetic.domain.admin.dto;
+package com.be3c.sysmetic.domain.strategy.dto;
 
-import com.be3c.sysmetic.domain.admin.entity.Stock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package com.be3c.sysmetic.admin.Stock;
 
 
-import com.be3c.sysmetic.domain.admin.entity.Stock;
-import com.be3c.sysmetic.domain.admin.repository.StockRepository;
+import com.be3c.sysmetic.domain.strategy.entity.Stock;
+import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
