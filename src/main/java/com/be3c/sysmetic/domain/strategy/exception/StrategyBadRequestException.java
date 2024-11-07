@@ -1,8 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.exception;
 
 public class StrategyBadRequestException extends RuntimeException {
-//    public StrategyBadRequestException() {}
-
     public StrategyBadRequestException(String message) {
         super(message);
     }
