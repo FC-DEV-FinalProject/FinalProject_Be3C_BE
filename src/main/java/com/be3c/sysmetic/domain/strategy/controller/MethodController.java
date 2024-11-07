@@ -8,11 +8,13 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -47,21 +49,27 @@ public class MethodController {
             @PathVariable Long id
     ) throws Exception {
         try {
-            Method find_method = methodService.findById(id);
-
-            MethodGetResponseDto methodGetResponseDto = MethodGetResponseDto.builder()
-                    .id(find_method.getId())
-                    .name(find_method.getName())
-                    // 아이콘 file path 찾는 코드 필요.
-                    .build();
+            MethodGetResponseDto find_method = methodService.findById(id);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(methodGetResponseDto));
+                    .body(ApiResponse.success(find_method));
         } catch (NullPointerException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 데이터가 없습니다."));
         }
     }
 
-
+    @GetMapping("/admin/method")
+    public ResponseEntity<ApiResponse<Page<MethodGetResponseDto>>> getMethods(
+            @RequestParam Integer page
+    ) throws Exception {
+        try {
+            Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(method_page));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        }
+    }
 }

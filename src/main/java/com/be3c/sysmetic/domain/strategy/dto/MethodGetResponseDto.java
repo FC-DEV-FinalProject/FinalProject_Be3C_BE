@@ -10,5 +10,6 @@ import lombok.*;
 public class MethodGetResponseDto {
     private Long id;
     private String name;
-    private String file_path;
+//    추후 추가 예정
+//    private String file_path;
 }
