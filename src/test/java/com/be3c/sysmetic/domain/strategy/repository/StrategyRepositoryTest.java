@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @SpringBootTest
 class StrategyRepositoryTest {
     /*
@@ -30,17 +32,13 @@ class StrategyRepositoryTest {
     5. 비공개 상태로 설정하여 DB에 저장
      */
 
-    @Autowired
-    private StrategyRepository strategyRepository;
+    private final StrategyRepository strategyRepository;
 
-    @Autowired
-    private MethodRepository methodRepository;
+    private final MethodRepository methodRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
     @BeforeEach
     void setup() {
@@ -186,7 +184,22 @@ class StrategyRepositoryTest {
 
     void saveMember() {
         Member member = Member.builder()
-                .id(0L)
+                .roleCode("USER")
+                .email("tester@example.com")
+                .password("password123")
+                .name("Test User")
+                .nickname("testuser")
+                .phoneNumber("010-1234-5678")
+                .usingStatusCode("ACTIVE")
+                .totalFollow(100)
+                .receiveInfoConsent("Y")
+                .infoConsentDate(LocalDateTime.now().minusDays(10))
+                .receiveMarketingConsent("Y")
+                .marketingConsentDate(LocalDateTime.now().minusDays(10))
+                .createdBy(1L)
+                .createdDate(LocalDateTime.now().minusDays(30))
+                .modifiedBy(1L)
+                .modifiedDate(LocalDateTime.now())
                 .build();
 
         memberRepository.save(member);

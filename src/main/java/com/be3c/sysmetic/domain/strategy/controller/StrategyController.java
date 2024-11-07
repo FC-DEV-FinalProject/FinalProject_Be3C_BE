@@ -5,16 +5,17 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.service.StrategyServiceImpl;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @RestController
 public class StrategyController {
 
-    @Autowired
-    StrategyServiceImpl strategyService;
+    private final StrategyServiceImpl strategyService;
 
     // 전략 등록
     @PostMapping("/trader/strategy")

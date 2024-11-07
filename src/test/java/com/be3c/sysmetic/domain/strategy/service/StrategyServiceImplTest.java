@@ -9,6 +9,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,26 +23,21 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @SpringBootTest
 class StrategyServiceImplTest {
 
-    @Autowired
-    private StrategyServiceImpl strategyService;
+    private final StrategyServiceImpl strategyService;
 
-    @Autowired
-    private StrategyRepository strategyRepository;
+    private final StrategyRepository strategyRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private MethodRepository methodRepository;
+    private final MethodRepository methodRepository;
 
-    @Autowired
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
-    @Autowired
-    private StrategyStockReferenceRepository strategyStockReferenceRepository;
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     @BeforeEach
     void setup() {
