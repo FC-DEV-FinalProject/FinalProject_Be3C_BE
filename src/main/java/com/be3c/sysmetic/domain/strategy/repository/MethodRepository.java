@@ -14,14 +14,8 @@ import java.util.Optional;
 public interface MethodRepository extends JpaRepository<Method, Long> {
     Optional<Method> findById(Long id);
     Optional<Method> findByName(String name);
-
-    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name) " +
-            "FROM Method m WHERE m.id = :id AND m.statusCode = :statusCode")
-    Optional<MethodGetResponseDto> findByIdAndStatusCode(Long id, String openStatus);
-
-    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name) " +
-            "FROM Method m WHERE m.name = :name AND m.statusCode = :statusCode")
-    Optional<MethodGetResponseDto> findByNameAndStatusCode(String name, String openStatus);
+    Optional<Method> findByIdAndStatusCode(Long id, String statusCode);
+    Optional<Method> findByNameAndStatusCode(String name, String statusCode);
 
     // 추후 f.file_path 추가 생각중.
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name) " +

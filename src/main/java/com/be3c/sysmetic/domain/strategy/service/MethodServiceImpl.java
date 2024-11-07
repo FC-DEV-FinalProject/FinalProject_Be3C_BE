@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
@@ -36,7 +37,9 @@ public class MethodServiceImpl implements MethodService {
      */
     @Override
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
-        return methodRepository.findByIdAndStatusCode(id, Code.USING_STATE.getCode()).get();
+        Method method = methodRepository.findByIdAndStatusCode(id, Code.USING_STATE.getCode()).get();
+        // 파일 패스 찾는 메서드 필요
+        return new MethodGetResponseDto(method.getId(), method.getName());
     }
 
     /*
@@ -66,6 +69,16 @@ public class MethodServiceImpl implements MethodService {
                 .name(methodPostRequestDto.getName())
                 .statusCode(Code.USING_STATE.getCode())
                 .build());
+
+        return true;
+    }
+
+    @Override
+    public boolean updateMethod(MethodPutRequestDto methodPutRequestDto) {
+        Method method = methodRepository.findByIdAndStatusCode(methodPutRequestDto.getId(), Code.USING_STATE.getCode()).get();
+
+        method.setName(methodPutRequestDto.getName());
+        methodRepository.save(method);
 
         return true;
     }
