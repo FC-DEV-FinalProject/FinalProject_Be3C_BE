@@ -67,4 +67,5 @@ public class Stock {
 
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
+
 }
