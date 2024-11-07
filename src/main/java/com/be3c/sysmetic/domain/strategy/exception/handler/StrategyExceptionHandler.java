@@ -11,6 +11,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+// strategy package exception handler
 @RestControllerAdvice(basePackages = {"com.be3c.sysmetic.domain.strategy"})
 public class StrategyExceptionHandler {
 
