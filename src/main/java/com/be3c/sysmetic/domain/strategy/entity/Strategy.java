@@ -44,7 +44,7 @@ public class Strategy {
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @ManyToOne
+    @ManyToOne      // Unique 제약 조건 생겨서 @OneToOne -> @ManyToOne으로 변경
     @JoinColumn(name = "method_id", unique = false, nullable = false)
     private Method method;
 

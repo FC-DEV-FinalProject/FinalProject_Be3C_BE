@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +54,8 @@ public class StrategyListRepositoryTest {
         // 각 메서드를 호출하여 데이터 추가
         saveMember();
         saveMethod();
-        saveStrategies();
+        saveStrategy1();
+        saveStrategy2();
     }
 
 
@@ -94,7 +96,7 @@ public class StrategyListRepositoryTest {
         methodRepository.save(method);
     }
 
-    void saveStrategies() {
+    void saveStrategy1() {
         // Strategy 객체 생성
         Strategy s1 = Strategy.builder()
                 .trader(getTrader())
@@ -109,7 +111,9 @@ public class StrategyListRepositoryTest {
                 .modifiedBy(1L)
                 .build();
         strategyRepository.saveAndFlush(s1);
+    }
 
+    void saveStrategy2() {
         Strategy s2 = Strategy.builder()
                 .trader(getTrader())
                 .method(getMethod())
@@ -137,20 +141,22 @@ public class StrategyListRepositoryTest {
     }
 
     @Test
-    @DisplayName("전략 목록 조회 테스트")
+    @DisplayName("전체 전략 목록 조회 테스트")
     @Transactional
     @Rollback(false)
     public void getStrategyListTest() {
         // createStrategy List로 가져오기
-        List<Strategy> strategyList = strategyListRepository.findAll().stream().toList();
+        // List<Strategy> strategyList = strategyListRepository.findAll().stream().toList();
+        List<Strategy> strategyList = strategyListRepository.findAll();
+
         // strategyListRepository로 데이터베이스에 저장
-
         System.out.println("==========================================");
-
-        // 요소 하나씩 출력하기 - Lambda
-        // strategyList.forEach(s -> System.out.println(s));
         // 요소 하나씩 출력하기 - 메서드 참조 ::
         strategyList.forEach(System.out::println);
         System.out.println("==========================================");
+        assertEquals(strategyList.get(0), strategyRepository.findAll().get(0));
+        assertEquals(strategyList.get(1), strategyRepository.findAll().get(1));
+        // assertEquals(strategyList.get(0).getId(), strategyRepository.findAll().get(0).getId());
+        // assertEquals(strategyList.get(1).getId(), strategyRepository.findAll().get(1).getId());
     }
 }
