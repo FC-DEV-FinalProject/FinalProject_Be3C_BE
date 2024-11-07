@@ -8,9 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MethodGetResponseDto {
-    private Long id;
-    private String name;
-//    추후 추가 예정
-//    private String file_path;
+public class MethodPutRequestDto {
+    Long id;
+    String name;
+    Boolean duplCheck;
+    MultipartFile filePath;
 }
