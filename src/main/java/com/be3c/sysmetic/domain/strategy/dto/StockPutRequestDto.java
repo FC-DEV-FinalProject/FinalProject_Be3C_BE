@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.admin.dto;
+package com.be3c.sysmetic.domain.strategy.dto;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;

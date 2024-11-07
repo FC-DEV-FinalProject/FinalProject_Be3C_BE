@@ -1,11 +1,8 @@
-package com.be3c.sysmetic.domain.admin.service;
+package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.admin.dto.StockPutRequestDto;
-import com.be3c.sysmetic.domain.admin.entity.Stock;
+import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
+import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface StockService {
     Stock findItemById(Long id);

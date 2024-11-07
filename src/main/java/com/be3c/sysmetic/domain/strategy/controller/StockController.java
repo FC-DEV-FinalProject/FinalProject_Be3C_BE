@@ -1,9 +1,9 @@
-package com.be3c.sysmetic.domain.admin.controller;
+package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.admin.dto.StockGetResponseDto;
-import com.be3c.sysmetic.domain.admin.dto.StockPutRequestDto;
-import com.be3c.sysmetic.domain.admin.entity.Stock;
-import com.be3c.sysmetic.domain.admin.service.StockService;
+import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
+import com.be3c.sysmetic.domain.strategy.entity.Stock;
+import com.be3c.sysmetic.domain.strategy.service.StockService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.CustomUserDetails;
@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,9 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Controller
 @Slf4j
