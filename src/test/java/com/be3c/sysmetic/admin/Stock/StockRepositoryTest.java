@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.admin;
+package com.be3c.sysmetic.admin.Stock;
 
 
 import com.be3c.sysmetic.domain.admin.entity.Stock;
@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
