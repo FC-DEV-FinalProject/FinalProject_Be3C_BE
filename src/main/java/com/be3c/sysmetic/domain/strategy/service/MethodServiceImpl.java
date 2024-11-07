@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,9 @@ public class MethodServiceImpl implements MethodService {
      */
     @Override
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
-        Method method = methodRepository.findByIdAndStatusCode(id, Code.USING_STATE.getCode()).get();
+        Method method = methodRepository.findByIdAndStatusCode(
+                id, Code.USING_STATE.getCode())
+                .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
         // 파일 패스 찾는 메서드 필요
         return new MethodGetResponseDto(method.getId(), method.getName());
     }
@@ -50,10 +53,13 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public Page<MethodGetResponseDto> findMethodPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<MethodGetResponseDto> find_page = methodRepository.findAllByStatusCode(pageable, Code.USING_STATE.getCode());
+        Page<MethodGetResponseDto> find_page = methodRepository
+                .findAllByStatusCode(pageable, Code.USING_STATE.getCode());
+
         if(find_page.getContent().isEmpty()) {
-            throw new NoSuchElementException();
+            throw new EntityNotFoundException();
         }
+
 //        파일 패스 찾는 메서드 추가 예정
 //        find_page.getContent().get(0).setFile_path();
         return find_page;
@@ -75,11 +81,34 @@ public class MethodServiceImpl implements MethodService {
 
     @Override
     public boolean updateMethod(MethodPutRequestDto methodPutRequestDto) {
-        Method method = methodRepository.findByIdAndStatusCode(methodPutRequestDto.getId(), Code.USING_STATE.getCode()).get();
+        Method method = methodRepository.findByIdAndStatusCode(
+                methodPutRequestDto.getId(), Code.USING_STATE.getCode())
+                .orElseThrow(() -> new EntityNotFoundException("해당 엔티티가 없습니다."));
 
+        if(method.getName().equals(methodPutRequestDto.getName())) {
+            throw new IllegalArgumentException("이미 적용된 상태입니다.");
+        }
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
+        /*
+            업로드 파일 유무 확인
+            업로드 파일 업데이트
+         */
+        return true;
+    }
 
+    @Override
+    public boolean deleteMethod(Long id) {
+        Method method = methodRepository.findByIdAndStatusCode(
+                id, Code.USING_STATE.getCode())
+                .orElseThrow(() -> new EntityNotFoundException("해당 엔티티가 없습니다."));
+
+        if(method.getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
+            throw new IllegalArgumentException("이미 적용된 상태입니다.");
+        }
+
+        method.setStatusCode(Code.NOT_USING_STATE.getCode());
+        methodRepository.save(method);
         return true;
     }
 }

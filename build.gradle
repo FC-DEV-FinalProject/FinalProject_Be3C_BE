@@ -38,6 +38,8 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'           // 추가
+	testAnnotationProcessor 'org.projectlombok:lombok'   // 추가
 
 	// MapStruct
 	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
