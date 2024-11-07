@@ -43,7 +43,7 @@ public class Strategy {
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "method_id", nullable = false)
     private Method method;
 
