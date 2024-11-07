@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class StrategyServiceImpl implements StrategyService {
     public Strategy insertStrategy(InsertStrategyRequestDto requestDto) {
         // 전략명 중복 여부 검증
         checkDuplicationName(requestDto.getName());
+
+        // 종목 존재 여부 검증
         checkStock(requestDto.getStockIdList());
 
         Strategy strategy = Strategy.builder()
@@ -52,8 +55,12 @@ public class StrategyServiceImpl implements StrategyService {
                 .modifiedBy(requestDto.getTraderId())
                 .build();
 
+        // DB 저장
         Strategy savedStrategy = strategyRepository.save(strategy);
+
+        // 전략 종목 교차테이블 DB 저장
         insertStrategyStockReference(savedStrategy, requestDto.getStockIdList(), requestDto.getTraderId());
+
         return savedStrategy;
     }
 
@@ -63,28 +70,34 @@ public class StrategyServiceImpl implements StrategyService {
     }
 
     Member getMember(Long id) {
-        return memberRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException("존재하지 않는 트레이더입니다."));
+        if(id == null) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
+        }
+        return memberRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     Method getMethod(Long id) {
-        return methodRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException("존재하지 않는 매매방식입니다."));
+        if(id == null) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
+        }
+        return methodRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     void checkStock(List<Long> idList) {
         if (idList == null) {
-            throw new StrategyBadRequestException("종목 데이터가 없습니다.");
+            throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage());
         }
     }
 
     public void checkDuplicationName(String name) {
         if(strategyRepository.existsByName(name)) {
-            throw new StrategyBadRequestException("동일한 전략명이 이미 존재합니다.");
+            throw new StrategyBadRequestException(StrategyExceptionMessage.DUPLICATE_STRATEGY_NAME.getMessage());
         }
     }
 
     private void insertStrategyStockReference(Strategy strategy, List<Long> stockIdList, Long traderId) {
         stockIdList.forEach((id) -> {
-            Stock stock = stockRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException("존재하지 않는 종목입니다."));
+            Stock stock = stockRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
             StrategyStockReference strategyStockReference = StrategyStockReference.builder()
                     .strategy(strategy)
