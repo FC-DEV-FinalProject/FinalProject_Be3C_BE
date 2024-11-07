@@ -10,7 +10,7 @@ public interface StockService {
     Object findItemIcon(Long itemId);
     Page<Stock> findItemPage(Integer page);
 
-    boolean saveItem(StockPutRequestDto requestDto, Long userId);
-    boolean updateItem(StockPutRequestDto requestDto, Long userId);
+    boolean saveItem(StockPutRequestDto requestDto);
+    boolean updateItem(StockPutRequestDto requestDto);
     boolean deleteItem(Long id, Long userId);
 }

@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.service.StockService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.CustomUserDetails;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(stockGetResponseDto));
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
         }
@@ -95,7 +96,7 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(stock_page));
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
         }
@@ -120,7 +121,7 @@ public class StockController {
             if(principal instanceof UserDetails userDetails) {
                 Long userId = ((CustomUserDetails) userDetails).getUserId();
 
-                stockService.saveItem(stockRequestDto, userId);
+                stockService.saveItem(stockRequestDto);
             }
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -146,7 +147,7 @@ public class StockController {
             if(principal instanceof UserDetails userDetails) {
                 Long userId = ((CustomUserDetails) userDetails).getUserId();
 
-                stockService.updateItem(stockPutRequestDto, userId);
+                stockService.updateItem(stockPutRequestDto);
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
@@ -155,11 +156,6 @@ public class StockController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
         } catch(NoSuchElementException | IllegalArgumentException | DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
-        } catch(Exception e) {
-            // 예외 처리 코드 추가 필요.
-            // 예외 상황 분류 필요.
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
         }
@@ -185,7 +181,7 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
         }
