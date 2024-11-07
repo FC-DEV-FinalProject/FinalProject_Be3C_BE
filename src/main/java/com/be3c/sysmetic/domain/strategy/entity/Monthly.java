@@ -15,6 +15,19 @@ import java.time.LocalDateTime;
 @Table(name = "monthly")
 public class Monthly {
 
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdDate = now;
+        modifiedDate = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        LocalDateTime now = LocalDateTime.now();
+        modifiedDate = now;
+    }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -22,8 +35,8 @@ public class Monthly {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    @Column(name = "month_id", nullable = false)
-    private Integer month;
+    @Column(name = "month_number", nullable = false)
+    private Integer month_number;
 
     @Column(name = "average_monthly_wage", nullable = false)
     private Double averageMonthlyWage;
@@ -43,12 +56,12 @@ public class Monthly {
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
-    @Column(name = "created_date", nullable = false, columnDefinition = "Timestamp default now()")
+    @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
     @Column(name = "modified_by", nullable = false)
     private Long modifiedBy;
 
-    @Column(name = "modified_date", nullable = false, columnDefinition = "Timestamp default now() on update now()")
+    @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 }

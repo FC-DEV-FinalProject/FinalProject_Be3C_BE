@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -17,15 +16,36 @@ import java.time.LocalDateTime;
 @Table(name = "strategy")
 public class Strategy {
 
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdDate = now;
+        modifiedDate = now;
+        strategyCreatedDate = now;
+        strategyModifiedDate = now;
+        followerCount = 0L;
+        kpRatio = 0.0;
+        smScore = 0.0;
+        accumProfitRate = 0.0;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        LocalDateTime now = LocalDateTime.now();
+        modifiedDate = now;
+        strategyModifiedDate = now;
+    }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ManyToOne -> 연관관계 주인 - Member
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @OneToOne // 단방향 매핑
-    @JoinColumn(name = "method_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "method_id", unique = false, nullable = false)
     private Method method;
 
     @Column(name = "status_code", nullable = false)
@@ -44,33 +64,33 @@ public class Strategy {
     private String content;
 
     @Column(name = "follower_count", nullable = false)
-    @ColumnDefault("0")
     private Long followerCount;
 
-    @Column(name = "share_count", nullable = false, columnDefinition = "Integer default 0")
-    private Integer shareCount;
-
-    @Column(name = "kp_ratio", columnDefinition = "Double default 0.0")
+    @Column(name = "kp_ratio")
     private Double kpRatio;
 
-    @Column(name = "sm_score", columnDefinition = "Double default 0.0")
+    @Column(name = "sm_score")
     private Double smScore;
 
-    @Column(name = "strategy_created_date", nullable = false, columnDefinition = "Timestamp default now()")
+    // 누적수익률 추가
+    @Column(name = "accum_profit_rate", nullable = false)
+    private Double accumProfitRate;
+
+    @Column(name = "strategy_created_date", nullable = false)
     private LocalDateTime strategyCreatedDate;
 
-    @Column(name = "strategy_modified_date", nullable = false, columnDefinition = "Timestamp default now() on update now()")
+    @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
-    @Column(name = "created_date", nullable = false, columnDefinition = "Timestamp default now()")
+    @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
     @Column(name = "modified_by", nullable = false)
     private Long modifiedBy;
 
-    @Column(name = "modified_date", nullable = false,  columnDefinition = "Timestamp default now() on update now()")
+    @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 //@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
-@Table(name = "number")
+@Table(name = "member")
 public class Member {
     /*
         id : 회원의 식별번호

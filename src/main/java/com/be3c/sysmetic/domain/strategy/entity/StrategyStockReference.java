@@ -14,6 +14,20 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "strategy_stock_reference")
 public class StrategyStockReference {
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdDate = now;
+        modifiedDate = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        LocalDateTime now = LocalDateTime.now();
+        modifiedDate = now;
+    }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -28,12 +42,12 @@ public class StrategyStockReference {
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
-    @Column(name = "created_date", nullable = false, columnDefinition = "Timestamp default now()")
+    @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
     @Column(name = "modified_by", nullable = false)
     private Long modifiedBy;
 
-    @Column(name = "modified_date", nullable = false, columnDefinition = "Timestamp default now() on update now()")
+    @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 }
