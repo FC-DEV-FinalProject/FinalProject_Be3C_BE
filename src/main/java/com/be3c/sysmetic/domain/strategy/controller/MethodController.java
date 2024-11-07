@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -12,9 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 
 @Controller
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -67,9 +68,26 @@ public class MethodController {
             Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
-        } catch (Exception e) {
+        } catch(NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        }
+    }
+
+    @PostMapping("/admin/method")
+    public ResponseEntity<ApiResponse<String>> postMethod(
+            @RequestBody MethodPostRequestDto method_post_request
+    ) throws Exception {
+        try {
+            if(methodService.insertMethod(method_post_request)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 }
