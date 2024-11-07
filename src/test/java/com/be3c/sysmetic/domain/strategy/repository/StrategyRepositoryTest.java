@@ -43,7 +43,7 @@ class StrategyRepositoryTest {
     private StockRepository stockRepository;
 
     @BeforeEach
-    void deleteAll() {
+    void setup() {
         saveMethod();
         saveMember();
         saveStock();
@@ -87,7 +87,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, null, getMethod());
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
@@ -100,7 +100,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), getMethod());
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
@@ -113,7 +113,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), null);
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
@@ -126,7 +126,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), getMethod());
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
@@ -139,7 +139,7 @@ class StrategyRepositoryTest {
 //
 //        Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), getMethod());
 //
-//        // 예외가 발생하는지 검증
+//        // 예외 검증
 //        assertThrows(DataIntegrityViolationException.class, () -> {
 //            strategyRepository.saveAndFlush(strategy);
 //        });
@@ -152,7 +152,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), getMethod());
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
@@ -165,7 +165,7 @@ class StrategyRepositoryTest {
 
         Strategy strategy = getStrategy(insertStrategyRequestDto, getMember(), getMethod());
 
-        // 예외가 발생하는지 검증
+        // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
             strategyRepository.saveAndFlush(strategy);
         });
