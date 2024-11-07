@@ -10,6 +10,7 @@ import com.be3c.sysmetic.global.util.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -127,7 +128,7 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 값입니다."));
         }
@@ -154,6 +155,9 @@ public class StockController {
                         .body(ApiResponse.success());
             }
 
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
+        } catch(NoSuchElementException | IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
         } catch(Exception e) {

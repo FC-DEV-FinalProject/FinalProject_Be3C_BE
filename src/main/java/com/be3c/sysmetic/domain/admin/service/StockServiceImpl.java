@@ -68,15 +68,11 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public boolean updateItem(StockPutRequestDto requestDto, Long userId) {
-        Optional<Stock> find_stock = stockRepository.findByIdAndStatusCode(
-                requestDto.getId(), Code.USING_STATE.getCode());
+        Stock find_stock = stockRepository.findByIdAndStatusCode(
+                requestDto.getId(),
+                Code.USING_STATE.getCode()).get();
 
-        if(find_stock.isEmpty()) {
-            return false;
-        }
-
-        Stock stock = find_stock.get();
-        stock.setName(requestDto.getName());
+        find_stock.setName(requestDto.getName());
 
         // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
 
