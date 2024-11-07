@@ -15,4 +15,5 @@ public interface MethodService {
 
     boolean insertMethod(MethodPostRequestDto methodPostRequestDto);
     boolean updateMethod(MethodPutRequestDto methodPutRequestDto);
+    boolean deleteMethod(Long id);
 }

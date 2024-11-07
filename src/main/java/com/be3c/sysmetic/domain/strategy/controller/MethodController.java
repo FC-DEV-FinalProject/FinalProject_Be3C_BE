@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +44,9 @@ public class MethodController {
         4. SELECT 값이 존재한다면? DEPLICATE_RESOURCE 코드를 반환한다.
         5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
      */
-    @GetMapping("/admin/method/{name:^(?!\\d+$).+}")
+    @GetMapping("/admin/method/availability")
     public ResponseEntity<ApiResponse<String>> duplCheck(
-            @PathVariable String name
+            @RequestParam String name
     ) throws Exception {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
@@ -66,9 +67,12 @@ public class MethodController {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(methodService.findById(id)));
-        } catch (NoSuchElementException e) {
+        } catch (EntityNotFoundException |
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 데이터가 없습니다."));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
@@ -80,7 +84,10 @@ public class MethodController {
             Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
-        } catch(NoSuchElementException e ) {
+        } catch (EntityNotFoundException |
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
@@ -97,7 +104,8 @@ public class MethodController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
@@ -119,7 +127,33 @@ public class MethodController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
+        } catch (EntityNotFoundException |
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        }
+    }
+
+    /*
+        매매 유형 삭제 메서드
+     */
+    @DeleteMapping("/admin/method/{id:[0-9]+}")
+    public ResponseEntity<ApiResponse<String>> deleteMethod(
+            @PathVariable Long id
+    ) throws Exception {
+        try {
+            if(methodService.deleteMethod(id)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success());
+        } catch (EntityNotFoundException |
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
