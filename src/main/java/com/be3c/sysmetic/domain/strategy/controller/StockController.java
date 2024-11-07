@@ -40,7 +40,7 @@ public class StockController {
         종목명 중복 검사 메서드
      */
 //    @PreAuthorize(("hasRole('ADMIN')"))
-    @GetMapping("admin/stock/name")
+    @GetMapping("admin/stock/availability")
     public ResponseEntity<ApiResponse<String>> getCheckName(
         @RequestParam String name
     ) throws Exception {
@@ -56,12 +56,12 @@ public class StockController {
         아이디로 종목 찾기
      */
     //@PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin/stock/{stock}")
+    @GetMapping("/admin/stock/{id:\\d+}")
     public ResponseEntity<ApiResponse<StockGetResponseDto>> getitem(
-            @PathVariable Long stock
+            @PathVariable Long id
     ) throws Exception {
         try {
-            Stock find_stock = stockService.findItemById(stock);
+            Stock find_stock = stockService.findItemById(id);
 
             StockGetResponseDto stockGetResponseDto = StockGetResponseDto.builder()
                     .id(find_stock.getId())
