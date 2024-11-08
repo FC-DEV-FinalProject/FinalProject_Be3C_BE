@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
+import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.service.FolderService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -15,15 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -51,14 +51,14 @@ public class FolderController {
     public ResponseEntity<ApiResponse<List<Folder>>> getAllFolder(
 
     ) throws Exception {
-        try {
-            Long userId = getUserIdInSecurityContext();
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(folderService.getUserFolders(userId)));
+        try {return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(folderService.getUserFolders(getUserIdInSecurityContext())));
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 요청입니다."));
+        } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
     }
 
@@ -71,13 +71,16 @@ public class FolderController {
             @RequestParam String name
     ) throws Exception {
         try {
-            Long userId = getUserIdInSecurityContext();
-            folderService.duplCheck(userId, name);
+            folderService.duplCheck(getUserIdInSecurityContext(), name);
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+        } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
     }
 
@@ -90,6 +93,7 @@ public class FolderController {
     ) throws Exception {
         try {
             folderService.insertFolder(folderPostRequestDto, getUserIdInSecurityContext());
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
         } catch (HttpStatusCodeException e) {
@@ -102,16 +106,49 @@ public class FolderController {
         } catch (ResponseStatusException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
     }
 
-    private Long getUserIdInSecurityContext() throws AuthenticationException {
+    /*
+        폴더명 수정 메서드
+     */
+    @PutMapping("/member/folder")
+    public ResponseEntity<ApiResponse<String>> putFolder(
+            @RequestBody FolderPutRequestDto folderPutRequestDto
+    ) throws Exception {
+        try {
+            if(folderService.updateFolder(folderPutRequestDto, getUserIdInSecurityContext())) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "알 수 없는 이유로 폴더명 수정에 실패했습니다."));
+        } catch(IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException |
+                 ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
+        }
+    }
+
+    private Long getUserIdInSecurityContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AuthenticationCredentialsNotFoundException("인증 정보가 없습니다.");
+        }
+
         Object principal = authentication.getPrincipal();
 
-        if(principal instanceof UserDetails userDetails) {
-            return ((CustomUserDetails) userDetails).getUserId();
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            return customUserDetails.getUserId();
         }
-        return null;
+
+        throw new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다.");
     }
 }

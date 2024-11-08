@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
+import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
@@ -29,7 +30,7 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public List<Folder> getUserFolders(Long id) {
         List<Folder> folderList = folderRepository
-                .findByMemberIdAndStatusCode(id, Code.USING_STATE.getCode());
+                .findAllByMemberIdAndStatusCode(id, Code.USING_STATE.getCode());
 
         if(folderList == null || folderList.isEmpty()) {
             throw new EntityNotFoundException();
@@ -57,7 +58,7 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public boolean insertFolder(FolderPostRequestDto folderPostRequestDto, Long id) {
         if(folderPostRequestDto.getCheckDupl()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("이미 존재하는 폴더입니다.");
         }
 
         Member member = memberRepository
@@ -66,7 +67,7 @@ public class FolderServiceImpl implements FolderService {
                         Code.USING_STATE.getCode())
                 .orElseThrow(() -> new EntityNotFoundException("폴더 생성 권한이 없습니다."));
 
-        List<Folder> folderList = folderRepository.findByMemberIdAndStatusCode(id, Code.USING_STATE.getCode());
+        List<Folder> folderList = folderRepository.findAllByMemberIdAndStatusCode(id, Code.USING_STATE.getCode());
 
         if (!duplCheck(id, folderPostRequestDto.getName())) {
             throw new IllegalArgumentException("이미 추가되어 있는 폴더입니다.");
@@ -79,6 +80,28 @@ public class FolderServiceImpl implements FolderService {
                 .member(member)
                 .build();
 
+        folderRepository.save(folder);
+
+        return true;
+    }
+
+    @Override
+    public boolean updateFolder(FolderPutRequestDto folderPutRequestDto, Long id) {
+        if(duplCheck(id, folderPutRequestDto.getFolderName())) {
+            throw new IllegalArgumentException("이미 존재하는 폴더명입니다.");
+        }
+
+        Folder folder = folderRepository
+                .findByIdAndStatusCode(
+                        folderPutRequestDto.getFolderId(),
+                        Code.USING_STATE.getCode()
+                ).orElseThrow(() -> new EntityNotFoundException("해당 폴더가 없습니다."));
+
+        if(!folder.getMember().getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        folder.setFolderName(folderPutRequestDto.getFolderName());
         folderRepository.save(folder);
 
         return true;

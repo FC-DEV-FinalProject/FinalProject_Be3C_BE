@@ -11,7 +11,8 @@ import java.util.Optional;
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Long> {
 
-    List<Folder> findByMemberIdAndStatusCode(Long memberId, String statusCode);
+    Optional<Folder> findByIdAndStatusCode(Long id, String status);
+    List<Folder> findAllByMemberIdAndStatusCode(Long memberId, String statusCode);
     Optional<Folder> findByMemberIdAndFolderNameAndStatusCode(Long memberId, String folderName, String statusCode);
 
 }
