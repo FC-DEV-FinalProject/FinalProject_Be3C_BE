@@ -6,8 +6,8 @@ import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,86 +20,52 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @SpringBootTest
-class InsertStrategyServiceTest {
+public class UpdateStrategyServiceTest {
 
-<<<<<<<< HEAD:src/test/java/com/be3c/sysmetic/domain/strategy/service/StrategyServiceImplTest.java
-    @Autowired
-    private StrategyServiceImpl strategyService;
-========
-    private final InsertStrategyServiceImpl strategyService;
->>>>>>>> fb823a7 (feat: 전략 수정 #9):src/test/java/com/be3c/sysmetic/domain/strategy/service/InsertStrategyServiceTest.java
+    private final UpdateStrategyServiceImpl updateStrategyService;
 
-    @Autowired
-    private StrategyRepository strategyRepository;
+    private final InsertStrategyServiceImpl insertStrategyService;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final StrategyRepository strategyRepository;
 
-    @Autowired
-    private MethodRepository methodRepository;
+    private final MethodRepository methodRepository;
 
-    @Autowired
-    private StockRepository stockRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private StrategyStockReferenceRepository strategyStockReferenceRepository;
+    private final StockRepository stockRepository;
+
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     @BeforeEach
     void setup() {
-        saveMethod();
-        saveMember();
-        saveStock();
-
         strategyStockReferenceRepository.deleteAll();
         strategyRepository.deleteAll();
     }
 
-    @DisplayName("전략 등록 성공 테스트")
+    @DisplayName("전략 수정 성공 테스트")
     @Test
-    void insertStrategySuccessTest() {
-        // DB 저장
+    void updateStrategySuccessTest() {
+        // insert
         SaveStrategyRequestDto requestDto = getRequestDto();
-        Strategy savedStrategy = strategyService.insertStrategy(requestDto);
+        Strategy strategy = insertStrategyService.insertStrategy(requestDto);
 
-        // 검증
-        assertNotNull(savedStrategy);
-        assertEquals(requestDto.getTraderId(), savedStrategy.getTrader().getId());
-        assertEquals(requestDto.getMethodId(), savedStrategy.getMethod().getId());
-        assertEquals(savedStrategy.getStatusCode(), StrategyStatusCode.PRIVATE.name());
-        assertEquals(requestDto.getName(), savedStrategy.getName());
-        assertEquals(requestDto.getCycle(), savedStrategy.getCycle());
-        assertEquals(requestDto.getMinOperationAmount(), savedStrategy.getMinOperationAmount());
-        assertEquals(requestDto.getContent(), savedStrategy.getContent());
-        assertEquals(0, savedStrategy.getFollowerCount());
-        assertEquals(0.0, savedStrategy.getKpRatio());
-        assertEquals(0.0, savedStrategy.getSmScore());
-        assertNotNull(savedStrategy.getStrategyCreatedDate());
-        assertNotNull(savedStrategy.getStrategyModifiedDate());
-    }
+        assertNotNull(strategy);
 
-    @DisplayName("전략 등록 실패 테스트 - 멤버id 미존재")
-    @Test
-    void insertStrategyFailureTest_NullMemberId() {
-        SaveStrategyRequestDto requestDto = getRequestDto();
-        requestDto.setTraderId(null);
+        // update
+        SaveStrategyRequestDto updateRequestDto = getRequestDto();
+//        updateRequestDto.setName("이름 수정");
+        updateRequestDto.setContent("내용 수정");
+        updateStrategyService.updateStrategy(strategy.getId(), updateRequestDto);
 
-        // 예외 검증
-        assertThrows(StrategyBadRequestException.class, () -> {
-            strategyService.insertStrategy(requestDto);
-        });
-    }
+        // find
+        Strategy updatedStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 
-    @DisplayName("전략 등록 실패 테스트 - 전략명 미존재")
-    @Test
-    void insertStrategyFailureTest_NullStrategyName() {
-        SaveStrategyRequestDto requestDto = getRequestDto();
-        requestDto.setName(null);
-
-        // 예외 검증
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            strategyService.insertStrategy(requestDto);
-        });
+        if(updatedStrategy != null) {
+            assertEquals(updateRequestDto.getName(), updatedStrategy.getName());
+            assertEquals(updateRequestDto.getContent(), updatedStrategy.getContent());
+        }
     }
 
     void saveMethod() {
