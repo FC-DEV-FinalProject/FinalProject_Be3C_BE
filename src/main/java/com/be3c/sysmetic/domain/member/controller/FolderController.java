@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -43,7 +44,9 @@ public class FolderController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder")
-    public ResponseEntity<ApiResponse<List<Folder>>> getAllFolder() {
+    public ResponseEntity<ApiResponse<List<Folder>>> getAllFolder(
+
+    ) throws Exception {
         try {
             Long userId = getUserIdInSecurityContext();
 
@@ -52,6 +55,22 @@ public class FolderController {
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 요청입니다."));
+        }
+    }
+
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
+    @GetMapping("/member/folder/availability")
+    public ResponseEntity<ApiResponse<String>> getDuplCheck(
+            @RequestParam String name
+    ) throws Exception {
+        try {
+            Long userId = getUserIdInSecurityContext();
+            folderService.duplCheck(userId, name);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success());
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         }
     }
 

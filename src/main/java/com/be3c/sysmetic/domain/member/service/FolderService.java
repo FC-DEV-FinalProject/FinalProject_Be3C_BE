@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface FolderService {
     List<Folder> getUserFolders(Long id);
+    boolean duplCheck(Long id, String name);
 }

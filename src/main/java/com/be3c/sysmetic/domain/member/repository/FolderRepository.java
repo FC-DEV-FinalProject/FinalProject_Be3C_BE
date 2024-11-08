@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Long> {
 
-    List<Folder> findByIdAndStatusCode(Long id, String statusCode);
-
+    List<Folder> findByMemberIdAndStatusCode(Long memberId, String statusCode);
+    Optional<Folder> findByMemberIdAndFolderNameAndStatusCode(Long memberId, String folderName, String statusCode);
 
 }
