@@ -53,8 +53,8 @@ public class StrategyListRepositoryTest {
         // 각 메서드를 호출하여 데이터 추가
         saveMember();
         saveMethod();
-        saveStrategy1();
-        saveStrategy2();
+        // saveStrategy1();
+        // saveStrategy2();
     }
 
 
@@ -94,38 +94,38 @@ public class StrategyListRepositoryTest {
         methodRepository.save(method);
     }
 
-    void saveStrategy1() {
-        // Strategy 객체 생성
-        Strategy s1 = Strategy.builder()
-                .trader(getTrader())
-                .method(getMethod())
-                .statusCode("ST001")
-                .name("전략1")
-                .cycle('P')
-                .minOperationAmount(1000000.0)
-                .content("전략1 소개 내용")
-                .accumProfitRate(0.0)
-                .createdBy(1L)
-                .modifiedBy(1L)
-                .build();
-        strategyRepository.saveAndFlush(s1);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-    }
-
-    void saveStrategy2() {
-        Strategy s2 = Strategy.builder()
-                .trader(getTrader())
-                .method(getMethod())
-                .statusCode("ST001")
-                .name("전략2")
-                .cycle('P')
-                .minOperationAmount(1000000.0)
-                .content("전략1 소개 내용")
-                .accumProfitRate(0.0)
-                .createdBy(1L)
-                .modifiedBy(1L)
-                .build();
-        strategyRepository.saveAndFlush(s2);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-    }
+    // void saveStrategy1() {
+    //     // Strategy 객체 생성
+    //     Strategy s1 = Strategy.builder()
+    //             .trader(getTrader())
+    //             .method(getMethod())
+    //             .statusCode("ST001")
+    //             .name("전략1")
+    //             .cycle('P')
+    //             .minOperationAmount(1000000.0)
+    //             .content("전략1 소개 내용")
+    //             .accumProfitRate(0.0)
+    //             .createdBy(1L)
+    //             .modifiedBy(1L)
+    //             .build();
+    //     strategyRepository.saveAndFlush(s1);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
+    // }
+    //
+    // void saveStrategy2() {
+    //     Strategy s2 = Strategy.builder()
+    //             .trader(getTrader())
+    //             .method(getMethod())
+    //             .statusCode("ST001")
+    //             .name("전략2")
+    //             .cycle('P')
+    //             .minOperationAmount(1000000.0)
+    //             .content("전략1 소개 내용")
+    //             .accumProfitRate(0.0)
+    //             .createdBy(1L)
+    //             .modifiedBy(1L)
+    //             .build();
+    //     strategyRepository.saveAndFlush(s2);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
+    // }
 
     Member getTrader() {
         return memberRepository.findAll().stream().findFirst()
@@ -138,29 +138,29 @@ public class StrategyListRepositoryTest {
                 orElseThrow(() -> new NoSuchElementException("매매방식이 없습니다."));
     }
 
-    @Test
-    @DisplayName("전체 전략 목록 조회 테스트")
-    @Transactional
-    @Rollback(false)
-    public void getStrategyListTest() {
-        // createStrategy List로 가져오기
-        // List<Strategy> strategyList = strategyListRepository.findAll().stream().toList();
-        List<Strategy> strategyList = strategyListRepository.findAll();
+    // @Test
+    // @DisplayName("전체 전략 목록 조회 테스트")
+    // @Transactional
+    // @Rollback(false)
+    // public void getStrategyListTest() {
+    //     // createStrategy List로 가져오기
+    //     // List<Strategy> strategyList = strategyListRepository.findAll().stream().toList();
+    //     List<Strategy> strategyList = strategyListRepository.findAll();
+    //
+    //     // strategyListRepository로 데이터베이스에 저장
+    //     System.out.println("==========================================");
+    //     // 요소 하나씩 출력하기 - 메서드 참조 ::
+    //     strategyList.forEach(System.out::println);
+    //     System.out.println("==========================================");
+    //     assertNotNull(strategyList);
+    //     assertEquals(strategyList.get(0), strategyRepository.findAll().get(0));
+    //     assertEquals(strategyList.get(1), strategyRepository.findAll().get(1));
+    //     // assertEquals(strategyList.get(0).getId(), strategyRepository.findAll().get(0).getId());
+    //     // assertEquals(strategyList.get(1).getId(), strategyRepository.findAll().get(1).getId());
+    // }
 
-        // strategyListRepository로 데이터베이스에 저장
-        System.out.println("==========================================");
-        // 요소 하나씩 출력하기 - 메서드 참조 ::
-        strategyList.forEach(System.out::println);
-        System.out.println("==========================================");
-        assertNotNull(strategyList);
-        assertEquals(strategyList.get(0), strategyRepository.findAll().get(0));
-        assertEquals(strategyList.get(1), strategyRepository.findAll().get(1));
-        // assertEquals(strategyList.get(0).getId(), strategyRepository.findAll().get(0).getId());
-        // assertEquals(strategyList.get(1).getId(), strategyRepository.findAll().get(1).getId());
-    }
-
     @Test
-    @DisplayName("전략 목록 첫 번째 페이지 조회 테스트 - 성공")
+    @DisplayName("전략 목록 첫 번째 페이지 조회 테스트 - 수익률순")
     @Transactional
     @Rollback(false)
     public void strategyFirstPageTest() {
@@ -262,5 +262,43 @@ public class StrategyListRepositoryTest {
         // 전체 페이지 수 구하기
         int totalPage = (int)Math.ceil((double)randomStrategyNum / 10);
         assertEquals(strategyListRepository.getTotalPage("ST001"), totalPage);
+    }
+
+    @Test
+    @DisplayName("현재 페이지가 전체 페이지 보다 안됨")
+    @Transactional
+    @Rollback(false)
+    public void curPageNumTest() {
+        // before : 현재 데이터베이스 비우기
+        strategyListRepository.deleteAll();
+        assertTrue(strategyListRepository.findAll().isEmpty());
+
+        // 전략 수 난수는 [1, 100]
+        int randomStrategyNum = (int) (Math.random() * 100) + 1;
+        System.out.println("randomStrategyNum = " + randomStrategyNum);
+
+        // 난수만큼 전략 생성 후 데이터베이스에 저장
+        for (int i=0; i < randomStrategyNum; i++){
+            Strategy s = Strategy.builder()
+                    .trader(getTrader())
+                    .method(getMethod())
+                    .statusCode("ST001")
+                    .name("전략" + (i+1))
+                    .cycle('P')
+                    .minOperationAmount(100.0)
+                    .content("전략" + (i + 1) + " 소개 내용")
+                    .accumProfitRate(Math.random() * 100)
+                    .createdBy(Long.valueOf(randomStrategyNum))
+                    .modifiedBy(Long.valueOf(randomStrategyNum))
+                    .build();
+            strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
+        }
+
+        // 전체 페이지 중 난수로 현재 페이지 curPage 생성
+        int randomCurPage = (int) (Math.random() * randomStrategyNum) / 10 + 1;
+        // 현재 페이지가 전체 페이지보다 크면 안됨
+        System.out.println("randomCurPage = " + randomCurPage);
+        System.out.println("strategyListRepository.getTotalPage() = " + strategyListRepository.getTotalPage("ST001"));
+        assertTrue(randomCurPage <= strategyListRepository.getTotalPage("ST001"));
     }
 }
