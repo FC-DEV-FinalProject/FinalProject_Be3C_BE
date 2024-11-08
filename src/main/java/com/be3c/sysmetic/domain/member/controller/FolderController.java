@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
+import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.service.FolderService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -20,7 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -58,6 +62,9 @@ public class FolderController {
         }
     }
 
+    /*
+        폴더명 중복 체크
+     */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder/availability")
     public ResponseEntity<ApiResponse<String>> getDuplCheck(
@@ -71,6 +78,30 @@ public class FolderController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+        }
+    }
+
+    /*
+        폴더 추가 메서드
+     */
+    @PostMapping("/member/folder/")
+    public ResponseEntity<ApiResponse<String>> postFolder(
+            @RequestBody FolderPostRequestDto folderPostRequestDto
+    ) throws Exception {
+        try {
+            folderService.insertFolder(folderPostRequestDto, getUserIdInSecurityContext());
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success());
+        } catch (HttpStatusCodeException e) {
+            if(e.getStatusCode() == HttpStatus.CONFLICT) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (ResponseStatusException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
