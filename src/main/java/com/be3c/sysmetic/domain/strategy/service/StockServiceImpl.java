@@ -57,6 +57,10 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public boolean saveItem(StockPutRequestDto requestDto) {
+        if(requestDto.getCheckDuplicate()) {
+            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+        }
+
         if(stockRepository.findByNameAndStatusCode(
                 requestDto.getName(),
                 Code.valueOf("USING_STATE").getCode()).isPresent()) {
@@ -73,6 +77,10 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public boolean updateItem(StockPutRequestDto requestDto) {
+        if(requestDto.getCheckDuplicate()) {
+            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+        }
+
         Stock find_stock = stockRepository.findByIdAndStatusCode(
                 requestDto.getId(),
                 Code.USING_STATE.getCode())
@@ -86,13 +94,12 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public boolean deleteItem(Long id, Long userId) {
+    public boolean deleteItem(Long id) {
         Stock find_stock = stockRepository.findByIdAndStatusCode
                 (id, Code.USING_STATE.getCode())
                 .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
 
         find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
-        find_stock.setModifiedBy(userId);
         stockRepository.save(find_stock);
 
         return false;
