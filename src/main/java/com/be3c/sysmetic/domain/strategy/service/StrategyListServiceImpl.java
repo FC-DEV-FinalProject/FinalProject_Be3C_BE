@@ -19,10 +19,14 @@ public class StrategyListServiceImpl implements StrategyListService {
 
     private final StrategyListRepository strategyListRepository;
 
+    /*
+        findStrategyPage : 메인 전략 목록 페이지 (수익률순 조회)
+    */
     @Override
-    public Page<Strategy> findStrategyPage(Integer pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber,10, Sort.by(Sort.Order.desc("accumProfitRate")));
+    public Page<Strategy> findStrategyPage(Integer pageNum) {
+        Pageable pageable = PageRequest.of(pageNum,10, Sort.by(Sort.Order.desc("accumProfitRate")));
         String statusCode = "ST001";        // 공개중인 전략
+
         return strategyListRepository.findAllByStatusCode(statusCode, pageable);
     }
 }

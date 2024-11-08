@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 @Controller
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
@@ -30,12 +27,12 @@ public class StrategyListController {
     */
     @GetMapping("/strategy/list")
     // 페이징된 Strategy 목록을 포함하는 응답 형식을 가진 ApiResponse 객체 -> ResponseEntity로 보냄
-    public ResponseEntity<ApiResponse<Page<Strategy>>> getStrategyPage(@RequestParam(defaultValue = "0") Integer pageNum) throws Exception {
+    public ResponseEntity<ApiResponse<Page<Strategy>>> getStrategyPage(@RequestParam(defaultValue = "1") Integer pageNum) throws Exception {
         /* ExceptionHandler 추후 정의 */
 
         Page<Strategy> strategyList = strategyListService.findStrategyPage(pageNum);
 
-        // strategyList null 검증
+        // page가 null인지 검증
         if (strategyList == null) {
             // ResponseEntity(HttpStatusCode)를 담은 ApiResonse 반환
             // 400 BAD_REQUEST 상태코드 지정
@@ -43,7 +40,6 @@ public class StrategyListController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다."));
         }
-
         // strategyList가 null 검증 통과
         // 응답 본문에 strategyList를 담은 ApiResponse 반환
         return ResponseEntity.status(HttpStatus.OK)

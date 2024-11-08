@@ -1,7 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Digits;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,7 +28,7 @@ public class Strategy {
         followerCount = 0L;
         kpRatio = 0.0;
         smScore = 0.0;
-        accumProfitRate = 0.0;
+        // accumProfitRate = 0.0;
     }
 
     @PreUpdate
@@ -73,7 +75,8 @@ public class Strategy {
     private Double smScore;
 
     // 누적수익률 추가
-    @Column(name = "accum_profit_rate", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.00")
+    @Column(name = "accum_profit_rate", nullable = true)
     private Double accumProfitRate;
 
     @Column(name = "strategy_created_date", nullable = false)
