@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.reactor.ReactorProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,11 +41,13 @@ public class StrategyListRepositoryTest {
     MemberRepository memberRepository;
 
     @Autowired
-    EntityManager entityManager;
+    EntityManager em;
+    @Autowired
+    private ReactorProperties reactorProperties;
 
     @BeforeEach
     public void init() {
-        entityManager.createNativeQuery("ALTER TABLE sysmetictest.strategy AUTO_INCREMENT = 1")
+        em.createNativeQuery("ALTER TABLE sysmetictest.strategy AUTO_INCREMENT = 1")
                 .executeUpdate();
         // strategyListRepository 데이터 모두 삭제
         strategyListRepository.deleteAll();
@@ -53,10 +55,7 @@ public class StrategyListRepositoryTest {
         // 각 메서드를 호출하여 데이터 추가
         saveMember();
         saveMethod();
-        // saveStrategy1();
-        // saveStrategy2();
     }
-
 
     void saveMember() {
         // Member trader 생성
@@ -94,39 +93,6 @@ public class StrategyListRepositoryTest {
         methodRepository.save(method);
     }
 
-    // void saveStrategy1() {
-    //     // Strategy 객체 생성
-    //     Strategy s1 = Strategy.builder()
-    //             .trader(getTrader())
-    //             .method(getMethod())
-    //             .statusCode("ST001")
-    //             .name("전략1")
-    //             .cycle('P')
-    //             .minOperationAmount(1000000.0)
-    //             .content("전략1 소개 내용")
-    //             .accumProfitRate(0.0)
-    //             .createdBy(1L)
-    //             .modifiedBy(1L)
-    //             .build();
-    //     strategyRepository.saveAndFlush(s1);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-    // }
-    //
-    // void saveStrategy2() {
-    //     Strategy s2 = Strategy.builder()
-    //             .trader(getTrader())
-    //             .method(getMethod())
-    //             .statusCode("ST001")
-    //             .name("전략2")
-    //             .cycle('P')
-    //             .minOperationAmount(1000000.0)
-    //             .content("전략1 소개 내용")
-    //             .accumProfitRate(0.0)
-    //             .createdBy(1L)
-    //             .modifiedBy(1L)
-    //             .build();
-    //     strategyRepository.saveAndFlush(s2);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-    // }
-
     Member getTrader() {
         return memberRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new NoSuchElementException("트레이더가 없습니다."));
@@ -137,27 +103,6 @@ public class StrategyListRepositoryTest {
                 findFirst().
                 orElseThrow(() -> new NoSuchElementException("매매방식이 없습니다."));
     }
-
-    // @Test
-    // @DisplayName("전체 전략 목록 조회 테스트")
-    // @Transactional
-    // @Rollback(false)
-    // public void getStrategyListTest() {
-    //     // createStrategy List로 가져오기
-    //     // List<Strategy> strategyList = strategyListRepository.findAll().stream().toList();
-    //     List<Strategy> strategyList = strategyListRepository.findAll();
-    //
-    //     // strategyListRepository로 데이터베이스에 저장
-    //     System.out.println("==========================================");
-    //     // 요소 하나씩 출력하기 - 메서드 참조 ::
-    //     strategyList.forEach(System.out::println);
-    //     System.out.println("==========================================");
-    //     assertNotNull(strategyList);
-    //     assertEquals(strategyList.get(0), strategyRepository.findAll().get(0));
-    //     assertEquals(strategyList.get(1), strategyRepository.findAll().get(1));
-    //     // assertEquals(strategyList.get(0).getId(), strategyRepository.findAll().get(0).getId());
-    //     // assertEquals(strategyList.get(1).getId(), strategyRepository.findAll().get(1).getId());
-    // }
 
     @Test
     @DisplayName("전략 목록 첫 번째 페이지 조회 테스트 - 수익률순")
@@ -170,7 +115,7 @@ public class StrategyListRepositoryTest {
 
         // 전략 수 난수는 [1, 100]
         int randomStrategyNum = (int) (Math.random() * 100) + 1;
-        // int randomStrategyNum = 9;
+        // int randomStrategyNum = 8;
         System.out.println(randomStrategyNum);
 
         // 난수만큼 순차적으로 전략 생성
@@ -191,7 +136,7 @@ public class StrategyListRepositoryTest {
         }
 
         // 전략 페이지 하나 가져오기
-        Pageable pageable = strategyListRepository.getPageable(1);
+        Pageable pageable = strategyListRepository.getPageable(0);
         Page<Strategy> spage = strategyListRepository.findAllByStatusCode("ST001", pageable);
 
         assertNotNull(spage);
@@ -222,8 +167,7 @@ public class StrategyListRepositoryTest {
         Strategy firstStrategy = spage.getContent().get(0);
         for (Strategy s : spage.getContent()) {
             assertTrue(firstStrategy.getAccumProfitRate() >= s.getAccumProfitRate(), "수익률이 내림차순으로 정렬되지 않음.");
-            // System.out.println("s.getId() = " + s.getId());
-            // System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
+            System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
         }
     }
 
@@ -240,7 +184,7 @@ public class StrategyListRepositoryTest {
         // 전략 수 난수는 [1, 100]
         int randomStrategyNum = (int) (Math.random() * 100) + 1;
         // int randomStrategyNum = 9;
-        System.out.println(randomStrategyNum);
+        System.out.println("randomStrategyNum = " + randomStrategyNum);
 
         // 난수만큼 순차적으로 전략 생성
         for (int i = 0; i < randomStrategyNum; i++) {
@@ -260,8 +204,8 @@ public class StrategyListRepositoryTest {
         }
 
         // 전체 페이지 수 구하기
-        int totalPage = (int)Math.ceil((double)randomStrategyNum / 10);
-        assertEquals(strategyListRepository.getTotalPage("ST001"), totalPage);
+        int totalPage = (int) Math.ceil(strategyListRepository.countByStatusCode("ST001") / (double) 10);
+        assertEquals(totalPage, (int)Math.ceil((double)randomStrategyNum / 10));
     }
 
     @Test
@@ -275,6 +219,7 @@ public class StrategyListRepositoryTest {
 
         // 전략 수 난수는 [1, 100]
         int randomStrategyNum = (int) (Math.random() * 100) + 1;
+        // int randomStrategyNum = 9;
         System.out.println("randomStrategyNum = " + randomStrategyNum);
 
         // 난수만큼 전략 생성 후 데이터베이스에 저장
@@ -296,9 +241,13 @@ public class StrategyListRepositoryTest {
 
         // 전체 페이지 중 난수로 현재 페이지 curPage 생성
         int randomCurPage = (int) (Math.random() * randomStrategyNum) / 10 + 1;
+        // 전체 페이지
+        long totalPage = (int) Math.ceil((double)  strategyListRepository.countByStatusCode("ST001") /10);
+
         // 현재 페이지가 전체 페이지보다 크면 안됨
         System.out.println("randomCurPage = " + randomCurPage);
-        System.out.println("strategyListRepository.getTotalPage() = " + strategyListRepository.getTotalPage("ST001"));
-        assertTrue(randomCurPage <= strategyListRepository.getTotalPage("ST001"));
+        System.out.println("totalPage = " + totalPage);
+
+        assertTrue(randomCurPage <= totalPage);
     }
 }

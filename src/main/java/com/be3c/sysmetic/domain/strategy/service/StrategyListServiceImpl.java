@@ -29,4 +29,13 @@ public class StrategyListServiceImpl implements StrategyListService {
 
         return strategyListRepository.findAllByStatusCode(statusCode, pageable);
     }
+
+    /*
+        getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
+    */
+    @Override
+    public int getTotalPageNumber(String statusCode, int pageSize) {
+        long totalStrategyCount = strategyListRepository.countByStatusCode(statusCode);
+        return (int) Math.ceil((double) totalStrategyCount / pageSize);
+    }
 }
