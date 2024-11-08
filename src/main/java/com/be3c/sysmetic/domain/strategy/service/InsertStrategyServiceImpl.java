@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.strategy.dto.InsertStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Service
-public class StrategyServiceImpl implements StrategyService {
+public class InsertStrategyServiceImpl implements InsertStrategyService {
 
     private final StrategyRepository strategyRepository;
 
@@ -33,7 +33,7 @@ public class StrategyServiceImpl implements StrategyService {
 
     @Override
     @Transactional
-    public Strategy insertStrategy(InsertStrategyRequestDto requestDto) {
+    public Strategy insertStrategy(SaveStrategyRequestDto requestDto) {
         // 전략명 중복 여부 검증
         checkDuplicationName(requestDto.getName());
 
@@ -41,8 +41,8 @@ public class StrategyServiceImpl implements StrategyService {
         checkStock(requestDto.getStockIdList());
 
         Strategy strategy = Strategy.builder()
-                .trader(getMember(requestDto.getTraderId()))
-                .method(getMethod(requestDto.getMethodId()))
+                .trader(findMember(requestDto.getTraderId()))
+                .method(findMethod(requestDto.getMethodId()))
                 .statusCode(StrategyStatusCode.PRIVATE.name()) // 비공개 설정
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
@@ -62,18 +62,18 @@ public class StrategyServiceImpl implements StrategyService {
     }
 
     @Override
-    public boolean confirmDuplicationName(String name) {
+    public boolean returnIsDuplicationName(String name) {
         return strategyRepository.existsByName(name);
     }
 
-    Member getMember(Long id) {
+    Member findMember(Long id) {
         if(id == null) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
         }
         return memberRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
-    Method getMethod(Long id) {
+    Method findMethod(Long id) {
         if(id == null) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
         }
