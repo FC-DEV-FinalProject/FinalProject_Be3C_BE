@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
+import com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
@@ -8,6 +9,7 @@ import com.be3c.sysmetic.domain.member.service.FolderService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.CustomUserDetails;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +39,11 @@ public class FolderController {
 
     private final FolderService folderService;
 
+    private final SecurityUtils securityUtils;
+
     /*
         해당 유저의 폴더 목록 중에서 겹치는 이름이 존재하는지 확인하는 api
      */
-
-
     /*
         해당 유저의 폴더 목록을 반환하는 api
         트레이더는 해당 메서드에 접근 불가능.
@@ -51,8 +53,12 @@ public class FolderController {
     public ResponseEntity<ApiResponse<List<Folder>>> getAllFolder(
 
     ) throws Exception {
-        try {return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(folderService.getUserFolders(getUserIdInSecurityContext())));
+        try {
+            List<Folder> folderList = folderService.getUserFolders(
+                    securityUtils.getUserIdInSecurityContext());
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(folderList));
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 요청입니다."));
@@ -68,10 +74,12 @@ public class FolderController {
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder/availability")
     public ResponseEntity<ApiResponse<String>> getDuplCheck(
-            @RequestParam String name
+            @RequestParam String folderName
     ) throws Exception {
         try {
-            folderService.duplCheck(getUserIdInSecurityContext(), name);
+            folderService.duplCheck(
+                    securityUtils.getUserIdInSecurityContext(),
+                    folderName);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
@@ -92,7 +100,7 @@ public class FolderController {
             @RequestBody FolderPostRequestDto folderPostRequestDto
     ) throws Exception {
         try {
-            folderService.insertFolder(folderPostRequestDto, getUserIdInSecurityContext());
+            folderService.insertFolder(folderPostRequestDto, securityUtils.getUserIdInSecurityContext());
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
@@ -115,17 +123,23 @@ public class FolderController {
     /*
         폴더명 수정 메서드
      */
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PutMapping("/member/folder")
     public ResponseEntity<ApiResponse<String>> putFolder(
             @RequestBody FolderPutRequestDto folderPutRequestDto
     ) throws Exception {
         try {
-            if(folderService.updateFolder(folderPutRequestDto, getUserIdInSecurityContext())) {
+            if(folderService
+                    .updateFolder(
+                            folderPutRequestDto,
+                            securityUtils.getUserIdInSecurityContext())) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "알 수 없는 이유로 폴더명 수정에 실패했습니다."));
+                    .body(ApiResponse.fail(
+                            ErrorCode.BAD_REQUEST,
+                            "알 수 없는 이유로 폴더명 수정에 실패했습니다."));
         } catch(IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
@@ -135,20 +149,5 @@ public class FolderController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
-    }
-
-    private Long getUserIdInSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AuthenticationCredentialsNotFoundException("인증 정보가 없습니다.");
-        }
-
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUserId();
-        }
-
-        throw new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다.");
     }
 }
