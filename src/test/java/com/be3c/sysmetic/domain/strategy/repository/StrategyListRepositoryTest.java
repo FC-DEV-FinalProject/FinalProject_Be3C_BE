@@ -115,7 +115,7 @@ public class StrategyListRepositoryTest {
 
         // 전략 수 난수는 [1, 100]
         int randomStrategyNum = (int) (Math.random() * 100) + 1;
-        // int randomStrategyNum = 8;
+        // int randomStrategyNum = 9;
         System.out.println(randomStrategyNum);
 
         // 난수만큼 순차적으로 전략 생성
@@ -204,12 +204,16 @@ public class StrategyListRepositoryTest {
         }
 
         // 전체 페이지 수 구하기
-        int totalPage = (int) Math.ceil(strategyListRepository.countByStatusCode("ST001") / (double) 10);
-        assertEquals(totalPage, (int)Math.ceil((double)randomStrategyNum / 10));
+        int actualTotalPage = (int) Math.ceil(strategyListRepository.countByStatusCode("ST001") / 10.0);
+        int expectedTotalPage = (int) Math.ceil(randomStrategyNum / 10.0);
+        // 예상 값과 실제 값이 일치하는지 검증
+        assertEquals(expectedTotalPage, actualTotalPage);
+        System.out.println("expectedTotalPage = " + expectedTotalPage);
+        System.out.println("actualTotalPage = " + actualTotalPage);
     }
 
     @Test
-    @DisplayName("현재 페이지가 전체 페이지 보다 안됨")
+    @DisplayName("현재 페이지가 전체 페이지 보다 크면 안됨")
     @Transactional
     @Rollback(false)
     public void curPageNumTest() {
@@ -242,12 +246,12 @@ public class StrategyListRepositoryTest {
         // 전체 페이지 중 난수로 현재 페이지 curPage 생성
         int randomCurPage = (int) (Math.random() * randomStrategyNum) / 10 + 1;
         // 전체 페이지
-        long totalPage = (int) Math.ceil((double)  strategyListRepository.countByStatusCode("ST001") /10);
+        int actualTotalPage = (int) Math.ceil(strategyListRepository.countByStatusCode("ST001") / 10.0);
 
         // 현재 페이지가 전체 페이지보다 크면 안됨
         System.out.println("randomCurPage = " + randomCurPage);
-        System.out.println("totalPage = " + totalPage);
+        System.out.println("actualTotalPage = " + actualTotalPage);
 
-        assertTrue(randomCurPage <= totalPage);
+        assertTrue(randomCurPage <= actualTotalPage);
     }
 }

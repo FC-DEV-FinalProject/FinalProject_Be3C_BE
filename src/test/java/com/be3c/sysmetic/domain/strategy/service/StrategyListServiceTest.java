@@ -12,10 +12,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,6 +115,8 @@ public class StrategyListServiceTest {
 
     @Test
     @DisplayName("전략 목록 전체 페이지 수")
+    @Transactional
+    @Rollback(false)
     public void getAllStrategyPageNum() {
         // before : 현재 데이터베이스 비우기
         strategyListRepository.deleteAll();
@@ -147,9 +147,67 @@ public class StrategyListServiceTest {
             em.flush();
             em.clear();
         }
+
+        // 전체 페이지 수 확인
+        int expectedTotalPage = (int) Math.ceil(randomStrategyNum / 10.0);
+        int actualTotalPage = strategyListService.getTotalPageNumber("ST001", 10);
+        System.out.println("expectedTotalPage = " + expectedTotalPage);
+        System.out.println("actualTotalPage = " + actualTotalPage);
     }
 
 
+    @Test
+    @DisplayName("지정 페이지 조회")
+    @Transactional
+    @Rollback(false)
+    public void getSelectedPageTest() {
+        // before : 현재 데이터베이스 비우기
+        strategyListRepository.deleteAll();
+        assertTrue(strategyListRepository.findAll().isEmpty());
+
+        // 전략 수 난수는 [1, 100]
+        int randomStrategyNum = (int) (Math.random() * 10 + 1) * 10;        // 10의 배수만
+        // int randomStrategyNum = 9;
+        System.out.println("randomStrategyNum = " + randomStrategyNum);
+
+        // 난수만큼 순차적으로 전략 생성
+        for (int i = 0; i < randomStrategyNum; i++) {
+            Strategy s = Strategy.builder()
+                    .trader(getTrader())
+                    .method(getMethod())
+                    .statusCode("ST001")
+                    .name("전략" + (i + 1))
+                    .cycle('P')
+                    .minOperationAmount(100.0)
+                    .content("전략" + (i + 1) + " 소개 내용")
+                    .accumProfitRate(Math.random() * 100)
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
+                    .build();
+
+            // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
+            em.persist(s);
+            em.flush();
+            em.clear();
+        }
+
+        // 전체 페이지 계산
+        int totalPage = (int) Math.ceil(randomStrategyNum / 10.0);
+        // 랜덤 페이지 선택
+        int randomPage = (int) (Math.random() * totalPage);
+        System.out.println("randomPage = " + randomPage);
+
+        // 특정 페이지 가져오기
+        Page<Strategy> selectPage = strategyListService.findStrategyPage(randomPage);
+        assertFalse(selectPage.isEmpty(), "선택한 페이지에 데이터 없음.");
+        double maxProfitRate = selectPage.getContent().get(0).getAccumProfitRate();
+
+        // 가져온 페이지도 수익률 순으로 정렬되어야 함
+        for (Strategy s : selectPage) {
+            assertTrue(maxProfitRate >= s.getAccumProfitRate());
+            System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
+        }
+    }
 
     void saveMember() {
         // Member trader 생성
