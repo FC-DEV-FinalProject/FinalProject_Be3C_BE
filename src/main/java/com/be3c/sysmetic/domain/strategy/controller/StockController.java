@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -111,24 +112,16 @@ public class StockController {
             @RequestBody StockPutRequestDto stockRequestDto
     ) throws Exception {
         try {
-            if(stockRequestDto.getCheckDuplicate()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 요청입니다."));
-            }
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication.getPrincipal();
-
-            if(principal instanceof UserDetails userDetails) {
-                Long userId = ((CustomUserDetails) userDetails).getUserId();
-
-                stockService.saveItem(stockRequestDto);
-            }
+            stockService.saveItem(stockRequestDto);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 값입니다."));
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -141,23 +134,16 @@ public class StockController {
             @RequestBody StockPutRequestDto stockPutRequestDto
     ) throws Exception {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication.getPrincipal();
+            stockService.updateItem(stockPutRequestDto);
 
-            if(principal instanceof UserDetails userDetails) {
-                Long userId = ((CustomUserDetails) userDetails).getUserId();
-
-                stockService.updateItem(stockPutRequestDto);
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
-            }
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success());
         } catch(NoSuchElementException | IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -167,23 +153,33 @@ public class StockController {
             @PathVariable Long id
     ) throws Exception {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication.getPrincipal();
-
-            if(principal instanceof UserDetails userDetails) {
-                Long userId = ((CustomUserDetails) userDetails).getUserId();
-
-                stockService.deleteItem(id, userId);
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
-            }
+            stockService.deleteItem(id);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
+        } catch (AuthenticationCredentialsNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
+
+//    private Long getUserIdInSecurityContext() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new AuthenticationCredentialsNotFoundException("인증되지 않은 사용자입니다.");
+//        }
+//
+//        Object principal = authentication.getPrincipal();
+//
+//        // principal이 UserDetails의 인스턴스인지 확인
+//        if (principal instanceof CustomUserDetails customUserDetails) {
+//            return customUserDetails.getUserId();
+//        }
+//
+//        throw new AuthenticationCredentialsNotFoundException("사용자 정보를 찾을 수 없습니다.");
+//    }
+
 }

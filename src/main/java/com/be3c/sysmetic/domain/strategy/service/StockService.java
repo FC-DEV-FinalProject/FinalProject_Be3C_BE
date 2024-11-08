@@ -12,5 +12,5 @@ public interface StockService {
 
     boolean saveItem(StockPutRequestDto requestDto);
     boolean updateItem(StockPutRequestDto requestDto);
-    boolean deleteItem(Long id, Long userId);
+    boolean deleteItem(Long id);
 }
