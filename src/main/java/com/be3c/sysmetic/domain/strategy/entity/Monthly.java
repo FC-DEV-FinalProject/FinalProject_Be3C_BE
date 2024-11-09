@@ -36,7 +36,7 @@ public class Monthly {
     private Strategy strategy;
 
     @Column(name = "month_number", nullable = false)
-    private Integer month_number;
+    private Integer monthNumber;
 
     @Column(name = "average_monthly_wage", nullable = false)
     private Double averageMonthlyWage;
