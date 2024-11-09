@@ -44,7 +44,7 @@ public class Strategy {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "follower_count")
+    @Column(name = "follower_count", nullable = false)
     private Long followerCount;
 
     @Column(name = "mdd")
