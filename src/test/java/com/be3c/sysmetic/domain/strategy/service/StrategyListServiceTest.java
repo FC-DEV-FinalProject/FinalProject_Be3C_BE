@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
@@ -62,7 +63,6 @@ public class StrategyListServiceTest {
 
         // 전략 수 난수는 [1, 100]
         int randomStrategyNum = (int) (Math.random() * 100) + 1;
-        // int randomStrategyNum = 8;
         System.out.println("randomStrategyNum = " + randomStrategyNum);
 
         // 난수만큼 순차적으로 전략 생성
@@ -76,39 +76,33 @@ public class StrategyListServiceTest {
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .accumProfitRate(Math.random() * 100)
-                    .createdBy(Long.valueOf(randomStrategyNum))
-                    .modifiedBy(Long.valueOf(randomStrategyNum))
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
                     .build();
-
-            // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
             em.persist(s);
             em.flush();
             em.clear();
         }
 
         // 전략 첫 번째 페이지 가져오기
-        Page<Strategy> firstPage = strategyListService.findStrategyPage(0);
+        Page<StrategyListDto> firstPage = strategyListService.findStrategyPage(0);
         assertNotNull(firstPage);
-        assertEquals(firstPage.getSize(), 10);
+        assertEquals(10, firstPage.getSize());
         assertTrue(firstPage.hasContent());
 
         // 첫 번째 페이지 전략 반복 검증
-        for (Strategy s : firstPage) {
-            assertNotNull(s.getId());
-            assertNotNull(s.getTrader());
-            assertNotNull(s.getMethod());
-            assertEquals(s.getStatusCode(), "ST001");
-            assertNotNull(s.getName());
-            assertEquals(s.getCycle(), 'P');
-            assertEquals(s.getMinOperationAmount(), 100.0);
-            assertNotNull(s.getAccumProfitRate());
-            assertEquals(s.getCreatedBy(), Long.valueOf(randomStrategyNum));
-            assertEquals(s.getModifiedBy(), Long.valueOf(randomStrategyNum));
+        for (StrategyListDto dto : firstPage) {
+            assertNotNull(dto.getName());
+            assertNotNull(dto.getStock());
+            assertNotNull(dto.getTraderNickname());
+            assertNotNull(dto.getCycle());
+            assertNotNull(dto.getAccumProfitRate());
         }
+
         // 첫 페이지 첫 번째 값이 제일 큰 accumProfitRate 가져야 함
-        for (Strategy s : firstPage){
-            assertTrue(firstPage.getContent().get(0).getAccumProfitRate() >= s.getAccumProfitRate());
-            System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
+        for (StrategyListDto dto : firstPage) {
+            assertTrue(firstPage.getContent().get(0).getAccumProfitRate() >= dto.getAccumProfitRate());
+            System.out.println("dto.getAccumProfitRate() = " + dto.getAccumProfitRate());
         }
     }
 
@@ -138,8 +132,8 @@ public class StrategyListServiceTest {
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .accumProfitRate(Math.random() * 100)
-                    .createdBy(Long.valueOf(randomStrategyNum))
-                    .modifiedBy(Long.valueOf(randomStrategyNum))
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
                     .build();
 
             // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
@@ -157,7 +151,7 @@ public class StrategyListServiceTest {
 
 
     @Test
-    @DisplayName("지정 페이지 조회")
+    @DisplayName("특정 페이지 조회")
     @Transactional
     @Rollback(false)
     public void getSelectedPageTest() {
@@ -198,12 +192,13 @@ public class StrategyListServiceTest {
         System.out.println("randomPage = " + randomPage);
 
         // 특정 페이지 가져오기
-        Page<Strategy> selectPage = strategyListService.findStrategyPage(randomPage);
+        // Page<Strategy> selectPage = strategyListService.findStrategyPage(randomPage);
+        Page<StrategyListDto> selectPage = strategyListService.findStrategyPage(randomPage);
         assertFalse(selectPage.isEmpty(), "선택한 페이지에 데이터 없음.");
         double maxProfitRate = selectPage.getContent().get(0).getAccumProfitRate();
 
         // 가져온 페이지도 수익률 순으로 정렬되어야 함
-        for (Strategy s : selectPage) {
+        for (StrategyListDto s : selectPage) {
             assertTrue(maxProfitRate >= s.getAccumProfitRate());
             System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
         }

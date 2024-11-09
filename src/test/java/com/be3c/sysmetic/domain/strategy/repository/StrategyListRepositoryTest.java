@@ -129,8 +129,8 @@ public class StrategyListRepositoryTest {
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .accumProfitRate(Math.random() * 100)
-                    .createdBy(Long.valueOf(randomStrategyNum))
-                    .modifiedBy(Long.valueOf(randomStrategyNum))
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -197,8 +197,8 @@ public class StrategyListRepositoryTest {
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .accumProfitRate(Math.random() * 100)
-                    .createdBy(Long.valueOf(randomStrategyNum))
-                    .modifiedBy(Long.valueOf(randomStrategyNum))
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
