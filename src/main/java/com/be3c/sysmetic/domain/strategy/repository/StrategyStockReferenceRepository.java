@@ -11,14 +11,10 @@ import java.util.Set;
 
 @Repository
 public interface StrategyStockReferenceRepository extends JpaRepository<StrategyStockReference, Long> {
-    List<StrategyStockReference> findByStrategyId(Long strategyId);
-
     @Query("SELECT sr.stock.id FROM StrategyStockReference sr WHERE sr.strategy.id = :strategyId")
     List<Long> findStockIdsByStrategyId(Long strategyId);
 
     void deleteByStrategyId(Long strategyId);
-
-    void deleteByStrategyIdAndStockId(Long strategyId, Long stockId);
 
     @Modifying
     @Query("DELETE FROM StrategyStockReference sr WHERE sr.strategy.id = :strategyId AND sr.stock.id IN :stockIds")

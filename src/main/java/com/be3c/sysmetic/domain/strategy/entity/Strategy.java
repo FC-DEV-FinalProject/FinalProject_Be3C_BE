@@ -39,7 +39,6 @@ public class Strategy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ManyToOne -> 연관관계 주인 - Member
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;

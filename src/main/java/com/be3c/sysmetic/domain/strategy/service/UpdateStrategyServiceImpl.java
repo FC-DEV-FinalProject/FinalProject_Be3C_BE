@@ -12,7 +12,6 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
-import jakarta.el.MethodNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,7 +74,7 @@ public class UpdateStrategyServiceImpl implements UpdateStrategyService {
 
     private void updateMethod(Long methodId, Strategy existingStrategy) {
         if(methodId != null) {
-            Method method = methodRepository.findById(methodId).orElseThrow(() -> new MethodNotFoundException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+            Method method = methodRepository.findById(methodId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
             existingStrategy.setMethod(method);
         }
     }
@@ -92,14 +91,14 @@ public class UpdateStrategyServiceImpl implements UpdateStrategyService {
     }
 
     @Transactional
-    private void updateStrategyStockReferences(Strategy strategy, List<Long> stockIdList) {
+    void updateStrategyStockReferences(Strategy strategy, List<Long> stockIdList) {
         List<Long> currentStockIdList = strategyStockReferenceRepository.findStockIdsByStrategyId(strategy.getId());
 
-        // currentStockIdList - stockIdList(request)
+        // currentStockIdList - stockIdList(request) 차집합 계산
         Set<Long> stockIdListToDelete = new HashSet<>(currentStockIdList);
         stockIdListToDelete.removeAll(stockIdList);
 
-        // stockIdList(request) - currentStockIdList
+        // stockIdList(request) - currentStockIdList 차집합 계산
         Set<Long> stockIdListToAdd = new HashSet<>(stockIdList);
         stockIdListToAdd.removeAll(currentStockIdList);
 
