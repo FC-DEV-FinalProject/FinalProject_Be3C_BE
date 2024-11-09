@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.exception;
 
+// strategy exception message
 public enum StrategyExceptionMessage {
     INVALID_VALUE("유효하지 않은 값입니다."),
     INVALID_PARAMETER("유효하지 않은 parameter입니다."),
