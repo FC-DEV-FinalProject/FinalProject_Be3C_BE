@@ -11,4 +11,5 @@ public class TraderListDto {
     private String nickname;
     private Long followerCount;
     // 프로필 사진
+    private Long searchCount;
 }
