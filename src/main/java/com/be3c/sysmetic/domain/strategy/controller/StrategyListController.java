@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
@@ -9,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,49 +29,44 @@ public class StrategyListController {
     // 전략 목록은 전략명, 종목명, 트레이더 닉네임, 트레이더 프로필 이미지, 누적수익률, MDD, SM Score, 팔로우 수, 팔로우 버튼이 표시된다.
     // 로그인 하지 않은 회원이 팔로우 버튼을 클릭하면, 회원가입 / 로그인 페이지로 이동한다.
     @GetMapping("/strategy/list")
-    public ResponseEntity<ApiResponse<Page<StrategyListDto>>> getStrategyList(
+    public ApiResponse<Page<StrategyListDto>> getStrategies(
             @RequestParam(defaultValue = "0") Integer pageNum) throws Exception {
         Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
 
         if (strategyList.isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다."));
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다.");
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(strategyList));
+        return ApiResponse.success(strategyList);
     }
 
     /*
-        searchByTrader : 트레이더 닉네임으로 검색
+        searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
-    @GetMapping("/strategy/search/{nickname}")
-    public ResponseEntity<ApiResponse<Page<TraderListDto>>> searchByTraderNickname(
+    @GetMapping("/strategy/trader/{nickname}")
+    public ApiResponse<Page<TraderListDto>> searchByTraderNickname(
             @PathVariable String nickname) throws Exception {
-        Page<TraderListDto> traderList = strategyListService.findByTrader(nickname);
+        Page<TraderListDto> traderList = strategyListService.findTraderNickname(nickname);
 
-        if (traderList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다."));
-        }
+        if (traderList.isEmpty())
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다.");
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(traderList));
+        return ApiResponse.success(traderList);
     }
 
+
     /*
-       getStrategyDetail : 전략 목록 -> 전략 상세 페이지
+        getStrategiesByTrader : 트레이더별 전략 목록
+        searchByTraderNickname 트레이더 검색 -> 한 명 선택 -> getStrategiesByTrader 트레이더의 전략 목록 보여줌
     */
-    // @GetMapping("/strategy/detail/{strategyId}")
-    // public ResponseEntity<ApiResponse<StrategyDetailDto>> getStrategyDetail(
-    //         @RequestParam Long strategyId) throws Exception {
-    //     StrategyDetailDto strategyDetailDto = strategyListService.getStrategyDetailById(strategyId);
-    //
-    //     if (ObjectUtils.isEmpty(strategyDetailDto)) {
-    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-    //                 .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-    //     }
-    //
-    //     return ResponseEntity.status(HttpStatus.OK)
-    //             .body(ApiResponse.success(strategyDetailDto));
-    // }
+    @GetMapping("/strategy/trader/{traderId}")
+    public ApiResponse<Page<StrategyListByTraderDto>> getStrategiesByTrader(
+            @PathVariable Long traderId, @RequestParam(defaultValue = "0") Integer pageNum) {
+
+        Page<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
+
+        if (strategyListByTrader.isEmpty())
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, "해당 트레이더의 등록된 전략이 없습니다.");
+
+        return ApiResponse.success(strategyListByTrader);
+    }
 }

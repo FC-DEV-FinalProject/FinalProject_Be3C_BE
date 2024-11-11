@@ -1,6 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
+import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 
 @Service
 @Transactional
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StrategyListServiceImpl implements StrategyListService {
 
     private final StrategyListRepository strategyListRepository;
+    private final MemberRepository memberRepository;
 
     /*
     getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
@@ -54,10 +59,10 @@ public class StrategyListServiceImpl implements StrategyListService {
 
 
     /*
-        findByTrader : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
+        findByTraderNickname : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
     */
     @Override
-    public Page<TraderListDto> findByTrader(String nickname) {
+    public Page<TraderListDto> findTraderNickname(String nickname) {
         int pageNum = 0, pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));
 
@@ -65,6 +70,35 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .map(strategy -> new TraderListDto(
                         strategy.getTrader().getId(),
                         strategy.getTrader().getNickname(),
+                        strategy.getFollowerCount(),
+                        // 총 검색 결과 수
+                        strategyListRepository.countByTraderNicknameContaining(nickname)
+                ));
+    }
+
+    /*
+        findStrategiesByTrader : 트레이더 별 전략 목록 - 전략 목록 내에서는 똑같이 수익률순 내림차순
+    */
+    @Override
+    public Page<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
+
+        // 트레이더 조회
+        Member trader = memberRepository.findById(traderId)
+                .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
+
+        return strategyListRepository.findByTrader(trader, pageable)
+                .map(strategy -> new StrategyListByTraderDto(
+                        strategy.getTrader().getNickname(),
+                        strategy.getId(),
+                        strategy.getMethod().getId(),
+                        strategy.getCycle(),
+                        strategy.getName(),
+                        strategy.getMdd(),
+                        strategy.getSmScore(),
+                        strategy.getAccumProfitRate(),
                         strategy.getFollowerCount()
                 ));
     }

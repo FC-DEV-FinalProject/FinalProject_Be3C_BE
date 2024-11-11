@@ -2,7 +2,6 @@ package com.be3c.sysmetic.domain.strategy.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
