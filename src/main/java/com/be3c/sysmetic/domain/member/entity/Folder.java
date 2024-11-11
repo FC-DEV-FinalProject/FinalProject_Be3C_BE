@@ -46,15 +46,3 @@ public class Folder extends BaseEntity {
 }
 
 
-@Embeddable
-@EqualsAndHashCode
-@NoArgsConstructor
-@AllArgsConstructor
-class FolderId implements Serializable {
-
-    @Column(name = "member_id")
-    private Long memberId;
-
-    @Column(name = "folder_id")
-    private Long folderId;
-}
