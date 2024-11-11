@@ -76,6 +76,18 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         )
                 );
 
+        Folder folder = folderRepository
+                .findByIdAndStatusCode(
+                        new FolderId(followPostRequestDto.getFolderId(),userId),
+                        Code.USING_STATE.getCode())
+                .orElseThrow(
+                        () -> new EntityNotFoundException("폴더 아이디를 제대로 입력해주세요.")
+                );
+
+        if(!folder.getMember().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+        }
+
         if(interestStrategy.isEmpty()) {
             interestStrategyRepository.save(
                     InterestStrategy.builder()
@@ -84,13 +96,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                             followPostRequestDto.getFolderId(),
                             followPostRequestDto.getStrategyId()
                     ))
-                    .folder(folderRepository
-                            .findByIdAndStatusCode(
-                                    new FolderId(followPostRequestDto.getFolderId(),userId),
-                                    Code.USING_STATE.getCode())
-                            .orElseThrow(
-                                    () -> new EntityNotFoundException("폴더 아이디를 제대로 입력해주세요.")
-                            ))
+                    .folder(folder)
                     .strategy(strategyRepository
                             .findById(
                                     followPostRequestDto.getStrategyId()
