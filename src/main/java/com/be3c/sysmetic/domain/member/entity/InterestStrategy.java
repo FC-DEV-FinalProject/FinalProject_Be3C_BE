@@ -5,8 +5,6 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @ToString
@@ -18,7 +16,12 @@ import java.io.Serializable;
 public class InterestStrategy extends BaseEntity {
 
     @EmbeddedId
-    private FollowStrategyId id;
+    private InterestStrategyId id;
+
+    @MapsId("memberId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @MapsId("folderId")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,17 +37,3 @@ public class InterestStrategy extends BaseEntity {
     private String StatusCode;
 }
 
-@Embeddable
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-class FollowStrategyId implements Serializable {
-
-    @Column(name = "folder_id", nullable = false)
-    private Long folderId;
-
-    @Column(name = "strategy_id", nullable = false)
-    private Long strategyId;
-}
