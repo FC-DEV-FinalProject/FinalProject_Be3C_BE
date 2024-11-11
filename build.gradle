@@ -19,6 +19,10 @@ configurations {
 	}
 }
 
+ext {
+	awsSdkVersion = '2.27.21'
+}
+
 repositories {
 	mavenCentral()
 }
@@ -39,6 +43,10 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// MapStruct
+	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+
 	// DevTools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -55,6 +63,15 @@ dependencies {
 
 	// Spring Cloud for AWS
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.2.1'
+
+	// AWS
+	implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}") // SDK 버전 관리
+	implementation 'software.amazon.awssdk:s3'
+
+	implementation 'software.amazon.awssdk:apache-client'
+
+	implementation 'software.amazon.awssdk:sso'
+	implementation 'software.amazon.awssdk:ssooidc'
 
 	// Thumbnailator
 	implementation 'net.coobird:thumbnailator:0.4.16'
