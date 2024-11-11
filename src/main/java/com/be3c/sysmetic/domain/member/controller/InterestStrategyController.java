@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.CustomUserDetails;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @Slf4j
@@ -76,6 +78,16 @@ public class InterestStrategyController {
         } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
+        } catch (IllegalArgumentException |
+                 EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
+
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
+
 }
