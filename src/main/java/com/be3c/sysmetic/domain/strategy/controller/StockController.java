@@ -40,7 +40,7 @@ public class StockController {
     /*
         종목명 중복 검사 메서드
      */
-//    @PreAuthorize(("hasRole('ADMIN')"))
+//    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("admin/stock/availability")
     public ResponseEntity<ApiResponse<String>> getCheckName(
         @RequestParam String name
@@ -56,7 +56,7 @@ public class StockController {
     /*
         아이디로 종목 찾기
      */
-    //@PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id:\\d+}")
     public ResponseEntity<ApiResponse<StockGetResponseDto>> getitem(
             @PathVariable Long id
@@ -83,7 +83,7 @@ public class StockController {
         종목 관리 - 종목 페이지 표시.
         RequestParam - page
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock")
     public ResponseEntity<ApiResponse<Page<Stock>>> getStockPage(
     //나중에 따로 Dto 생성해야함!
@@ -106,7 +106,7 @@ public class StockController {
     /*
         종목 저장하기
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<ApiResponse<Integer>> saveitem(
             @RequestBody StockPutRequestDto stockRequestDto
@@ -128,7 +128,7 @@ public class StockController {
     /*
         종목 수정하기
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> updateItem(
             @RequestBody StockPutRequestDto stockPutRequestDto
@@ -147,7 +147,7 @@ public class StockController {
         }
     }
 
-    // @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<ApiResponse<String>> deleteItem(
             @PathVariable Long id
@@ -165,21 +165,4 @@ public class StockController {
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
-
-//    private Long getUserIdInSecurityContext() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new AuthenticationCredentialsNotFoundException("인증되지 않은 사용자입니다.");
-//        }
-//
-//        Object principal = authentication.getPrincipal();
-//
-//        // principal이 UserDetails의 인스턴스인지 확인
-//        if (principal instanceof CustomUserDetails customUserDetails) {
-//            return customUserDetails.getUserId();
-//        }
-//
-//        throw new AuthenticationCredentialsNotFoundException("사용자 정보를 찾을 수 없습니다.");
-//    }
-
 }
