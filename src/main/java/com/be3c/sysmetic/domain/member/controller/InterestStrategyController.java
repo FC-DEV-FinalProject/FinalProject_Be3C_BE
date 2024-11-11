@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto;
+import com.be3c.sysmetic.domain.member.dto.FollowDeleteRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
 import com.be3c.sysmetic.domain.member.service.InterestStrategyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -20,10 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
@@ -87,7 +85,4 @@ public class InterestStrategyController {
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
-
-    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-
 }
