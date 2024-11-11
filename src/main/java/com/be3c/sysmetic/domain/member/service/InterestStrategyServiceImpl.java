@@ -3,12 +3,11 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto;
 import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
-import com.be3c.sysmetic.domain.member.entity.FolderId;
-import com.be3c.sysmetic.domain.member.entity.InterestStrategyId;
-import com.be3c.sysmetic.domain.member.entity.InterestStrategy;
+import com.be3c.sysmetic.domain.member.entity.*;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyLogRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
-import com.be3c.sysmetic.domain.strategy.service.StrategyService;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +31,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final InterestStrategyRepository interestStrategyRepository;
 
+    private final InterestStrategyLogRepository interestStrategyLogRepository;
+
     private final FolderRepository folderRepository;
 
-    private final StrategyService strategyService;
+    private final StrategyRepository strategyRepository;
 
     @Override
     public Page<FolderGetResponseDto> getInterestStrategyPage(
@@ -90,13 +91,47 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                             .orElseThrow(
                                     () -> new EntityNotFoundException("폴더 아이디를 제대로 입력해주세요.")
                             ))
-                    .strategy()
+                    .strategy(strategyRepository
+                            .findById(
+                                    followPostRequestDto.getStrategyId()
+                            ).orElseThrow(
+                                    () -> new EntityNotFoundException("해당 전략이 없습니다.")
+                            )
+                    )
                     .build()
             );
 
+            interestStrategyLogRepository.save(
+                    InterestStrategyLog.builder()
+                            .interestStrategyLogId(
+                                    new InterestStrategyLogId(
+                                            userId,
+                                            followPostRequestDto.getFolderId(),
+                                            followPostRequestDto.getStrategyId()
+                                    )
+                            )
+                            .build()
+            );
 
+            return true;
+        } else if(interestStrategy.get().getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
+            interestStrategy.get().setStatusCode(Code.USING_STATE.getCode());
+
+            interestStrategyLogRepository.save(
+                    InterestStrategyLog.builder()
+                            .interestStrategyLogId(
+                                    new InterestStrategyLogId(
+                                            userId,
+                                            followPostRequestDto.getFolderId(),
+                                            followPostRequestDto.getStrategyId()
+                                    )
+                            )
+                            .build()
+            );
+
+            return true;
         }
 
-        return false;
+        throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 }
