@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -38,6 +40,23 @@ public class StrategyListController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(strategyList));
+    }
+
+    /*
+        searchByTrader : 트레이더 닉네임으로 검색
+    */
+    @GetMapping("/strategy/search/{nickname}")
+    public ResponseEntity<ApiResponse<Page<TraderListDto>>> searchByTraderNickname(
+            @PathVariable String nickname) throws Exception {
+        Page<TraderListDto> traderList = strategyListService.findByTrader(nickname);
+
+        if (traderList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다."));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(traderList));
     }
 
     /*

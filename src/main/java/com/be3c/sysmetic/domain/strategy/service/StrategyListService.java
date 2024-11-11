@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import org.springframework.data.domain.Page;
 
 public interface StrategyListService {
@@ -12,4 +13,7 @@ public interface StrategyListService {
     Page<StrategyListDto> findStrategyPage(Integer pageNum);
 
     // StrategyDetailDto getStrategyDetailById(Long strategyId);
+
+    // findByTraderNickname :
+    Page<TraderListDto> findByTrader(String nickname);
 }

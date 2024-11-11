@@ -24,7 +24,7 @@ public class Strategy {
         modifiedDate = now;
         strategyCreatedDate = now;
         strategyModifiedDate = now;
-        followerCount = 0L;
+        // followerCount = 0L;
         kpRatio = 0.0;
         smScore = 0.0;
         mdd = 0.0;
@@ -42,11 +42,11 @@ public class Strategy {
     private Long id;
 
     // ManyToOne -> 연관관계 주인 - Member
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @ManyToOne      // Unique 제약 조건 생겨서 @OneToOne -> @ManyToOne으로 변경
+    @ManyToOne(fetch = FetchType.LAZY)      // Unique 제약 조건 생겨서 @OneToOne -> @ManyToOne으로 변경
     @JoinColumn(name = "method_id", unique = false, nullable = false)
     private Method method;
 

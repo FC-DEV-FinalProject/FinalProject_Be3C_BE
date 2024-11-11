@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class StrategyListServiceImpl implements StrategyListService {
     */
     @Override
     public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
-        Pageable pageable = PageRequest.of(pageNum, 10, Sort.by(Sort.Order.desc("accumProfitRate")));
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
         String statusCode = "ST001"; // 공개중인 전략
 
         return strategyListRepository.findAllByStatusCode(statusCode, pageable)
@@ -51,8 +53,19 @@ public class StrategyListServiceImpl implements StrategyListService {
     }
 
 
-    // @Override
-    // public StrategyDetailDto getStrategyDetailById(Long strategyId) {
-    //
-    // }
+    /*
+        findByTrader : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
+    */
+    @Override
+    public Page<TraderListDto> findByTrader(String nickname) {
+        int pageNum = 0, pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));
+
+        return strategyListRepository.findByTraderNicknameContaining(nickname, pageable)
+                .map(strategy -> new TraderListDto(
+                        strategy.getTrader().getId(),
+                        strategy.getTrader().getNickname(),
+                        strategy.getFollowerCount()
+                ));
+    }
 }

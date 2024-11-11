@@ -17,8 +17,11 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
     // 특정 statusCode에 따른 전체 전략 수 조회
     Long countByStatusCode(String statusCode);
 
-    default Pageable getPageable(Integer pageNum) {
+    // 닉네임으로 트레이더 조회, 일차한 닉네임, 팔로우 수 정렬
+    Page<Strategy> findByTraderNicknameContaining(String nickname, Pageable pageable);
+
+    default Pageable getPageable(Integer pageNum, String property) {
         int pageSize = 10;
-        return PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
+        return PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc(property)));
     }
 }

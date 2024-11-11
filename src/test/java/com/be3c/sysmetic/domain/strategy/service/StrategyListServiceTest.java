@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
@@ -48,7 +49,7 @@ public class StrategyListServiceTest {
                 .executeUpdate();
         // strategyListRepository 데이터 모두 삭제
         strategyListRepository.deleteAll();
-        saveMember();
+        saveMember("홍길동");
         saveMethod();
     }
 
@@ -75,6 +76,7 @@ public class StrategyListServiceTest {
                     .cycle('P')
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) (Math.random() * 100))
                     .accumProfitRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
@@ -131,6 +133,7 @@ public class StrategyListServiceTest {
                     .cycle('P')
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) (Math.random() * 100))
                     .accumProfitRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
@@ -160,7 +163,7 @@ public class StrategyListServiceTest {
         assertTrue(strategyListRepository.findAll().isEmpty());
 
         // 전략 수 난수는 [1, 100]
-        int randomStrategyNum = (int) (Math.random() * 10 + 1) * 10;        // 10의 배수만
+        int randomStrategyNum = (int) (Math.random() * 100 + 1);
         // int randomStrategyNum = 9;
         System.out.println("randomStrategyNum = " + randomStrategyNum);
 
@@ -174,6 +177,7 @@ public class StrategyListServiceTest {
                     .cycle('P')
                     .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) (Math.random() * 100))
                     .accumProfitRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
@@ -192,7 +196,6 @@ public class StrategyListServiceTest {
         System.out.println("randomPage = " + randomPage);
 
         // 특정 페이지 가져오기
-        // Page<Strategy> selectPage = strategyListService.findStrategyPage(randomPage);
         Page<StrategyListDto> selectPage = strategyListService.findStrategyPage(randomPage);
         assertFalse(selectPage.isEmpty(), "선택한 페이지에 데이터 없음.");
         double maxProfitRate = selectPage.getContent().get(0).getAccumProfitRate();
@@ -204,14 +207,123 @@ public class StrategyListServiceTest {
         }
     }
 
-    void saveMember() {
+
+    @Test
+    @DisplayName("전략 목록 전체 페이지 조회")
+    @Transactional
+    @Rollback(false)
+    public void getAllStrategyPages() {
+        // before : 현재 데이터베이스 비우기
+        strategyListRepository.deleteAll();
+        assertTrue(strategyListRepository.findAll().isEmpty());
+
+        // 전략 수 난수는 [1, 100]
+        int randomStrategyNum = (int) (Math.random() * 100 + 1);
+        // int randomStrategyNum = 9;
+        System.out.println("randomStrategyNum = " + randomStrategyNum);
+
+        // 난수만큼 순차적으로 전략 생성
+        for (int i = 0; i < randomStrategyNum; i++) {
+            Strategy s = Strategy.builder()
+                    .trader(getTrader())
+                    .method(getMethod())
+                    .statusCode("ST001")
+                    .name("전략" + (i + 1))
+                    .cycle('P')
+                    .minOperationAmount(100.0)
+                    .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) (Math.random() * 100))
+                    .accumProfitRate(Math.random() * 100)
+                    .createdBy((long) randomStrategyNum)
+                    .modifiedBy((long) randomStrategyNum)
+                    .build();
+
+            // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
+            em.persist(s);
+            em.flush();
+            em.clear();
+        }
+
+        // 전체 페이지 계산
+        int expectedTotalPage = (int) Math.ceil(randomStrategyNum / 10.0);
+        int actualTotalPage = strategyListService.getTotalPageNumber("ST001", 10);
+        assertEquals(expectedTotalPage, actualTotalPage);
+
+        for (int i=0; i < actualTotalPage; i++) {
+            Page<StrategyListDto> page = strategyListService.findStrategyPage(i);
+            assertNotNull(page);
+            assertTrue(page.hasContent());
+
+            for (int j=0; j < page.getContent().size(); j++) {
+                assertTrue(page.getContent().get(0).getAccumProfitRate() >= page.getContent().get(j).getAccumProfitRate());
+                System.out.println("AccumProfitRate = " + page.getContent().get(j).getAccumProfitRate());
+            }
+            System.out.println("=====================");
+        }
+    }
+
+
+    @Test
+    @DisplayName("트레이더 닉네임으로 검색")
+    @Transactional
+    @Rollback(false)
+    public void findByTraderNickname() {
+        // before : 현재 데이터베이스 비우기
+        strategyListRepository.deleteAll();
+        assertTrue(strategyListRepository.findAll().isEmpty());
+
+        // 전략 수 난수는 [1, 100]
+        int randomStrategyNum = (int) (Math.random() * 100 + 1);
+        // int randomStrategyNum = 9;
+        System.out.println("randomStrategyNum = " + randomStrategyNum);
+
+        // 트레이더 저장
+        saveMember("여의도");
+        saveMember("여의도전략가");
+
+        // 트레이더 수만큼 전략 생성 후 저장
+        for (int i=0; i < randomStrategyNum; i++) {
+            Strategy s = Strategy.builder()
+                    .trader(i % 2 == 0 ? getTrader("여의도") : getTrader("여의도전략가"))
+                    .method(getMethod())
+                    .statusCode("ST001")
+                    .name("전략" + (i+1))
+                    .cycle('P')
+                    .minOperationAmount(100.0)
+                    .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) (Math.random() * 100))
+                    .accumProfitRate(Math.random() * 100)
+                    .createdBy(1L)
+                    .modifiedBy(1L)
+                    .build();
+            em.persist(s);
+            em.flush();
+            em.clear();
+        }
+
+        // 페이지 하나
+        Page<TraderListDto> page = strategyListService.findByTrader("여의도");
+        assertNotNull(page);
+        assertTrue(page.hasContent());
+        assertEquals(page.getSize(), 10);
+        long maxFollowerCount = page.getContent().get(0).getFollowerCount();
+
+        for (TraderListDto t : page) {
+            assertTrue(t.getNickname().contains("여의도"));
+            assertTrue(t.getFollowerCount() <= maxFollowerCount);
+            System.out.println("id = " + t.getTraderId() + ", followerCount() = " + t.getFollowerCount());
+        }
+    }
+
+
+    void saveMember(String nickname) {
         // Member trader 생성
         Member trader = Member.builder()
                 .roleCode("trader")
                 .email("trader1@gmail.com")
                 .password("1234")
-                .name("홍길동")
-                .nickname("gildong")
+                .name("김이박")
+                .nickname(nickname)
                 .phoneNumber("01012341234")
                 .usingStatusCode("using status code")
                 .totalFollow(0)
@@ -243,6 +355,11 @@ public class StrategyListServiceTest {
     Member getTrader() {
         return memberRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new NoSuchElementException("트레이더가 없습니다."));
+    }
+
+    Member getTrader(String nickname) {
+        return memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 없습니다."));
     }
 
     Method getMethod(){
