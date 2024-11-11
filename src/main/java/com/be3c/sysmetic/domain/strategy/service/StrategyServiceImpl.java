@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
+//@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
+@RequiredArgsConstructor
 @Service
 public class StrategyServiceImpl implements StrategyService {
 

@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
     boolean existsByName(String name); // 전략명 중복 확인
+
+    // 임시
+    Strategy findOne(Long id);
 }
