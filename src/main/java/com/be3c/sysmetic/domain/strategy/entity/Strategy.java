@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Digits;
 import lombok.*;
 
 import java.time.LocalDateTime;
