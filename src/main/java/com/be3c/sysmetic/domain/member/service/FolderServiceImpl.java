@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
+import com.be3c.sysmetic.domain.member.entity.FolderId;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
@@ -86,18 +87,20 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public boolean updateFolder(FolderPutRequestDto folderPutRequestDto, Long id) {
-        if(duplCheck(id, folderPutRequestDto.getFolderName())) {
+    public boolean updateFolder(FolderPutRequestDto folderPutRequestDto, Long userId) {
+        if(duplCheck(userId, folderPutRequestDto.getFolderName())) {
             throw new IllegalArgumentException("이미 존재하는 폴더명입니다.");
         }
 
+        FolderId folderId = new FolderId(userId, folderPutRequestDto.getFolderId());
+
         Folder folder = folderRepository
                 .findByIdAndStatusCode(
-                        folderPutRequestDto.getFolderId(),
+                        folderId,
                         Code.USING_STATE.getCode()
                 ).orElseThrow(() -> new EntityNotFoundException("해당 폴더가 없습니다."));
 
-        if(!folder.getMember().getId().equals(id)) {
+        if(!folder.getMember().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
         }
 
