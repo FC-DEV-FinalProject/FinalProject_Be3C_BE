@@ -115,4 +115,61 @@ public class FileServiceImpl implements FileService{
 
      */
 
+
+    @Override
+    public String getFilePath(FileRequestDto fileRequestDto) {
+        List<File> files = fileRepository.findFilesByFileReference(fileRequestDto);
+        File file = files.get(0);
+        // size 2 이상일 시 로깅하기
+
+
+
+
+        return s3Service.createPresignedGetUrl(file.getPath());
+    }
+
+
+
+
+    @Override
+    public Map<Long, FileResponseDto> getFileResponseByReferenceId(FileRequestDto fileRequestDto) {
+        List<File> files = fileRepository.findFilesByFileReference(fileRequestDto);
+
+
+        Map<Long, FileResponseDto> map = new HashMap<>();
+        for(File f : files){
+            String url = s3Service.createPresignedGetUrl(f.getPath());
+            FileResponseDto fileResponseDto = new FileResponseDto(f.getReferenceId(), url, f.getOriginalName());
+            map.put(f.getReferenceId(), fileResponseDto);
+        }
+
+
+
+
+        return map;
+    }
+
+
+//    @Transactional
+//    @Override
+//    public List<FileResponseDto> getFileResponse(FileRequestDto fileRequestDto) {
+//        List<File> files = fileRepository.findFilesByFileReference(fileRequestDto);
+//        List<FileResponseDto> lists = new ArrayList<>();
+//
+//        for(File f : files){
+//            String url = s3Service.createPresignedGetUrl(f.getPath());
+//            FileResponseDto fileResponseDto = new FileResponseDto(f.getReferenceId(), url, f.getOriginalName());
+//            lists.add(fileResponseDto);
+//        }
+//
+//        return lists;
+//    }
+
+
+  /*
+  download
+  ------------------------------------------------------------------------------
+  file info
+   */
+
 }

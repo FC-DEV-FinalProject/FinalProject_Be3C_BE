@@ -16,4 +16,13 @@ public interface FileService {
     String uploadImage(MultipartFile file, FileRequestDto fileRequestDto);
     String uploadPdf(MultipartFile file, FileRequestDto fileRequestDto);
     String uploadAnyFile(MultipartFile file, FileRequestDto fileRequestDto);
+
+    /**
+     * 다운로드 공통 사항 : presignedUrl 제공
+     * @param fileRequestDto ReferenceType(참조 테이블명)과 ReferenceId(참조 id) 입력
+     */
+    public String getFilePath(FileRequestDto fileRequestDto);
+    public Map<Long, FileResponseDto> getFileResponseByReferenceId(FileRequestDto fileRequestDto);
+//    public List<FileResponseDto> getFileResponse(FileRequestDto fileRequestDto);
+
 }

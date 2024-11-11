@@ -83,5 +83,29 @@ public class S3Service {
     }
 
 
+    /**
+     * Create a pre-signed URL to download an object in a subsequent GET request
+     * @param keyName S3에 저장된 key
+     * @return presignedGetURL
+     */
+    public String createPresignedGetUrl(String keyName) {
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))  // URL duration
+                .getObjectRequest(objectRequest)
+                .build();
+
+        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
+//            logger.info("Presigned URL: [{}]", presignedRequest.url().toString());
+//            logger.info("HTTP method: [{}]", presignedRequest.httpRequest().method());
+        System.out.println("Presigned URL: [{}]"+ presignedRequest.url().toString());
+        System.out.println("HTTP method: [{}]" + presignedRequest.httpRequest().method());
+
+        return presignedRequest.url().toExternalForm();
+    }
 
 }

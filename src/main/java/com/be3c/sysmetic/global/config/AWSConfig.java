@@ -37,4 +37,13 @@ public class AWSConfig {
                 .build();
     }
 
+    @Bean
+    public S3Presigner s3Presigner(){
+        return S3Presigner.builder()
+                .region(region)
+                .credentialsProvider(awsCredentialsProvider())
+//                .credentialsProvider(DefaultCredentialsProvider.create()) // 자동 검색!! -> EC2 전환 시 사용
+                .build();
+    }
+
 }
