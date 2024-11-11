@@ -14,4 +14,5 @@ public interface InterestStrategyService {
     Page<FolderGetResponseDto> getInterestStrategyPage(FolderGetRequestDto folderGetRequestDto, Long userId) throws HttpStatusCodeException;
 
     boolean follow(FollowPostRequestDto followPostRequestDto, Long userId);
+    boolean unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId);
 }

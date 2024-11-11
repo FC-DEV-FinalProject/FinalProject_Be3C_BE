@@ -85,4 +85,32 @@ public class InterestStrategyController {
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
+
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
+    @DeleteMapping("/strategy/follow")
+    public ResponseEntity<ApiResponse<String>> unfollow(
+            @RequestBody FollowDeleteRequestDto followPostRequestDto
+    ) throws Exception {
+        try {
+            if(interestStrategyService.unfollow(
+                    followPostRequestDto,
+                    securityUtils.getUserIdInSecurityContext()
+            )) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
+        } catch (IllegalArgumentException |
+                 EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        }
+    }
 }

@@ -114,18 +114,50 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                     .build()
             );
 
-            followStrategyLog(interestStrategyLogId);
+            followStrategyLog(interestStrategyLogId, Code.FOLLOW.getCode());
 
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
             interestStrategy.get().setStatusCode(Code.USING_STATE.getCode());
 
-            followStrategyLog(interestStrategyLogId);
+            followStrategyLog(interestStrategyLogId, Code.FOLLOW.getCode());
 
             return true;
         }
 
         throw new IllegalArgumentException("잘못된 요청입니다.");
+    }
+
+    @Override
+    public boolean unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId) {
+        if(followDeleteRequestDto.getStrategyId() == null || followDeleteRequestDto.getFolderId() == null) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        }
+
+        InterestStrategyLogId interestStrategyLogId = new InterestStrategyLogId(
+                userId,
+                followDeleteRequestDto.getFolderId(),
+                followDeleteRequestDto.getStrategyId()
+        );
+
+        InterestStrategy interestStrategy = interestStrategyRepository.findById(
+                new InterestStrategyId(
+                        userId,
+                        followDeleteRequestDto.getFolderId(),
+                        followDeleteRequestDto.getStrategyId()
+                )
+        ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 팔로우 중이 아닙니다."));
+
+        if(interestStrategy.getStatusCode().equals(Code.FOLLOW.getCode())) {
+            throw new IllegalArgumentException("해당 전략을 팔로우 중이 아닙니다.");
+        }
+
+        interestStrategy.setStatusCode(Code.UNFOLLOW.getCode());
+
+        interestStrategyRepository.save(interestStrategy);
+        followStrategyLog(interestStrategyLogId, Code.UNFOLLOW.getCode());
+
+        return true;
     }
 
     private boolean followStrategy(InterestStrategyId interestStrategyId, Folder folder, Long userId) {
@@ -146,12 +178,13 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         return true;
     }
 
-    private boolean followStrategyLog(InterestStrategyLogId interestStrategyLogId) {
+    private boolean followStrategyLog(InterestStrategyLogId interestStrategyLogId, String LogCode) {
         interestStrategyLogRepository.save(
                 InterestStrategyLog.builder()
                         .interestStrategyLogId(
                                 interestStrategyLogId
                         )
+                        .LogCode(LogCode)
                         .build()
         );
 
