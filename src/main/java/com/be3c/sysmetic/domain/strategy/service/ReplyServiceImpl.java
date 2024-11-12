@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Reply;
@@ -9,12 +10,17 @@ import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.ReplyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +38,31 @@ public class ReplyServiceImpl implements ReplyService{
     private final ReplyRepository replyRepository;
 
     private final StrategyRepository strategyRepository;
+
+    @Override
+    public PageResponseDto<PageReplyResponseDto> getReplyPage(Integer page) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        Pageable pageable = PageRequest.of(
+                page,
+                10,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<PageReplyResponseDto> findReplyPage = replyRepository
+                .findPageByMemberIdAndStatusCode(
+                        userId,
+                        Code.USING_STATE.getCode(),
+                        pageable
+                );
+
+        return PageResponseDto.<PageReplyResponseDto>builder()
+                .totalItemCount(findReplyPage.getTotalElements())
+                .totalPageCount(findReplyPage.getTotalPages())
+                .currentPage(page)
+                .list(findReplyPage.getContent())
+                .build();
+    }
 
     @Override
     public boolean insertReply(ReplyPostRequestDto replyPostRequestDto) {
