@@ -102,12 +102,13 @@ public class MethodController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
