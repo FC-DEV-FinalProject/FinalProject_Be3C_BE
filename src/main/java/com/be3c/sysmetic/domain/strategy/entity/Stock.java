@@ -3,7 +3,7 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.DynamicInsert;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +26,7 @@ public class Stock extends BaseEntity {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
-    @Column(name = "code", nullable = false)
+    @Column(name = "code")
     private String code;
 
     @Column(name = "country")
@@ -41,6 +41,7 @@ public class Stock extends BaseEntity {
     @Column(name = "delisted_date")
     private LocalDateTime delistedDate;
 
+    @CreatedDate
     @Column(name = "stock_created_date", nullable = false)
     private LocalDateTime stockCreatedDate;
 
