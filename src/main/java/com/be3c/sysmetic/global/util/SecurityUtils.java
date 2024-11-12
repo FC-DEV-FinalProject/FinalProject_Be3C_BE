@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.global.util;
 
+import com.be3c.sysmetic.global.config.security.CustomUserDetails;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +19,7 @@ public class SecurityUtils {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUserId();
+            return customUserDetails.getMemberId();
         }
 
         throw new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다.");
