@@ -38,23 +38,23 @@ public class InquiryService {
     }
 
     // 문의 전체 조회
-    public List<Inquiry> findAllInquiries() {
-        return inquiryRepository.findAll();
+    public List<Inquiry> findAllInquiries(int offset, int limit) {
+        return inquiryRepository.findAll(offset, limit);
     }
 
     // 상태별 문의 조회
-    public List<Inquiry> findStatusInquires(InquiryStatus inquiryStatus) {
-        return inquiryRepository.findByInquiryStatus(inquiryStatus);
+    public List<Inquiry> findStatusInquires(InquiryStatus inquiryStatus, int offset, int limit) {
+        return inquiryRepository.findByInquiryStatus(inquiryStatus, offset, limit);
     }
 
     // 내(회원별) 문의 조회
-    public List<Inquiry> findMemberInquiries(Long memberId) {
-        return inquiryRepository.findByMemberId(memberId);
+    public List<Inquiry> findMemberInquiries(Long memberId, int offset, int limit) {
+        return inquiryRepository.findByMemberId(memberId, offset, limit);
     }
 
     // 내(회원별) 상태별 문의 조회
-    public List<Inquiry> findMemberStatusInquires(Long memberId, InquiryStatus inquiryStatus) {
-        return inquiryRepository.findByMemberIdAndInquiryStatus(memberId, inquiryStatus);
+    public List<Inquiry> findMemberStatusInquires(Long memberId, InquiryStatus inquiryStatus, int offset, int limit) {
+        return inquiryRepository.findByMemberIdAndInquiryStatus(memberId, inquiryStatus, offset, limit);
     }
 
     // 등록
@@ -100,6 +100,4 @@ public class InquiryService {
     public List<Inquiry> findInquiresByStrategyQuestionerTrader(InquirySearch inquirySearch) {
         return inquiryRepository.dynamicQueryWithBooleanBuilder(inquirySearch);
     }
-
-    // 페이지네이션
 }

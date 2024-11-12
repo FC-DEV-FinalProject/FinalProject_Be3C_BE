@@ -31,28 +31,60 @@ public class InquiryRepository {
         return em.find(Inquiry.class, id);
     }
 
-    public List<Inquiry> findAll() {
+    public List<Inquiry> findAll(int offset, int limit) {
         return em.createQuery("select i from Inquiry i order by i.inquiryRegistrationDate desc", Inquiry.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
-    public List<Inquiry> findByInquiryStatus(InquiryStatus inquiryStatus) {
+    public long totalCountAll() {
+        return em.createQuery("select count(i) from Inquiry i", Long.class)
+                .getSingleResult();
+    }
+
+    public List<Inquiry> findByInquiryStatus(InquiryStatus inquiryStatus, int offset, int limit) {
         return em.createQuery("select i from Inquiry i where i.inquiryStatus = :inquiryStatus order by i.inquiryRegistrationDate desc", Inquiry.class)
                 .setParameter("inquiryStatus", inquiryStatus)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
-    public List<Inquiry> findByMemberId(Long memberId) {
+    public long totalCountInquiryStatus(InquiryStatus inquiryStatus) {
+        return em.createQuery("select count(i) from Inquiry i where i.inquiryStatus = :inquiryStatus", Long.class)
+                .setParameter("inquiryStatus", inquiryStatus)
+                .getSingleResult();
+    }
+
+    public List<Inquiry> findByMemberId(Long memberId, int offset, int limit) {
         return em.createQuery("select i from Inquiry i where i.member.id = :memberId order by i.inquiryRegistrationDate desc", Inquiry.class)
                 .setParameter("memberId", memberId)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
-    public List<Inquiry> findByMemberIdAndInquiryStatus(Long memberId, InquiryStatus inquiryStatus) {
+    public long totalCountMemberId(Long memberId) {
+        return em.createQuery("select count(i) from Inquiry i where i.member.id = :memberId", Long.class)
+                .setParameter("memberId", memberId)
+                .getSingleResult();
+    }
+
+    public List<Inquiry> findByMemberIdAndInquiryStatus(Long memberId, InquiryStatus inquiryStatus, int offset, int limit) {
         return em.createQuery("select i from Inquiry i where i.member.id = :memberId and i.inquiryStatus = :inquiryStatus order by i.inquiryRegistrationDate desc", Inquiry.class)
                 .setParameter("memberId", memberId)
                 .setParameter("inquiryStatus", inquiryStatus)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
+    }
+
+    public long totalCountMemberIdAndInquiryStatus(Long memberId, InquiryStatus inquiryStatus) {
+        return em.createQuery("select count(i) from Inquiry i where i.member.id = :memberId and i.inquiryStatus = :inquiryStatus", Long.class)
+                .setParameter("memberId", memberId)
+                .setParameter("inquiryStatus", inquiryStatus)
+                .getSingleResult();
     }
 
     public void deleteInquiry(Inquiry inquiry) {

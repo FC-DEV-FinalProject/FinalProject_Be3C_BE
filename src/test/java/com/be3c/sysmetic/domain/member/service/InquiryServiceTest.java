@@ -53,95 +53,154 @@ public class InquiryServiceTest {
     public void 전체_조회() throws Exception {
         //given
         Strategy strategy = createStrategy();
-        Member member = createMember();
+        Member member1 = createMember();
+        Member member2 = createMember();
+        Member member3 = createMember();
+        Member member4 = createMember();
+        Member member5 = createMember();
 
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member, "질문1", "내용1");
+        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member1, "질문1", "내용1");
         inquiryService.saveInquiry(inquiry1);
-
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member, "질문2", "내용2");
+        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member2, "질문2", "내용2");
         inquiryService.saveInquiry(inquiry2);
+        Inquiry inquiry3 = Inquiry.createInquiry(strategy, member3, "질문3", "내용3");
+        inquiryService.saveInquiry(inquiry3);
+        Inquiry inquiry4 = Inquiry.createInquiry(strategy, member4, "질문4", "내용4");
+        inquiryService.saveInquiry(inquiry4);
+        Inquiry inquiry5 = Inquiry.createInquiry(strategy, member5, "질문5", "내용5");
+        inquiryService.saveInquiry(inquiry5);
+
+        int offset = 0;
+        int limit = 3;
 
         //when
-        List<Inquiry> inquiryList = inquiryService.findAllInquiries();
+        List<Inquiry> inquiryList = inquiryService.findAllInquiries(offset, limit);
+        long totalCount = inquiryRepository.totalCountAll();
 
         //then
-        assertEquals(2, inquiryList.size());
+        assertEquals(3, inquiryList.size());
+        assertEquals(5, totalCount);
 
     }
 
     @Test
     public void 회원별_조회() throws Exception {
         //given
-        Strategy strategy = createStrategy();
-        Member member = createMember();
+        Strategy strategy1 = createStrategy();
+        Strategy strategy2 = createStrategy();
+        Strategy strategy3 = createStrategy();
+        Strategy strategy4 = createStrategy();
+        Strategy strategy5 = createStrategy();
+        Member member1 = createMember();
+        Member member2 = createMember();
 
-        Long memberId = member.getId();
+        Long memberId1 = member1.getId();
 
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member, "질문1", "내용1");
+        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
         inquiryService.saveInquiry(inquiry1);
-
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member, "질문2", "내용2");
+        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
         inquiryService.saveInquiry(inquiry2);
+        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
+        inquiryService.saveInquiry(inquiry3);
+        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member1, "질문4", "내용4");
+        inquiryService.saveInquiry(inquiry4);
+        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
+        inquiryService.saveInquiry(inquiry5);
+
+        int offset = 0;
+        int limit = 3;
 
         //when
-        List<Inquiry> inquiryList = inquiryService.findMemberInquiries(memberId);
+        List<Inquiry> inquiryList = inquiryService.findMemberInquiries(memberId1, offset, limit);
+        long totalCountMemberId = inquiryRepository.totalCountMemberId(memberId1);
 
         //then
-        assertEquals(2, inquiryList.size());
+        assertEquals(3, inquiryList.size());
+        assertEquals(4, totalCountMemberId);
 
     }
 
     @Test
     public void 상태별_조회() throws Exception {
         //given
-        Strategy strategy = createStrategy();
+        Strategy strategy1 = createStrategy();
+        Strategy strategy2 = createStrategy();
+        Strategy strategy3 = createStrategy();
+        Strategy strategy4 = createStrategy();
+        Strategy strategy5 = createStrategy();
         Member member1 = createMember();
         Member member2 = createMember();
 
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member1, "질문1", "내용1");
+        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
+        inquiry1.setInquiryStatus(InquiryStatus.COMPLETE);
         inquiryService.saveInquiry(inquiry1);
-
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member2, "질문2", "내용2");
+        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
+        inquiry2.setInquiryStatus(InquiryStatus.COMPLETE);
         inquiryService.saveInquiry(inquiry2);
-
-        Inquiry inquiry3 = Inquiry.createInquiry(strategy, member1, "질문3", "내용3");
+        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
         inquiryService.saveInquiry(inquiry3);
+        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member1, "질문4", "내용4");
+        inquiryService.saveInquiry(inquiry4);
+        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
+        inquiryService.saveInquiry(inquiry5);
+
+        int offset = 0;
+        int limit = 3;
 
         //when
-        List<Inquiry> inquiryListIncomplete = inquiryService.findStatusInquires(InquiryStatus.INCOMPLETE);
-        List<Inquiry> inquiryListComplete = inquiryService.findStatusInquires(InquiryStatus.COMPLETE);
+        List<Inquiry> inquiryListIncomplete = inquiryService.findStatusInquires(InquiryStatus.INCOMPLETE, offset, limit);
+        List<Inquiry> inquiryListComplete = inquiryService.findStatusInquires(InquiryStatus.COMPLETE, offset, limit);
+        long totalCountInquiryStatusComplete = inquiryRepository.totalCountInquiryStatus(InquiryStatus.COMPLETE);
+        long totalCountInquiryStatusIncomplete = inquiryRepository.totalCountInquiryStatus(InquiryStatus.INCOMPLETE);
 
         //then
-        assertEquals(2, inquiryListIncomplete.size());
-        assertEquals(1, inquiryListComplete.size());
-
+        assertEquals(3, inquiryListIncomplete.size());
+        assertEquals(2, inquiryListComplete.size());
+        assertEquals(3, totalCountInquiryStatusIncomplete);
+        assertEquals(2, totalCountInquiryStatusComplete);
     }
 
     @Test
     public void 회원별_상태별_조회() throws Exception {
         //given
-        Strategy strategy = createStrategy();
-        Member member = createMember();
+        Strategy strategy1 = createStrategy();
+        Strategy strategy2 = createStrategy();
+        Strategy strategy3 = createStrategy();
+        Strategy strategy4 = createStrategy();
+        Strategy strategy5 = createStrategy();
+        Member member1 = createMember();
+        Member member2 = createMember();
 
-        Long memberId = member.getId();
+        Long memberId1 = member1.getId();
+        Long memberId2 = member2.getId();
 
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member, "질문1", "내용1");
+        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
+        inquiry1.setInquiryStatus(InquiryStatus.COMPLETE);
         inquiryService.saveInquiry(inquiry1);
-
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member, "질문2", "내용2");
+        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
+        inquiry2.setInquiryStatus(InquiryStatus.COMPLETE);
         inquiryService.saveInquiry(inquiry2);
-
-        Inquiry inquiry3 = Inquiry.createInquiry(strategy, member, "질문3", "내용3");
+        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
         inquiryService.saveInquiry(inquiry3);
+        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member2, "질문4", "내용4");
+        inquiryService.saveInquiry(inquiry4);
+        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
+        inquiryService.saveInquiry(inquiry5);
+
+        int offset = 0;
+        int limit = 3;
 
         //when
-        List<Inquiry> inquiryListIncomplete = inquiryService.findMemberStatusInquires(memberId, InquiryStatus.INCOMPLETE);
-        List<Inquiry> inquiryListComplete = inquiryService.findMemberStatusInquires(memberId, InquiryStatus.COMPLETE);
+        List<Inquiry> inquiryListIncomplete1 = inquiryService.findMemberStatusInquires(memberId1, InquiryStatus.INCOMPLETE, offset, limit);
+        List<Inquiry> inquiryListComplete1 = inquiryService.findMemberStatusInquires(memberId1, InquiryStatus.COMPLETE, offset, limit);
+        List<Inquiry> inquiryListIncomplete2 = inquiryService.findMemberStatusInquires(memberId2, InquiryStatus.INCOMPLETE, offset, limit);
+        List<Inquiry> inquiryListComplete2 = inquiryService.findMemberStatusInquires(memberId2, InquiryStatus.COMPLETE, offset, limit);
 
         //then
-        assertEquals(2, inquiryListIncomplete.size());
-        assertEquals(1, inquiryListComplete.size());
-
+        assertEquals(2, inquiryListIncomplete1.size());
+        assertEquals(1, inquiryListComplete1.size());
+        assertEquals(1, inquiryListIncomplete2.size());
+        assertEquals(1, inquiryListComplete2.size());
     }
 
     @Test
