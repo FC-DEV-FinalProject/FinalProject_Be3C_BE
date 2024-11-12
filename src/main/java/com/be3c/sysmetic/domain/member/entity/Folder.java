@@ -4,10 +4,8 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -18,9 +16,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "folder")
 public class Folder extends BaseEntity {
-
-    @EmbeddedId
-    private FolderId id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
     @Column(name = "folder_name", nullable = false)
     private String folderName;
@@ -37,6 +35,7 @@ public class Folder extends BaseEntity {
     @Column(name = "latest_interest_strategy_added_date")
     private LocalDateTime latestInterestStrategyAddedDate;
 
+    @MapsId("member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;

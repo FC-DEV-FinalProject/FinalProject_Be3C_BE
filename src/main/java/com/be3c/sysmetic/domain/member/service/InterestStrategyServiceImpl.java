@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.entity.*;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyLogRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +39,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final StrategyRepository strategyRepository;
 
+    private final MemberRepository memberRepository;
+
     @Override
     public Page<FolderGetResponseDto> getInterestStrategyPage(
             FolderGetRequestDto folderGetRequestDto,
@@ -54,7 +57,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
         Page<FolderGetResponseDto> folderPage = interestStrategyRepository
                 .findPageByIdAndStatusCode(
-                        new FolderId(userId, folderGetRequestDto.getFolderId()),
+                        userId,
+                        folderGetRequestDto.getFolderId(),
                         Code.USING_STATE.getCode(),
                         pageable
                 );
@@ -69,58 +73,46 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         }
 
         Optional<InterestStrategy> interestStrategy = interestStrategyRepository
-                .findById(
-                        new InterestStrategyId(
-                                userId,
-                                followPostRequestDto.getFolderId(),
-                                followPostRequestDto.getStrategyId()
-                        )
+                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
+                        userId,
+                        followPostRequestDto.getFolderId(),
+                        followPostRequestDto.getStrategyId(),
+                        Code.USING_STATE.getCode()
                 );
 
         Folder folder = folderRepository
-                .findByIdAndStatusCode(
-                        new FolderId(followPostRequestDto.getFolderId(),userId),
+                .findByMemberIdAndFolderIdAndStatusCode(
+                        userId,
+                        followPostRequestDto.getFolderId(),
                         Code.USING_STATE.getCode())
                 .orElseThrow(
                         () -> new EntityNotFoundException("폴더 아이디를 제대로 입력해주세요.")
                 );
-
-        InterestStrategyLogId interestStrategyLogId = new InterestStrategyLogId(
-                userId,
-                followPostRequestDto.getFolderId(),
-                followPostRequestDto.getStrategyId()
-        );
 
         if(!folder.getMember().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
         }
 
         if(interestStrategy.isEmpty()) {
-            interestStrategyRepository.save(
-                    InterestStrategy.builder()
-                    .id(new InterestStrategyId(
-                            userId,
-                            followPostRequestDto.getFolderId(),
-                            followPostRequestDto.getStrategyId()
-                    ))
-                    .folder(folder)
-                    .strategy(strategyRepository
-                            .findById(
-                                    followPostRequestDto.getStrategyId()
-                            ).orElseThrow(
-                                    () -> new EntityNotFoundException("해당 전략이 없습니다.")
-                            )
-                    )
-                    .build()
-            );
+            followStrategy(userId, folder, followPostRequestDto.getStrategyId());
 
-            followStrategyLog(interestStrategyLogId, Code.FOLLOW.getCode());
+            followStrategyLog(
+                    userId,
+                    followPostRequestDto.getFolderId(),
+                    followPostRequestDto.getStrategyId(),
+                    Code.FOLLOW.getCode()
+            );
 
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
             interestStrategy.get().setStatusCode(Code.USING_STATE.getCode());
 
-            followStrategyLog(interestStrategyLogId, Code.FOLLOW.getCode());
+            followStrategyLog(
+                    userId,
+                    followPostRequestDto.getFolderId(),
+                    followPostRequestDto.getStrategyId(),
+                    Code.FOLLOW.getCode()
+            );
 
             return true;
         }
@@ -134,19 +126,13 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         }
 
-        InterestStrategyLogId interestStrategyLogId = new InterestStrategyLogId(
-                userId,
-                followDeleteRequestDto.getFolderId(),
-                followDeleteRequestDto.getStrategyId()
-        );
-
-        InterestStrategy interestStrategy = interestStrategyRepository.findById(
-                new InterestStrategyId(
+        InterestStrategy interestStrategy = interestStrategyRepository
+                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
                         userId,
                         followDeleteRequestDto.getFolderId(),
-                        followDeleteRequestDto.getStrategyId()
-                )
-        ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 팔로우 중이 아닙니다."));
+                        followDeleteRequestDto.getStrategyId(),
+                        Code.USING_STATE.getCode()
+                ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다."));
 
         if(interestStrategy.getStatusCode().equals(Code.FOLLOW.getCode())) {
             throw new IllegalArgumentException("해당 전략을 팔로우 중이 아닙니다.");
@@ -155,19 +141,27 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         interestStrategy.setStatusCode(Code.UNFOLLOW.getCode());
 
         interestStrategyRepository.save(interestStrategy);
-        followStrategyLog(interestStrategyLogId, Code.UNFOLLOW.getCode());
+        followStrategyLog(
+                userId,
+                followDeleteRequestDto.getFolderId(),
+                followDeleteRequestDto.getStrategyId(),
+                Code.UNFOLLOW.getCode()
+        );
 
         return true;
     }
 
-    private boolean followStrategy(InterestStrategyId interestStrategyId, Folder folder, Long userId) {
+    private boolean followStrategy(Long userId, Folder folder, Long strategyId) {
         interestStrategyRepository.save(
                 InterestStrategy.builder()
-                        .id(interestStrategyId)
+                        .member(memberRepository.findByIdAndStatusCode(
+                                userId,
+                                Code.USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 유저가 없습니다.")))
                         .folder(folder)
                         .strategy(strategyRepository
                                 .findById(
-                                        interestStrategyId.getStrategyId()
+                                        strategyId
                                 ).orElseThrow(
                                         () -> new EntityNotFoundException("해당 전략이 없습니다.")
                                 )
@@ -178,12 +172,22 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         return true;
     }
 
-    private boolean followStrategyLog(InterestStrategyLogId interestStrategyLogId, String LogCode) {
+    private boolean followStrategyLog(Long userId, Long folderId, Long strategyId, String LogCode) {
         interestStrategyLogRepository.save(
                 InterestStrategyLog.builder()
-                        .interestStrategyLogId(
-                                interestStrategyLogId
-                        )
+                        .member(memberRepository.findByIdAndStatusCode(
+                                userId,
+                                Code.USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다.")))
+                        .folder(folderRepository.findByMemberIdAndFolderIdAndStatusCode(
+                                userId,
+                                folderId,
+                                Code.USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 폴더를 찾을 수 없습니다.")))
+                        .strategy(strategyRepository.findByIdAndStatusCode(
+                                strategyId,
+                                Code.USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다.")))
                         .LogCode(LogCode)
                         .build()
         );

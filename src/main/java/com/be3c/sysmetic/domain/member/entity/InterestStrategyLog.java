@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,14 +15,28 @@ import lombok.*;
 @Table(name = "interest_strategy_log")
 public class InterestStrategyLog extends BaseEntity {
 
-    @EmbeddedId
-    private InterestStrategyLogId interestStrategyLogId;
+    @MapsId("member_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @MapsId("folder_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id", nullable = false)
+    private Folder folder;
+
+    @MapsId("strategy_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "strategy_id", nullable = false)
+    private Strategy strategy;
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "log_id", nullable = false)
-    private Long logId;
+    @Column(name = "id", nullable = false)
+    private Long id;
 
+    @Column(name = "log_code", nullable = false)
     private String LogCode;
 
+    @Column(name = "is_send_mail", nullable = false)
     private String isSendMail;
 }
