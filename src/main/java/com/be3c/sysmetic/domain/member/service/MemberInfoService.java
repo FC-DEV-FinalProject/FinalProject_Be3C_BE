@@ -8,4 +8,5 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface MemberInfoService {
     boolean changePassword(MemberPutPasswordRequestDto memberPutPasswordRequestDto, Long userId, HttpServletRequest request);
     boolean changeMemberInfo(MemberPatchInfoRequestDto memberPatchInfoRequestDto, Long userId);
+    boolean deleteUser(Long userId, HttpServletRequest request);
 }

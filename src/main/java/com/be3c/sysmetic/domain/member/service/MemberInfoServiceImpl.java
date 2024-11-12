@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.member.entity.ResetPasswordLog;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.ResetPasswordLogRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class MemberInfoServiceImpl implements MemberInfoService {
+
+    private final SecurityUtils securityUtils;
 
     private final MemberRepository memberRepository;
 
@@ -90,6 +93,33 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         memberRepository.save(member);
 
         return true;
+    }
+
+    @Override
+    public boolean deleteUser(Long userId, HttpServletRequest request) {
+        if(!securityUtils.getUserIdInSecurityContext().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        Member member = findMemberById(userId);
+
+        if(member.getRoleCode().equals(Code.ROLE_USER.getCode())) {
+            deleteUser(userId);
+        } else if(member.getRoleCode().equals(Code.ROLE_TRADER.getCode())) {
+            deleteTrader(userId);
+        }
+
+        memberRepository.delete(member);
+
+        return false;
+    }
+
+    private void deleteUser(Long userId) {
+
+    }
+
+    private void deleteTrader(Long userId) {
+
     }
 
     private void saveChangePasswordLog(HttpServletRequest request, Member member, String resultCode) {

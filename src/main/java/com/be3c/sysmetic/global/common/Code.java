@@ -14,7 +14,13 @@ public enum Code {
 
     // 메일 수신 동의 상태
     RECEIVE_MAIL("RM001"),
-    NOT_RECEIVE_MAIL("RM002");
+    NOT_RECEIVE_MAIL("RM002"),
+
+    // 회원 등급
+    ROLE_USER("UR001"),
+    ROLE_TRADER("UR002"),
+    ROLE_MANAGER("UR003"),
+    ROLE_ADMIN("UR004");
 
     String code;
 
