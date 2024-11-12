@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,11 +78,11 @@ public class MethodController {
     }
 
     @GetMapping("/admin/method")
-    public ResponseEntity<ApiResponse<Page<MethodGetResponseDto>>> getMethods(
+    public ResponseEntity<ApiResponse<PageResponseDto<MethodGetResponseDto>>> getMethods(
             @RequestParam Integer page
     ) throws Exception {
         try {
-            Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
+            PageResponseDto<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
         } catch (EntityNotFoundException |
