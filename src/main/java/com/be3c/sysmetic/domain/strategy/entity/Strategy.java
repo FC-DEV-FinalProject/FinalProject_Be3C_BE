@@ -35,15 +35,14 @@ public class Strategy {
         strategyModifiedDate = now;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "method_id", nullable = false)
     private Method method;
 

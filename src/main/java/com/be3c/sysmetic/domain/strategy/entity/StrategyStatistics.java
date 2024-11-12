@@ -15,6 +15,42 @@ import java.time.LocalDateTime;
 @Table(name = "strategy_statistics")
 public class StrategyStatistics {
 
+    /*
+    id : 전략 통계 id
+    strategy : 전략
+    currentBalance : 잔고
+    principal : 원금
+    accumulatedDepositWithdrawalAmount : 누적입출금액
+    accumulatedProfitLossAmount : 누적손익금액
+    accumulatedProfitLossRate : 누적손익률
+    accumulatedProfitAmount : 누적수익금액
+    accumulatedProfitRate : 누적수익률
+    currentCapitalReductionAmount : 현재자본인하금액
+    currentCapitalReductionRate : 현재자본인하율
+    maximumCapitalReductionAmount : 최대자본인하금액
+    maximumCapitalReductionRate : 최대자본인하율
+    averageProfitLossAmount : 평균손익금액
+    averageProfitLossRate : 평균손익률
+    maximumDailyProfitAmount : 최대일수익금액
+    maximumDailyProfitRate : 최대일수익률
+    maximumDailyLossAmount : 최대일손실금액
+    maximumDailyLossRate : 최대일손실율
+    totalTradingDays : 총매매일수
+    currentContinuousProfitLossDays : 현재연속손익일수
+    totalProfitDays : 총이익일수
+    maxContinuousProfitDays : 최대연속이익일수
+    totalLossDays : 총손실일수
+    maxContinuousLossDays : 최대연속손실일수
+    winningRate : 승률
+    highPointRenewalProgress : 고점갱신후경과일
+    profitFactor
+    roa
+    lastYearProfitRate : 최근1년수익률
+    standardDeviation : 표준편차
+    firstRegistrationDate : 최초등록일시
+    lastRegistrationDate : 최종등록일시
+     */
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
