@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -51,18 +52,25 @@ public class MethodServiceImpl implements MethodService {
      */
 
     @Override
-    public Page<MethodGetResponseDto> findMethodPage(Integer page) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
+    public PageResponseDto<MethodGetResponseDto> findMethodPage(Integer page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
         Page<MethodGetResponseDto> find_page = methodRepository
                 .findAllByStatusCode(pageable, Code.USING_STATE.getCode());
 
-        if(find_page.getContent().isEmpty()) {
+        if(!find_page.hasContent()) {
             throw new EntityNotFoundException();
         }
 
+        return PageResponseDto.<MethodGetResponseDto>builder()
+                .totalPageCount(find_page.getTotalPages())
+                .currentPage(page)
+                .itemCountPerPage(find_page.getNumberOfElements())
+                .totalItemCount(find_page.getTotalElements())
+                .list(find_page.getContent())
+                .build();
+
 //        파일 패스 찾는 메서드 추가 예정
 //        find_page.getContent().get(0).setFile_path();
-        return find_page;
     }
 
     @Override
