@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyListController {
@@ -29,8 +29,7 @@ public class StrategyListController {
     */
     // 전략 목록은 전략명, 종목명, 트레이더 닉네임, 트레이더 프로필 이미지, 누적수익률, MDD, SM Score, 팔로우 수, 팔로우 버튼이 표시된다.
     // 로그인 하지 않은 회원이 팔로우 버튼을 클릭하면, 회원가입 / 로그인 페이지로 이동한다.
-    @GetMapping("/strategy/list")
-    // public ApiResponse<Page<StrategyListDto>> getStrategies(
+    @GetMapping("/strategy/list")           // 요청 경로 : http://localhost:8080/strategy/list?pageNum=0
     public ApiResponse<PageResponse<StrategyListDto>> getStrategies(
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
         Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
@@ -44,9 +43,9 @@ public class StrategyListController {
     /*
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
-    @GetMapping("/strategy/trader/{nickname}")
+    @GetMapping("/strategy/trader")          // 요청 경로 :
     public ApiResponse<PageResponse<TraderListDto>> searchByTraderNickname(
-            @PathVariable String nickname) throws Exception {
+            @RequestParam String nickname) throws Exception {
         Page<TraderListDto> traderList = strategyListService.findTraderNickname(nickname);
 
         if (traderList.isEmpty())
