@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -37,7 +38,7 @@ public class Daily {
     private Strategy strategy;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(name = "principal", nullable = false)
     private Double principal;
@@ -45,11 +46,11 @@ public class Daily {
     @Column(name = "deposit_withdrawal_amount", nullable = false)
     private Double depositWithdrawalAmount;
 
-    @Column(name = "daily_loss_amount", nullable = false)
-    private Double dailyLossAmount;
+    @Column(name = "profit_loss_amount", nullable = false)
+    private Double profitLossAmount;
 
-    @Column(name = "daily_loss_rate", nullable = false)
-    private Double dailyLossRate;
+    @Column(name = "profit_loss_rate", nullable = false)
+    private Double profitLossRate;
 
     @Column(name = "accumulated_profit_loss_amount", nullable = false)
     private Double accumulatedProfitLossAmount;

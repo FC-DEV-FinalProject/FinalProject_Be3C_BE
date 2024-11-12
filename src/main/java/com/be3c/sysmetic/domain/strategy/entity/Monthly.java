@@ -41,11 +41,11 @@ public class Monthly {
     @Column(name = "average_monthly_wage", nullable = false)
     private Double averageMonthlyWage;
 
-    @Column(name = "monthly_profit_loss_amount", nullable = false)
-    private Double monthlyProfitLossAmount;
+    @Column(name = "profit_loss_amount", nullable = false)
+    private Double profitLossAmount;
 
-    @Column(name = "monthly_profit_rate", nullable = false)
-    private Double monthlyProfitRate;
+    @Column(name = "profit_rate", nullable = false)
+    private Double profitRate;
 
     @Column(name = "accumulated_profit_loss_amount", nullable = false)
     private Double accumulatedProfitLossAmount;

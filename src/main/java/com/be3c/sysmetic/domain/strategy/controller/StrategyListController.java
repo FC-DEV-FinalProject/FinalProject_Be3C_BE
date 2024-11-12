@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,28 +30,29 @@ public class StrategyListController {
     // 전략 목록은 전략명, 종목명, 트레이더 닉네임, 트레이더 프로필 이미지, 누적수익률, MDD, SM Score, 팔로우 수, 팔로우 버튼이 표시된다.
     // 로그인 하지 않은 회원이 팔로우 버튼을 클릭하면, 회원가입 / 로그인 페이지로 이동한다.
     @GetMapping("/strategy/list")
-    public ApiResponse<Page<StrategyListDto>> getStrategies(
-            @RequestParam(defaultValue = "0") Integer pageNum) throws Exception {
+    // public ApiResponse<Page<StrategyListDto>> getStrategies(
+    public ApiResponse<PageResponse<StrategyListDto>> getStrategies(
+            @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
         Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
 
         if (strategyList.isEmpty())
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다.");
 
-        return ApiResponse.success(strategyList);
+        return ApiResponse.success(PageResponse.of(strategyList));
     }
 
     /*
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
     @GetMapping("/strategy/trader/{nickname}")
-    public ApiResponse<Page<TraderListDto>> searchByTraderNickname(
+    public ApiResponse<PageResponse<TraderListDto>> searchByTraderNickname(
             @PathVariable String nickname) throws Exception {
         Page<TraderListDto> traderList = strategyListService.findTraderNickname(nickname);
 
         if (traderList.isEmpty())
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다.");
 
-        return ApiResponse.success(traderList);
+        return ApiResponse.success(PageResponse.of(traderList));
     }
 
 
@@ -59,7 +61,7 @@ public class StrategyListController {
         searchByTraderNickname 트레이더 검색 -> 한 명 선택 -> getStrategiesByTrader 트레이더의 전략 목록 보여줌
     */
     @GetMapping("/strategy/trader/{traderId}")
-    public ApiResponse<Page<StrategyListByTraderDto>> getStrategiesByTrader(
+    public ApiResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTrader(
             @PathVariable Long traderId, @RequestParam(defaultValue = "0") Integer pageNum) {
 
         Page<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
@@ -67,6 +69,6 @@ public class StrategyListController {
         if (strategyListByTrader.isEmpty())
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "해당 트레이더의 등록된 전략이 없습니다.");
 
-        return ApiResponse.success(strategyListByTrader);
+        return ApiResponse.success(PageResponse.of(strategyListByTrader));
     }
 }

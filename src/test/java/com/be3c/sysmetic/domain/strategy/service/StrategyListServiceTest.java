@@ -492,6 +492,7 @@ public class StrategyListServiceTest {
     public void failFindStrategiesByTraderTest() {
         // before : 현재 데이터베이스 비우기
         strategyListRepository.deleteAll();
+        memberRepository.deleteAll();
         assertTrue(strategyListRepository.findAll().isEmpty());
 
         int randomStrategyNum = 11;
