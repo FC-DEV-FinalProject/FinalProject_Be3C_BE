@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MethodPutRequestDto {
-    Long id;
-    String name;
-    Boolean duplCheck;
-    MultipartFile filePath;
+    private Long id;
+    private String name;
+    private Boolean checkDuplicate;
+    private MultipartFile filePath;
 }

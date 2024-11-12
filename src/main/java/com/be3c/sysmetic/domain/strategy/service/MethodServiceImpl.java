@@ -67,8 +67,14 @@ public class MethodServiceImpl implements MethodService {
 
     @Override
     public boolean insertMethod(MethodPostRequestDto methodPostRequestDto) {
-        if(methodPostRequestDto.getDuplCheck()) {
-            throw new IllegalArgumentException();
+        if(!methodPostRequestDto.getCheckDuplicate()) {
+            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+        }
+
+        Optional<Method> method = methodRepository.findByNameAndStatusCode(methodPostRequestDto.getName(), Code.USING_STATE.getCode());
+
+        if(method.isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 이름입니다.");
         }
 
         methodRepository.save(Method.builder()
@@ -81,9 +87,13 @@ public class MethodServiceImpl implements MethodService {
 
     @Override
     public boolean updateMethod(MethodPutRequestDto methodPutRequestDto) {
+        if(!methodPutRequestDto.getCheckDuplicate()) {
+            throw new IllegalArgumentException("중복 체크를 진행해주세요.");
+        }
+
         Method method = methodRepository.findByIdAndStatusCode(
                 methodPutRequestDto.getId(), Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 엔티티가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("해당 데이터가 없습니다."));
 
         if(method.getName().equals(methodPutRequestDto.getName())) {
             throw new IllegalArgumentException("이미 적용된 상태입니다.");
