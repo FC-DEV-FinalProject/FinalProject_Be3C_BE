@@ -19,5 +19,11 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             "WHERE r.member.id = :memberId and r.statusCode = :statusCode")
     Page<PageReplyResponseDto> findPageByMemberIdAndStatusCode(Long memberId, String statusCode, Pageable pageable);
 
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto(" +
+            "r.member.id, r.strategy.id, r.content) " +
+            "FROM Reply r " +
+            "WHERE r.strategy.id = :strategyId and r.statusCode = :statusCode")
+    Page<PageReplyResponseDto> findPageByStrategyIdAndStatusCode(Long strategyId, String statusCode, Pageable pageable);
+
     Optional<Reply> findByIdAndStatusCode(Long id, String statusCode);
 }

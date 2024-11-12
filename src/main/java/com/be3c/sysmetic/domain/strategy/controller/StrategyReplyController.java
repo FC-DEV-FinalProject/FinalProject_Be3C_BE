@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyDeleteRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.ReplyGetPageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.ReplyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
@@ -17,10 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @Slf4j
@@ -29,13 +27,28 @@ public class StrategyReplyController {
 
     private final ReplyService replyService;
 
+    // 나중에 mypageController로 이동해야함.
     @GetMapping("/mypage/reply/{page}")
     public ResponseEntity<ApiResponse<PageResponseDto<PageReplyResponseDto>>> getReplyPage(
             @PathVariable Integer page
     ) throws Exception {
         try {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(replyService.getReplyPage(page)));
+                    .body(ApiResponse.success(replyService.getMyReplyPage(page)));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+        }
+    }
+
+    @GetMapping("/strategy/reply")
+    public ResponseEntity<ApiResponse<PageResponseDto<PageReplyResponseDto>>> getReplyPage(
+            @RequestParam ReplyGetPageRequestDto replyGetPageRequestDto
+    ) throws Exception {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(replyService.getReplyPage(replyGetPageRequestDto)));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

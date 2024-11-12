@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyDeleteRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.ReplyGetPageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Reply;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.NoSuchElementException;
+
 @Service
 @Slf4j
 @Transactional
@@ -40,7 +43,7 @@ public class ReplyServiceImpl implements ReplyService{
     private final StrategyRepository strategyRepository;
 
     @Override
-    public PageResponseDto<PageReplyResponseDto> getReplyPage(Integer page) {
+    public PageResponseDto<PageReplyResponseDto> getMyReplyPage(Integer page) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Pageable pageable = PageRequest.of(
@@ -56,12 +59,45 @@ public class ReplyServiceImpl implements ReplyService{
                         pageable
                 );
 
-        return PageResponseDto.<PageReplyResponseDto>builder()
-                .totalItemCount(findReplyPage.getTotalElements())
-                .totalPageCount(findReplyPage.getTotalPages())
-                .currentPage(page)
-                .list(findReplyPage.getContent())
-                .build();
+        if(!findReplyPage.hasContent()) {
+            return PageResponseDto.<PageReplyResponseDto>builder()
+                    .totalItemCount(findReplyPage.getTotalElements())
+                    .totalPageCount(findReplyPage.getTotalPages())
+                    .currentPage(page)
+                    .list(findReplyPage.getContent())
+                    .build();
+        }
+
+        throw new NoSuchElementException("잘못된 페이지 요청입니다.");
+    }
+
+    @Override
+    public PageResponseDto<PageReplyResponseDto> getReplyPage(ReplyGetPageRequestDto replyGetPageRequestDto) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        Pageable pageable = PageRequest.of(
+                replyGetPageRequestDto.getPage(),
+                10,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<PageReplyResponseDto> findReplyPage = replyRepository
+                .findPageByStrategyIdAndStatusCode(
+                        replyGetPageRequestDto.getStrategyId(),
+                        Code.USING_STATE.getCode(),
+                        pageable
+                );
+
+        if(!findReplyPage.hasContent()) {
+            return PageResponseDto.<PageReplyResponseDto>builder()
+                    .totalItemCount(findReplyPage.getTotalElements())
+                    .totalPageCount(findReplyPage.getTotalPages())
+                    .currentPage(replyGetPageRequestDto.getPage())
+                    .list(findReplyPage.getContent())
+                    .build();
+        }
+
+        throw new NoSuchElementException("잘못된 페이지 요청입니다.");
     }
 
     @Override
