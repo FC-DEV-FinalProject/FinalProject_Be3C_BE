@@ -45,4 +45,26 @@ public class StrategyReplyController {
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
+
+    // @PreAuthorize("hasRole='ROLE_USER and !ROLE_TRADER'")
+    @PostMapping("/strategy/reply")
+    public ResponseEntity<ApiResponse<String>> deleteReply(
+            @RequestBody ReplyDeleteRequestDto replyDeleteRequestDto
+    ) throws Exception {
+        try {
+            if(replyService.deleteReply(replyDeleteRequestDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+        }
+    }
 }
