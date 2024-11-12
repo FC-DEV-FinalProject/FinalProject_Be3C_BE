@@ -6,7 +6,10 @@ import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
+import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyListServiceImpl implements StrategyListService {
 
@@ -40,12 +44,13 @@ public class StrategyListServiceImpl implements StrategyListService {
         Strategy 엔티티를 StrategyListDto로 반환
     */
     @Override
-    public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
+    // public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
+    public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
         String statusCode = "ST001"; // 공개중인 전략
 
-        return strategyListRepository.findAllByStatusCode(statusCode, pageable)
+         Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(statusCode, pageable)
                 .map(strategy -> new StrategyListDto(
                         strategy.getName(),
                         "stock name", // 종목 이름 가져오는 메서드 필요
@@ -55,6 +60,20 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getMdd(),
                         strategy.getSmScore()
                 ));
+
+
+         // 페이지에 내용 있는지 검증
+         // if (!strategyListPage.hasContent()) {
+         //     return
+         // }
+
+         return PageResponse.<StrategyListDto>builder()
+                 .currentPage(strategies.getNumber())
+                 .pageSize(strategies.getSize())
+                 .totalElement(strategies.getTotalElements())
+                 .totalPages(strategies.getTotalPages())
+                 .content(strategies.getContent())
+                 .build();
     }
 
 
@@ -62,11 +81,14 @@ public class StrategyListServiceImpl implements StrategyListService {
         findByTraderNickname : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
     */
     @Override
-    public Page<TraderListDto> findTraderNickname(String nickname) {
+    public PageResponse<TraderListDto> findTraderNickname(String nickname) {
+
+        // log.info("Searching for nickname in Service: {}", nickname); // 로그 추가
+
         int pageNum = 0, pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));
 
-        return strategyListRepository.findByTraderNicknameContaining(nickname, pageable)
+        Page<TraderListDto> traders = strategyListRepository.findByTraderNicknameContaining(nickname, pageable)
                 .map(strategy -> new TraderListDto(
                         strategy.getTrader().getId(),
                         strategy.getTrader().getNickname(),
@@ -74,13 +96,23 @@ public class StrategyListServiceImpl implements StrategyListService {
                         // 총 검색 결과 수
                         strategyListRepository.countByTraderNicknameContaining(nickname)
                 ));
+
+        return PageResponse.<TraderListDto>builder()
+                .currentPage(traders.getNumber())
+                .pageSize(traders.getSize())
+                .totalElement(traders.getTotalElements())
+                .totalPages(traders.getTotalPages())
+                .content(traders.getContent())
+                .build();
     }
+
 
     /*
         findStrategiesByTrader : 트레이더 별 전략 목록 - 전략 목록 내에서는 똑같이 수익률순 내림차순
     */
     @Override
-    public Page<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
+    public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
+        log.info("traderId in service {} : ", traderId);
         int pageSize = 10;
 
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
@@ -89,7 +121,7 @@ public class StrategyListServiceImpl implements StrategyListService {
         Member trader = memberRepository.findById(traderId)
                 .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
 
-        return strategyListRepository.findByTrader(trader, pageable)
+        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findByTrader(trader, pageable)
                 .map(strategy -> new StrategyListByTraderDto(
                         strategy.getTrader().getNickname(),
                         strategy.getId(),
@@ -101,5 +133,13 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getAccumProfitRate(),
                         strategy.getFollowerCount()
                 ));
+
+        return PageResponse.<StrategyListByTraderDto>builder()
+                .currentPage(strategiesByTrader.getNumber())
+                .pageSize(strategiesByTrader.getSize())
+                .totalElement(strategiesByTrader.getTotalElements())
+                .totalPages(strategiesByTrader.getTotalPages())
+                .content(strategiesByTrader.getContent())
+                .build();
     }
 }

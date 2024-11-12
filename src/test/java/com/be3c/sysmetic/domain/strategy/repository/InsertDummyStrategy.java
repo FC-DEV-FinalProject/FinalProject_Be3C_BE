@@ -117,7 +117,6 @@ public class InsertDummyStrategy {
         methodRepository.save(method);
     }
 
-
     Member getTrader(String nickname) {
         System.out.println("Searching for trader with nickname: " + nickname);
 

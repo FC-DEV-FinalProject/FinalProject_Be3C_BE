@@ -32,26 +32,29 @@ public class StrategyListController {
     @GetMapping("/strategy/list")           // 요청 경로 : http://localhost:8080/strategy/list?pageNum=0
     public ApiResponse<PageResponse<StrategyListDto>> getStrategies(
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
-        Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
+        // Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
 
-        if (strategyList.isEmpty())
+        PageResponse<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
+
+        if (strategyList.getContent().isEmpty())
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다.");
 
-        return ApiResponse.success(PageResponse.of(strategyList));
+        // return ApiResponse.success(PageResponse.of(strategyList));
+        return ApiResponse.success(strategyList);
     }
 
     /*
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
-    @GetMapping("/strategy/trader")          // 요청 경로 :
+    @GetMapping("/strategy/trader")          // 요청 경로 : localhost:8080/strategy/trader?nickname=트레이더124
     public ApiResponse<PageResponse<TraderListDto>> searchByTraderNickname(
-            @RequestParam String nickname) throws Exception {
-        Page<TraderListDto> traderList = strategyListService.findTraderNickname(nickname);
+            @RequestParam("nickname") String nickname) throws Exception {
+        PageResponse<TraderListDto> traderList = strategyListService.findTraderNickname(nickname);
 
-        if (traderList.isEmpty())
+        if (traderList.getContent().isEmpty())
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다.");
 
-        return ApiResponse.success(PageResponse.of(traderList));
+        return ApiResponse.success(traderList);
     }
 
 
@@ -59,15 +62,17 @@ public class StrategyListController {
         getStrategiesByTrader : 트레이더별 전략 목록
         searchByTraderNickname 트레이더 검색 -> 한 명 선택 -> getStrategiesByTrader 트레이더의 전략 목록 보여줌
     */
-    @GetMapping("/strategy/trader/{traderId}")
+    @GetMapping("/strategy/choose")
     public ApiResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTrader(
-            @PathVariable Long traderId, @RequestParam(defaultValue = "0") Integer pageNum) {
+            @RequestParam("traderId") Long traderId, @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
 
-        Page<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
+        log.info("traderId in controller {} : ", traderId);
 
-        if (strategyListByTrader.isEmpty())
+        PageResponse<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
+
+        if (strategyListByTrader.getContent().isEmpty())
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "해당 트레이더의 등록된 전략이 없습니다.");
 
-        return ApiResponse.success(PageResponse.of(strategyListByTrader));
+        return ApiResponse.success(strategyListByTrader);
     }
 }
