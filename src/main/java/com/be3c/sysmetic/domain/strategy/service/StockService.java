@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import org.springframework.data.domain.Page;
@@ -10,7 +11,7 @@ public interface StockService {
     Object findItemIcon(Long itemId);
     Page<Stock> findItemPage(Integer page);
 
-    boolean saveItem(StockPutRequestDto requestDto);
+    boolean saveItem(StockPostRequestDto requestDto);
     boolean updateItem(StockPutRequestDto requestDto);
     boolean deleteItem(Long id);
 }

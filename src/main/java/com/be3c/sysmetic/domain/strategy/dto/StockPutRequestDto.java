@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockPutRequestDto {
-    Long id;
-    String name;
-    Boolean checkDuplicate;
-    MultipartFile file;
+    private Long id;
+    private String name;
+    private Boolean checkDuplicate;
+    // private MultipartFile file;
 }

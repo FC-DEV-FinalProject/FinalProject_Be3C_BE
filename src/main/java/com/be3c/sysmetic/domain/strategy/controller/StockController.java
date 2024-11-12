@@ -1,12 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.service.StockService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
-import com.be3c.sysmetic.global.util.CustomUserDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +26,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StockController {
 
-    private StockService stockService;
+    private final StockService stockService;
 
     /*
         추가 필요 사항
@@ -108,8 +105,8 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
-    public ResponseEntity<ApiResponse<Integer>> saveitem(
-            @RequestBody StockPutRequestDto stockRequestDto
+    public ResponseEntity<ApiResponse<String>> saveitem(
+            @RequestBody StockPostRequestDto stockRequestDto
     ) throws Exception {
         try {
             stockService.saveItem(stockRequestDto);
@@ -118,7 +115,7 @@ public class StockController {
                     .body(ApiResponse.success());
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "잘못된 값입니다."));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         } catch (AuthenticationCredentialsNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
@@ -159,7 +156,7 @@ public class StockController {
                     .body(ApiResponse.success());
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         } catch (AuthenticationCredentialsNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));

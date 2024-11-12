@@ -1,11 +1,13 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,14 +21,15 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StockServiceImpl implements StockService {
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
     @Override
     public Stock findItemById(Long id) {
         Optional<Stock> findStock = stockRepository.findByIdAndStatusCode
-                (id, Code.valueOf("USING_STATE").getCode());
+                (id, Code.USING_STATE.getCode());
         if(findStock.isPresent()) {
             return findStock.get();
         }
@@ -56,8 +59,8 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public boolean saveItem(StockPutRequestDto requestDto) {
-        if(requestDto.getCheckDuplicate()) {
+    public boolean saveItem(StockPostRequestDto requestDto) {
+        if(!requestDto.getCheckDuplicate()) {
             throw new IllegalArgumentException("중복 확인을 진행해주세요.");
         }
 
@@ -69,6 +72,7 @@ public class StockServiceImpl implements StockService {
 
         stockRepository.save(Stock.builder()
                         .name(requestDto.getName())
+                        .statusCode(Code.USING_STATE.getCode())
                         .build());
 
         // 아이콘 S3에 업로드 + DB에 저장하는 코드 필요
@@ -77,9 +81,12 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public boolean updateItem(StockPutRequestDto requestDto) {
-        if(requestDto.getCheckDuplicate()) {
+        if(!requestDto.getCheckDuplicate()) {
             throw new IllegalArgumentException("중복 확인을 진행해주세요.");
         }
+
+        log.info("id : {}", requestDto.getId());
+        log.info("name : {}", requestDto.getName());
 
         Stock find_stock = stockRepository.findByIdAndStatusCode(
                 requestDto.getId(),
