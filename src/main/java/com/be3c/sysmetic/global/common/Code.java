@@ -10,7 +10,11 @@ public enum Code {
 
     // 비밀번호 변경 결과 코드
     PASSWORD_CHANGE_SUCCESS("PC001"),
-    PASSWORD_CHANGE_FAIL("PC002");
+    PASSWORD_CHANGE_FAIL("PC002"),
+
+    // 메일 수신 동의 상태
+    RECEIVE_MAIL("RM001"),
+    NOT_RECEIVE_MAIL("RM002");
 
     String code;
 

@@ -14,6 +14,6 @@ public class MemberPatchInfoRequestDto {
     private String nickname;
     private Boolean nicknameDuplCheck;
 
-    private String receiveInfoConsent;
-    private String receiveMarketingConsent;
+    private Boolean receiveInfoConsent;
+    private Boolean receiveMarketingConsent;
 }

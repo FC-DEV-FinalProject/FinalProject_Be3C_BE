@@ -68,12 +68,23 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
         Member member = findMemberById(userId);
 
-        if(memberPatchInfoRequestDto.getNickname() != null && memberPatchInfoRequestDto.getNicknameDuplCheck()) {
+        if(memberPatchInfoRequestDto.getNicknameDuplCheck()) {
             member.setNickname(memberPatchInfoRequestDto.getNickname());
         }
 
-        if(memberPatchInfoRequestDto.getPhone_number() != null) {
-            member.setPhoneNumber(memberPatchInfoRequestDto.getPhone_number());
+        member.setPhoneNumber(memberPatchInfoRequestDto.getPhone_number());
+
+        // 수정 필요. 너무 구리다.
+        if(memberPatchInfoRequestDto.getReceiveInfoConsent()) {
+            member.setReceiveInfoConsent(Code.RECEIVE_MAIL.getCode());
+        } else {
+            member.setReceiveInfoConsent(Code.NOT_RECEIVE_MAIL.getCode());
+        }
+
+        if(memberPatchInfoRequestDto.getReceiveMarketingConsent()) {
+            member.setReceiveMarketingConsent(Code.RECEIVE_MAIL.getCode());
+        } else {
+            member.setReceiveMarketingConsent(Code.NOT_RECEIVE_MAIL.getCode());
         }
 
         memberRepository.save(member);
