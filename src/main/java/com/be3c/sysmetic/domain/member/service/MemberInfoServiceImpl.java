@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
+import com.be3c.sysmetic.domain.member.dto.MemberPatchInfoRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPutPasswordRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.ResetPasswordLog;
@@ -11,9 +12,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -29,14 +32,25 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     @Override
     public boolean changePassword(MemberPutPasswordRequestDto memberPutPasswordRequestDto, Long userId, HttpServletRequest request) {
-        Member member = memberRepository
-                .findByIdAndStatusCode(
-                        userId,
-                        Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+        if(memberPutPasswordRequestDto.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        }
 
-        if(passwordEncoder.matches(memberPutPasswordRequestDto.getCurrentPassword(), member.getPassword()) &&
-        memberPutPasswordRequestDto.getNewPassword().equals(memberPutPasswordRequestDto.getNewPasswordConfirm())) {
+        Member member = findMemberById(userId);
+
+        if(
+            // 현재 비밀번호가 제대로 입력되었는지 확인
+            passwordEncoder
+                .matches(
+                        memberPutPasswordRequestDto.getCurrentPassword(),
+                        member.getPassword()
+                ) &&
+            // 비밀번호 확인과 비밀번호가 일치하는지 확인.
+            memberPutPasswordRequestDto
+                    .getNewPassword()
+                    .equals(memberPutPasswordRequestDto
+                            .getNewPasswordConfirm())
+        ) {
             member.setPassword(passwordEncoder.encode(memberPutPasswordRequestDto.getNewPassword()));
 
             saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_SUCCESS.getCode());
@@ -44,6 +58,27 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
 
         return false;
+    }
+
+    @Override
+    public boolean changeMemberInfo(MemberPatchInfoRequestDto memberPatchInfoRequestDto, Long userId) {
+        if(memberPatchInfoRequestDto.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        }
+
+        Member member = findMemberById(userId);
+
+        if(memberPatchInfoRequestDto.getNickname() != null && memberPatchInfoRequestDto.getNicknameDuplCheck()) {
+            member.setNickname(memberPatchInfoRequestDto.getNickname());
+        }
+
+        if(memberPatchInfoRequestDto.getPhone_number() != null) {
+            member.setPhoneNumber(memberPatchInfoRequestDto.getPhone_number());
+        }
+
+        memberRepository.save(member);
+
+        return true;
     }
 
     private void saveChangePasswordLog(HttpServletRequest request, Member member, String resultCode) {
@@ -54,5 +89,13 @@ public class MemberInfoServiceImpl implements MemberInfoService {
                 .build();
 
         resetPasswordLogRepository.save(passwordLog);
+    }
+
+    private Member findMemberById(Long userId) {
+        return memberRepository
+                .findByIdAndStatusCode(
+                        userId,
+                        Code.USING_STATE.getCode())
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
     }
 }

@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberPutPasswordRequestDto {
+    private Long userId;
     private String currentPassword;
     private String newPassword;
     private String newPasswordConfirm;
