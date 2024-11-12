@@ -15,25 +15,21 @@ import lombok.*;
 @Table(name = "interest_strategy")
 public class InterestStrategy extends BaseEntity {
 
-    @EmbeddedId
-    private InterestStrategyId id;
-
-    @MapsId("memberId")
+    @MapsId("member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @MapsId("folderId")
+    @MapsId("folder_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", nullable = false)
     private Folder folder;
 
-    @MapsId("strategyId")
+    @MapsId("strategy_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
     @Column(name = "status_code", nullable = false, length = 20)
-    private String StatusCode;
+    private String statusCode;
 }
-
