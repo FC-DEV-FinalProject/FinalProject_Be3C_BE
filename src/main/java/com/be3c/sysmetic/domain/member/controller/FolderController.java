@@ -38,8 +38,6 @@ public class FolderController {
 
     private final FolderService folderService;
 
-    private final SecurityUtils securityUtils;
-
     /*
         해당 유저의 폴더 목록 중에서 겹치는 이름이 존재하는지 확인하는 api
      */
@@ -50,11 +48,9 @@ public class FolderController {
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder")
     public ResponseEntity<ApiResponse<List<Folder>>> getAllFolder(
-
     ) throws Exception {
         try {
-            List<Folder> folderList = folderService.getUserFolders(
-                    securityUtils.getUserIdInSecurityContext());
+            List<Folder> folderList = folderService.getUserFolders();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(folderList));
@@ -76,9 +72,7 @@ public class FolderController {
             @RequestParam String folderName
     ) throws Exception {
         try {
-            folderService.duplCheck(
-                    securityUtils.getUserIdInSecurityContext(),
-                    folderName);
+            folderService.duplCheck(folderName);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
@@ -99,7 +93,7 @@ public class FolderController {
             @RequestBody FolderPostRequestDto folderPostRequestDto
     ) throws Exception {
         try {
-            folderService.insertFolder(folderPostRequestDto, securityUtils.getUserIdInSecurityContext());
+            folderService.insertFolder(folderPostRequestDto);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
@@ -128,10 +122,31 @@ public class FolderController {
             @RequestBody FolderPutRequestDto folderPutRequestDto
     ) throws Exception {
         try {
-            if(folderService
-                    .updateFolder(
-                            folderPutRequestDto,
-                            securityUtils.getUserIdInSecurityContext())) {
+            if(folderService.updateFolder(folderPutRequestDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(
+                            ErrorCode.BAD_REQUEST,
+                            "알 수 없는 이유로 폴더명 수정에 실패했습니다."));
+        } catch(IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException |
+                 ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/member/folder/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteFolder(
+            @PathVariable Long id
+    ) throws Exception {
+        try {
+            if(folderService.deleteFolder(id)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
