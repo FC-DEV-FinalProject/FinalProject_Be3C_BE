@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.SaveDailyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.SaveDailyResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
@@ -9,8 +10,12 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,14 +43,20 @@ public class DailyServiceImpl implements DailyService {
     4. 날짜 변경시 변경한 날짜 데이터가 기존에 존재하는지 검증
         존재할 경우 기존에 존재하던 데이터 삭제 및 변경한 데이터 업데이트 처리
         미존재할 경우 DB 업데이트
-    5. 수정 이후의 날짜부터 누적손익 다시 계산 todo
+    5. 수정 이후의 날짜부터 누적손익 다시 계산
 
     일간분석 데이터 삭제
 
     1. 일간분석 식별번호를 받는다.
     2. 일간분석 식별번호를 검증한다.
     3. DB 삭제
-    4. 삭제 이후의 날짜부터 누적손익 다시 계산* todo
+    4. 삭제 이후의 날짜부터 누적손익 다시 계산
+
+    일간분석 데이터 조회
+
+    1. 전략 식별번호, 기간, 페이지를 받는다.
+    2. 전략 식별번호를 검증한다.
+    3. 해당 기간의 일간분석 데이터를 한 페이지에 10개 노출한다.
     */
 
     private final DailyRepository dailyRepository;
@@ -58,6 +69,7 @@ public class DailyServiceImpl implements DailyService {
         dailyRepository.saveAll(dailyList);
     }
 
+    // 일간분석 등록
     @Override
     public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
         for (SaveDailyRequestDto requestDto : requestDtoList) {
@@ -73,6 +85,7 @@ public class DailyServiceImpl implements DailyService {
                 .build();
     }
 
+    // 일간분석 수정
     @Transactional
     @Override
     public void updateDaily(Long strategyId, Long dailyId, SaveDailyRequestDto requestDto) {
@@ -88,6 +101,7 @@ public class DailyServiceImpl implements DailyService {
         recalculateAccumulatedData(strategyId, daily.getDate());
     }
 
+    // 일간분석 삭제
     @Transactional
     @Override
     public void deleteDaily(Long strategyId, Long dailyId) {
@@ -98,6 +112,22 @@ public class DailyServiceImpl implements DailyService {
 
         // 누적금액 다시 계산
         recalculateAccumulatedData(strategyId, daily.getDate());
+    }
+
+    // 일간분석 조회
+    public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByDateBetween(startDate, endDate, pageable).map(this::entityToDto);
+
+        PageResponse<DailyResponseDto> responseDto = PageResponse.<DailyResponseDto>builder()
+                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
+                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
+                .totalElement(dailyResponseDtoPage.getTotalElements())
+                .totalPages(dailyResponseDtoPage.getTotalPages())
+                .content(dailyResponseDtoPage.getContent())
+                .build();
+
+        return responseDto;
     }
 
     // TODO 시큐리티 완료 후 수정 필요
@@ -150,6 +180,19 @@ public class DailyServiceImpl implements DailyService {
                 .accumulatedProfitLossRate(getAccumulatedProfitLossRate(strategyId, dailyProfitLossRate)) // 누적손익률
                 .createdBy(createdBy)
                 .modifiedBy(createdBy)
+                .build();
+    }
+
+    private DailyResponseDto entityToDto(Daily daily) {
+        return DailyResponseDto.builder()
+                .dailyId(daily.getId())
+                .date(daily.getDate())
+                .principal(daily.getPrincipal())
+                .depositWithdrawalAmount(daily.getDepositWithdrawalAmount())
+                .profitLossAmount(daily.getProfitLossAmount())
+                .profitLossRate(daily.getProfitLossRate())
+                .accumulatedProfitLossAmount(daily.getAccumulatedProfitLossAmount())
+                .accumulatedProfitLossRate(daily.getAccumulatedProfitLossRate())
                 .build();
     }
 
