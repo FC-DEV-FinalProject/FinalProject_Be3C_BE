@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class StrategyListDto {
 
+    private Long strategyId;
     private String name;
     private String stock;
     private Character cycle;

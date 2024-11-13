@@ -10,9 +10,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,8 +30,6 @@ public class StrategyListController {
     @GetMapping("/strategy/list")           // 요청 경로 : http://localhost:8080/strategy/list?pageNum=0
     public ApiResponse<PageResponse<StrategyListDto>> getStrategies(
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
-        // Page<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
-
         PageResponse<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
 
         if (strategyList.getContent().isEmpty())
@@ -42,6 +38,7 @@ public class StrategyListController {
         // return ApiResponse.success(PageResponse.of(strategyList));
         return ApiResponse.success(strategyList);
     }
+
 
     /*
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
@@ -62,12 +59,9 @@ public class StrategyListController {
         getStrategiesByTrader : 트레이더별 전략 목록
         searchByTraderNickname 트레이더 검색 -> 한 명 선택 -> getStrategiesByTrader 트레이더의 전략 목록 보여줌
     */
-    @GetMapping("/strategy/choose")
+    @GetMapping("/strategy/choose")         // 요청 경로 : localhost:8080/strategy/choose?traderId=195
     public ApiResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTrader(
             @RequestParam("traderId") Long traderId, @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
-
-        log.info("traderId in controller {} : ", traderId);
-
         PageResponse<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
 
         if (strategyListByTrader.getContent().isEmpty())
