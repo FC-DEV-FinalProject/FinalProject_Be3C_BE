@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,4 +25,9 @@ public class Method extends BaseEntity {
 
     @Column(name = "status_code", nullable = false)
     private String statusCode;
+
+    @CreationTimestamp
+    @Column(name = "method_created_date", nullable = false)
+    private LocalDateTime methodCreatedDate;
 }
+
