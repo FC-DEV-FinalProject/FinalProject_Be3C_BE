@@ -21,6 +21,7 @@ configurations {
 
 ext {
 	awsSdkVersion = '2.27.21'
+	apachePoiVersion = '5.3.0'
 }
 
 repositories {
@@ -65,13 +66,17 @@ dependencies {
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.2.1'
 
 	// AWS
-	implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}") // SDK 버전 관리
+	implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
 	implementation 'software.amazon.awssdk:s3'
 
 	implementation 'software.amazon.awssdk:apache-client'
 
 	implementation 'software.amazon.awssdk:sso'
 	implementation 'software.amazon.awssdk:ssooidc'
+
+	// Apache POI - exel
+	implementation "org.apache.poi:poi:${apachePoiVersion}"
+	implementation "org.apache.poi:poi-ooxml:${apachePoiVersion}"
 
 	// Thumbnailator
 	implementation 'net.coobird:thumbnailator:0.4.16'
