@@ -84,9 +84,8 @@ public class StrategyListTest {
                 .statusCode("ST001")
                 .name("전략1")
                 .cycle('P')
-                .minOperationAmount(1000000.0)
                 .content("전략1 소개 내용")
-                .accumProfitRate(0.0)
+                .accumProfitLossRate(0.0)
                 .createdBy(1L)
                 .modifiedBy(1L)
                 .build();
@@ -104,7 +103,7 @@ public class StrategyListTest {
         //         .cycle('P')
         //         .minOperationAmount(1000000.0)
         //         .content("전략1 소개 내용")
-        //         .accumProfitRate(0.0)
+        //         .accumProfitLossRate(0.0)
         //         .createdBy(1L)
         //         .modifiedBy(1L)
         //         .build();

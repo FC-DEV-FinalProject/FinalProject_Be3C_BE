@@ -59,6 +59,9 @@ public class Member {
     @Column(name = "total_follow", nullable = false)
     private Integer totalFollow;
 
+    @Column(name = "total_strategy_count", nullable = false)
+    private Integer totalStrategyCount;
+
     @Column(name = "receive_info_consent", nullable = false)
     private String receiveInfoConsent;
 

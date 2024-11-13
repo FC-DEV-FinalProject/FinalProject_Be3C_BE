@@ -79,10 +79,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i + 1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
                     .build();
@@ -103,13 +102,13 @@ public class StrategyListServiceTest {
         //     assertNotNull(dto.getStock());
         //     assertNotNull(dto.getTraderNickname());
         //     assertNotNull(dto.getCycle());
-        //     assertNotNull(dto.getAccumProfitRate());
+        //     assertNotNull(dto.getAccumProfitLossRate());
         // }
 
-        // 첫 페이지 첫 번째 값이 제일 큰 accumProfitRate 가져야 함
+        // 첫 페이지 첫 번째 값이 제일 큰 accumProfitLossRate 가져야 함
         // for (StrategyListDto dto : firstPage) {
-        //     assertTrue(firstPage.getContent().get(0).getAccumProfitRate() >= dto.getAccumProfitRate());
-        //     System.out.println("dto.getAccumProfitRate() = " + dto.getAccumProfitRate());
+        //     assertTrue(firstPage.getContent().get(0).getAccumProfitLossRate() >= dto.getAccumProfitLossRate());
+        //     System.out.println("dto.getAccumProfitLossRate() = " + dto.getAccumProfitLossRate());
         // }
     }
 
@@ -136,10 +135,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i + 1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
                     .build();
@@ -180,10 +178,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i + 1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
                     .build();
@@ -203,12 +200,12 @@ public class StrategyListServiceTest {
         // 특정 페이지 가져오기
         // Page<StrategyListDto> selectPage = strategyListService.findStrategyPage(randomPage);
         // assertFalse(selectPage.isEmpty(), "선택한 페이지에 데이터 없음.");
-        // double maxProfitRate = selectPage.getContent().get(0).getAccumProfitRate();
+        // double maxProfitRate = selectPage.getContent().get(0).getAccumProfitLossRate();
         //
         // // 가져온 페이지도 수익률 순으로 정렬되어야 함
         // for (StrategyListDto s : selectPage) {
-        //     assertTrue(maxProfitRate >= s.getAccumProfitRate());
-        //     System.out.println("s.getAccumProfitRate() = " + s.getAccumProfitRate());
+        //     assertTrue(maxProfitRate >= s.getAccumProfitLossRate());
+        //     System.out.println("s.getAccumProfitLossRate() = " + s.getAccumProfitLossRate());
         // }
     }
 
@@ -235,10 +232,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i + 1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy((long) randomStrategyNum)
                     .modifiedBy((long) randomStrategyNum)
                     .build();
@@ -260,8 +256,8 @@ public class StrategyListServiceTest {
         //     assertTrue(page.hasContent());
         //
         //     for (int j=0; j < page.getContent().size(); j++) {
-        //         assertTrue(page.getContent().get(0).getAccumProfitRate() >= page.getContent().get(j).getAccumProfitRate());
-        //         System.out.println("AccumProfitRate = " + page.getContent().get(j).getAccumProfitRate());
+        //         assertTrue(page.getContent().get(0).getAccumProfitLossRate() >= page.getContent().get(j).getAccumProfitLossRate());
+        //         System.out.println("accumProfitLossRate = " + page.getContent().get(j).getAccumProfitLossRate());
         //     }
         //     System.out.println("=====================");
         // }
@@ -294,10 +290,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i+1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy(1L)
                     .modifiedBy(1L)
                     .build();
@@ -347,10 +342,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i+1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy(1L)
                     .modifiedBy(1L)
                     .build();
@@ -366,10 +360,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i+1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy(1L)
                     .modifiedBy(1L)
                     .build();
@@ -420,10 +413,9 @@ public class StrategyListServiceTest {
                 .statusCode("ST001")
                 .name("전략" + ("김삼성"))
                 .cycle('P')
-                .minOperationAmount(100.0)
                 .content("전략 소개 내용")
                 .followerCount((long) (Math.random() * 100))
-                .accumProfitRate(Math.random() * 100)
+                .accumProfitLossRate(Math.random() * 100)
                 .createdBy(1L)
                 .modifiedBy(1L)
                 .build();
@@ -461,10 +453,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i+1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy(1L)
                     .modifiedBy(1L)
                     .build();
@@ -476,12 +467,12 @@ public class StrategyListServiceTest {
         // Page<StrategyListByTraderDto> page = strategyListService.findStrategiesByTrader(getTrader("나는부자").getId(), 0);
         // assertNotNull(page);
         // assertEquals(page.getSize(), 10);
-        // double maxProfitRate = page.getContent().get(0).getAccumProfitRate();
+        // double maxProfitRate = page.getContent().get(0).getAccumProfitLossRate();
         //
         // for (StrategyListByTraderDto s : page) {
         //     assertNotNull(s);
         //     assertEquals(s.getTraderNickname(), "나는부자");
-        //     assertTrue(s.getAccumProfitRate() <= maxProfitRate);
+        //     assertTrue(s.getAccumProfitLossRate() <= maxProfitRate);
         // }
     }
 
@@ -509,10 +500,9 @@ public class StrategyListServiceTest {
                     .statusCode("ST001")
                     .name("전략" + (i+1))
                     .cycle('P')
-                    .minOperationAmount(100.0)
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
-                    .accumProfitRate(Math.random() * 100)
+                    .accumProfitLossRate(Math.random() * 100)
                     .createdBy(1L)
                     .modifiedBy(1L)
                     .build();
@@ -539,6 +529,7 @@ public class StrategyListServiceTest {
                 .phoneNumber("01012341234")
                 .usingStatusCode("using status code")
                 .totalFollow(0)
+                .totalStrategyCount(0)
                 .receiveInfoConsent("Yes")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("NO")

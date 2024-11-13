@@ -15,7 +15,7 @@ public interface StrategyListService {
     PageResponse<StrategyListDto> findStrategyPage(Integer pageNum);
 
     // findTraderNickname : 트레이더 닉네임으로 조회
-    PageResponse<TraderListDto> findTraderNickname(String nickname);
+    PageResponse<TraderListDto> findTraderNickname(String nickname, Integer pageNum);
 
     // findStrategyPageByTrader : 트리이더 전략 목록
     PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum);

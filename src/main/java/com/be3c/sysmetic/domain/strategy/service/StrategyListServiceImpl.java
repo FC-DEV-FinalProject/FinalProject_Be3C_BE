@@ -47,25 +47,22 @@ public class StrategyListServiceImpl implements StrategyListService {
     // public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
         String statusCode = "ST001"; // 공개중인 전략
 
          Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(statusCode, pageable)
                 .map(strategy -> new StrategyListDto(
-                        strategy.getName(),
-                        "stock name", // 종목 이름 가져오는 메서드 필요
-                        strategy.getCycle(),
+                        strategy.getId(),
+                        strategy.getTrader().getId(),
+                        strategy.getMethod().getId(),
                         strategy.getTrader().getNickname(),
-                        strategy.getAccumProfitRate(),
+                        strategy.getName(),
+                        strategy.getCycle(),
+                        "stock name", // 종목 이름 가져오는 메서드 필요
+                        strategy.getAccumProfitLossRate(),
                         strategy.getMdd(),
                         strategy.getSmScore()
                 ));
-
-
-         // 페이지에 내용 있는지 검증
-         // if (!strategyListPage.hasContent()) {
-         //     return
-         // }
 
          return PageResponse.<StrategyListDto>builder()
                  .currentPage(strategies.getNumber())
@@ -81,26 +78,25 @@ public class StrategyListServiceImpl implements StrategyListService {
         findByTraderNickname : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
     */
     @Override
-    public PageResponse<TraderListDto> findTraderNickname(String nickname) {
+    public PageResponse<TraderListDto> findTraderNickname(String nickname, Integer pageNum) {
 
-        // log.info("Searching for nickname in Service: {}", nickname); // 로그 추가
+        log.info("Searching for nickname in Service: {}", nickname); // 로그 추가
 
-        int pageNum = 0, pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));            // 팔로우 수 내림차순 정렬
 
-        Page<TraderListDto> traders = strategyListRepository.findByTraderNicknameContaining(nickname, pageable)
+        Page<TraderListDto> traders = strategyListRepository.findDistinctByTraderNicknameContaining(nickname, pageable)
                 .map(strategy -> new TraderListDto(
                         strategy.getTrader().getId(),
                         strategy.getTrader().getNickname(),
                         strategy.getFollowerCount(),
-                        // 총 검색 결과 수
-                        strategyListRepository.countByTraderNicknameContaining(nickname)
+                        strategyListRepository.countByTraderId(strategy.getTrader().getId())        // 해당 트레이더가 올린 총 전략 개수
                 ));
 
         return PageResponse.<TraderListDto>builder()
                 .currentPage(traders.getNumber())
                 .pageSize(traders.getSize())
-                .totalElement(traders.getTotalElements())
+                .totalElement(traders.getTotalElements())       // 검색 결과 수 대체 가능
                 .totalPages(traders.getTotalPages())
                 .content(traders.getContent())
                 .build();
@@ -115,7 +111,7 @@ public class StrategyListServiceImpl implements StrategyListService {
         log.info("traderId in service {} : ", traderId);
         int pageSize = 10;
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitRate")));
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
         // 트레이더 조회
         Member trader = memberRepository.findById(traderId)
@@ -130,7 +126,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getName(),
                         strategy.getMdd(),
                         strategy.getSmScore(),
-                        strategy.getAccumProfitRate(),
+                        strategy.getAccumProfitLossRate(),
                         strategy.getFollowerCount()
                 ));
 

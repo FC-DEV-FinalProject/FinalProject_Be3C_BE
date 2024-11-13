@@ -28,7 +28,7 @@ public class Strategy {
         kpRatio = 0.0;
         smScore = 0.0;
         mdd = 0.0;
-        // accumProfitRate = 0.0;
+        // accumProfitLossRate = 0.0;
     }
 
     @PreUpdate
@@ -59,9 +59,6 @@ public class Strategy {
     @Column(name = "strategy_cycle", nullable = false)
     private Character cycle;
 
-    @Column(name = "min_operation_amount", nullable = false)
-    private Double minOperationAmount;
-
     @Column(name = "content", nullable = false)
     private String content;
 
@@ -79,8 +76,8 @@ public class Strategy {
 
     // 누적수익률 추가
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.00")
-    @Column(name = "accum_profit_rate", nullable = true)
-    private Double accumProfitRate;
+    @Column(name = "accum_profit_loss_rate", nullable = true)
+    private Double accumProfitLossRate;
 
     @Column(name = "strategy_created_date", nullable = false)
     private LocalDateTime strategyCreatedDate;

@@ -29,6 +29,6 @@ public class StrategyListByTraderDto {
     private String strategyName;
     private Double mdd;
     private Double smScore;
-    private Double accumProfitRate;
+    private Double accumProfitLossRate;
     private Long followerCount;
 }
