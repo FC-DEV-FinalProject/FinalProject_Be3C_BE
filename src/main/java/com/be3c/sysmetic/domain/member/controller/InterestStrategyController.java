@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.service.InterestStrategyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.common.response.SuccessCode;
 import com.be3c.sysmetic.global.config.security.CustomUserDetails;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,6 +25,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -90,19 +93,22 @@ public class InterestStrategyController {
 
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @DeleteMapping("/strategy/follow")
-    public ResponseEntity<ApiResponse<String>> unfollow(
+    public ResponseEntity<ApiResponse<Map<Long, String>>> unfollow(
             @RequestBody FollowDeleteRequestDto followPostRequestDto
     ) throws Exception {
         try {
-            if(interestStrategyService.unfollow(
+            Map<Long, String> unFollowResult = interestStrategyService.unfollow(
                     followPostRequestDto,
                     securityUtils.getUserIdInSecurityContext()
-            )) {
+            );
+
+            if(unFollowResult.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                    .body(ApiResponse.success(SuccessCode.OK, unFollowResult));
         } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));

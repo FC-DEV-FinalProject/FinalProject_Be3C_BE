@@ -10,10 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import java.util.List;
+import java.util.Map;
+
 public interface InterestStrategyService {
 
     PageResponse<FolderGetResponseDto> getInterestStrategyPage(FolderGetRequestDto folderGetRequestDto, Long userId) throws HttpStatusCodeException;
 
     boolean follow(FollowPostRequestDto followPostRequestDto, Long userId);
-    boolean unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId);
+    Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId);
 }
