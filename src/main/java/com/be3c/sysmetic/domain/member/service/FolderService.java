@@ -7,9 +7,10 @@ import com.be3c.sysmetic.domain.member.entity.Folder;
 import java.util.List;
 
 public interface FolderService {
-    List<Folder> getUserFolders(Long id);
-    boolean duplCheck(Long id, String name);
+    List<Folder> getUserFolders();
+    boolean duplCheck(String name);
 
-    boolean insertFolder(FolderPostRequestDto folderPostRequestDto, Long id);
-    boolean updateFolder(FolderPutRequestDto folderPutRequestDto, Long id);
+    boolean insertFolder(FolderPostRequestDto folderPostRequestDto);
+    boolean updateFolder(FolderPutRequestDto folderPutRequestDto);
+    boolean deleteFolder(Long folder_id);
 }
