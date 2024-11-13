@@ -15,11 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SaveDailyRequestDto {
 
-    @NotNull
-    private Long strategyId;
-
-    private Long dailyId; // nullable, 수정시 사용
-
     @ValidDailyDate
     @NotNull
     private LocalDateTime date;

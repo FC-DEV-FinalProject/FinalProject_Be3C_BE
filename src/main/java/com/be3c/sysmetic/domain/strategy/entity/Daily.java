@@ -25,6 +25,7 @@ public class Daily {
     @PreUpdate
     public void preUpdate() {
         LocalDateTime now = LocalDateTime.now();
+        if(createdDate == null) {createdDate = now;}
         modifiedDate = now;
     }
 

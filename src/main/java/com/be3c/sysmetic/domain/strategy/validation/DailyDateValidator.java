@@ -1,5 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.validation;
 
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -12,7 +14,10 @@ public class DailyDateValidator implements ConstraintValidator<ValidDailyDate, L
     @Override
     public boolean isValid(LocalDateTime value, ConstraintValidatorContext context) {
         LocalDate date = value.toLocalDate();
-        return !date.isAfter(LocalDate.now());
+        boolean isValid = !date.isAfter(LocalDate.now());
+        if(!isValid) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage());
+        }
+        return isValid;
     }
-
 }
