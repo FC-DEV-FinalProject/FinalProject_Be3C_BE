@@ -49,8 +49,9 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
                 .cycle(requestDto.getCycle())
                 .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(requestDto.getTraderId())
-                .modifiedBy(requestDto.getTraderId())
+                // BaseEntity로 바꾸면서 주석 처리함
+//                .createdBy(requestDto.getTraderId())
+//                .modifiedBy(requestDto.getTraderId())
                 .build();
 
         // DB 저장
