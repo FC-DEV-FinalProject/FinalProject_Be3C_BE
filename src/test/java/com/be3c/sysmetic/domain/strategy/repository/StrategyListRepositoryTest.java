@@ -2,9 +2,9 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import io.lettuce.core.dynamic.annotation.Param;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -296,14 +296,14 @@ public class StrategyListRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         // "트레이더1"를 포함하는 닉네임을 가지면 전부 조회되어야 함
-        Page<Strategy> findTrader = strategyListRepository.findDistinctByTraderNicknameContaining("트레이더1", pageable);
+        Page<TraderNicknameListDto> findTrader = strategyListRepository.findDistinctByTraderNickname("트레이더1", pageable);
         assertNotNull(findTrader);
         assertTrue(findTrader.hasContent());
         assertEquals(findTrader.getSize(), 10);
 
-        for (Strategy s : findTrader) {
-            System.out.println("s.getTrader().getNickname() = " + s.getTrader().getNickname());
-            assertTrue(s.getTrader().getNickname().contains("트레이더1"));
+        for (TraderNicknameListDto t : findTrader) {
+            System.out.println("nickname = " + t.getNickname());
+            assertTrue(t.getNickname().contains("트레이더1"));
         }
     }
 
@@ -315,6 +315,7 @@ public class StrategyListRepositoryTest {
     public void findAllByTraderNickname() {
         // before : 현재 데이터베이스 비우기
         strategyListRepository.deleteAll();
+        memberRepository.deleteAll();
         assertTrue(strategyListRepository.findAll().isEmpty());
 
         // 난수는 [1, 50]
@@ -346,17 +347,16 @@ public class StrategyListRepositoryTest {
         // "여의도"를 가진 트레이더는 전체 randonNum / 10 / 2의 올림 만큼의 페이지를 채울 수 있음
         for (int i=0; i < (int) Math.ceil(expectedTotalPage / 2.0) ; i++) {
             // Pageable 생성
-            Pageable pageable = strategyListRepository.getPageable(i, "followerCount");
+            Pageable pageable = strategyListRepository.getPageable(i, "totalStrategyCount");
 
             // 트레이더 닉네임으로 조회
-            Page<Strategy> page = strategyListRepository.findDistinctByTraderNicknameContaining("여의도", pageable);
+            Page<TraderNicknameListDto> page = strategyListRepository.findDistinctByTraderNickname("여의도", pageable);
             assertNotNull(page);
-            long maxFollowerCount = page.getContent().get(0).getFollowerCount();
 
-            for (Strategy s : page) {
-                assertTrue(s.getTrader().getNickname().contains("여의도"));
-                assertTrue(maxFollowerCount >= s.getFollowerCount());
-                System.out.println("id = " + s.getId() + ", nickname = " + s.getTrader().getNickname() + ", folowerCount = " + s.getFollowerCount());
+            for (TraderNicknameListDto t : page) {
+                assertTrue(t.getNickname().contains("여의도"));
+                assertNotNull(t.getTotalFollow());
+                System.out.println("nickname = " + t.getNickname());
             }
             System.out.println("=====" + pageable.getPageNumber() + "=====");
         }
@@ -388,9 +388,9 @@ public class StrategyListRepositoryTest {
                 .build();
         strategyRepository.saveAndFlush(s);
 
-        // Pageable pageable = PageRequest.of(0, 10);
-        // Page<Strategy> page = strategyListRepository.findByTraderNicknameContaining("여의도", pageable);
-        // assertFalse(page.hasContent());
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<TraderNicknameListDto> page = strategyListRepository.findDistinctByTraderNickname("여의도", pageable);
+        assertFalse(page.hasContent());
     }
 
 

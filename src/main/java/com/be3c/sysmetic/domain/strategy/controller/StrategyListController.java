@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyListService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -42,12 +42,12 @@ public class StrategyListController {
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
     @GetMapping("/strategy/trader")          // 요청 경로 : localhost:8080/strategy/trader?nickname=트레이더1
-    public ApiResponse<PageResponse<TraderListDto>> searchByTraderNickname(
+    public ApiResponse<PageResponse<TraderNicknameListDto>> searchByTraderNickname(
             @RequestParam("nickname") String nickname, @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
 
         log.info("Searching for nickname in Controller: {}", nickname); // 로그 추가
 
-        PageResponse<TraderListDto> traderList = strategyListService.findTraderNickname(nickname, pageNum);
+        PageResponse<TraderNicknameListDto> traderList = strategyListService.findTraderNickname(nickname, pageNum);
 
         if (traderList.getContent().isEmpty())
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 닉네임을 가진 트레이더가 없습니다.");

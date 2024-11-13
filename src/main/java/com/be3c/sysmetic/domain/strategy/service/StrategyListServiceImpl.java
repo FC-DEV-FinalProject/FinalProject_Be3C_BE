@@ -4,9 +4,8 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.TraderListDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,22 +77,17 @@ public class StrategyListServiceImpl implements StrategyListService {
         findByTraderNickname : 트레이더 닉네임으로 검색, 일치한 닉네임, 팔로우 수 정렬
     */
     @Override
-    public PageResponse<TraderListDto> findTraderNickname(String nickname, Integer pageNum) {
+    public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
         log.info("Searching for nickname in Service: {}", nickname); // 로그 추가
 
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));            // 팔로우 수 내림차순 정렬
+        // Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));            // 팔로우 수 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
 
-        Page<TraderListDto> traders = strategyListRepository.findDistinctByTraderNicknameContaining(nickname, pageable)
-                .map(strategy -> new TraderListDto(
-                        strategy.getTrader().getId(),
-                        strategy.getTrader().getNickname(),
-                        strategy.getFollowerCount(),
-                        strategyListRepository.countByTraderId(strategy.getTrader().getId())        // 해당 트레이더가 올린 총 전략 개수
-                ));
+        Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
 
-        return PageResponse.<TraderListDto>builder()
+        return PageResponse.<TraderNicknameListDto>builder()
                 .currentPage(traders.getNumber())
                 .pageSize(traders.getSize())
                 .totalElement(traders.getTotalElements())       // 검색 결과 수 대체 가능
