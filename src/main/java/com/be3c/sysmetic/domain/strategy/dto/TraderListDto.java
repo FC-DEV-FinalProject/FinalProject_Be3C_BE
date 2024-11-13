@@ -7,9 +7,17 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TraderListDto {
 
+    /*
+        TraderListDto : 트레이더 닉네임으로 검색 응답 Dto
+
+        traderId : 트레이더 id
+        nickname : 트레이더 닉네임
+        followerCount : 팔로워 수
+    */
+
     private Long traderId;
     private String nickname;
     private Long followerCount;
-    // 프로필 사진
-    private Long searchCount;
+    // 트레이더가 등록한 전략 수
+    private Long strategyCount;
 }

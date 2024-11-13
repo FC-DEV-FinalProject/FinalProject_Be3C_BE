@@ -57,8 +57,8 @@ public class Strategy {
 
     // 누적수익률 추가
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.00")
-    @Column(name = "accum_profit_rate", nullable = true)
-    private Double accumProfitRate;
+    @Column(name = "accum_profit_loss_rate", nullable = true)
+    private Double accumProfitLossRate;
 
     @Column(name = "strategy_created_date", nullable = false)
     private LocalDateTime strategyCreatedDate;
