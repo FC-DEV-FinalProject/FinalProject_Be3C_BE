@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Service
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByIdAndStatusCode(Long id, String StatusCode);
+    Optional<Member> findByIdAndUsingStatusCode(Long id, String UsingStatusCode);
 }

@@ -29,19 +29,16 @@ public class Folder extends BaseEntity {
     @Column(name = "internal_interest_strategy_count")
     private Integer internalInterestStrategyCount;
 
-    @Column(name = "usage_status", nullable = false)
-    private String usageStatus;
+    @Column(name = "status_code", nullable = false)
+    private String statusCode;
 
     @Column(name = "latest_interest_strategy_added_date")
     private LocalDateTime latestInterestStrategyAddedDate;
 
-    @MapsId("member_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "member_id", updatable = false)
     private Member member;
 
     @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     private List<InterestStrategy> interestStrategies;
 }
-
-

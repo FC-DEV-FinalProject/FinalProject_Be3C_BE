@@ -11,6 +11,7 @@ import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -42,7 +44,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     private final MemberRepository memberRepository;
 
     @Override
-    public Page<FolderGetResponseDto> getInterestStrategyPage(
+    public PageResponse<FolderGetResponseDto> getInterestStrategyPage(
             FolderGetRequestDto folderGetRequestDto,
             Long userId
     ) throws HttpStatusCodeException {
@@ -55,7 +57,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 10,
                 Sort.by("modifiedAt"));
 
-        Page<FolderGetResponseDto> folderPage = interestStrategyRepository
+        Page<FolderGetResponseDto> folder_page = interestStrategyRepository
                 .findPageByIdAndStatusCode(
                         userId,
                         folderGetRequestDto.getFolderId(),
@@ -63,7 +65,17 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         pageable
                 );
 
-        return null;
+        if(folder_page.hasContent()) {
+            return PageResponse.<FolderGetResponseDto>builder()
+                    .totalPageCount(folder_page.getTotalPages())
+                    .totalItemCount(folder_page.getTotalElements())
+                    .itemCountPerPage(folder_page.getNumberOfElements())
+                    .currentPage(folderGetRequestDto.getPage())
+                    .list(folder_page.getContent())
+                    .build();
+        }
+
+        throw new NoSuchElementException("잘못된 페이지 요청입니다.");
     }
 
     @Override
@@ -81,7 +93,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 );
 
         Folder folder = folderRepository
-                .findByMemberIdAndFolderIdAndStatusCode(
+                .findByMemberIdAndIdAndStatusCode(
                         userId,
                         followPostRequestDto.getFolderId(),
                         Code.USING_STATE.getCode())
@@ -154,7 +166,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     private boolean followStrategy(Long userId, Folder folder, Long strategyId) {
         interestStrategyRepository.save(
                 InterestStrategy.builder()
-                        .member(memberRepository.findByIdAndStatusCode(
+                        .member(memberRepository.findByIdAndUsingStatusCode(
                                 userId,
                                 Code.USING_STATE.getCode()
                         ).orElseThrow(() -> new EntityNotFoundException("해당 유저가 없습니다.")))
@@ -175,11 +187,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     private boolean followStrategyLog(Long userId, Long folderId, Long strategyId, String LogCode) {
         interestStrategyLogRepository.save(
                 InterestStrategyLog.builder()
-                        .member(memberRepository.findByIdAndStatusCode(
+                        .member(memberRepository.findByIdAndUsingStatusCode(
                                 userId,
                                 Code.USING_STATE.getCode()
                         ).orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다.")))
-                        .folder(folderRepository.findByMemberIdAndFolderIdAndStatusCode(
+                        .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
                                 userId,
                                 folderId,
                                 Code.USING_STATE.getCode()

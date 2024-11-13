@@ -13,15 +13,23 @@ import java.util.Optional;
 @Repository
 public interface InterestStrategyRepository extends JpaRepository<InterestStrategy, Long> {
 
-    @Query("SELECT new com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto(" +
-            "s.id, s.name, m.name, null, s.followerCount, ss.accumulatedProfitRate, s.smScore, ss.maximumCapitalReductionRate) " +
-            "FROM InterestStrategy is " +
-            "JOIN is.strategy s " +
-            "JOIN s.trader m " +
-            "JOIN StrategyStatistics ss ON s.id = ss.id " +
-            "WHERE s.statusCode = :statusCode " +
-            "AND is.member.id = :memberId " +
-            "AND is.folder.id = :folderId")
+    @Query("""
+        SELECT new com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto
+            (
+            s.id,
+            s.name,
+            m.name,
+            s.followerCount,
+            s.smScore,
+            ss.accumulatedProfitRate,
+            ss.maximumCapitalReductionRate
+            )
+        FROM InterestStrategy i
+        JOIN i.strategy s
+        JOIN s.trader m
+        JOIN StrategyStatistics ss on ss.strategy.id = s.id
+        WHERE i.member.id = :memberId AND i.folder.id = :folderId AND i.statusCode = :statusCode
+        """)
     Page<FolderGetResponseDto> findPageByIdAndStatusCode(
             Long memberId, Long folderId, String statusCode, Pageable pageable
     );
