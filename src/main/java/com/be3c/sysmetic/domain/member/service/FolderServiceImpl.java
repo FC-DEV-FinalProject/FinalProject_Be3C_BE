@@ -62,7 +62,7 @@ public class FolderServiceImpl implements FolderService {
         }
 
         Member member = memberRepository
-                .findByIdAndStatusCode(
+                .findByIdAndUsingStatusCode(
                         id,
                         Code.USING_STATE.getCode())
                 .orElseThrow(() -> new EntityNotFoundException("폴더 생성 권한이 없습니다."));
@@ -76,7 +76,7 @@ public class FolderServiceImpl implements FolderService {
         }
         Folder folder = Folder.builder()
                 .folderName(folderPostRequestDto.getName())
-                .usageStatus(Code.USING_STATE.getCode())
+                .statusCode(Code.USING_STATE.getCode())
                 .member(member)
                 .build();
 
@@ -92,7 +92,7 @@ public class FolderServiceImpl implements FolderService {
         }
 
         Folder folder = folderRepository
-                .findByMemberIdAndFolderIdAndStatusCode(
+                .findByMemberIdAndIdAndStatusCode(
                         userId,
                         folderPutRequestDto.getFolderId(),
                         Code.USING_STATE.getCode()

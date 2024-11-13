@@ -7,6 +7,8 @@ import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
 import com.be3c.sysmetic.domain.member.service.InterestStrategyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.config.security.CustomUserDetails;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,15 +40,16 @@ public class InterestStrategyController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
-    public ResponseEntity<ApiResponse<Page<FolderGetResponseDto>>> getFolderPage(
-            @RequestParam FolderGetRequestDto folderGetRequestDto
+    public ResponseEntity<ApiResponse<PageResponse<FolderGetResponseDto>>> getFolderPage(
+            @ModelAttribute FolderGetRequestDto folderGetRequestDto
     ) throws Exception {
         try {
-            Page<FolderGetResponseDto> interestStrategyPage =
+            PageResponse<FolderGetResponseDto> interestStrategyPage =
                     interestStrategyService
                             .getInterestStrategyPage(
                                     folderGetRequestDto,
-                                    securityUtils.getUserIdInSecurityContext()
+                                    1L
+                                    //securityUtils.getUserIdInSecurityContext()
                             );
 
             return ResponseEntity.status(HttpStatus.OK)
