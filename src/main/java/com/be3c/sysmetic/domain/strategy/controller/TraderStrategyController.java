@@ -80,5 +80,13 @@ public class TraderStrategyController {
                 .body(ApiResponse.success());
     }
 
+    @DeleteMapping("/strategy/daily")
+    public ResponseEntity<ApiResponse> deleteDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("dailyId") Long dailyId) {
+        dailyService.deleteDaily(strategyId, dailyId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success());
+    }
+
 }
 
