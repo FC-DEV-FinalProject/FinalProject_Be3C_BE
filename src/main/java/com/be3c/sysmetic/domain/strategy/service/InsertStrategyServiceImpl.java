@@ -40,6 +40,7 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
         // 종목 존재 여부 검증
         checkStock(requestDto.getStockIdList());
 
+        // TODO 시큐리티 완료 후 멤버 적용
         Strategy strategy = Strategy.builder()
                 .trader(findMember(requestDto.getTraderId()))
                 .method(findMethod(requestDto.getMethodId()))

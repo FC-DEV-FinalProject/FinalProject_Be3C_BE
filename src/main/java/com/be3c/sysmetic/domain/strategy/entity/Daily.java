@@ -20,7 +20,6 @@ public class Daily {
         LocalDateTime now = LocalDateTime.now();
         createdDate = now;
         modifiedDate = now;
-        dailyCreatedDate = now;
     }
 
     @PreUpdate
@@ -42,23 +41,26 @@ public class Daily {
     @Column(name = "principal", nullable = false)
     private Double principal;
 
+    @Column(name = "current_balance", nullable = false)
+    private Double currentBalance;
+
+    @Column(name = "standard_amount", nullable = false)
+    private Double standardAmount;
+
     @Column(name = "deposit_withdrawal_amount", nullable = false)
     private Double depositWithdrawalAmount;
 
-    @Column(name = "daily_loss_amount", nullable = false)
-    private Double dailyLossAmount;
+    @Column(name = "profit_loss_amount", nullable = false)
+    private Double profitLossAmount;
 
-    @Column(name = "daily_loss_rate", nullable = false)
-    private Double dailyLossRate;
+    @Column(name = "profit_loss_rate", nullable = false)
+    private Double profitLossRate;
 
     @Column(name = "accumulated_profit_loss_amount", nullable = false)
     private Double accumulatedProfitLossAmount;
 
     @Column(name = "accumulated_profit_loss_rate", nullable = false)
     private Double accumulatedProfitLossRate;
-
-    @Column(name = "daily_created_date", nullable = false)
-    private LocalDateTime dailyCreatedDate;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
