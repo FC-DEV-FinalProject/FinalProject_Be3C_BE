@@ -2,6 +2,8 @@ package com.be3c.sysmetic.domain.member.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -9,5 +11,5 @@ import lombok.*;
 @AllArgsConstructor
 public class FollowDeleteRequestDto {
     private Long folderId;
-    private Long strategyId;
+    private List<Long> strategyId;
 }

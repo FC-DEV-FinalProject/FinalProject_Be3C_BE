@@ -25,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -133,34 +132,54 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     }
 
     @Override
-    public boolean unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId) {
+    public Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId) {
         if(followDeleteRequestDto.getStrategyId() == null || followDeleteRequestDto.getFolderId() == null) {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         }
 
-        InterestStrategy interestStrategy = interestStrategyRepository
-                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
-                        userId,
-                        followDeleteRequestDto.getFolderId(),
-                        followDeleteRequestDto.getStrategyId(),
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다."));
+        Map<Long, String> fail_unfollow = new HashMap<>();
 
-        if(interestStrategy.getStatusCode().equals(Code.FOLLOW.getCode())) {
-            throw new IllegalArgumentException("해당 전략을 팔로우 중이 아닙니다.");
+        for(Long unfollowId : followDeleteRequestDto.getStrategyId()) {
+            String unFollowResult = unFollowStrategy(userId, followDeleteRequestDto.getFolderId(), unfollowId);
+            if(!unFollowResult.isEmpty()) {
+                fail_unfollow.put(unfollowId, unFollowResult);
+            }
         }
 
-        interestStrategy.setStatusCode(Code.UNFOLLOW.getCode());
+        return fail_unfollow;
+    }
 
-        interestStrategyRepository.save(interestStrategy);
+    private String unFollowStrategy(Long userId, Long folderId, Long strategyId) {
+        Optional<InterestStrategy> interestStrategy = interestStrategyRepository
+                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
+                        userId,
+                        folderId,
+                        strategyId,
+                        Code.USING_STATE.getCode()
+                );
+
+        if(interestStrategy.isEmpty()) {
+            return "해당 관심 전략을 찾을 수 없습니다.";
+        }
+
+        InterestStrategy find_is = interestStrategy.get();
+
+        if(find_is.getStatusCode().equals(Code.FOLLOW.getCode())) {
+            return "해당 관심 전략을 찾을 수 없습니다.";
+        }
+
+        find_is.setStatusCode(Code.UNFOLLOW.getCode());
+
+        interestStrategyRepository.save(find_is);
+
         followStrategyLog(
                 userId,
-                followDeleteRequestDto.getFolderId(),
-                followDeleteRequestDto.getStrategyId(),
+                folderId,
+                strategyId,
                 Code.UNFOLLOW.getCode()
         );
 
-        return true;
+        return "";
     }
 
     private boolean followStrategy(Long userId, Folder folder, Long strategyId) {
