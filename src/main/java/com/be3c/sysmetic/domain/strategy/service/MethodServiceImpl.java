@@ -46,6 +46,7 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public PageResponseDto<MethodGetResponseDto> findMethodPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
+
         Page<MethodGetResponseDto> find_page = methodRepository
                 .findAllByStatusCode(pageable, Code.USING_STATE.getCode());
 
@@ -115,11 +116,7 @@ public class MethodServiceImpl implements MethodService {
     public boolean deleteMethod(Long id) {
         Method method = methodRepository.findByIdAndStatusCode(
                 id, Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 엔티티가 없습니다."));
-
-        if(method.getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
-            throw new IllegalArgumentException("이미 적용된 상태입니다.");
-        }
+                .orElseThrow(() -> new EntityNotFoundException("해당 매매 유형이 없습니다."));
 
         method.setStatusCode(Code.NOT_USING_STATE.getCode());
         methodRepository.save(method);
