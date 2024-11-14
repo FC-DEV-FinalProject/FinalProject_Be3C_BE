@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class MethodServiceImpl implements MethodService {
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
         Method method = methodRepository.findByIdAndStatusCode(
                 id, Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
+                .orElseThrow(EntityNotFoundException::new);
         // 아이콘 파일 패스 찾는 메서드 필요
         return new MethodGetResponseDto(method.getId(), method.getName());
     }
@@ -68,13 +69,13 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public boolean insertMethod(MethodPostRequestDto methodPostRequestDto) {
         if(!methodPostRequestDto.getCheckDuplicate()) {
-            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+            throw new IllegalStateException();
         }
 
         Optional<Method> method = methodRepository.findByNameAndStatusCode(methodPostRequestDto.getName(), Code.USING_STATE.getCode());
 
         if(method.isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 이름입니다.");
+            throw new ConflictException();
         }
 
         methodRepository.save(Method.builder()
@@ -88,20 +89,20 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public boolean updateMethod(MethodPutRequestDto methodPutRequestDto) {
         if(!methodPutRequestDto.getCheckDuplicate()) {
-            throw new IllegalArgumentException("중복 체크를 진행해주세요.");
+            throw new IllegalStateException();
         }
 
         methodRepository.findByNameAndStatusCode(
                 methodPutRequestDto.getName(),
                 Code.USING_STATE.getCode()
         ).ifPresent(a -> {
-            throw new IllegalArgumentException("중복된 이름의 매매유형이 존재합니다.");
+            throw new IllegalArgumentException();
         });
 
         Method method = methodRepository.findByIdAndStatusCode(
                             methodPutRequestDto.getId(),
                             Code.USING_STATE.getCode())
-                    .orElseThrow(() -> new EntityNotFoundException("해당 매매 유형을 찾을 수 없습니다."));
+                    .orElseThrow(EntityNotFoundException::new);
 
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);

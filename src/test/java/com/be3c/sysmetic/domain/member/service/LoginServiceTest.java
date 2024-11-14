@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@TestPropertySource(locations = "/application-test.properties")
+@Slf4j
 @SpringBootTest
 class LoginServiceTest {
 
@@ -48,18 +52,14 @@ class LoginServiceTest {
                 .phoneNumber("01012341234")
                 .usingStatusCode("사용")
                 .totalFollow(0)
+                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         memberRepository.save(member);
     }
-
 
     @Test
     @DisplayName("이메일 조회 테스트")

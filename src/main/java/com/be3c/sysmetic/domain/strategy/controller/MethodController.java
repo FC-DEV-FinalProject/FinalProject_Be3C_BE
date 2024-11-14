@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,23 +63,25 @@ public class MethodController {
         1. 만약 숫자로만 이루어진 값이 PathVariable로 넘어온다면, 해당 메서드로 진입한다.
         2.
      */
-    @GetMapping("/admin/method/{id:[0-9]+}")
+//    @GetMapping("/admin/method/{id:[0-9]+}")
+    @GetMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
             @PathVariable Long id
     ) throws Exception {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(methodService.findById(id)));
-        } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
+        } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
-    @GetMapping("/admin/method")
+    @GetMapping("/admin/methodlist")
     public ResponseEntity<ApiResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @RequestParam Integer page
     ) throws Exception {
@@ -107,9 +110,13 @@ public class MethodController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
+                 IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (ConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         }
     }
 
@@ -129,19 +136,25 @@ public class MethodController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
+        } catch (IllegalArgumentException |
+                 IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+        } catch (ConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         }
     }
 
     /*
         매매 유형 삭제 메서드
      */
-    @DeleteMapping("/admin/method/{id:[0-9]+}")
+//    @DeleteMapping("/admin/method/{id:[0-9]+}")
+    @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<String>> deleteMethod(
             @PathVariable Long id
     ) throws Exception {
@@ -152,12 +165,13 @@ public class MethodController {
             }
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success());
-        } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
+        } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 }
