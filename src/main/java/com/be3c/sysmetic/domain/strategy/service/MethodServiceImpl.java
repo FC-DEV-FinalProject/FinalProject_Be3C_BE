@@ -9,15 +9,15 @@ import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class MethodServiceImpl implements MethodService {
@@ -34,22 +34,14 @@ public class MethodServiceImpl implements MethodService {
         return methodRepository.findByNameAndStatusCode(name, Code.USING_STATE.getCode()).isEmpty();
     }
 
-    /*
-
-     */
     @Override
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
         Method method = methodRepository.findByIdAndStatusCode(
                 id, Code.USING_STATE.getCode())
                 .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
-        // 파일 패스 찾는 메서드 필요
+        // 아이콘 파일 패스 찾는 메서드 필요
         return new MethodGetResponseDto(method.getId(), method.getName());
     }
-
-    /*
-        메서드 해당 페이지 데이터 반환
-        아이콘 찾기 메서드를 통해 해당 페이지에 넣기.
-     */
 
     @Override
     public PageResponseDto<MethodGetResponseDto> findMethodPage(Integer page) {
@@ -61,6 +53,8 @@ public class MethodServiceImpl implements MethodService {
             throw new EntityNotFoundException();
         }
 
+//        파일 패스 찾는 메서드 추가 예정
+
         return PageResponseDto.<MethodGetResponseDto>builder()
                 .totalPageCount(find_page.getTotalPages())
                 .currentPage(page)
@@ -68,9 +62,6 @@ public class MethodServiceImpl implements MethodService {
                 .totalItemCount(find_page.getTotalElements())
                 .list(find_page.getContent())
                 .build();
-
-//        파일 패스 찾는 메서드 추가 예정
-//        find_page.getContent().get(0).setFile_path();
     }
 
     @Override
@@ -99,13 +90,18 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalArgumentException("중복 체크를 진행해주세요.");
         }
 
-        Method method = methodRepository.findByIdAndStatusCode(
-                methodPutRequestDto.getId(), Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 데이터가 없습니다."));
+        methodRepository.findByNameAndStatusCode(
+                methodPutRequestDto.getName(),
+                Code.USING_STATE.getCode()
+        ).ifPresent(a -> {
+            throw new IllegalArgumentException("중복된 이름의 매매유형이 존재합니다.");
+        });
 
-        if(method.getName().equals(methodPutRequestDto.getName())) {
-            throw new IllegalArgumentException("이미 적용된 상태입니다.");
-        }
+        Method method = methodRepository.findByIdAndStatusCode(
+                            methodPutRequestDto.getId(),
+                            Code.USING_STATE.getCode())
+                    .orElseThrow(() -> new EntityNotFoundException("해당 매매 유형을 찾을 수 없습니다."));
+
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
         /*

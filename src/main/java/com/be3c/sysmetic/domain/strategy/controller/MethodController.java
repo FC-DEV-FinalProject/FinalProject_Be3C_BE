@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,7 @@ public class MethodController {
         4. SELECT 값이 존재한다면? DEPLICATE_RESOURCE 코드를 반환한다.
         5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
      */
+//    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/method/availability")
     public ResponseEntity<ApiResponse<String>> duplCheck(
             @RequestParam String name
@@ -57,11 +59,9 @@ public class MethodController {
                 .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 이름입니다."));
     }
 
-    /*
-        1. 만약 숫자로만 이루어진 값이 PathVariable로 넘어온다면, 해당 메서드로 진입한다.
-        2.
-     */
-    @GetMapping("/admin/method/{id:[0-9]+}")
+//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @GetMapping("/admin/method/{id:[0-9]+}")
+    @GetMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
             @PathVariable Long id
     ) throws Exception {
@@ -69,26 +69,25 @@ public class MethodController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(methodService.findById(id)));
         } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
-                 DataIntegrityViolationException e) {
+                 IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
-    @GetMapping("/admin/method")
+//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/admin/methodlist")
     public ResponseEntity<ApiResponse<PageResponseDto<MethodGetResponseDto>>> getMethods(
             @RequestParam Integer page
     ) throws Exception {
         try {
-            PageResponseDto<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
+            PageResponseDto<MethodGetResponseDto> method_page =
+                    methodService.findMethodPage(page);
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
         } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
-                 DataIntegrityViolationException e) {
+                 IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
