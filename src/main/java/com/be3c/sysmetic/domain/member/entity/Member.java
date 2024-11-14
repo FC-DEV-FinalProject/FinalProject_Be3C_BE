@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 
