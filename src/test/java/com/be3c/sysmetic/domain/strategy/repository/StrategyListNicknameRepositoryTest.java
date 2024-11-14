@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = StrategyListNicknameRepositoryTest.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "/application-test.properties")
 public class StrategyListNicknameRepositoryTest {

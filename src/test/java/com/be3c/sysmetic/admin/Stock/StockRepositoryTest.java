@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @TestPropertySource(locations = "/application-test.properties")
 @Slf4j
-@SpringBootTest
+@SpringBootTest(classes = StockRepositoryTest.class)
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StockRepositoryTest {
