@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,11 +11,10 @@ import java.time.LocalDateTime;
 @ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
-//@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
 @Table(name = "member")
-public class Member {
+public class Member extends BaseEntity {
     /*
         id : 회원의 식별번호
         roleCode : 회원등급코드
@@ -71,15 +71,4 @@ public class Member {
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 }

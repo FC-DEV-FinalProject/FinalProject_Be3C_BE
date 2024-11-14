@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,21 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "daily")
-public class Daily {
-
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        if(createdDate == null) {createdDate = now;}
-        modifiedDate = now;
-    }
+public class Daily extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -62,17 +49,5 @@ public class Daily {
 
     @Column(name = "accumulated_profit_loss_rate", nullable = false)
     private Double accumulatedProfitLossRate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 
 }
