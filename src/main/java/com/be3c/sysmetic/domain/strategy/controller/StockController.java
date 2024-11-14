@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -106,7 +107,7 @@ public class StockController {
     /*
         종목 저장하기
      */
-//    @PreAuthorize(("hasRole('MANAGER')"))
+   // @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> saveitem(
             @RequestBody StockPostRequestDto stockRequestDto
@@ -172,4 +173,5 @@ public class StockController {
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
+    //999
 }
