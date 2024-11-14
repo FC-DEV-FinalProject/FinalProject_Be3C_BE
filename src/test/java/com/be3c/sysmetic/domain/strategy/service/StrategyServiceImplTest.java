@@ -138,8 +138,8 @@ class StrategyServiceImplTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
-                .createdBy(0L)
-                .modifiedBy(0L)
+//                .createdBy(0L)
+//                .modifiedBy(0L)
                 .build();
 
         stockRepository.saveAndFlush(stock);
