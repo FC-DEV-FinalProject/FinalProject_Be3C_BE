@@ -55,6 +55,7 @@ public class MethodRepositoryTest {
             methodList.add(Method.builder()
                     .name("테스트" + i)
                     .statusCode(Code.USING_STATE.getCode())
+                            .explanation("테스트")
                     .build());
         }
 
@@ -68,6 +69,7 @@ public class MethodRepositoryTest {
         Method method = Method.builder()
                 .name("테스트")
                 .statusCode(Code.USING_STATE.getCode())
+                .explanation("테스트")
                 .build();
 
         methodRepository.save(method);
@@ -118,6 +120,7 @@ public class MethodRepositoryTest {
             methodList.add(Method.builder()
                     .name("테스트" + i)
                     .statusCode(Code.USING_STATE.getCode())
+                    .explanation("테스트")
                     .build()
             );
         }
@@ -149,6 +152,7 @@ public class MethodRepositoryTest {
             methodList.add(Method.builder()
                     .name("테스트" + i)
                     .statusCode(Code.USING_STATE.getCode())
+                    .explanation("테스트")
                     .build()
             );
         }
