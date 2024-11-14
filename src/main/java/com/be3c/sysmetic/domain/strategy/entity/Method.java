@@ -1,7 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,21 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "method")
-public class Method {
-
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-        methodCreatedDate = now;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        modifiedDate = now;
-    }
+public class Method extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,22 +23,13 @@ public class Method {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "status_code", nullable = false)
+    @Column(name = "statusCode", nullable = false)
     private String statusCode;
 
-    @Column(name = "method_created_date", nullable = false)
+    @Column(name = "explanation", nullable = false)
+    private String explanation;
+
+    @CreationTimestamp
+    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
     private LocalDateTime methodCreatedDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
-    
 }

@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,14 +46,14 @@ public class StockController {
         try {
                 if(stockService.duplcheck(name)) {
                     return ResponseEntity.status(HttpStatus.OK)
-                            .body(ApiResponse.success("사용 가능한 종목명입니다."));
+                            .body(ApiResponse.success());
                 }
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 종목명입니다."));
-        } catch (AuthenticationCredentialsNotFoundException
-                 | UsernameNotFoundException e) {
+                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -61,7 +62,7 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id}")
-    public ResponseEntity<ApiResponse<StockGetResponseDto>> getitem(
+    public ResponseEntity<ApiResponse<StockGetResponseDto>> getItem(
             @PathVariable Long id
     ) throws Exception {
         try {
@@ -69,13 +70,13 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(find_stock));
-        } catch (NoSuchElementException | EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
-        } catch (AuthenticationCredentialsNotFoundException
-                 | UsernameNotFoundException e) {
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -93,13 +94,13 @@ public class StockController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(stock_page));
-        } catch (NoSuchElementException | EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
-        } catch (AuthenticationCredentialsNotFoundException
-                 | UsernameNotFoundException e) {
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -109,7 +110,7 @@ public class StockController {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> saveitem(
-            @RequestBody StockPostRequestDto stockRequestDto
+            @Valid @RequestBody StockPostRequestDto stockRequestDto
     ) throws Exception {
         try {
             if(stockService.saveItem(stockRequestDto)) {
@@ -118,9 +119,11 @@ public class StockController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
+        } catch (IllegalArgumentException |
+                 IllegalStateException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -134,7 +137,7 @@ public class StockController {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> updateItem(
-            @RequestBody StockPutRequestDto stockPutRequestDto
+            @Valid @RequestBody StockPutRequestDto stockPutRequestDto
     ) throws Exception {
         try {
             if(stockService.updateItem(stockPutRequestDto)) {
@@ -143,10 +146,13 @@ public class StockController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch(NoSuchElementException | IllegalArgumentException | DataIntegrityViolationException e) {
+        } catch(IllegalArgumentException |
+                IllegalStateException |
+                DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
-        } catch (AuthenticationCredentialsNotFoundException e) {
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
@@ -164,9 +170,10 @@ public class StockController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (NoSuchElementException | EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+        } catch (NoSuchElementException |
+                 EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         } catch (AuthenticationCredentialsNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));

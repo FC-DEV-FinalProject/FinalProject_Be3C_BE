@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,18 +19,26 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.be3c.sysmetic.global.common.Code.USING_STATE;
+
 @Service
 @Transactional
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StockServiceImpl implements StockService {
+
     private final StockRepository stockRepository;
+
+    @Override
+    public boolean duplcheck(String name) {
+        return stockRepository.findByName(name).isEmpty();
+    }
 
     @Override
     public StockGetResponseDto findItemById(Long id) {
         Stock findStock = stockRepository.findByIdAndStatusCode
-                (id, Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
+                (id, USING_STATE.getCode())
+                .orElseThrow(EntityNotFoundException::new);
         
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
@@ -39,14 +48,9 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public boolean duplcheck(String name) {
-        return stockRepository.findByName(name).isEmpty();
-    }
-
-    @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(Code.USING_STATE.getCode(), pageable);
+        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
         if (stock_page.hasContent()) {
             return PageResponse.<StockGetResponseDto>builder()
@@ -56,24 +60,25 @@ public class StockServiceImpl implements StockService {
                     .currentPage(page)
                     .build();
         }
-        throw new EntityNotFoundException("잘못된 페이지 요청입니다.");
+        throw new EntityNotFoundException();
     }
 
     @Override
     public boolean saveItem(StockPostRequestDto requestDto) {
         if(!requestDto.getCheckDuplicate()) {
-            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+            throw new IllegalStateException();
         }
 
         if(stockRepository.findByNameAndStatusCode(
                 requestDto.getName(),
-                Code.valueOf("USING_STATE").getCode()).isPresent()) {
-            throw new IllegalArgumentException("중복된 이름은 저장할 수 없습니다.");
+                USING_STATE.getCode()
+        ).isPresent()) {
+            throw new IllegalArgumentException();
         }
 
         stockRepository.save(Stock.builder()
                         .name(requestDto.getName())
-                        .statusCode(Code.USING_STATE.getCode())
+                        .statusCode(USING_STATE.getCode())
                         .build());
 
         // 아이콘 S3에 업로드 + DB에 저장하는 코드 필요
@@ -83,20 +88,20 @@ public class StockServiceImpl implements StockService {
     @Override
     public boolean updateItem(StockPutRequestDto requestDto) {
         if(!requestDto.getCheckDuplicate()) {
-            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+            throw new IllegalStateException();
         }
 
         stockRepository.findByNameAndStatusCode(
                 requestDto.getName(),
-                Code.valueOf("USING_STATE").getCode()
+                USING_STATE.getCode()
         ).ifPresent(a -> {
-            throw new IllegalArgumentException("중복된 이름으로 변경은 불가능합니다.");
+            throw new ConflictException();
         });
 
         Stock find_stock = stockRepository.findByIdAndStatusCode(
                 requestDto.getId(),
-                Code.USING_STATE.getCode())
-                .orElseThrow(()-> new EntityNotFoundException("해당 엔티티를 찾을 수 없습니다."));
+                USING_STATE.getCode())
+                .orElseThrow(EntityNotFoundException::new);
 
         find_stock.setName(requestDto.getName());
         // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
@@ -107,8 +112,10 @@ public class StockServiceImpl implements StockService {
     @Override
     public boolean deleteItem(Long id) {
         Stock find_stock = stockRepository.findByIdAndStatusCode
-                (id, Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
+                (
+                        id,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
 
         find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(find_stock);
