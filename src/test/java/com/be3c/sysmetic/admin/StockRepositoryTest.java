@@ -1,8 +1,10 @@
 package com.be3c.sysmetic.admin;
 
 
+import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
+import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -228,8 +230,8 @@ public class StockRepositoryTest {
                 Sort.by("createdDate"
                 ).descending());
 
-        Page<Stock> stockPage = stockRepository
-                .findAllByStatusCode(pageable, STATUS_CODE[0]);
+        Page<StockGetResponseDto> stockPage = stockRepository
+                .findAllByStatusCode(Code.USING_STATE.getCode(), pageable);
 
         // then
         assertThat(stockPage).isNotNull();
@@ -280,8 +282,8 @@ public class StockRepositoryTest {
                 Sort.by("createdDate"
                 ).descending());
 
-        Page<Stock> stockPage = stockRepository
-                .findAllByStatusCode(pageable, STATUS_CODE[0]);
+        Page<StockGetResponseDto> stockPage = stockRepository
+                .findAllByStatusCode(Code.USING_STATE.getCode(), pageable);
 
         // then
         assertThrows(NoSuchElementException.class, () -> {
