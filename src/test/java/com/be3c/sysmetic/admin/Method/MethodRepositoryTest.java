@@ -83,16 +83,27 @@ public class MethodRepositoryTest {
     public void insertFailTest() {
         assertThrows(DataIntegrityViolationException.class, ()-> {
             Method method = Method.builder()
-                    .name("이름")
-//                    .statusCode(Code.USING_STATE.getCode())
+//                    .name("이름")
+                    .statusCode(Code.USING_STATE.getCode())
+                    .explanation("테스트")
                     .build();
             methodRepository.save(method);
         });
 
         assertThrows(DataIntegrityViolationException.class, ()-> {
             Method method = Method.builder()
-//                    .name("이름")
+                    .name("이름")
+//                    .statusCode(Code.USING_STATE.getCode())
+                    .explanation("테스트")
+                    .build();
+            methodRepository.save(method);
+        });
+
+        assertThrows(DataIntegrityViolationException.class, ()-> {
+            Method method = Method.builder()
+                    .name("이름")
                     .statusCode(Code.USING_STATE.getCode())
+//                    .explanation("테스트")
                     .build();
             methodRepository.save(method);
         });
