@@ -156,8 +156,7 @@ public class DailyServiceImpl implements DailyService {
         List<Daily> dailyList = new ArrayList<>();
         final Long createdBy = 1L;
 
-        for(int i=0; i<requestDtoList.size(); i++) {
-            SaveDailyRequestDto requestDto = requestDtoList.get(i);
+        for(SaveDailyRequestDto requestDto : requestDtoList) {
             Daily duplicatedDaily = findDuplicateDate(strategyId, requestDto.getDate());
 
             if(dailyId == null && duplicatedDaily != null) {
@@ -165,7 +164,7 @@ public class DailyServiceImpl implements DailyService {
                 continue;
             }
 
-            if(i == 0) {
+            if(dailyList.isEmpty()) {
                 if(beforeDaily == null) {
                     // DB 데이터 미존재
                     dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, true, requestDto, 0.0, 0.0, 0.0));
@@ -174,7 +173,7 @@ public class DailyServiceImpl implements DailyService {
                     dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, beforeDaily.getPrincipal(), beforeDaily.getCurrentBalance(), beforeDaily.getStandardAmount()));
                 }
             } else {
-                Daily addedBeforeData = dailyList.get(i - 1);
+                Daily addedBeforeData = dailyList.get(dailyList.size()-1);
                 dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, addedBeforeData.getPrincipal(), addedBeforeData.getCurrentBalance(), addedBeforeData.getStandardAmount()));
             }
 
@@ -256,6 +255,7 @@ public class DailyServiceImpl implements DailyService {
         return cumulativeProfitLossRate;
     }
 
+    // TODO 일간데이터 전체 삭제시 로직 추가 필요 - 통계 진행하면서 하겠습니다.
     // 수정 또는 삭제시 누적 데이터 다시 계산
     public void recalculateAccumulatedData(Long strategyId, LocalDateTime startDate) {
         Double cumulativeProfitLossAmount = 0.0;

@@ -30,7 +30,7 @@ public class StrategyController {
 
     // 월간데이터 조회
     @GetMapping("/strategy/monthly")
-    public ResponseEntity<ApiResponse> findMonthly(@RequestParam("strategyId") Long strategyId, @RequestParam("page") int page, @RequestParam("startYear") int startYear, @RequestParam("startMonth") int startMonth, @RequestParam("endYear") int endYear, @RequestParam("endMonth") int endMonth) {
+    public ResponseEntity<ApiResponse> findMonthly(@RequestParam("strategyId") Long strategyId, @RequestParam("page") Integer page, @RequestParam(value = "startYear", required = false) Integer startYear, @RequestParam(value = "startMonth", required = false) Integer startMonth, @RequestParam(value = "endYear", required = false) Integer endYear, @RequestParam(value = "endMonth", required = false) Integer endMonth) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(monthlyService.findMonthly(strategyId, page, startYear, startMonth, endYear, endMonth)));
     }

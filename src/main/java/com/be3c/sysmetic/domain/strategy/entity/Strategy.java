@@ -3,6 +3,8 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -47,6 +49,7 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_cycle", nullable = false)
     private Character cycle;
 
+    @Size(max = 500)
     @Column(name = "content", nullable = false)
     private String content;
 
