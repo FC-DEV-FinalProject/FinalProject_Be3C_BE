@@ -40,9 +40,6 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_cycle", nullable = false)
     private Character cycle;
 
-    @Column(name = "min_operation_amount", nullable = false)
-    private Double minOperationAmount;
-
     @Column(name = "content", nullable = false)
     private String content;
 

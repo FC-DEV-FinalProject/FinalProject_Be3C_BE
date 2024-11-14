@@ -41,7 +41,7 @@ public class StockRepositoryTest {
     @BeforeEach
     public void setUp() {
         stockRepository.deleteAll();
-        entityManager.createNativeQuery("ALTER TABLE stock AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE sysmetictest.stock AUTO_INCREMENT = 1")
                 .executeUpdate();
     }
 
