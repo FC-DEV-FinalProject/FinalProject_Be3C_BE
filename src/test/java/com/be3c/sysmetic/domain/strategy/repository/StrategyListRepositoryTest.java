@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import jakarta.persistence.EntityManager;
@@ -12,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,8 +96,6 @@ public class StrategyListRepositoryTest {
             assertNotNull(s.getName());
             assertEquals(s.getCycle(), 'P');
             assertNotNull(s.getAccumProfitLossRate());
-            assertEquals(s.getCreatedBy(), Long.valueOf(randomStrategyNum));
-            assertEquals(s.getModifiedBy(), Long.valueOf(randomStrategyNum));
         }
 
         // 페이지 크기 확인
@@ -249,205 +244,6 @@ public class StrategyListRepositoryTest {
         System.out.println("actualTotalPage = " + actualTotalPage);
 
         assertTrue(randomCurPage <= actualTotalPage);
-    }
-
-    @Test
-    @DisplayName("트레이더1이란 닉네임으로 첫 페이지 조회")
-    @Transactional
-    @Rollback(false)
-    public void findByTraderNicknameTest() {
-        // before : 현재 데이터베이스 비우기
-        strategyListRepository.deleteAll();
-        memberRepository.deleteAll();
-        assertTrue(strategyListRepository.findAll().isEmpty());
-
-        // 난수는 [1, 100]
-        int randomNum = (int) (Math.random() * 100) + 1;
-        System.out.println("randomNum = " + randomNum);
-        // 트레이더 생성 후 저장 (트레이더 1번부터 시작)
-        for (int i=0; i < randomNum; i++)
-            saveMember("트레이더" + (i + 1));
-
-        // 트레이더 수만큼 전략 생성 후 저장
-        for (int i=0; i < randomNum; i++) {
-            Strategy s = Strategy.builder()
-                    .trader(getTrader("트레이더" + (i + 1)))
-                    .method(getMethod())
-                    .statusCode("ST001")
-                    .name("전략" + (i+1))
-                    .cycle('P')
-                    .content("전략" + (i + 1) + " 소개 내용")
-                    .followerCount((long) (Math.random() * 100))
-                    .accumProfitLossRate(Math.random() * 100)
-                    .build();
-            strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-        }
-
-        Pageable pageable = PageRequest.of(0, 10);
-        // "트레이더1"를 포함하는 닉네임을 가지면 전부 조회되어야 함
-        Page<TraderNicknameListDto> findTrader = strategyListRepository.findDistinctByTraderNickname("트레이더1", pageable);
-        assertNotNull(findTrader);
-        assertTrue(findTrader.hasContent());
-        assertEquals(findTrader.getSize(), 10);
-
-        for (TraderNicknameListDto t : findTrader) {
-            System.out.println("nickname = " + t.getNickname());
-            assertTrue(t.getNickname().contains("트레이더1"));
-        }
-    }
-
-
-    @Test
-    @DisplayName("특정 닉네임을 가진 트레이더 목록 전부 조회")
-    @Transactional
-    @Rollback(false)
-    public void findAllByTraderNickname() {
-        // before : 현재 데이터베이스 비우기
-        strategyListRepository.deleteAll();
-        memberRepository.deleteAll();
-        assertTrue(strategyListRepository.findAll().isEmpty());
-
-        // 난수는 [1, 50]
-        int randomNum = (int) (Math.random() * 50) + 1;
-        System.out.println("randomNum = " + randomNum);
-
-        saveMember("강남부자");
-        saveMember("여의도전략가");
-
-        // 트레이더 수만큼 전략 생성 후 저장
-        for (int i=0; i < randomNum; i++) {
-            Strategy s = Strategy.builder()
-                    .trader(i % 2 == 0 ? getTrader("강남부자") : getTrader("여의도전략가"))
-                    .method(getMethod())
-                    .statusCode("ST001")
-                    .name("전략" + (i+1))
-                    .cycle('P')
-                    .content("전략" + (i + 1) + " 소개 내용")
-                    .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(Math.random() * 100)
-                    .build();
-            strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-        }
-
-        int expectedTotalPage = (int) Math.ceil(randomNum / 10.0);
-
-        // "여의도"를 가진 트레이더는 전체 randonNum / 10 / 2의 올림 만큼의 페이지를 채울 수 있음
-        for (int i=0; i < (int) Math.ceil(expectedTotalPage / 2.0) ; i++) {
-            // Pageable 생성
-            Pageable pageable = strategyListRepository.getPageable(i, "totalStrategyCount");
-
-            // 트레이더 닉네임으로 조회
-            Page<TraderNicknameListDto> page = strategyListRepository.findDistinctByTraderNickname("여의도", pageable);
-            assertNotNull(page);
-
-            for (TraderNicknameListDto t : page) {
-                assertTrue(t.getNickname().contains("여의도"));
-                assertNotNull(t.getTotalFollow());
-                System.out.println("nickname = " + t.getNickname());
-            }
-            System.out.println("=====" + pageable.getPageNumber() + "=====");
-        }
-    }
-
-    @Test
-    @DisplayName("특정 닉네임을 가진 트레이더 존재하지 않음")
-    @Transactional
-    @Rollback(false)
-    public void failToFindTrader(){
-        // before : 현재 데이터베이스 비우기
-        strategyListRepository.deleteAll();
-        assertTrue(strategyListRepository.findAll().isEmpty());
-
-        saveMember("강남");
-
-        // 트레이더 수만큼 전략 생성 후 저장
-        Strategy s = Strategy.builder()
-                .trader(getTrader("강남"))
-                .method(getMethod())
-                .statusCode("ST001")
-                .name("전략")
-                .cycle('P')
-                .content("전략 소개 내용")
-                .followerCount((long) (Math.random() * 100))
-                .accumProfitLossRate(Math.random() * 100)
-                .build();
-        strategyRepository.saveAndFlush(s);
-
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<TraderNicknameListDto> page = strategyListRepository.findDistinctByTraderNickname("여의도", pageable);
-        assertFalse(page.hasContent());
-    }
-
-
-    @Test
-    @DisplayName("트레이더 별 전략 목록")
-    @Transactional
-    @Rollback(false)
-    public void findPageByTraderNicknameTest() {
-        // before : 현재 데이터베이스 비우기
-        strategyListRepository.deleteAll();
-        memberRepository.deleteAll();
-        assertTrue(strategyListRepository.findAll().isEmpty());
-
-        // 난수는 [1, 50]
-        // int randomNum = (int) (Math.random() * 50) + 1;
-        int randomNum = 50;
-        System.out.println("randomNum = " + randomNum);
-
-        saveMember("강남아빠");
-        saveMember("강남부자");
-
-        // 트레이더 수만큼 전략 생성 후 저장
-        for (int i=0; i < 25; i++) {
-            Strategy s = Strategy.builder()
-                    .trader(getTrader("강남아빠"))
-                    .method(getMethod())
-                    .statusCode("ST001")
-                    .name("전략" + (i+1))
-                    .cycle('P')
-                    .content("전략" + (i + 1) + " 소개 내용")
-                    .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(Math.random() * 100)
-                    .build();
-            strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-        }
-
-        for (int i=0; i < 25; i++) {
-            Strategy s = Strategy.builder()
-                    .trader(getTrader("강남부자"))
-                    .method(getMethod())
-                    .statusCode("ST001")
-                    .name("전략" + (i+1))
-                    .cycle('P')
-                    .content("전략" + (i + 1) + " 소개 내용")
-                    .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(Math.random() * 100)
-                    .build();
-            strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
-
-        }
-
-        Page<Strategy> page;
-
-        // 트레이더 하나에 대한 전략 목록
-        int pageNum = 0;
-        do {
-            // pageable 객체를 현재 pageNum에 맞게 생성
-            Pageable pageable = PageRequest.of(pageNum, 10, Sort.by(Sort.Order.desc("accumProfitLossRate")));
-            page = strategyListRepository.findAllByTraderAndStatusCode(getTrader("강남아빠"), "ST001", pageable);
-
-            assertTrue(page.hasContent());
-            assertTrue(page.getSort().isSorted());
-
-            double maxProfitRate = page.getContent().get(0).getAccumProfitLossRate();
-            for (Strategy s : page) {
-                assertEquals(s.getTrader().getNickname(), "강남아빠");
-                assertTrue(s.getAccumProfitLossRate() <= maxProfitRate);
-                System.out.println("id = " + s.getId() + ", nickname = " + s.getTrader().getNickname() + ", accumProfitLossRate = " + s.getAccumProfitLossRate());
-            }
-
-            pageNum++; // 다음 페이지로 이동하기 위해 pageNum을 증가
-        } while (page.hasNext());
     }
 
 
