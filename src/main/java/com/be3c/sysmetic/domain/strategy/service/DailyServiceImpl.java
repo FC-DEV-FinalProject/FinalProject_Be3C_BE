@@ -136,7 +136,7 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 조회
     public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByDateBetween(startDate, endDate, pageable).map(this::entityToDto);
+        Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
 
         PageResponse<DailyResponseDto> responseDto = PageResponse.<DailyResponseDto>builder()
                 .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
@@ -197,8 +197,6 @@ public class DailyServiceImpl implements DailyService {
                 .standardAmount(strategyCalculator.getStandardAmount(isFirst, requestDto.getDepositWithdrawalAmount(), requestDto.getDailyProfitLossAmount(), beforeBalance, beforePrincipal)) // 기준가
                 .accumulatedProfitLossAmount(getAccumulatedProfitLossAmount(strategyId, requestDto.getDailyProfitLossAmount())) // 누적손익금액
                 .accumulatedProfitLossRate(getAccumulatedProfitLossRate(strategyId, dailyProfitLossRate)) // 누적손익률
-                .createdBy(createdBy)
-                .modifiedBy(createdBy)
                 .build();
     }
 

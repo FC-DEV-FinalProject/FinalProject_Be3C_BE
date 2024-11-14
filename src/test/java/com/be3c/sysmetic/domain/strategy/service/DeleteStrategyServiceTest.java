@@ -64,8 +64,6 @@ public class DeleteStrategyServiceTest {
                 .id(0L)
                 .name("Auto")
                 .statusCode("Y")
-                .createdBy(0L)
-                .modifiedBy(0L)
                 .build();
 
         methodRepository.save(method);
@@ -85,10 +83,6 @@ public class DeleteStrategyServiceTest {
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now().minusDays(10))
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now().minusDays(30))
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
 
         memberRepository.save(member);
@@ -100,8 +94,6 @@ public class DeleteStrategyServiceTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
-                .createdBy(0L)
-                .modifiedBy(0L)
                 .build();
 
         stockRepository.saveAndFlush(stock);
@@ -127,7 +119,6 @@ public class DeleteStrategyServiceTest {
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStock().getId()))
                 .cycle('D')
-                .minOperationAmount(300000.0)
                 .build();
     }
 
@@ -138,10 +129,7 @@ public class DeleteStrategyServiceTest {
                 .statusCode(StrategyStatusCode.PRIVATE.name())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
-                .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(findMember().getId())
-                .modifiedBy(findMember().getId())
                 .build();
     }
 }

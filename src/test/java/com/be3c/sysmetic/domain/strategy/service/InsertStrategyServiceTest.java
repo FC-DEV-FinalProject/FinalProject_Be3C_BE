@@ -61,7 +61,6 @@ class InsertStrategyServiceTest {
         assertEquals(savedStrategy.getStatusCode(), StrategyStatusCode.PRIVATE.name());
         assertEquals(requestDto.getName(), savedStrategy.getName());
         assertEquals(requestDto.getCycle(), savedStrategy.getCycle());
-        assertEquals(requestDto.getMinOperationAmount(), savedStrategy.getMinOperationAmount());
         assertEquals(requestDto.getContent(), savedStrategy.getContent());
         assertEquals(0, savedStrategy.getFollowerCount());
         assertEquals(0.0, savedStrategy.getKpRatio());
@@ -99,8 +98,6 @@ class InsertStrategyServiceTest {
                 .id(0L)
                 .name("Auto")
                 .statusCode("Y")
-                .createdBy(0L)
-                .modifiedBy(0L)
                 .build();
 
         methodRepository.save(method);
@@ -120,10 +117,6 @@ class InsertStrategyServiceTest {
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now().minusDays(10))
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now().minusDays(30))
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
 
         memberRepository.save(member);
@@ -135,8 +128,6 @@ class InsertStrategyServiceTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
-                .createdBy(0L)
-                .modifiedBy(0L)
                 .build();
 
         stockRepository.saveAndFlush(stock);
@@ -162,7 +153,6 @@ class InsertStrategyServiceTest {
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStock().getId()))
                 .cycle('D')
-                .minOperationAmount(300000.0)
                 .build();
     }
 
@@ -173,10 +163,7 @@ class InsertStrategyServiceTest {
                 .statusCode(StrategyStatusCode.PRIVATE.name())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
-                .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(findMember().getId())
-                .modifiedBy(findMember().getId())
                 .build();
     }
 }
