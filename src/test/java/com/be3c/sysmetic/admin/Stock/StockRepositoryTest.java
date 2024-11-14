@@ -40,9 +40,9 @@ public class StockRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-//        entityManager.createNativeQuery("ALTER TABLE Stock AUTO_INCREMENT = 1")
-//                .executeUpdate();
         stockRepository.deleteAll();
+        entityManager.createNativeQuery("ALTER TABLE stock AUTO_INCREMENT = 1")
+                .executeUpdate();
     }
 
     @AfterEach
@@ -79,7 +79,7 @@ public class StockRepositoryTest {
         while (test_count < 10) {
             // when
             long find_rand = (long) (Math.random() * create_rand);
-            log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
+//            log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
 
             // then
             Optional<Stock> stock = stockRepository.findByIdAndStatusCode(find_rand + 1, Code.USING_STATE.getCode());
@@ -98,7 +98,7 @@ public class StockRepositoryTest {
         // given
         ArrayList<Stock> stocks = new ArrayList<>();
         long create_rand = (long) (Math.random() * 1000);
-        log.info("생성된 테스트 종목 수 : {}개", create_rand);
+//        log.info("생성된 테스트 종목 수 : {}개", create_rand);
 
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
@@ -128,7 +128,7 @@ public class StockRepositoryTest {
         // given
         ArrayList<Stock> stocks = new ArrayList<>();
         long create_rand = (long) (Math.random() * 1000);
-        log.info("생성된 테스트 종목 수 : {}개", create_rand);
+//        log.info("생성된 테스트 종목 수 : {}개", create_rand);
 
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
@@ -149,7 +149,7 @@ public class StockRepositoryTest {
         while (test_count < 10) {
             // when
             long find_rand = (long) (Math.random() * create_rand);
-            log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
+//            log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
 
             Optional<Stock> stock = stockRepository.findByNameAndStatusCode(
                     stocks.get((int) find_rand).getName(), Code.USING_STATE.getCode()
@@ -169,7 +169,7 @@ public class StockRepositoryTest {
         // given
         ArrayList<Stock> stocks = new ArrayList<>();
         long create_rand = (long) (Math.random() * 1000);
-        log.info("생성된 테스트 종목 수 : {}개", create_rand);
+//        log.info("생성된 테스트 종목 수 : {}개", create_rand);
 
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
@@ -224,8 +224,8 @@ public class StockRepositoryTest {
         Pageable pageable = PageRequest.of(
                 find_page,
                 10,
-                Sort.by("createdDate"
-                ).descending());
+                Sort.by("createdAt"
+                ).ascending());
 
         Page<StockGetResponseDto> stockPage = stockRepository
                 .findAllByStatusCode(Code.USING_STATE.getCode(), pageable);
@@ -252,10 +252,10 @@ public class StockRepositoryTest {
         // given
         ArrayList<Stock> stocks = new ArrayList<>();
         long create_rand = (long) (Math.random() * 1000) + 10;
-        log.info("생성된 테스트 종목 수 : {}개", create_rand);
+//        log.info("생성된 테스트 종목 수 : {}개", create_rand);
 
         long total_page = (create_rand / 10) + (create_rand % 10 == 0 ? 0 : 1);
-        log.info("총 페이지 수 : {}", total_page);
+//        log.info("총 페이지 수 : {}", total_page);
 
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
@@ -276,7 +276,7 @@ public class StockRepositoryTest {
         Pageable pageable = PageRequest.of(
                 (int) total_page + 1,
                 10,
-                Sort.by("createdDate"
+                Sort.by("createdAt"
                 ).descending());
 
         Page<StockGetResponseDto> stockPage = stockRepository
