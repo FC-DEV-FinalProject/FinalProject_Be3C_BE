@@ -21,6 +21,7 @@ public class StrategyCalculator {
         if(isFirst) {
             return doubleHandler.cutDouble(depositWithdrawalAmount);
         } else {
+            if(beforePrincipal == 0 || beforeBalance == 0) return 0.0;
             return doubleHandler.cutDouble(beforePrincipal + (depositWithdrawalAmount/(beforeBalance/beforePrincipal)));
         }
     }
@@ -35,6 +36,7 @@ public class StrategyCalculator {
         Double balance = getCurrentBalance(isFirst, beforeBalance, depositWithdrawalAmount, dailyProfitLossAmount);
         Double principal = getPrincipal(isFirst, depositWithdrawalAmount, beforePrincipal, beforeBalance);
 
+        if(principal == 0) return 0.0;
         return doubleHandler.cutDouble(balance / principal * 1000);
     }
 
@@ -59,9 +61,10 @@ public class StrategyCalculator {
     public Double getDailyProfitLossRate(boolean isFirst, Double depositWithdrawalAmount, Double dailyProfitLossAmount, Double beforeBalance, Double beforePrincipal, Double beforeStandardAmount) {
         Double standardAmount = getStandardAmount(isFirst, depositWithdrawalAmount, dailyProfitLossAmount, beforeBalance, beforePrincipal);
         if(isFirst) {
-            return doubleHandler.cutDouble((standardAmount - 1000) * 1000);
+            return doubleHandler.cutDouble((standardAmount - 1000) / 1000 * 100);
         } else {
-            return doubleHandler.cutDouble((standardAmount - beforeStandardAmount) / beforeStandardAmount);
+            if(beforeStandardAmount == 0) return 0.0;
+            return doubleHandler.cutDouble((standardAmount - beforeStandardAmount) / beforeStandardAmount) * 100;
         }
     }
 

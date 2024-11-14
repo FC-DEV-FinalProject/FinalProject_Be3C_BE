@@ -80,21 +80,6 @@ public class DailyServiceImpl implements DailyService {
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
-    @Override
-    public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
-        for (SaveDailyRequestDto requestDto : requestDtoList) {
-            // 이미 등록한 날짜가 하나라도 존재할 경우 true 반환
-            if(findDuplicateDate(strategyId, requestDto.getDate()) != null) {
-                return SaveDailyResponseDto.builder()
-                        .isDuplicate(true)
-                        .build();
-            }
-        }
-        return SaveDailyResponseDto.builder()
-                .isDuplicate(false)
-                .build();
-    }
-
     // 일간분석 수정
     @Transactional
     @Override
@@ -133,6 +118,21 @@ public class DailyServiceImpl implements DailyService {
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
+    @Override
+    public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
+        for (SaveDailyRequestDto requestDto : requestDtoList) {
+            // 이미 등록한 날짜가 하나라도 존재할 경우 true 반환
+            if(findDuplicateDate(strategyId, requestDto.getDate()) != null) {
+                return SaveDailyResponseDto.builder()
+                        .isDuplicate(true)
+                        .build();
+            }
+        }
+        return SaveDailyResponseDto.builder()
+                .isDuplicate(false)
+                .build();
+    }
+
     // 일간분석 조회
     public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page, 10);
@@ -151,25 +151,33 @@ public class DailyServiceImpl implements DailyService {
 
     // TODO 시큐리티 완료 후 수정 필요
     private List<Daily> processingDaily(Long strategyId, Long dailyId, List<SaveDailyRequestDto> requestDtoList) {
+
         final Daily beforeDaily = getBeforeDaily(strategyId);
-        final boolean isFirst = beforeDaily == null;
-        final Double beforePrincipal = beforeDaily != null ? beforeDaily.getPrincipal() : null;
-        final Double beforeBalance = beforeDaily != null ? beforeDaily.getCurrentBalance() : null;
-        final Double beforeStandardAmount =  beforeDaily != null ?  beforeDaily.getStandardAmount() : null;
+        List<Daily> dailyList = new ArrayList<>();
         final Long createdBy = 1L;
 
-        List<Daily> dailyList = new ArrayList<>();
-
-        for(SaveDailyRequestDto requestDto : requestDtoList) {
+        for(int i=0; i<requestDtoList.size(); i++) {
+            SaveDailyRequestDto requestDto = requestDtoList.get(i);
             Daily duplicatedDaily = findDuplicateDate(strategyId, requestDto.getDate());
 
             if(dailyId == null && duplicatedDaily != null) {
-                // 일간분석 데이터 등록이면서 중복일 경우
+                // 일간분석 등록이면서 중복인 경우 미저장
                 continue;
             }
 
-            // 중복이 아닌 등록 또는 수정일 경우
-            dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, isFirst, requestDto, beforePrincipal, beforeBalance, beforeStandardAmount));
+            if(i == 0) {
+                if(beforeDaily == null) {
+                    // DB 데이터 미존재
+                    dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, true, requestDto, 0.0, 0.0, 0.0));
+                } else {
+                    // DB 데이터 존재
+                    dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, beforeDaily.getPrincipal(), beforeDaily.getCurrentBalance(), beforeDaily.getStandardAmount()));
+                }
+            } else {
+                Daily addedBeforeData = dailyList.get(i - 1);
+                dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, addedBeforeData.getPrincipal(), addedBeforeData.getCurrentBalance(), addedBeforeData.getStandardAmount()));
+            }
+
         }
 
         return dailyList;
