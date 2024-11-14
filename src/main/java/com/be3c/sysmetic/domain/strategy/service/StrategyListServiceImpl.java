@@ -45,9 +45,10 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     // public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
+
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
         String statusCode = "ST001"; // 공개중인 전략
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
          Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(statusCode, pageable)
                 .map(strategy -> new StrategyListDto(
@@ -79,10 +80,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
-        log.info("Searching for nickname in Service: {}", nickname); // 로그 추가
-
         int pageSize = 10;
-        // Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("followerCount")));            // 팔로우 수 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
 
         Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
@@ -102,16 +100,16 @@ public class StrategyListServiceImpl implements StrategyListService {
     */
     @Override
     public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
-        log.info("traderId in service {} : ", traderId);
-        int pageSize = 10;
 
+        int pageSize = 10;
+        String statusCode = "ST001";
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
-        // 트레이더 조회
+        // traderId로 Member 가져오기
         Member trader = memberRepository.findById(traderId)
                 .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
 
-        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findByTrader(trader, pageable)
+        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findAllByTraderAndStatusCode(trader, statusCode, pageable)
                 .map(strategy -> new StrategyListByTraderDto(
                         strategy.getTrader().getNickname(),
                         strategy.getId(),
@@ -123,6 +121,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getAccumProfitLossRate(),
                         strategy.getFollowerCount()
                 ));
+
 
         return PageResponse.<StrategyListByTraderDto>builder()
                 .currentPage(strategiesByTrader.getNumber())
