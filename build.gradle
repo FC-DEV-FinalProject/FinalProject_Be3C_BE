@@ -38,6 +38,8 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'           // 추가
+	testAnnotationProcessor 'org.projectlombok:lombok'   // 추가
 
 	// DevTools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -58,6 +60,12 @@ dependencies {
 
 	// Thumbnailator
 	implementation 'net.coobird:thumbnailator:0.4.16'
+
+	// jjwt (241105 추가)
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6' // API 의존성
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' // 구현체 의존성
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6' // Jackson 사용 시 필요
+
 }
 
 tasks.named('test') {
