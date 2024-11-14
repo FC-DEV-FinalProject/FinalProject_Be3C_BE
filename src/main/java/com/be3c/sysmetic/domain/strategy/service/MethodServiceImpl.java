@@ -6,7 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
-import com.be3c.sysmetic.global.common.response.PageResponseDto;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class MethodServiceImpl implements MethodService {
     }
 
     @Override
-    public PageResponseDto<MethodGetResponseDto> findMethodPage(Integer page) {
+    public PageResponse<MethodGetResponseDto> findMethodPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
 
         Page<MethodGetResponseDto> find_page = methodRepository
@@ -56,12 +56,12 @@ public class MethodServiceImpl implements MethodService {
 
 //        파일 패스 찾는 메서드 추가 예정
 
-        return PageResponseDto.<MethodGetResponseDto>builder()
-                .totalPageCount(find_page.getTotalPages())
-                .currentPage(page)
-                .itemCountPerPage(find_page.getNumberOfElements())
-                .totalItemCount(find_page.getTotalElements())
-                .list(find_page.getContent())
+        return PageResponse.<MethodGetResponseDto>builder()
+                .totalElement(find_page.getTotalElements())
+                .currentPage(find_page.getNumber())
+                .totalPages(find_page.getTotalPages())
+                .pageSize(find_page.getNumberOfElements())
+                .content(find_page.getContent())
                 .build();
     }
 

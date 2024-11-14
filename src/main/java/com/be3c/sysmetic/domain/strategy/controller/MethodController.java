@@ -3,21 +3,18 @@ package com.be3c.sysmetic.domain.strategy.controller;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
-import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
-import com.be3c.sysmetic.global.common.response.PageResponseDto;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,11 +75,11 @@ public class MethodController {
 
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/methodlist/{page}")
-    public ResponseEntity<ApiResponse<PageResponseDto<MethodGetResponseDto>>> getMethods(
+    public ResponseEntity<ApiResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @PathVariable Integer page
     ) throws Exception {
         try {
-            PageResponseDto<MethodGetResponseDto> method_page =
+            PageResponse<MethodGetResponseDto> method_page =
                     methodService.findMethodPage(page);
 
             return ResponseEntity.status(HttpStatus.OK)
