@@ -3,19 +3,19 @@ package com.be3c.sysmetic.domain.strategy.controller;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
-import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.service.StockService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,37 +42,40 @@ public class StockController {
     public ResponseEntity<ApiResponse<String>> getCheckName(
         @RequestParam String name
     ) throws Exception {
-        if(stockService.duplcheck(name)) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success("사용 가능한 종목명입니다."));
+        try {
+                if(stockService.duplcheck(name)) {
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(ApiResponse.success("사용 가능한 종목명입니다."));
+                }
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 종목명입니다."));
+        } catch (AuthenticationCredentialsNotFoundException
+                 | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
         }
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 종목명입니다."));
     }
 
     /*
         아이디로 종목 찾기
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock/{id:\\d+}")
+    @GetMapping("/admin/stock/{id}")
     public ResponseEntity<ApiResponse<StockGetResponseDto>> getitem(
             @PathVariable Long id
     ) throws Exception {
         try {
-            Stock find_stock = stockService.findItemById(id);
-
-            StockGetResponseDto stockGetResponseDto = StockGetResponseDto.builder()
-                    .id(find_stock.getId())
-                    .name(find_stock.getName())
-                    // 아이콘 찾는 코드 추가 필요.
-                    // .filepath()
-                    .build();
+            StockGetResponseDto find_stock = stockService.findItemById(id);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(stockGetResponseDto));
+                    .body(ApiResponse.success(find_stock));
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
+        } catch (AuthenticationCredentialsNotFoundException
+                 | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
         }
     }
 
@@ -81,22 +84,22 @@ public class StockController {
         RequestParam - page
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock")
-    public ResponseEntity<ApiResponse<Page<Stock>>> getStockPage(
-    //나중에 따로 Dto 생성해야함!
-    //public ResponseEntity<ApiResponse<Page<StockPageGetRequestDto>>> getStockPage(
-            @RequestParam Integer page
+    @GetMapping("/admin/stocklist/{page}")
+    public ResponseEntity<ApiResponse<PageResponse<StockGetResponseDto>>> getStockPage(
+            @PathVariable Integer page
     ) throws Exception {
         try {
-            Page<Stock> stock_page = stockService.findItemPage(page);
-
-            // 아이콘 찾기 필요.
+            PageResponse<StockGetResponseDto> stock_page = stockService.findItemPage(page);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(stock_page));
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "해당 종목을 찾을 수 없습니다."));
+        } catch (AuthenticationCredentialsNotFoundException
+                 | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, "중복된 종목명입니다."));
         }
     }
 
@@ -109,14 +112,17 @@ public class StockController {
             @RequestBody StockPostRequestDto stockRequestDto
     ) throws Exception {
         try {
-            stockService.saveItem(stockRequestDto);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success());
+            if(stockService.saveItem(stockRequestDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
-        } catch (AuthenticationCredentialsNotFoundException e) {
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
@@ -131,10 +137,12 @@ public class StockController {
             @RequestBody StockPutRequestDto stockPutRequestDto
     ) throws Exception {
         try {
-            stockService.updateItem(stockPutRequestDto);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success());
+            if(stockService.updateItem(stockPutRequestDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         } catch(NoSuchElementException | IllegalArgumentException | DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "수정에 실패했습니다."));
@@ -150,10 +158,12 @@ public class StockController {
             @PathVariable Long id
     ) throws Exception {
         try {
-            stockService.deleteItem(id);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success());
+            if(stockService.deleteItem(id)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (NoSuchElementException | EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));

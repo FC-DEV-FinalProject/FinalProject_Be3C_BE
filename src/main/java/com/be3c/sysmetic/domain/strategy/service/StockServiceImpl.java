@@ -1,10 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
 @Service
 @Transactional
 @Slf4j
@@ -27,13 +26,16 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
 
     @Override
-    public Stock findItemById(Long id) {
-        Optional<Stock> findStock = stockRepository.findByIdAndStatusCode
-                (id, Code.USING_STATE.getCode());
-        if(findStock.isPresent()) {
-            return findStock.get();
-        }
-        throw new EntityNotFoundException("해당 데이터를 찾을 수 없습니다.");
+    public StockGetResponseDto findItemById(Long id) {
+        Stock findStock = stockRepository.findByIdAndStatusCode
+                (id, Code.USING_STATE.getCode())
+                .orElseThrow(() -> new EntityNotFoundException("해당 데이터를 찾을 수 없습니다."));
+        
+        return StockGetResponseDto.builder()
+                .id(findStock.getId())
+                .name(findStock.getName())
+                // filepath 찾는 로직 추가 필요
+                .build();
     }
 
     @Override
@@ -42,20 +44,19 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public Page<Stock> findItemPage(Integer page) {
+    public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<Stock> stock_page = stockRepository.findAllByStatusCode(pageable, Code.USING_STATE.getCode());
+        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(Code.USING_STATE.getCode(), pageable);
 
         if (stock_page.hasContent()) {
-            return stock_page;
+            return PageResponse.<StockGetResponseDto>builder()
+                    .totalPages(stock_page.getTotalPages())
+                    .totalElement(stock_page.getTotalElements())
+                    .pageSize(stock_page.getNumberOfElements())
+                    .currentPage(page)
+                    .build();
         }
-        throw new EntityNotFoundException("해당 데이터를 찾을 수 없습니다.");
-    }
-
-    @Override
-    public Object findItemIcon(Long itemId) {
-        // 추가 필요함.
-        return Optional.empty();
+        throw new EntityNotFoundException("잘못된 페이지 요청입니다.");
     }
 
     @Override
@@ -85,8 +86,12 @@ public class StockServiceImpl implements StockService {
             throw new IllegalArgumentException("중복 확인을 진행해주세요.");
         }
 
-        log.info("id : {}", requestDto.getId());
-        log.info("name : {}", requestDto.getName());
+        stockRepository.findByNameAndStatusCode(
+                requestDto.getName(),
+                Code.valueOf("USING_STATE").getCode()
+        ).ifPresent(a -> {
+            throw new IllegalArgumentException("중복된 이름으로 변경은 불가능합니다.");
+        });
 
         Stock find_stock = stockRepository.findByIdAndStatusCode(
                 requestDto.getId(),
@@ -94,7 +99,6 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(()-> new EntityNotFoundException("해당 엔티티를 찾을 수 없습니다."));
 
         find_stock.setName(requestDto.getName());
-
         // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
 
         return true;
@@ -109,6 +113,6 @@ public class StockServiceImpl implements StockService {
         find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(find_stock);
 
-        return false;
+        return true;
     }
 }
