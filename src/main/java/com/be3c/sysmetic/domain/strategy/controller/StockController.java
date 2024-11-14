@@ -173,5 +173,4 @@ public class StockController {
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
-    //999
 }
