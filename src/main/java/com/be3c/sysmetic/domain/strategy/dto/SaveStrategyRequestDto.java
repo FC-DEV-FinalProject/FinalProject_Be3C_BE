@@ -13,7 +13,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class InsertStrategyRequestDto {
+public class SaveStrategyRequestDto {
 
     @NotNull
     private Long traderId;
