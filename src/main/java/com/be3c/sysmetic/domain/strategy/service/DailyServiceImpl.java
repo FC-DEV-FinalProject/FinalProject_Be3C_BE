@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Service
@@ -29,47 +30,56 @@ public class DailyServiceImpl implements DailyService {
     /*
     일간분석 데이터 등록
 
-    1. 날짜, 입출금, 일손익을 리스트 형태로 받는다.
-    2. 입력한 날짜 중 이미 존재하는 날짜가 있을 경우 해당 데이터는 추가 또는 수정하지 않고 응답 데이터에 중복임을 보낸다.
-    3. 미래의 날짜인지 검증 필요
-    4. 나머지 데이터는 등록한다.
-    5. 모든 데이터가 중복일 경우 예외 처리
+        1. 날짜, 입출금, 일손익을 리스트 형태로 받는다.
+        2. 입력한 날짜 중 이미 존재하는 날짜가 있을 경우 해당 데이터는 추가 또는 수정하지 않고 응답 데이터에 중복임을 보낸다.
+        3. 미래의 날짜인지 검증 필요
+        4. 나머지 데이터는 등록한다.
+        5. 모든 데이터가 중복일 경우 예외 처리
+        6. 월간분석 데이터 업데이트
 
     일간분석 데이터 수정
 
-    1. 날짜, 입출금, 일손익과 일간분석 식별번호를 받는다.
-    2. 일간분석 식별번호를 검증한다.
-    3. 미래의 날짜인지 검증 필요
-    4. 날짜 변경시 변경한 날짜 데이터가 기존에 존재하는지 검증
-        존재할 경우 기존에 존재하던 데이터 삭제 및 변경한 데이터 업데이트 처리
-        미존재할 경우 DB 업데이트
-    5. 수정 이후의 날짜부터 누적손익 다시 계산
+        1. 날짜, 입출금, 일손익과 일간분석 식별번호를 받는다.
+        2. 일간분석 식별번호를 검증한다.
+        3. 미래의 날짜인지 검증 필요
+        4. 날짜 변경시 변경한 날짜 데이터가 기존에 존재하는지 검증
+            존재할 경우 기존에 존재하던 데이터 삭제 및 변경한 데이터 업데이트 처리
+            미존재할 경우 DB 업데이트
+        5. 수정 이후의 날짜부터 누적손익 다시 계산
+        6. 월간분석 데이터 업데이트
 
     일간분석 데이터 삭제
 
-    1. 일간분석 식별번호를 받는다.
-    2. 일간분석 식별번호를 검증한다.
-    3. DB 삭제
-    4. 삭제 이후의 날짜부터 누적손익 다시 계산
+        1. 일간분석 식별번호를 받는다.
+        2. 일간분석 식별번호를 검증한다.
+        3. DB 삭제
+        4. 삭제 이후의 날짜부터 누적손익 다시 계산
+        5. 월간분석 데이터 업데이트
 
     일간분석 데이터 조회
 
-    1. 전략 식별번호, 기간, 페이지를 받는다.
-    2. 전략 식별번호를 검증한다.
-    3. 해당 기간의 일간분석 데이터를 한 페이지에 10개 노출한다.
+        1. 전략 식별번호, 기간, 페이지를 받는다.
+        2. 전략 식별번호를 검증한다.
+        3. 해당 기간의 일간분석 데이터를 한 페이지에 10개 노출한다.
     */
 
     private final DailyRepository dailyRepository;
     private final StrategyRepository strategyRepository;
     private final StrategyCalculator strategyCalculator;
+    private final MonthlyServiceImpl monthlyService;
 
+    // 일간분석 등록
+    @Transactional
     @Override
     public void saveDaily(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
         List<Daily> dailyList = processingDaily(strategyId, null, requestDtoList);
         dailyRepository.saveAll(dailyList);
+
+        // 월간분석 계산
+        List<LocalDateTime> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
+        monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
-    // 일간분석 등록
     @Override
     public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
         for (SaveDailyRequestDto requestDto : requestDtoList) {
@@ -97,8 +107,12 @@ public class DailyServiceImpl implements DailyService {
         // DB 저장
         dailyRepository.save(daily);
 
-        // 누적금액 다시 계산
+        // 누적금액 계산
         recalculateAccumulatedData(strategyId, daily.getDate());
+
+        // 월간분석 계산
+        List<LocalDateTime> updatedDateList = List.of(daily.getDate());
+        monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
     // 일간분석 삭제
@@ -106,12 +120,17 @@ public class DailyServiceImpl implements DailyService {
     @Override
     public void deleteDaily(Long strategyId, Long dailyId) {
         Daily daily = dailyRepository.findById(dailyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        LocalDateTime date = daily.getDate();
 
         // DB 삭제
         dailyRepository.deleteById(dailyId);
 
         // 누적금액 다시 계산
         recalculateAccumulatedData(strategyId, daily.getDate());
+
+        // 월간분석 계산
+        List<LocalDateTime> updatedDateList = List.of(date);
+        monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
     // 일간분석 조회

@@ -35,17 +35,20 @@ public class Monthly {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
+    @Column(name = "year_number", nullable = false)
+    private Integer yearNumber;
+
     @Column(name = "month_number", nullable = false)
     private Integer monthNumber;
 
-    @Column(name = "average_monthly_wage", nullable = false)
-    private Double averageMonthlyWage;
+    @Column(name = "average_monthly_principal", nullable = false)
+    private Double averageMonthlyPrincipal;
 
-    @Column(name = "monthly_profit_loss_amount", nullable = false)
-    private Double monthlyProfitLossAmount;
+    @Column(name = "profit_loss_amount", nullable = false)
+    private Double profitLossAmount;
 
-    @Column(name = "monthly_profit_rate", nullable = false)
-    private Double monthlyProfitRate;
+    @Column(name = "profit_loss_rate", nullable = false)
+    private Double profitLossRate;
 
     @Column(name = "accumulated_profit_loss_amount", nullable = false)
     private Double accumulatedProfitLossAmount;

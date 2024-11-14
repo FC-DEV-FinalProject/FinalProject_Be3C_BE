@@ -81,6 +81,7 @@ public class TraderStrategyController {
                 .body(ApiResponse.success());
     }
 
+    // 일간데이터 삭제
     @DeleteMapping("/strategy/daily")
     public ResponseEntity<ApiResponse> deleteDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("dailyId") Long dailyId) {
         dailyService.deleteDaily(strategyId, dailyId);
