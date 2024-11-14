@@ -41,26 +41,26 @@ public class MethodRepositoryTest {
     @BeforeEach
     public void setUp() {
         methodRepository.deleteAll();
-        entityManager.createNativeQuery("ALTER TABLE Method AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
                 .executeUpdate();
     }
 
-    @Test
-    @DisplayName("테스트 데이터 입력 메서드")
-    @Commit
-    public void insertToDB() {
-        List<Method> methodList = new ArrayList<>();
-
-        for(int i = 0; i < 1000; i++) {
-            methodList.add(Method.builder()
-                    .name("테스트" + i)
-                    .statusCode(Code.USING_STATE.getCode())
-                            .explanation("테스트")
-                    .build());
-        }
-
-        methodRepository.saveAll(methodList);
-    }
+//    @Test
+//    @DisplayName("테스트 데이터 입력 메서드")
+//    @Commit
+//    public void insertToDB() {
+//        List<Method> methodList = new ArrayList<>();
+//
+//        for(int i = 0; i < 1000; i++) {
+//            methodList.add(Method.builder()
+//                    .name("테스트" + i)
+//                    .statusCode(Code.USING_STATE.getCode())
+//                            .explanation("테스트")
+//                    .build());
+//        }
+//
+//        methodRepository.saveAll(methodList);
+//    }
 
     @Test
     @DisplayName("메서드 입력 성공 테스트")
