@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -34,9 +33,6 @@ public class ExcelServiceTest {
 
     @Mock
     private DailyRepository dailyRepository;
-
-    @Mock
-    private StrategyRepository strategyRepository;
 
     @Mock
     private DoubleHandler doubleHandler;
@@ -175,7 +171,7 @@ public class ExcelServiceTest {
     }
 
     @Test // 빈 파일을 업로드할 경우
-    void testUploadExcel_emptyFile() throws Exception {
+    void testUploadExcel_emptyFile() {
 
         MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new byte[0]);
 

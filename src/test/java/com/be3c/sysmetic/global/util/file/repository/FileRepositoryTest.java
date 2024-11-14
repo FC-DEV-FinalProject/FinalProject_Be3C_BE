@@ -1,9 +1,8 @@
-package com.be3c.sysmetic;
+package com.be3c.sysmetic.global.util.file.repository;
 
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
 import com.be3c.sysmetic.global.util.file.entity.File;
-import com.be3c.sysmetic.global.util.file.repository.FileRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
