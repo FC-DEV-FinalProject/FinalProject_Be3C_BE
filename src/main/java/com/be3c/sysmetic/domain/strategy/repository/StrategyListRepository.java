@@ -37,10 +37,6 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
     Page<Strategy> findAllByTraderAndStatusCode(Member trader, String statusCode, Pageable pageable);
 
 
-    // 트레이더가 등록한 전략수
-    // Long countByTraderId(Long traderId);
-
-
     // Pageable 반환 메서드
     default Pageable getPageable(Integer pageNum, String property) {
         int pageSize = 10;

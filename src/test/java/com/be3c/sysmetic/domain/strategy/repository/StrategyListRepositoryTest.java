@@ -453,7 +453,7 @@ public class StrategyListRepositoryTest {
         do {
             // pageable 객체를 현재 pageNum에 맞게 생성
             Pageable pageable = PageRequest.of(pageNum, 10, Sort.by(Sort.Order.desc("accumProfitLossRate")));
-            page = strategyListRepository.findByTrader(getTrader("강남아빠"), pageable);
+            page = strategyListRepository.findAllByTraderAndStatusCode(getTrader("강남아빠"), "ST001", pageable);
 
             assertTrue(page.hasContent());
             assertTrue(page.getSort().isSorted());
