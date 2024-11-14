@@ -3,16 +3,16 @@ package com.be3c.sysmetic.domain.strategy.controller;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
+import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
-import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,7 +44,6 @@ public class MethodController {
         4. SELECT 값이 존재한다면? DEPLICATE_RESOURCE 코드를 반환한다.
         5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
      */
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/method/availability")
     public ResponseEntity<ApiResponse<String>> duplCheck(
             @RequestParam String name
@@ -57,9 +56,11 @@ public class MethodController {
                 .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 이름입니다."));
     }
 
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
-//    @GetMapping("/admin/method/{id:[0-9]+}")
-    @GetMapping("/admin/method/{id}")
+    /*
+        1. 만약 숫자로만 이루어진 값이 PathVariable로 넘어온다면, 해당 메서드로 진입한다.
+        2.
+     */
+    @GetMapping("/admin/method/{id:[0-9]+}")
     public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
             @PathVariable Long id
     ) throws Exception {
@@ -67,45 +68,46 @@ public class MethodController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(methodService.findById(id)));
         } catch (EntityNotFoundException |
-                 IllegalArgumentException e) {
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @GetMapping("/admin/methodlist/{page}")
-    public ResponseEntity<ApiResponse<PageResponse<MethodGetResponseDto>>> getMethods(
-            @PathVariable Integer page
+    @GetMapping("/admin/method")
+    public ResponseEntity<ApiResponse<Page<MethodGetResponseDto>>> getMethods(
+            @RequestParam Integer page
     ) throws Exception {
         try {
-            PageResponse<MethodGetResponseDto> method_page =
-                    methodService.findMethodPage(page);
-
+            Page<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException |
+                 NoSuchElementException |
+                 IllegalArgumentException |
+                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
     @PostMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> postMethod(
-            @Valid @RequestBody MethodPostRequestDto method_post_request
+            @RequestBody MethodPostRequestDto method_post_request
     ) throws Exception {
         try {
             if(methodService.insertMethod(method_post_request)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
@@ -116,7 +118,7 @@ public class MethodController {
      */
     @PutMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto method_put_request
+            @RequestBody MethodPutRequestDto method_put_request
     ) throws Exception {
         try {
             if(methodService.updateMethod(method_put_request)) {
@@ -130,15 +132,14 @@ public class MethodController {
                  IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
     /*
         매매 유형 삭제 메서드
      */
-//    @DeleteMapping("/admin/method/{id:[0-9]+}")
-    @DeleteMapping("/admin/method/{id}")
+    @DeleteMapping("/admin/method/{id:[0-9]+}")
     public ResponseEntity<ApiResponse<String>> deleteMethod(
             @PathVariable Long id
     ) throws Exception {
@@ -154,7 +155,7 @@ public class MethodController {
                  IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 }
