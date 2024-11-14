@@ -9,6 +9,7 @@ import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +97,7 @@ public class MethodController {
 
     @PostMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> postMethod(
-            @RequestBody MethodPostRequestDto method_post_request
+            @Valid @RequestBody MethodPostRequestDto method_post_request
     ) throws Exception {
         try {
             if(methodService.insertMethod(method_post_request)) {
@@ -119,7 +120,7 @@ public class MethodController {
      */
     @PutMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> putMethod(
-            @RequestBody MethodPutRequestDto method_put_request
+            @Valid @RequestBody MethodPutRequestDto method_put_request
     ) throws Exception {
         try {
             if(methodService.updateMethod(method_put_request)) {

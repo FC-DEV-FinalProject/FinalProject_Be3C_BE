@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +110,7 @@ public class StockController {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> saveitem(
-            @RequestBody StockPostRequestDto stockRequestDto
+            @Valid @RequestBody StockPostRequestDto stockRequestDto
     ) throws Exception {
         try {
             if(stockService.saveItem(stockRequestDto)) {
@@ -134,7 +135,7 @@ public class StockController {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> updateItem(
-            @RequestBody StockPutRequestDto stockPutRequestDto
+            @Valid @RequestBody StockPutRequestDto stockPutRequestDto
     ) throws Exception {
         try {
             if(stockService.updateItem(stockPutRequestDto)) {
