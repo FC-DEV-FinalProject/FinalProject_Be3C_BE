@@ -41,7 +41,7 @@ public class StrategyListController {
     /*
         searchByTrader : 트레이더 닉네임으로 검색, 팔로우 수 내림차순 정렬
     */
-    @GetMapping("/strategy/trader")          // 요청 경로 : localhost:8080/strategy/trader?nickname=트레이더1
+    @GetMapping("/strategy/trader")          // 요청 경로 : localhost:8080/strategy/trader?nickname=트레이더1  -> 트레이더119가 21개 전략을 가져서 첫 번째여야 함
     public ApiResponse<PageResponse<TraderNicknameListDto>> searchByTraderNickname(
             @RequestParam("nickname") String nickname, @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
 
@@ -57,11 +57,11 @@ public class StrategyListController {
 
 
     /*
-        getStrategiesByTrader : 트레이더별 전략 목록
+         getStrategiesByTraderId : 트레이더별 전략 목록
         searchByTraderNickname 트레이더 검색 -> 한 명 선택 -> getStrategiesByTrader 트레이더의 전략 목록 보여줌
     */
     @GetMapping("/strategy/choose-trader")         // 요청 경로 : localhost:8080/strategy/choose-trader?traderId=195
-    public ApiResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTrader(
+    public ApiResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTraderId(
             @RequestParam("traderId") Long traderId, @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) throws Exception {
         PageResponse<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
 

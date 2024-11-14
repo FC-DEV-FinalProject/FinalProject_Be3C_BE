@@ -90,13 +90,30 @@ public class InsertDummyStrategy implements CommandLineRunner {
             strategyRepository.saveAndFlush(s);
         }
 
-        // 특정 트레이더의 추가 전략 더미 데이터
+        // 트레이더 닉네임 조회를 위한 전략 더미 데이터
+        for (int i = 0; i < 20; i++) {
+            Strategy s = Strategy.builder()
+                    .trader(getTrader("트레이더119"))
+                    .method(getMethod())
+                    .statusCode("ST001")
+                    .name("전략" + (i + 1) + "버전2")
+                    .cycle('P')
+                    .content("전략" + (i + 1) + " 소개 내용")
+                    .followerCount((long) ((Math.random() * 100) + 1))
+                    .accumProfitLossRate(Math.random() * 100)
+                    .createdBy(getTrader("트레이더119").getId())
+                    .modifiedBy(getTrader("트레이더119").getId())
+                    .build();
+            strategyRepository.saveAndFlush(s);
+        }
+
+        // 비공개인 전략 추가 - 트레이더 닉네임으로 검색 시 아래 전략 개수 세면 안됨
         for (int i = 0; i < 20; i++) {
             Strategy s = Strategy.builder()
                     .trader(getTrader("트레이더1"))
                     .method(getMethod())
-                    .statusCode("ST001")
-                    .name("전략" + (i + 1) + "버전2")
+                    .statusCode("ST002")
+                    .name("비공개 전략" + (i + 1))
                     .cycle('P')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
@@ -106,6 +123,7 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .build();
             strategyRepository.saveAndFlush(s);
         }
+
     }
 
     private Member getTrader(String nickname) {
