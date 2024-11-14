@@ -9,6 +9,7 @@ import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +77,9 @@ public class MethodController {
     }
 
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @GetMapping("/admin/methodlist")
+    @GetMapping("/admin/methodlist/{page}")
     public ResponseEntity<ApiResponse<PageResponseDto<MethodGetResponseDto>>> getMethods(
-            @RequestParam Integer page
+            @PathVariable Integer page
     ) throws Exception {
         try {
             PageResponseDto<MethodGetResponseDto> method_page =
@@ -86,16 +87,15 @@ public class MethodController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(method_page));
-        } catch (EntityNotFoundException |
-                 IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
     @PostMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> postMethod(
-            @RequestBody MethodPostRequestDto method_post_request
+            @Valid @RequestBody MethodPostRequestDto method_post_request
     ) throws Exception {
         try {
             if(methodService.insertMethod(method_post_request)) {
@@ -119,7 +119,7 @@ public class MethodController {
      */
     @PutMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> putMethod(
-            @RequestBody MethodPutRequestDto method_put_request
+            @Valid @RequestBody MethodPutRequestDto method_put_request
     ) throws Exception {
         try {
             if(methodService.updateMethod(method_put_request)) {
@@ -133,14 +133,15 @@ public class MethodController {
                  IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
     /*
         매매 유형 삭제 메서드
      */
-    @DeleteMapping("/admin/method/{id:[0-9]+}")
+//    @DeleteMapping("/admin/method/{id:[0-9]+}")
+    @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<String>> deleteMethod(
             @PathVariable Long id
     ) throws Exception {
@@ -156,7 +157,7 @@ public class MethodController {
                  IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 }
