@@ -35,15 +35,13 @@ public class StockRepositoryTest {
     @Autowired
     StockRepository stockRepository;
 
-    private static String[] STATUS_CODE = {"US001", "US002"};
-
     @Autowired
     EntityManager entityManager;
 
     @BeforeEach
     public void setUp() {
-        entityManager.createNativeQuery("ALTER TABLE Stock AUTO_INCREMENT = 1")
-                .executeUpdate();
+//        entityManager.createNativeQuery("ALTER TABLE Stock AUTO_INCREMENT = 1")
+//                .executeUpdate();
         stockRepository.deleteAll();
     }
 
@@ -65,13 +63,13 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository
-                    .findByIdAndStatusCode((long) i + 1, STATUS_CODE[0]);
+                    .findByIdAndStatusCode((long) i + 1, Code.USING_STATE.getCode());
 
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
@@ -84,7 +82,7 @@ public class StockRepositoryTest {
             log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
 
             // then
-            Optional<Stock> stock = stockRepository.findByIdAndStatusCode(find_rand + 1, STATUS_CODE[0]);
+            Optional<Stock> stock = stockRepository.findByIdAndStatusCode(find_rand + 1, Code.USING_STATE.getCode());
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (find_rand + 1));
 
@@ -105,20 +103,20 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository
-                    .findByIdAndStatusCode((long) i + 1, STATUS_CODE[0]);
+                    .findByIdAndStatusCode((long) i + 1, Code.USING_STATE.getCode());
 
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
         }
 
         // then
-        Optional<Stock> stock = stockRepository.findByIdAndStatusCode(create_rand + 11, STATUS_CODE[0]);
+        Optional<Stock> stock = stockRepository.findByIdAndStatusCode(create_rand + 11, Code.USING_STATE.getCode());
         assertThrows(NoSuchElementException.class, stock::get);
     }
 
@@ -135,13 +133,13 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository
-                    .findByIdAndStatusCode((long) i + 1, STATUS_CODE[0]);
+                    .findByIdAndStatusCode((long) i + 1, Code.USING_STATE.getCode());
 
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
@@ -154,7 +152,7 @@ public class StockRepositoryTest {
             log.info("찾아본 테스트 종목 번호 : {}번", find_rand);
 
             Optional<Stock> stock = stockRepository.findByNameAndStatusCode(
-                    stocks.get((int) find_rand).getName(), STATUS_CODE[0]
+                    stocks.get((int) find_rand).getName(), Code.USING_STATE.getCode()
             );
             // then
             assertThat(stock).isPresent();
@@ -176,20 +174,20 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository
-                    .findByIdAndStatusCode((long) i + 1, STATUS_CODE[0]);
+                    .findByIdAndStatusCode((long) i + 1, Code.USING_STATE.getCode());
 
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
         }
 
         // then
-        Optional<Stock> stock = stockRepository.findByNameAndStatusCode("이상한_값", STATUS_CODE[0]);
+        Optional<Stock> stock = stockRepository.findByNameAndStatusCode("이상한_값", Code.USING_STATE.getCode());
         assertThrows(NoSuchElementException.class, stock::get);
     }
 
@@ -209,13 +207,13 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository
-                    .findByIdAndStatusCode((long) i + 1, STATUS_CODE[0]);
+                    .findByIdAndStatusCode((long) i + 1, Code.USING_STATE.getCode());
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
         }
@@ -262,13 +260,13 @@ public class StockRepositoryTest {
         for (int i = 0; i < create_rand; i++) {
             stocks.add(Stock.builder()
                     .name("테스트" + (i + 1))
-                    .statusCode(STATUS_CODE[0])
+                    .statusCode(Code.USING_STATE.getCode())
                     .build());
 
             stockRepository.save(stocks.get(i));
 
             Optional<Stock> stock = stockRepository.findByIdAndStatusCode
-                    ((long) i + 1, STATUS_CODE[0]);
+                    ((long) i + 1, Code.USING_STATE.getCode());
             assertThat(stock).isPresent();
             assertThat(stock.get().getName()).isEqualTo("테스트" + (i + 1));
         }
