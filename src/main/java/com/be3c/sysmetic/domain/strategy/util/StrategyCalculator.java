@@ -64,7 +64,7 @@ public class StrategyCalculator {
             return doubleHandler.cutDouble((standardAmount - 1000) / 1000 * 100);
         } else {
             if(beforeStandardAmount == 0) return 0.0;
-            return doubleHandler.cutDouble((standardAmount - beforeStandardAmount) / beforeStandardAmount) * 100;
+            return doubleHandler.cutDouble((standardAmount - beforeStandardAmount) / beforeStandardAmount * 100);
         }
     }
 
