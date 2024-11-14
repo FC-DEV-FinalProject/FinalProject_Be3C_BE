@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dummy;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
@@ -84,8 +84,8 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) i)
-                    .modifiedBy((long) i)
+                    // .createdBy((long) i)
+                    // .modifiedBy((long) i)
                     .build();
             strategyRepository.saveAndFlush(s);
         }
@@ -101,8 +101,6 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(getTrader("트레이더119").getId())
-                    .modifiedBy(getTrader("트레이더119").getId())
                     .build();
             strategyRepository.saveAndFlush(s);
         }
@@ -118,8 +116,6 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(getTrader("트레이더1").getId())
-                    .modifiedBy(getTrader("트레이더1").getId())
                     .build();
             strategyRepository.saveAndFlush(s);
         }

@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -82,8 +81,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -148,8 +145,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -202,8 +197,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -242,8 +235,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -288,8 +279,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomNum)
-                    .modifiedBy((long) randomNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -336,8 +325,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomNum)
-                    .modifiedBy((long) randomNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -383,8 +370,6 @@ public class StrategyListRepositoryTest {
                 .content("전략 소개 내용")
                 .followerCount((long) (Math.random() * 100))
                 .accumProfitLossRate(Math.random() * 100)
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
         strategyRepository.saveAndFlush(s);
 
@@ -423,8 +408,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomNum)
-                    .modifiedBy((long) randomNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
         }
@@ -439,8 +422,6 @@ public class StrategyListRepositoryTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomNum)
-                    .modifiedBy((long) randomNum)
                     .build();
             strategyRepository.saveAndFlush(s);        // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
 

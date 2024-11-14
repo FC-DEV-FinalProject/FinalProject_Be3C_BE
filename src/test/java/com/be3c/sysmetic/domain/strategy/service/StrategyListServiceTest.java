@@ -1,7 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
+import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
+import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -79,8 +81,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
             em.persist(s);
             em.flush();
@@ -94,19 +94,19 @@ public class StrategyListServiceTest {
         assertNotNull(firstPage.getContent());
 
         // 첫 번째 페이지 전략 반복 검증
-        // for (StrategyListDto dto : firstPage) {
-        //     assertNotNull(dto.getName());
-        //     assertNotNull(dto.getStock());
-        //     assertNotNull(dto.getTraderNickname());
-        //     assertNotNull(dto.getCycle());
-        //     assertNotNull(dto.getAccumProfitLossRate());
-        // }
+        for (int i=0; i < firstPage.getContent().size(); i++) {
+            assertNotNull(firstPage.getContent().get(i).getName());
+            assertNotNull(firstPage.getContent().get(i).getStock());
+            assertNotNull(firstPage.getContent().get(i).getTraderNickname());
+            assertNotNull(firstPage.getContent().get(i).getCycle());
+            assertNotNull(firstPage.getContent().get(i).getAccumProfitLossRate());
+        }
 
         // 첫 페이지 첫 번째 값이 제일 큰 accumProfitLossRate 가져야 함
-        // for (StrategyListDto dto : firstPage) {
-        //     assertTrue(firstPage.getContent().get(0).getAccumProfitLossRate() >= dto.getAccumProfitLossRate());
-        //     System.out.println("dto.getAccumProfitLossRate() = " + dto.getAccumProfitLossRate());
-        // }
+        for (int i=0; i < 10; i++) {
+            assertTrue(firstPage.getContent().get(0).getAccumProfitLossRate() >= firstPage.getContent().get(i).getAccumProfitLossRate());
+            System.out.println("dto.getAccumProfitLossRate() = " + firstPage.getContent().get(i).getAccumProfitLossRate());
+        }
     }
 
 
@@ -135,8 +135,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
 
             // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
@@ -178,8 +176,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
 
             // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
@@ -195,15 +191,15 @@ public class StrategyListServiceTest {
         System.out.println("randomPage = " + randomPage);
 
         // 특정 페이지 가져오기
-        // Page<StrategyListDto> selectPage = strategyListService.findStrategyPage(randomPage);
-        // assertFalse(selectPage.isEmpty(), "선택한 페이지에 데이터 없음.");
-        // double maxProfitRate = selectPage.getContent().get(0).getAccumProfitLossRate();
-        //
-        // // 가져온 페이지도 수익률 순으로 정렬되어야 함
-        // for (StrategyListDto s : selectPage) {
-        //     assertTrue(maxProfitRate >= s.getAccumProfitLossRate());
-        //     System.out.println("s.getAccumProfitLossRate() = " + s.getAccumProfitLossRate());
-        // }
+        PageResponse<StrategyListDto> selectPage = strategyListService.findStrategyPage(randomPage);
+        assertFalse(selectPage.getContent().isEmpty(), "선택한 페이지에 데이터 없음.");
+        double maxProfitRate = selectPage.getContent().get(0).getAccumProfitLossRate();
+
+        // 가져온 페이지도 수익률 순으로 정렬되어야 함
+        for (int i=0; i < selectPage.getContent().size(); i++) {
+            assertTrue(maxProfitRate >= selectPage.getContent().get(i).getAccumProfitLossRate());
+            System.out.println("s.getAccumProfitLossRate() = " + selectPage.getContent().get(i).getAccumProfitLossRate());
+        }
     }
 
 
@@ -232,8 +228,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy((long) randomStrategyNum)
-                    .modifiedBy((long) randomStrategyNum)
                     .build();
 
             // 저장할 때는 하나씩 등록하니까 StrategyRepository 사용해서 하나씩 등록
@@ -247,17 +241,16 @@ public class StrategyListServiceTest {
         int actualTotalPage = strategyListService.getTotalPageNumber("ST001", 10);
         assertEquals(expectedTotalPage, actualTotalPage);
 
-        // for (int i=0; i < actualTotalPage; i++) {
-        //     Page<StrategyListDto> page = strategyListService.findStrategyPage(i);
-        //     assertNotNull(page);
-        //     assertTrue(page.hasContent());
-        //
-        //     for (int j=0; j < page.getContent().size(); j++) {
-        //         assertTrue(page.getContent().get(0).getAccumProfitLossRate() >= page.getContent().get(j).getAccumProfitLossRate());
-        //         System.out.println("accumProfitLossRate = " + page.getContent().get(j).getAccumProfitLossRate());
-        //     }
-        //     System.out.println("=====================");
-        // }
+        for (int i=0; i < actualTotalPage; i++) {
+            PageResponse<StrategyListDto> page = strategyListService.findStrategyPage(i);
+            assertNotNull(page);
+
+            for (int j=0; j < page.getContent().size(); j++) {
+                assertTrue(page.getContent().get(0).getAccumProfitLossRate() >= page.getContent().get(j).getAccumProfitLossRate());
+                System.out.println("accumProfitLossRate = " + page.getContent().get(j).getAccumProfitLossRate());
+            }
+            System.out.println("=====================");
+        }
     }
 
 
@@ -290,8 +283,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(1L)
-                    .modifiedBy(1L)
                     .build();
             em.persist(s);
             em.flush();
@@ -299,17 +290,15 @@ public class StrategyListServiceTest {
         }
 
         // 페이지 하나
-        // Page<TraderListDto> page = strategyListService.findTraderNickname("여의도");
-        // assertNotNull(page);
-        // assertTrue(page.hasContent());
-        // assertEquals(page.getSize(), 10);
-        // long maxFollowerCount = page.getContent().get(0).getFollowerCount();
-        //
-        // for (TraderListDto t : page) {
-        //     assertTrue(t.getNickname().contains("여의도"));
-        //     assertTrue(t.getFollowerCount() <= maxFollowerCount);
-        //     System.out.println("id = " + t.getTraderId() + ", followerCount() = " + t.getFollowerCount());
-        // }
+        PageResponse<TraderNicknameListDto> page = strategyListService.findTraderNickname("여의도", 0);
+        assertNotNull(page);
+        assertEquals(page.getPageSize(), 10);
+        long maxFollowerCount = page.getContent().get(0).getTotalFollow();
+
+        for (int i=0; i < page.getContent().size(); i++) {
+            assertTrue(page.getContent().get(i).getNickname().contains("여의도"));
+            assertTrue(page.getContent().get(i).getTotalFollow() <= maxFollowerCount);
+        }
     }
 
     @Test
@@ -342,8 +331,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(1L)
-                    .modifiedBy(1L)
                     .build();
             em.persist(s);
             em.flush();
@@ -360,8 +347,6 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(1L)
-                    .modifiedBy(1L)
                     .build();
             em.persist(s);
             em.flush();
@@ -374,21 +359,20 @@ public class StrategyListServiceTest {
         assertEquals(expectedTotalPage, actualTotalPage);
 
         // 전체 페이지 조회
-        // for (int i=0; i < (int) Math.ceil(expectedTotalPage / 2.0); i++) {
-        //     Page<TraderListDto> page = strategyListService.findTraderNickname("여의도");
-        //     assertEquals(page.getSize(), 10);
-        //     assertNotNull(page);
-        //     assertTrue(page.getSort().isSorted());
-        //
-        //     long maxFollowerCount = page.getContent().get(0).getFollowerCount();
-        //
-        //     for (int j=0; j < page.getContent().size(); j++) {
-        //         assertTrue(page.getContent().get(i).getNickname().contains("여의도"));
-        //         assertTrue(page.getContent().get(i).getFollowerCount() <= maxFollowerCount);
-        //         System.out.println("닉네임 = " + page.getContent().get(j).getNickname() + ", followerCount = " + page.getContent().get(j).getFollowerCount());
-        //     }
-        //     System.out.println("=====" + i + "======");
-        // }
+        for (int i=0; i < (int) Math.ceil(expectedTotalPage / 2.0); i++) {
+            PageResponse<TraderNicknameListDto> page = strategyListService.findTraderNickname("여의도", 0);
+            assertEquals(page.getPageSize(), 10);
+            assertNotNull(page);
+
+            long maxFollowerCount = page.getContent().get(0).getTotalFollow();
+
+            for (int j=0; j < page.getContent().size(); j++) {
+                assertTrue(page.getContent().get(j).getNickname().contains("여의도"));
+                assertTrue(page.getContent().get(i).getTotalFollow() <= maxFollowerCount);
+                System.out.println("닉네임 = " + page.getContent().get(j).getNickname() + ", followerCount = " + page.getContent().get(j).getTotalFollow());
+            }
+            System.out.println("=====" + i + "======");
+        }
     }
 
 
@@ -413,16 +397,14 @@ public class StrategyListServiceTest {
                 .content("전략 소개 내용")
                 .followerCount((long) (Math.random() * 100))
                 .accumProfitLossRate(Math.random() * 100)
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
         em.persist(s);
         em.flush();
         em.clear();
 
 
-        // Page<TraderListDto> page = strategyListService.findTraderNickname("강남");
-        // assertFalse(page.hasContent());
+        PageResponse<TraderNicknameListDto> page = strategyListService.findTraderNickname("강남", 0);
+        assertTrue(page.getContent().isEmpty());
     }
 
 
@@ -453,24 +435,22 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(1L)
-                    .modifiedBy(1L)
                     .build();
             em.persist(s);
             em.flush();
             em.clear();
         }
 
-        // Page<StrategyListByTraderDto> page = strategyListService.findStrategiesByTrader(getTrader("나는부자").getId(), 0);
-        // assertNotNull(page);
-        // assertEquals(page.getSize(), 10);
-        // double maxProfitRate = page.getContent().get(0).getAccumProfitLossRate();
-        //
-        // for (StrategyListByTraderDto s : page) {
-        //     assertNotNull(s);
-        //     assertEquals(s.getTraderNickname(), "나는부자");
-        //     assertTrue(s.getAccumProfitLossRate() <= maxProfitRate);
-        // }
+        PageResponse<StrategyListByTraderDto> page = strategyListService.findStrategiesByTrader(getTrader("나는부자").getId(), 0);
+        assertNotNull(page);
+        assertEquals(page.getPageSize(), 10);
+        double maxProfitRate = page.getContent().get(0).getAccumProfitLossRate();
+
+        for (int i=0; i < page.getContent().size(); i++){
+            assertNotNull(page.getContent().get(i));
+            assertEquals(page.getContent().get(i).getTraderNickname(), "나는부자");
+            assertTrue(page.getContent().get(i).getAccumProfitLossRate() <= maxProfitRate);
+        }
     }
 
 
@@ -500,18 +480,15 @@ public class StrategyListServiceTest {
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) (Math.random() * 100))
                     .accumProfitLossRate(Math.random() * 100)
-                    .createdBy(1L)
-                    .modifiedBy(1L)
                     .build();
             em.persist(s);
             em.flush();
             em.clear();
         }
 
-        // Page<StrategyListByTraderDto> page = strategyListService.findStrategiesByTrader(getTrader("여의도전략가").getId(), 0);
-        // assertNotNull(page);
-        // assertEquals(page.getSize(), 10);
-        // assertFalse(page.hasContent());
+        PageResponse<StrategyListByTraderDto> page = strategyListService.findStrategiesByTrader(getTrader("여의도전략가").getId(), 0);
+        assertNotNull(page);
+        assertEquals(page.getPageSize(), 10);
     }
 
 

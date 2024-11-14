@@ -52,7 +52,7 @@ public class UpdateStrategyServiceImpl implements UpdateStrategyService {
         updateMethod(requestDto.getMethodId(), existingStrategy);
         updateCycle(requestDto.getCycle(), existingStrategy);
         updateStrategyStockReferences(existingStrategy, requestDto.getStockIdList());
-        existingStrategy.setMinOperationAmount(requestDto.getMinOperationAmount());
+        // existingStrategy.setMinOperationAmount(requestDto.getMinOperationAmount());
         existingStrategy.setContent(requestDto.getContent());
 
         return strategyRepository.save(existingStrategy);

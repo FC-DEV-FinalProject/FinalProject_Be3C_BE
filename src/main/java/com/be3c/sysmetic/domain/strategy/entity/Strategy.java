@@ -1,9 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "strategy")
-public class Strategy {
+public class Strategy extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,9 +40,6 @@ public class Strategy {
     @Column(name = "strategy_cycle", nullable = false)
     private Character cycle;
 
-    @Column(name = "min_operation_amount", nullable = false)
-    private Double minOperationAmount;
-
     @Column(name = "content", nullable = false)
     private String content;
 
@@ -60,21 +60,11 @@ public class Strategy {
     @Column(name = "accum_profit_loss_rate", nullable = true)
     private Double accumProfitLossRate;
 
+    @CreationTimestamp
     @Column(name = "strategy_created_date", nullable = false)
     private LocalDateTime strategyCreatedDate;
 
+    @LastModifiedDate
     @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 }

@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
