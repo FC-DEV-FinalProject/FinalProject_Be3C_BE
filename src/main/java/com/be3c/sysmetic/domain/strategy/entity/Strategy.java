@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,27 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "strategy")
-public class Strategy {
-
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-        strategyCreatedDate = now;
-        strategyModifiedDate = now;
-        followerCount = 0L;
-        kpRatio = 0.0;
-        smScore = 0.0;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        modifiedDate = now;
-        strategyModifiedDate = now;
-    }
-
+public class Strategy extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -70,22 +51,4 @@ public class Strategy {
 
     @Column(name = "sm_score")
     private Double smScore;
-
-    @Column(name = "strategy_created_date", nullable = false)
-    private LocalDateTime strategyCreatedDate;
-
-    @Column(name = "strategy_modified_date", nullable = false)
-    private LocalDateTime strategyModifiedDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 }

@@ -1,10 +1,13 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyApprovalGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +49,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     }
 
     @Override
-    public PageResponse<AdminStrategyGetResponseDto> findApproveStrategyPage(Integer page) {
+    public PageResponse<AdminStrategyApprovalGetResponseDto> findApproveStrategyPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
 
         Page<AdminStrategyGetResponseDto> find_page
@@ -60,11 +63,30 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
             throw new NoSuchElementException("잘못된 페이지 요청입니다.");
         }
 
-        return PageResponse.<AdminStrategyGetResponseDto>builder()
+        return PageResponse.<AdminStrategyApprovalGetResponseDto>builder()
                 .totalPages(find_page.getTotalPages())
                 .currentPage(page)
                 .pageSize(find_page.getNumberOfElements())
                 .totalElement(find_page.getTotalElements())
                 .build();
+    }
+
+    @Override
+    public boolean StrategyApproveApplyAllow(Long id) {
+        StrategyApprovalHistory find_approval = strategyApprovalRepository
+                    .findByIdAndStatusCode(
+                            id,
+                            Code.APPROVE_WAIT.getCode()
+                    ).orElseThrow(
+                            () -> new EntityNotFoundException("해당 전략 승인 신청을 찾을 수 없습니다.")
+                );
+
+        find_approval.setStatusCode(Code.APPROVE_SUCCESS.getCode());
+
+        find_approval.getStrategy().setStatusCode(Code.OPEN_STRATEGY.getCode());
+
+        strategyApprovalRepository.save(find_approval);
+
+        return true;
     }
 }

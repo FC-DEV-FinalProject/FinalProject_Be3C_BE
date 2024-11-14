@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -21,4 +22,9 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long> {
         FROM Strategy s
     """)
     Page<AdminStrategyGetResponseDto> findStrategiesPage(Pageable pageable);
+
+    // 닉네임으로 트레이더 조회, 일치한 닉네임, 전략 수 내림차순 정렬
+    @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
+            "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")
+    Page<Strategy> findByTraderNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
 }
