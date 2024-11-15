@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
-//@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
 @Table(name = "member")
