@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.domain.member.controller;
 
-import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetRequestDto;
-import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.member.dto.FollowDeleteRequestDto;
-import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.service.InterestStrategyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -87,6 +84,34 @@ public class InterestStrategyController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+        }
+    }
+
+    /*
+        관심 전략이 속한 폴더 이동
+        1. 폴더 이동 성공했을 때 : OK
+        2. 폴더 이동 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 옮기려는 폴더가 존재하지 않을 때 : NOT_FOUND
+        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
+     */
+    @PutMapping("/strategy/follow")
+    public ResponseEntity<ApiResponse<String>> MoveFolder(
+            @Valid @RequestBody FollowPutRequestDto followPutRequestDto
+    ) throws Exception {
+        try {
+            if(interestStrategyService.moveFolder(followPutRequestDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail(ErrorCode.NOT_FOUND));

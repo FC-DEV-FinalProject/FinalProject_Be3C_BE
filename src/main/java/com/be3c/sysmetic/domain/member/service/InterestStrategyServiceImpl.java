@@ -1,11 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetRequestDto;
-import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.member.dto.FollowDeleteRequestDto;
-import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.*;
-import com.be3c.sysmetic.domain.member.message.FollowFailMessage;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyLogRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
@@ -89,20 +85,40 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         throw new NoSuchElementException();
     }
 
+    @Override
+    public boolean moveFolder(FollowPutRequestDto followPutRequestDto) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        InterestStrategy interestStrategy = interestStrategyRepository
+                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
+                        userId,
+                        followPutRequestDto.getOriginFolderId(),
+                        followPutRequestDto.getStrategyId(),
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
+
+        interestStrategy.setFolder(folderRepository.findByIdAndStatusCode(
+                followPutRequestDto.getToFolderId(),
+                USING_STATE.getCode()
+        ).orElseThrow(EntityNotFoundException::new));
+
+        return false;
+    }
+
     /*
-        1. SecurityContext에서 유저 아이디를 찾는다.
-        2. userId + strategyId + statusCode를 사용해서 해당 유저의 관심 전략을 가져온다.
-        3. 만약 관심 전략이 존재하지 않는다면,
-            3-1. 관심 전략을 등록한다.
-            3-2. 관심 전략 등록 로그를 등록한다.
-            3-3. true를 반환해 성공 여부를 전달한다..
-        4. 만약 관심 전략이 존재한다면,
-            4-1. 찾은 관심 전략의 상태 코드를 확인한다.
-            4-2. 관심 전략의 상태 코드가 삭제 상태라면 상태 코드를 팔로우 중으로 변경한다.
-            4-3. 관심 전략 등록 로그를 등록한다.
-            4-4. true를 반환해 성공 여부를 전달한다..
-        5. 관심 전략을 팔로우 중이라면, IllegalArgumentException을 발생시킨다.
-     */
+            1. SecurityContext에서 유저 아이디를 찾는다.
+            2. userId + strategyId + statusCode를 사용해서 해당 유저의 관심 전략을 가져온다.
+            3. 만약 관심 전략이 존재하지 않는다면,
+                3-1. 관심 전략을 등록한다.
+                3-2. 관심 전략 등록 로그를 등록한다.
+                3-3. true를 반환해 성공 여부를 전달한다..
+            4. 만약 관심 전략이 존재한다면,
+                4-1. 찾은 관심 전략의 상태 코드를 확인한다.
+                4-2. 관심 전략의 상태 코드가 삭제 상태라면 상태 코드를 팔로우 중으로 변경한다.
+                4-3. 관심 전략 등록 로그를 등록한다.
+                4-4. true를 반환해 성공 여부를 전달한다..
+            5. 관심 전략을 팔로우 중이라면, IllegalArgumentException을 발생시킨다.
+         */
     @Override
     public boolean follow(FollowPostRequestDto followPostRequestDto) {
         Long userId = securityUtils.getUserIdInSecurityContext();
