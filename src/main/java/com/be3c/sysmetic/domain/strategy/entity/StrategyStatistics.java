@@ -1,7 +1,10 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -13,23 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "strategy_statistics")
-public class StrategyStatistics {
-
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdDate = now;
-        modifiedDate = now;
-        firstRegistrationDate = now;
-        lastRegistrationDate = now;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        LocalDateTime now = LocalDateTime.now();
-        modifiedDate = now;
-        lastRegistrationDate = now;
-    }
+public class StrategyStatistics extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -125,22 +112,12 @@ public class StrategyStatistics {
     @Column(name = "standard_deviation", nullable = false)
     private Double standardDeviation;
 
+    @CreatedDate
     @Column(name = "first_registration_date", nullable = false)
     private LocalDateTime firstRegistrationDate;
 
+    @LastModifiedDate
     @Column(name = "last_registration_date", nullable = false)
     private LocalDateTime lastRegistrationDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 
 }

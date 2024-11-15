@@ -26,6 +26,7 @@ public class Stock extends BaseEntity {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
+    @Column(name = "code", nullable = false)
     private String code;
 
     @Column(name = "country")
@@ -43,4 +44,5 @@ public class Stock extends BaseEntity {
     @CreatedDate
     @Column(name = "stock_created_date", nullable = false)
     private LocalDateTime stockCreatedDate;
+
 }
