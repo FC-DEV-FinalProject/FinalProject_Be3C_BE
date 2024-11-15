@@ -10,5 +10,5 @@ public enum FollowFailMessage {
     NOT_FOUND_FOLDER("요청한 폴더를 찾을 수 없습니다."),
     NOT_FOUND_STRATEGY("해당 관심 전략을 찾을 수 없습니다.");
 
-    private String message;
+    private final String message;
 }

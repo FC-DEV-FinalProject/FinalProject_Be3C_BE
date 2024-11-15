@@ -4,7 +4,6 @@ import com.be3c.sysmetic.domain.member.dto.FolderListResponseDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
-import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.exception.ResourceLimitExceededException;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
@@ -15,15 +14,11 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 

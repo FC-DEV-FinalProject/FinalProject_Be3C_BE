@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.strategy.controller;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
-import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,12 +38,9 @@ public class MethodController {
      */
 
     /*
-        중복 확인 메서드
-        1. url에 문자 or 숫자로 이루어진 값이 넘어온다면 이 메서드로 넘어온다.
-        2. url의 값을 name에 저장한다.
-        3. 해당 값으로 SELECT WHERE name = :name을 진행한다.
-        4. SELECT 값이 존재한다면? DEPLICATE_RESOURCE 코드를 반환한다.
-        5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
+        매매 유형 명 중복 확인 Api
+        1. 중복된 이름의 매매 유형이 존재하지 않을 때 : OK
+        2. 중복된 이름의 매매 유형이 존재할 때 : CONFLICT
      */
     @GetMapping("/admin/method/availability")
     public ResponseEntity<ApiResponse<String>> getCheckDupl(
@@ -60,8 +55,8 @@ public class MethodController {
     }
 
     /*
-        1. 만약 숫자로만 이루어진 값이 PathVariable로 넘어온다면, 해당 메서드로 진입한다.
-        2.
+        매매 유형 찾기 Api
+
      */
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")

@@ -33,6 +33,8 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     Optional<Folder> findByMemberIdAndNameAndStatusCode(Long memberId, String folderName, String statusCode);
 
+    Optional<Folder> findByIdAndStatusCode(Long folderId, String statusCode);
+
     // insert, delete
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
