@@ -48,7 +48,7 @@ public class MethodController {
         5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
      */
     @GetMapping("/admin/method/availability")
-    public ResponseEntity<ApiResponse<String>> duplCheck(
+    public ResponseEntity<ApiResponse<String>> checkDupl(
             @RequestParam String name
     ) throws Exception {
         if(methodService.duplCheck(name)) {
@@ -86,9 +86,9 @@ public class MethodController {
             @RequestParam Integer page
     ) throws Exception {
         try {
-            PageResponse<MethodGetResponseDto> method_page = methodService.findMethodPage(page);
+            PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(method_page));
+                    .body(ApiResponse.success(methodList));
         } catch (EntityNotFoundException |
                  NoSuchElementException |
                  IllegalArgumentException |
@@ -100,10 +100,10 @@ public class MethodController {
 
     @PostMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> postMethod(
-            @Valid @RequestBody MethodPostRequestDto method_post_request
+            @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
     ) throws Exception {
         try {
-            if(methodService.insertMethod(method_post_request)) {
+            if(methodService.insertMethod(methodPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
@@ -127,10 +127,10 @@ public class MethodController {
      */
     @PutMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto method_put_request
+            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
     ) throws Exception {
         try {
-            if(methodService.updateMethod(method_put_request)) {
+            if(methodService.updateMethod(methodPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }

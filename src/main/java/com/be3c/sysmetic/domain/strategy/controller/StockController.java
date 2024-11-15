@@ -40,7 +40,7 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("admin/stock/availability")
-    public ResponseEntity<ApiResponse<String>> getCheckName(
+    public ResponseEntity<ApiResponse<String>> checkDupl(
         @RequestParam String name
     ) throws Exception {
         try {
@@ -66,10 +66,10 @@ public class StockController {
             @PathVariable Long id
     ) throws Exception {
         try {
-            StockGetResponseDto find_stock = stockService.findItemById(id);
+            StockGetResponseDto findStock = stockService.findItemById(id);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(find_stock));
+                    .body(ApiResponse.success(findStock));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
@@ -90,10 +90,10 @@ public class StockController {
             @PathVariable Integer page
     ) throws Exception {
         try {
-            PageResponse<StockGetResponseDto> stock_page = stockService.findItemPage(page);
+            PageResponse<StockGetResponseDto> stockPage = stockService.findItemPage(page);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(stock_page));
+                    .body(ApiResponse.success(stockPage));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
@@ -110,10 +110,10 @@ public class StockController {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<ApiResponse<String>> saveitem(
-            @Valid @RequestBody StockPostRequestDto stockRequestDto
+            @Valid @RequestBody StockPostRequestDto stockPostRequestDto
     ) throws Exception {
         try {
-            if(stockService.saveItem(stockRequestDto)) {
+            if(stockService.saveItem(stockPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }

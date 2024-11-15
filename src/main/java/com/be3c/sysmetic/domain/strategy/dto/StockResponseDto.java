@@ -12,5 +12,5 @@ import lombok.Setter;
 public class StockResponseDto {
     private Long id;
     private String name;
-    private String filepath;
+    private String filePath;
 }

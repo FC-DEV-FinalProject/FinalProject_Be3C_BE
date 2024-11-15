@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.be3c.sysmetic.global.common.Code.NOT_USING_STATE;
+import static com.be3c.sysmetic.global.common.Code.USING_STATE;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,14 +35,15 @@ public class MethodServiceImpl implements MethodService {
      */
     @Override
     public boolean duplCheck(String name) {
-        return methodRepository.findByNameAndStatusCode(name, Code.USING_STATE.getCode()).isEmpty();
+        return methodRepository.findByNameAndStatusCode(name, USING_STATE.getCode()).isEmpty();
     }
 
     @Override
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
         Method method = methodRepository.findByIdAndStatusCode(
-                id, Code.USING_STATE.getCode())
-                .orElseThrow(EntityNotFoundException::new);
+                        id,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
         // 아이콘 파일 패스 찾는 메서드 필요
         return new MethodGetResponseDto(method.getId(), method.getName());
     }
@@ -49,7 +53,7 @@ public class MethodServiceImpl implements MethodService {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
 
         Page<MethodGetResponseDto> find_page = methodRepository
-                .findAllByStatusCode(pageable, Code.USING_STATE.getCode());
+                .findAllByStatusCode(pageable, USING_STATE.getCode());
 
         if(!find_page.hasContent()) {
             throw new EntityNotFoundException();
@@ -72,15 +76,13 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        Optional<Method> method = methodRepository.findByNameAndStatusCode(methodPostRequestDto.getName(), Code.USING_STATE.getCode());
-
-        if(method.isPresent()) {
+        if(!duplCheck(methodPostRequestDto.getName())) {
             throw new ConflictException();
         }
 
         methodRepository.save(Method.builder()
                 .name(methodPostRequestDto.getName())
-                .statusCode(Code.USING_STATE.getCode())
+                .statusCode(USING_STATE.getCode())
                 .build());
 
         return true;
@@ -92,16 +94,13 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        methodRepository.findByNameAndStatusCode(
-                methodPutRequestDto.getName(),
-                Code.USING_STATE.getCode()
-        ).ifPresent(a -> {
-            throw new IllegalArgumentException();
-        });
+        if(duplCheck(methodPutRequestDto.getName())) {
+            throw new ConflictException();
+        }
 
         Method method = methodRepository.findByIdAndStatusCode(
                             methodPutRequestDto.getId(),
-                            Code.USING_STATE.getCode())
+                            USING_STATE.getCode())
                     .orElseThrow(EntityNotFoundException::new);
 
         method.setName(methodPutRequestDto.getName());
@@ -116,10 +115,11 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public boolean deleteMethod(Long id) {
         Method method = methodRepository.findByIdAndStatusCode(
-                id, Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("해당 매매 유형이 없습니다."));
+                        id,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
 
-        method.setStatusCode(Code.NOT_USING_STATE.getCode());
+        method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
         return true;
     }

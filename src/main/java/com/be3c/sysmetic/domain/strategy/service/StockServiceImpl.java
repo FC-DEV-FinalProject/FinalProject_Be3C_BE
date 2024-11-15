@@ -30,8 +30,11 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
 
     @Override
-    public boolean duplcheck(String name) {
-        return stockRepository.findByName(name).isEmpty();
+    public boolean duplCheck(String name) {
+        return stockRepository.findByNameAndStatusCode(
+                name,
+                USING_STATE.getCode()
+        ).isEmpty();
     }
 
     @Override
@@ -50,13 +53,13 @@ public class StockServiceImpl implements StockService {
     @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
+        Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
-        if (stock_page.hasContent()) {
+        if (stockPage.hasContent()) {
             return PageResponse.<StockGetResponseDto>builder()
-                    .totalPages(stock_page.getTotalPages())
-                    .totalElement(stock_page.getTotalElements())
-                    .pageSize(stock_page.getNumberOfElements())
+                    .totalPages(stockPage.getTotalPages())
+                    .totalElement(stockPage.getTotalElements())
+                    .pageSize(stockPage.getNumberOfElements())
                     .currentPage(page)
                     .build();
         }
@@ -64,20 +67,17 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public boolean saveItem(StockPostRequestDto requestDto) {
-        if(!requestDto.getCheckDuplicate()) {
+    public boolean saveItem(StockPostRequestDto stockPostRequestDto) {
+        if(!stockPostRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
 
-        if(stockRepository.findByNameAndStatusCode(
-                requestDto.getName(),
-                USING_STATE.getCode()
-        ).isPresent()) {
-            throw new IllegalArgumentException();
+        if(!duplCheck(stockPostRequestDto.getName())) {
+            throw new ConflictException();
         }
 
         stockRepository.save(Stock.builder()
-                        .name(requestDto.getName())
+                        .name(stockPostRequestDto.getName())
                         .statusCode(USING_STATE.getCode())
                         .build());
 
@@ -86,24 +86,21 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public boolean updateItem(StockPutRequestDto requestDto) {
-        if(!requestDto.getCheckDuplicate()) {
+    public boolean updateItem(StockPutRequestDto stockPutRequestDto) {
+        if(!stockPutRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
 
-        stockRepository.findByNameAndStatusCode(
-                requestDto.getName(),
-                USING_STATE.getCode()
-        ).ifPresent(a -> {
+        if(!duplCheck(stockPutRequestDto.getName())) {
             throw new ConflictException();
-        });
+        }
 
         Stock find_stock = stockRepository.findByIdAndStatusCode(
-                requestDto.getId(),
-                USING_STATE.getCode())
-                .orElseThrow(EntityNotFoundException::new);
+                        stockPutRequestDto.getId(),
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setName(requestDto.getName());
+        find_stock.setName(stockPutRequestDto.getName());
         // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
 
         return true;
@@ -111,14 +108,13 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public boolean deleteItem(Long id) {
-        Stock find_stock = stockRepository.findByIdAndStatusCode
-                (
+        Stock findStock = stockRepository.findByIdAndStatusCode(
                         id,
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
-        stockRepository.save(find_stock);
+        findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
+        stockRepository.save(findStock);
 
         return true;
     }
