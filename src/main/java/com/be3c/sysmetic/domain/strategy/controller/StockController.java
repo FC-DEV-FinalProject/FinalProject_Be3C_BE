@@ -44,7 +44,7 @@ public class StockController {
         @RequestParam String name
     ) throws Exception {
         try {
-                if(stockService.duplcheck(name)) {
+                if(stockService.duplCheck(name)) {
                     return ResponseEntity.status(HttpStatus.OK)
                             .body(ApiResponse.success());
                 }
