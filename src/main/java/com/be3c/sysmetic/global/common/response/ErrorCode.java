@@ -39,6 +39,11 @@ public enum ErrorCode {
     INSUFFICIENT_PERMISSIONS(HttpStatus.CONFLICT, "권한이 부족합니다."),
 
     /*
+        422 : Last Entity
+     */
+    UNPROCESSABLE_ENTITY(HttpStatus.UNPROCESSABLE_ENTITY, "최소 1개는 가지고 있어야 합니다."),
+
+    /*
         428 Too Many Request
      */
     RESOURCE_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "최대 생성 제한 개수에 도달했습니다."),

@@ -16,4 +16,7 @@ public class FolderPutRequestDto {
     @NotBlank
     @Size(min = 3, max = 20)
     private String folderName;
+
+    @NotBlank
+    private Boolean checkDuplication;
 }
