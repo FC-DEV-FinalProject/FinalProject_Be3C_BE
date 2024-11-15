@@ -21,7 +21,7 @@ public class Folder extends BaseEntity {
     private Long id;
 
     @Column(name = "folder_name", nullable = false)
-    private String folderName;
+    private String name;
 
     @Column(name = "folder_description")
     private String folderDescription;

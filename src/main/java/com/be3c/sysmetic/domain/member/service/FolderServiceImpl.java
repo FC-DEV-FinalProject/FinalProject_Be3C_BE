@@ -1,25 +1,34 @@
 package com.be3c.sysmetic.domain.member.service;
 
+import com.be3c.sysmetic.domain.member.dto.FolderListResponseDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.ResourceLimitExceededException;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.be3c.sysmetic.global.common.Code.USING_STATE;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Transactional
 public class FolderServiceImpl implements FolderService {
@@ -31,41 +40,37 @@ public class FolderServiceImpl implements FolderService {
     private final SecurityUtils securityUtils;
 
     @Override
-    public List<Folder> getUserFolders() {
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
-        List<Folder> folderList = folderRepository
-                .findAllByMemberIdAndStatusCode(userId, Code.USING_STATE.getCode());
-
-        if(folderList == null || folderList.isEmpty()) {
-            throw new EntityNotFoundException();
-        }
-
-        return folderList;
-    }
-
-    @Override
     public boolean duplCheck(String name) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Optional<Folder> folder = folderRepository
-                .findByMemberIdAndFolderNameAndStatusCode(
+        return folderRepository
+                .findByMemberIdAndNameAndStatusCode(
                         userId,
                         name,
-                        Code.USING_STATE.getCode()
-                );
+                        USING_STATE.getCode()
+                ).isEmpty();
+    }
 
-        if(folder.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "폴더명이 중복되었습니다.");
+    @Override
+    public List<FolderListResponseDto> getUserFolders() {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        List<FolderListResponseDto> findFolder = folderRepository.findResponseDtoByMemberIdAndStatusCode(
+                userId,
+                USING_STATE.getCode()
+        );
+
+        if(findFolder == null || findFolder.isEmpty()) {
+            throw new EntityNotFoundException();
         }
 
-        return true;
+        return findFolder;
     }
 
     @Override
     public boolean insertFolder(FolderPostRequestDto folderPostRequestDto) {
         if(folderPostRequestDto.getCheckDupl()) {
-            throw new IllegalArgumentException("중복 확인을 진행해주세요.");
+            throw new IllegalStateException();
         }
 
         Long userId = securityUtils.getUserIdInSecurityContext();
@@ -73,20 +78,24 @@ public class FolderServiceImpl implements FolderService {
         Member member = memberRepository
                 .findByIdAndUsingStatusCode(
                         userId,
-                        Code.USING_STATE.getCode())
-                .orElseThrow(() -> new EntityNotFoundException("폴더 생성 권한이 없습니다."));
+                        USING_STATE.getCode())
+                .orElseThrow(() -> new UsernameNotFoundException(""));
 
-        List<Folder> folderList = folderRepository.findAllByMemberIdAndStatusCode(userId, Code.USING_STATE.getCode());
+        List<Folder> folderList = folderRepository
+                .findAllByMemberIdAndStatusCode(
+                        userId,
+                        USING_STATE.getCode()
+                );
 
         if (!duplCheck(folderPostRequestDto.getName())) {
-            throw new IllegalArgumentException("이미 추가되어 있는 폴더입니다.");
+            throw new ConflictException();
         } else if(folderList.size() >= 5) {
-            throw new IllegalArgumentException("폴더는 최대 5개까지 만들 수 있습니다.");
+            throw new ResourceLimitExceededException();
         }
 
         Folder folder = Folder.builder()
-                .folderName(folderPostRequestDto.getName())
-                .statusCode(Code.USING_STATE.getCode())
+                .name(folderPostRequestDto.getName())
+                .statusCode(USING_STATE.getCode())
                 .member(member)
                 .build();
 
@@ -99,22 +108,22 @@ public class FolderServiceImpl implements FolderService {
     public boolean updateFolder(FolderPutRequestDto folderPutRequestDto) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        if(duplCheck(folderPutRequestDto.getFolderName())) {
-            throw new IllegalArgumentException("이미 존재하는 폴더명입니다.");
+        if(!duplCheck(folderPutRequestDto.getFolderName())) {
+            throw new ConflictException();
         }
 
         Folder folder = folderRepository
                 .findByMemberIdAndIdAndStatusCode(
                         userId,
                         folderPutRequestDto.getFolderId(),
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 폴더가 없습니다."));
+                        USING_STATE.getCode()
+                ).orElseThrow(() -> new UsernameNotFoundException(""));
 
         if(!folder.getMember().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+            throw new ConflictException();
         }
 
-        folder.setFolderName(folderPutRequestDto.getFolderName());
+        folder.setName(folderPutRequestDto.getFolderName());
         folderRepository.save(folder);
 
         return true;
@@ -128,8 +137,8 @@ public class FolderServiceImpl implements FolderService {
                 .findByMemberIdAndIdAndStatusCode(
                         userId,
                         folder_id,
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 폴더를 찾을 수 없습니다."));
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
 
         find_folder.setStatusCode(Code.NOT_USING_STATE.getCode());
 

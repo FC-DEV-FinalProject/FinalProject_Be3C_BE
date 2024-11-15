@@ -26,7 +26,7 @@ public class Stock extends BaseEntity {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
-    @Column(name = "code", nullable = false)
+    @Column(name = "code")
     private String code;
 
     @Column(name = "country")

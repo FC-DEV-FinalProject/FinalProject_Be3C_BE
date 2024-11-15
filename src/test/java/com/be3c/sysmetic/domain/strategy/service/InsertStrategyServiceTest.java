@@ -114,6 +114,7 @@ class InsertStrategyServiceTest {
                 .phoneNumber("010-1234-5678")
                 .usingStatusCode("ACTIVE")
                 .totalFollow(100)
+                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")

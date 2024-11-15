@@ -8,7 +8,7 @@ import java.util.List;
 @Setter
 @Builder
 @NoArgsConstructor
-public class FolderGetResponseDto {
+public class InterestStrategyGetResponseDto {
     private Long id;
     private String strategyName;
     private String traderName;
@@ -19,8 +19,8 @@ public class FolderGetResponseDto {
     private Double MDD;
 
     // Hibernate에서 사용할 생성자
-    public FolderGetResponseDto(Long id, String strategyName, String traderName, List<String> iconPath,
-                                Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
+    public InterestStrategyGetResponseDto(Long id, String strategyName, String traderName, List<String> iconPath,
+                                          Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
         this.id = id;
         this.strategyName = strategyName;
         this.traderName = traderName;

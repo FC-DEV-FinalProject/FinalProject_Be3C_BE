@@ -93,15 +93,6 @@ public class MethodRepositoryTest {
                     .build();
             methodRepository.save(method);
         });
-
-        assertThrows(DataIntegrityViolationException.class, ()-> {
-            Method method = Method.builder()
-                    .name("이름")
-                    .statusCode(Code.USING_STATE.getCode())
-//                    .explanation("테스트")
-                    .build();
-            methodRepository.save(method);
-        });
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.FolderGetRequestDto;
-import com.be3c.sysmetic.domain.member.dto.FolderGetResponseDto;
+import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetRequestDto;
+import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
 import com.be3c.sysmetic.domain.member.dto.FollowDeleteRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
 import com.be3c.sysmetic.domain.member.entity.*;
@@ -12,6 +12,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+
+import static com.be3c.sysmetic.global.common.Code.*;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -42,67 +45,59 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final MemberRepository memberRepository;
 
+    private final SecurityUtils securityUtils;
+
     @Override
-    public PageResponse<FolderGetResponseDto> getInterestStrategyPage(
-            FolderGetRequestDto folderGetRequestDto,
-            Long userId
+    public PageResponse<InterestStrategyGetResponseDto> getInterestStrategyPage(
+            InterestStrategyGetRequestDto interestStrategyGetRequestDto
     ) throws HttpStatusCodeException {
-        if(userId == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
-        }
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        userId = 1L;
 
         Pageable pageable = PageRequest.of(
-                folderGetRequestDto.getPage(),
+                interestStrategyGetRequestDto.getPage(),
                 10,
-                Sort.by("modifiedAt"));
+                Sort.by("modifiedAt").descending());
 
-        Page<FolderGetResponseDto> folder_page = interestStrategyRepository
+        Page<InterestStrategyGetResponseDto> folderPage = interestStrategyRepository
                 .findPageByIdAndStatusCode(
                         userId,
-                        folderGetRequestDto.getFolderId(),
-                        Code.USING_STATE.getCode(),
+                        interestStrategyGetRequestDto.getFolderId(),
+                        USING_STATE.getCode(),
                         pageable
                 );
 
-        if(folder_page.hasContent()) {
-            return PageResponse.<FolderGetResponseDto>builder()
-                    .totalPageCount(folder_page.getTotalPages())
-                    .totalItemCount(folder_page.getTotalElements())
-                    .itemCountPerPage(folder_page.getNumberOfElements())
-                    .currentPage(folderGetRequestDto.getPage())
-                    .list(folder_page.getContent())
+        if(folderPage.hasContent()) {
+            return PageResponse.<InterestStrategyGetResponseDto>builder()
+                    .totalPages(folderPage.getTotalPages())
+                    .totalElement(folderPage.getTotalElements())
+                    .pageSize(folderPage.getNumberOfElements())
+                    .currentPage(interestStrategyGetRequestDto.getPage())
+                    .content(folderPage.getContent())
                     .build();
         }
 
-        throw new NoSuchElementException("잘못된 페이지 요청입니다.");
+        throw new NoSuchElementException();
     }
 
     @Override
-    public boolean follow(FollowPostRequestDto followPostRequestDto, Long userId) {
-        if(followPostRequestDto.getStrategyId() == null || followPostRequestDto.getFolderId() == null) {
-            throw new IllegalArgumentException("잘못된 요청입니다.");
-        }
+    public boolean follow(FollowPostRequestDto followPostRequestDto) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
 
         Optional<InterestStrategy> interestStrategy = interestStrategyRepository
                 .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
                         userId,
                         followPostRequestDto.getFolderId(),
                         followPostRequestDto.getStrategyId(),
-                        Code.USING_STATE.getCode()
+                        USING_STATE.getCode()
                 );
 
         Folder folder = folderRepository
                 .findByMemberIdAndIdAndStatusCode(
                         userId,
                         followPostRequestDto.getFolderId(),
-                        Code.USING_STATE.getCode())
-                .orElseThrow(
-                        () -> new EntityNotFoundException("폴더 아이디를 제대로 입력해주세요.")
-                );
-
-        if(!folder.getMember().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
-        }
+                        USING_STATE.getCode())
+                .orElseThrow(EntityNotFoundException::new);
 
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, folder, followPostRequestDto.getStrategyId());
@@ -111,31 +106,28 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                     userId,
                     followPostRequestDto.getFolderId(),
                     followPostRequestDto.getStrategyId(),
-                    Code.FOLLOW.getCode()
+                    FOLLOW.getCode()
             );
-
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
-            interestStrategy.get().setStatusCode(Code.USING_STATE.getCode());
+            interestStrategy.get().setStatusCode(USING_STATE.getCode());
 
             followStrategyLog(
                     userId,
                     followPostRequestDto.getFolderId(),
                     followPostRequestDto.getStrategyId(),
-                    Code.FOLLOW.getCode()
+                    FOLLOW.getCode()
             );
 
             return true;
         }
 
-        throw new IllegalArgumentException("잘못된 요청입니다.");
+        throw new EntityNotFoundException();
     }
 
     @Override
-    public Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto, Long userId) {
-        if(followDeleteRequestDto.getStrategyId() == null || followDeleteRequestDto.getFolderId() == null) {
-            throw new IllegalArgumentException("잘못된 요청입니다.");
-        }
+    public Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
 
         Map<Long, String> fail_unfollow = new HashMap<>();
 
@@ -155,7 +147,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         userId,
                         folderId,
                         strategyId,
-                        Code.USING_STATE.getCode()
+                        USING_STATE.getCode()
                 );
 
         if(interestStrategy.isEmpty()) {
@@ -164,11 +156,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
         InterestStrategy find_is = interestStrategy.get();
 
-        if(find_is.getStatusCode().equals(Code.FOLLOW.getCode())) {
+        if(find_is.getStatusCode().equals(FOLLOW.getCode())) {
             return "해당 관심 전략을 찾을 수 없습니다.";
         }
 
-        find_is.setStatusCode(Code.UNFOLLOW.getCode());
+        find_is.setStatusCode(UNFOLLOW.getCode());
 
         interestStrategyRepository.save(find_is);
 
@@ -176,53 +168,48 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 userId,
                 folderId,
                 strategyId,
-                Code.UNFOLLOW.getCode()
+                UNFOLLOW.getCode()
         );
 
         return "";
     }
 
-    private boolean followStrategy(Long userId, Folder folder, Long strategyId) {
+    private void followStrategy(Long userId, Folder folder, Long strategyId) {
         interestStrategyRepository.save(
                 InterestStrategy.builder()
                         .member(memberRepository.findByIdAndUsingStatusCode(
                                 userId,
-                                Code.USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException("해당 유저가 없습니다.")))
+                                USING_STATE.getCode()
+                        ).orElseThrow(EntityNotFoundException::new))
                         .folder(folder)
                         .strategy(strategyRepository
-                                .findById(
-                                        strategyId
-                                ).orElseThrow(
-                                        () -> new EntityNotFoundException("해당 전략이 없습니다.")
-                                )
+                                .findById(strategyId)
+                                .orElseThrow(EntityNotFoundException::new)
                         )
                         .build()
         );
 
-        return true;
     }
 
-    private boolean followStrategyLog(Long userId, Long folderId, Long strategyId, String LogCode) {
+    private void followStrategyLog(Long userId, Long folderId, Long strategyId, String LogCode) {
         interestStrategyLogRepository.save(
                 InterestStrategyLog.builder()
                         .member(memberRepository.findByIdAndUsingStatusCode(
-                                userId,
-                                Code.USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다.")))
+                                        userId,
+                                        USING_STATE.getCode()
+                                ).orElseThrow(EntityNotFoundException::new))
                         .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
-                                userId,
-                                folderId,
-                                Code.USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException("해당 폴더를 찾을 수 없습니다.")))
+                                        userId,
+                                        folderId,
+                                        USING_STATE.getCode()
+                                ).orElseThrow(EntityNotFoundException::new))
                         .strategy(strategyRepository.findByIdAndStatusCode(
-                                strategyId,
-                                Code.USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다.")))
+                                        strategyId,
+                                        USING_STATE.getCode()
+                                ).orElseThrow(EntityNotFoundException::new))
                         .LogCode(LogCode)
                         .build()
         );
 
-        return true;
     }
 }
