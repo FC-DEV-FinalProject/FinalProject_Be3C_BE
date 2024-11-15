@@ -10,12 +10,15 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +47,7 @@ public class MethodController {
      */
     @GetMapping("/admin/method/availability")
     public ResponseEntity<ApiResponse<String>> getCheckDupl(
-            @RequestParam String name
+            @NotBlank @RequestParam String name
     ) throws Exception {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
@@ -56,12 +59,13 @@ public class MethodController {
 
     /*
         매매 유형 찾기 Api
-
+        1. 매매 유형 찾기 성공했을 때 : OK
+        2. 매매 유형 찾기 실패했을 때 : NOT_FOUND
      */
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
-            @PathVariable Long id
+            @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             return ResponseEntity.status(HttpStatus.OK)
@@ -76,23 +80,38 @@ public class MethodController {
         }
     }
 
+    /*
+        매매 유형 페이지로 찾기 api
+        1. 매매 유형 페이지 찾기 성공했을 떄 : OK
+        2. 페이지에 아무런 데이터도 존재하지 않을 때 : NOT_FOUND
+        3. 잘못된 데이터가 입력됐을 때 : BAD_REQUEST
+     */
     @GetMapping("/admin/methodlist")
     public ResponseEntity<ApiResponse<PageResponse<MethodGetResponseDto>>> getMethods(
-            @RequestParam Integer page
+            @NotBlank @RequestParam Integer page
     ) throws Exception {
         try {
             PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(methodList));
-        } catch (EntityNotFoundException |
-                 NoSuchElementException |
-                 IllegalArgumentException |
+        } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException |
+                NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
+    /*
+        매매 유형 등록 api
+        1. 매매 유형 등록에 성공했을 때 : OK
+        2. 매매 유형 등록에 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 중복 체크를 진행하지 않은 요청일 때 : BAD_REQUEST
+        4. 중복된 매매 유형명이 존재할 때 : CONFLICT
+     */
     @PostMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> postMethod(
             @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
@@ -116,9 +135,12 @@ public class MethodController {
     }
 
     /*
-        매매 방식 수정 메서드
-        1. HttpMethod가 put이라면, 이 메서드로 온다.
-        2. MethodService.updateMethod를 호출한다.
+        매매 유형 수정 메서드
+        1. 매매 유형 수정에 성공했을 때 : OK
+        2. 매매 유형 수정에 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 중복 체크를 진행하지 않은 요청일 때 : BAD_REQUEST
+        4. 수정하려는 매매 유형이 존재하지 않을 때 : NOT_FOUND
+        5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
     @PutMapping("/admin/method")
     public ResponseEntity<ApiResponse<String>> putMethod(
@@ -129,8 +151,8 @@ public class MethodController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException |
                  DataIntegrityViolationException e) {
@@ -147,19 +169,22 @@ public class MethodController {
 
     /*
         매매 유형 삭제 메서드
+        1. 매매 유형 삭제에 성공했을 때 : OK
+        2. 매매 유형 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 삭제하려는 매매 유형을 찾지 못했을 때 : NOT_FOUND
      */
 //    @DeleteMapping("/admin/method/{id:[0-9]+}")
     @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<ApiResponse<String>> deleteMethod(
-            @PathVariable Long id
+            @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             if(methodService.deleteMethod(id)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
