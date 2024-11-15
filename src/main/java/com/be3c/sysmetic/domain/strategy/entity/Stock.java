@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;

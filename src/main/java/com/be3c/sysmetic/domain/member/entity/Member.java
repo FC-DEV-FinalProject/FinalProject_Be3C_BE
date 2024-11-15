@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.entity;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 
@@ -59,6 +60,9 @@ public class Member extends BaseEntity {
     @Column(name = "total_follow", nullable = false)
     private Integer totalFollow;
 
+    @Column(name = "total_strategy_count", nullable = false)
+    private Integer totalStrategyCount;
+
     @Column(name = "receive_info_consent", nullable = false)
     private String receiveInfoConsent;
 
@@ -70,5 +74,4 @@ public class Member extends BaseEntity {
 
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
-
 }
