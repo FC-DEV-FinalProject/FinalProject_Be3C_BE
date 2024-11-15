@@ -3,9 +3,11 @@ package com.be3c.sysmetic.domain.member.repository;
 import com.be3c.sysmetic.domain.member.dto.FolderListResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -45,6 +47,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     // update
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(@QueryHint(name = "javax.persistence.lock.timeout", value = "5000"))
     @Query("""
         SELECT f
         FROM Folder f

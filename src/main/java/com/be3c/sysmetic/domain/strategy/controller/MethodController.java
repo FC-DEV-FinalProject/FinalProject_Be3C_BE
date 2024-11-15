@@ -48,7 +48,7 @@ public class MethodController {
         5. SELECT 값이 존재하지 않는다면? OK 코드를 반환한다.
      */
     @GetMapping("/admin/method/availability")
-    public ResponseEntity<ApiResponse<String>> checkDupl(
+    public ResponseEntity<ApiResponse<String>> getCheckDupl(
             @RequestParam String name
     ) throws Exception {
         if(methodService.duplCheck(name)) {

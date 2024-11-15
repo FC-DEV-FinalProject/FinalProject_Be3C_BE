@@ -33,7 +33,7 @@ public class FolderController {
         폴더명 중복 체크
         1. 중복된 폴더명이 없을 떄 : OK
         2. 중복된 폴더명이 존재할 때 : CONFLICT
-        3. SecurityContext에 userId가 존재하지 않는다면 : FORBIDDEN
+        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder/availability")
@@ -58,7 +58,7 @@ public class FolderController {
         해당 유저의 폴더 목록을 반환하는 api
         1. 해당 유저의 폴더를 찾았다면 : OK
         2. 해당 유저의 폴더 개수가 0개라면 : NOT_FOUND
-        3. SecurityContext에 userId가 존재하지 않는다면 : FORBIDDEN
+        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder")
@@ -86,7 +86,7 @@ public class FolderController {
         3. 중복체크가 되지 않은 요청일 떄 : BAD_REQUEST
         4. 중복된 이름의 폴더가 존재할 때 : CONFLICT
         5. 현재 폴더 개수가 5개일 때 : TOO_MANY_REQUESTS
-        6. SecurityContext에 userId가 존재하지 않는다면 : FORBIDDEN
+        6. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @PostMapping("/member/folder/")
     public ResponseEntity<ApiResponse<String>> postFolder(
@@ -123,7 +123,7 @@ public class FolderController {
         3. 중복 체크가 진행되지 않은 요청일 때 : BAD_REQUEST
         4. 수정하려는 폴더를 찾지 못했을 때 : NOT_FOUND
         5. 중복된 이름의 폴더가 존재할 때 : CONFLICT
-        6. SecurityContext에 userId가 존재하지 않는다면 : FORBIDDEN
+        6. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PutMapping("/member/folder")
@@ -157,7 +157,7 @@ public class FolderController {
         2. 폴더 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
         3. 현재 폴더 개수가 1개 이하일 때 : UNPROCESSABLE_ENTITY
         4. 삭제하려는 폴더를 찾지 못했을 때 : NOT_FOUND
-        5. SecurityContext에 userId가 존재하지 않는다면 : FORBIDDEN
+        5. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @DeleteMapping("/member/folder/{id}")
     public ResponseEntity<ApiResponse<String>> deleteFolder(

@@ -40,7 +40,7 @@ public class FolderServiceImpl implements FolderService {
     private final SecurityUtils securityUtils;
 
     /*
-        1. 요청한 유저의 Id 값을 가져온다.
+        1. SecurityContext에서 유저 아이디를 찾는다.
         2. 멤버 아이디 + 사용자가 입력한 폴더 이름 + 상태코드를 사용한 이름 중복 폴더가 존재하는지 확인
         3. 동일한 이름의 폴더 미 존재 시 true 반환 / 존재 시 false 반환
      */
@@ -57,7 +57,7 @@ public class FolderServiceImpl implements FolderService {
     }
 
     /*
-        1. 요청한 사용자의 Id를 시큐리티 컨텍스트에서 가져온다.
+        1. SecurityContext에서 유저 아이디를 찾는다.
         2. userId + 상태코드를 사용해 현재 사용 중인 폴더의 목록을 가져온다.
         2-1. 만약 폴더 목록의 개수가 0개라면, EntityNotFoundException을 발생시킨다.
         3. 찾은 폴더 목록을 반환한다.
@@ -81,7 +81,7 @@ public class FolderServiceImpl implements FolderService {
     /*
         1. 요청에서 중복 확인 인자를 가져온다.
         1-1. 만약 중복 확인을 진행하지 않았다면, IllegalStateException을 발생시킨다.
-        2. 시큐리티 컨텍스트에서 userId를 찾는다.
+        2. SecurityContext에서 유저 아이디를 찾는다.
         4. 해당 회원이 가지고 있는 폴더 개수가 5개보다 많다면, ResourceLimitExceededException을 발생시킨다.
         5. 이름을 통해 중복 체크를 진행한다.
         5-1. 중복된 이름이 존재한다면, ConflictException을 발생시킨다.
@@ -124,7 +124,7 @@ public class FolderServiceImpl implements FolderService {
     /*
         1. 요청에서 중복 확인 여부를 확인한다.
         1-1. 만약 중복 확인을 진행하지 않았다면, IllegalStateException을 발생시킨다.
-        2. 시큐리티 컨텍스트에서 userId를 가져온다.
+        2. SecurityContext에서 유저 아이디를 찾는다.
         3. 수정하고자 하는 폴더를 찾는다.
         4. 다른 폴더와 이름이 겹치는지 확인한다.
         4-1. 만약 중복된 이름의 폴더가 존재한다면, ConflictException을 발생시킨다.

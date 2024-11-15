@@ -35,6 +35,10 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
             Long memberId, Long folderId, String statusCode, Pageable pageable
     );
 
+    Optional<InterestStrategy> findByMemberIdAndStrategyIdAndStatusCode(
+            Long memberId, Long strategyId, String statusCode
+    );
+
     Optional<InterestStrategy> findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
             Long memberId, Long folderId, Long strategyId, String statusCode
     );

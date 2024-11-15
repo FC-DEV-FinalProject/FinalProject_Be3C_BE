@@ -40,7 +40,7 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("admin/stock/availability")
-    public ResponseEntity<ApiResponse<String>> checkDupl(
+    public ResponseEntity<ApiResponse<String>> getCheckDupl(
         @RequestParam String name
     ) throws Exception {
         try {

@@ -20,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -34,7 +33,9 @@ public class InterestStrategyController {
 
     /*
         폴더 내 관심 전략을 페이지로 가져오는 api
-        이게 여기 있는 게 맞나?
+        1. 해당 관심 전략 페이지를 찾는 데 성공했을 때 : OK
+        2. 해당 페이지에 관심 전략이 존재하지 않을 때 : NOT_FOUND
+        3. SecurityContext에 userId가 존재하지 않을 때 : FORBIDDEN
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
@@ -59,7 +60,14 @@ public class InterestStrategyController {
                     .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
-
+    /*
+        관심 전략 등록 api
+        1. 관심 전략 등록에 성공했을 때 : OK
+        2. 관심 전략 등록에 실패했을 떄 : INTERNAL_SERVER_ERROR
+        3. 이미 관심 전략에 등록된 전략일 때 : BAD_REQUEST
+        4. 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        5. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
+     */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PostMapping("/strategy/follow")
     public ResponseEntity<ApiResponse<String>> follow(
@@ -76,13 +84,21 @@ public class InterestStrategyController {
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
-        } catch (IllegalArgumentException |
-                 EntityNotFoundException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
+    /*
+        관심 전략 선택 삭제 api (단일 삭제 포함)
+        1. 선택한 관심 전략 전부 삭제에 성공했을 때 : OK
+        2. 선택한 관심 전략 중 일부만 삭제에 성공했을 때 : MULTI_STATUS
+        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
+     */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @DeleteMapping("/strategy/follow")
     public ResponseEntity<ApiResponse<Map<Long, String>>> unfollow(
@@ -100,16 +116,10 @@ public class InterestStrategyController {
 
             return ResponseEntity.status(HttpStatus.MULTI_STATUS)
                     .body(ApiResponse.success(SuccessCode.OK, unFollowResult));
-        } catch (AuthenticationCredentialsNotFoundException | UsernameNotFoundException e) {
+        } catch (AuthenticationCredentialsNotFoundException |
+                 UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
-        } catch (IllegalArgumentException |
-                 EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 }
