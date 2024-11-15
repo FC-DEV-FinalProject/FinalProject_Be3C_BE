@@ -23,11 +23,13 @@ public class Method extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "status_code", nullable = false)
+    @Column(name = "statusCode", nullable = false)
     private String statusCode;
 
+    @Column(name = "explanation", nullable = false)
+    private String explanation;
+
     @CreationTimestamp
-    @Column(name = "method_created_date", nullable = false)
+    @Column(name = "method_created_date", nullable = false, columnDefinition = "Timestamp default now()")
     private LocalDateTime methodCreatedDate;
 }
-

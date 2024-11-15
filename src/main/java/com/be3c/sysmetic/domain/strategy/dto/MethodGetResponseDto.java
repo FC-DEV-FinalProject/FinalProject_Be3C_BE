@@ -1,21 +1,17 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockPutRequestDto {
-    @NotNull
+public class MethodGetResponseDto {
     private Long id;
-    @NotNull
     private String name;
-    @NotNull
-    private Boolean checkDuplicate;
-//    @NotNull
-    // private MultipartFile file;
+//    추후 추가 예정
+//    private String file_path;
 }
