@@ -32,6 +32,11 @@ public class StrategyServiceImpl implements StrategyService {
 
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
+    // 임시
+    public Strategy findOne(Long id) {
+        return strategyRepository.findOne(id);
+    }
+
     @Override
     @Transactional
     public Strategy insertStrategy(InsertStrategyRequestDto requestDto) {

@@ -7,6 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface StrategyService {
+
+    // 임시
+    Strategy findOne(Long id);
+
     @Transactional
     Strategy insertStrategy(InsertStrategyRequestDto requestDto);
 

@@ -46,7 +46,7 @@ public class Inquiry extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // enum (COMPLETE, INCOMPLETE)
+    // enum (ALL, UNCLOSED, CLOSED)
     @Enumerated(EnumType.STRING)
 //    @Column(name = "status_code", length = 10, nullable = false)
     private InquiryStatus inquiryStatus;
@@ -80,7 +80,7 @@ public class Inquiry extends BaseEntity {
         inquiry.setStrategy(strategy);
         inquiry.setMember(member);
 
-        inquiry.setInquiryStatus(InquiryStatus.INCOMPLETE);
+        inquiry.setInquiryStatus(InquiryStatus.UNCLOSED);
         inquiry.setInquiryTitle(inquiryTitle);
         inquiry.setInquiryContent(inquiryContent);
         inquiry.setInquiryRegistrationDate(LocalDateTime.now());

@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
+import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import jakarta.persistence.EntityManager;
@@ -48,11 +49,11 @@ public class InquiryAnswerService {
         Inquiry inquiry = inquiryRepository.findOne(inquiryId);
 
         InquiryAnswer inquiryAnswer = InquiryAnswer.createInquiryAnswer(inquiry, answerContent);
-
         inquiryAnswerRepository.save(inquiryAnswer);
+
+        inquiry.setInquiryStatus(InquiryStatus.CLOSED);
+        inquiryRepository.save(inquiry);
 
         return inquiryAnswer.getId();
     }
-
-    //페이지네이션
 }
