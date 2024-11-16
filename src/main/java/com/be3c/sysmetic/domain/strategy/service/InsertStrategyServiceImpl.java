@@ -46,10 +46,7 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
                 .statusCode(StrategyStatusCode.PRIVATE.name()) // 비공개 설정
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
-                .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(requestDto.getTraderId())
-                .modifiedBy(requestDto.getTraderId())
                 .build();
 
         // DB 저장
@@ -99,8 +96,6 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
             StrategyStockReference strategyStockReference = StrategyStockReference.builder()
                     .strategy(strategy)
                     .stock(stock)
-                    .createdBy(traderId)
-                    .modifiedBy(traderId)
                     .build();
 
             strategyStockReferenceRepository.save(strategyStockReference);
