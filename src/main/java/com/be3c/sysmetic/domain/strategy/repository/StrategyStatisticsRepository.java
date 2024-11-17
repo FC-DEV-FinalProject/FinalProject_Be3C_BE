@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StrategyStatisticsRepository extends JpaRepository<StrategyStatistics, Long> {
     StrategyStatistics findByStrategyId(Long strategyId);
+    void deleteByStrategyId(Long strategyId);
 }
