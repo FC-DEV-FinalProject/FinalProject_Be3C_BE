@@ -15,6 +15,8 @@ import java.util.List;
 @Repository
 public interface DailyRepository extends JpaRepository<Daily, Long> {
 
+    // todo : 성능 최적화 필요. -> 리팩토링시 진행
+
     // 모든 일간분석데이터 목록 조회 - date 정렬
     List<Daily> findAllByStrategyIdOrderByDateDesc(Long strategyId);
 

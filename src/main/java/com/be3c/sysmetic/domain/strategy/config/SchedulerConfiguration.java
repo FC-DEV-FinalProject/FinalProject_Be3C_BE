@@ -18,11 +18,11 @@ public class SchedulerConfiguration {
     private final StrategyRepository strategyRepository;
     private final StrategyStatisticsServiceImpl strategyStatisticsService;
 
-    // 매일 자정에 계산 초, 분, 시
+    // 매일 자정에 계산 - cron 초, 분, 시
     @Scheduled(cron = "0 00 00 * * ?")
     public void run() {
 
-        // 공개 상태인 전략에 한해 전략 통계 계산 -> todo 비공개 상태일 때도 트레이더는 전략 통계 확인 가능한데, 공개 상태만 계산하는 게 맞는가. 리팩토링시 고민
+        // todo : 비공개 상태에도 트레이더는 자신의 전략 통계 확인 가능. 즉 비공개 상태인 전략도 계산 필요. -> 리팩토링시 진행
         List<Strategy> publicStrategies = strategyRepository.findAllByPublicStatus();
         for (Strategy strategy : publicStrategies) {
             try {

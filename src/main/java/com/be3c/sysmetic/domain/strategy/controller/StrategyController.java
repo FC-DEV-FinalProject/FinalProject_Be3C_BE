@@ -23,6 +23,8 @@ public class StrategyController {
     private final MonthlyServiceImpl monthlyService;
     private final StrategyStatisticsServiceImpl strategyStatisticsService;
 
+    // todo : 페이지 response 변경 필요. -> 리팩토링시 진행
+
     // 일간데이터 조회
     @GetMapping("/strategy/daily")
     public ResponseEntity<ApiResponse> findDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("page") int page, @RequestParam(value = "startDate", required = false) LocalDateTime startDate, @RequestParam(value = "endDate", required = false) LocalDateTime endDate) {

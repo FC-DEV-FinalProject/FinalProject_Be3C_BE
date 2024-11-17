@@ -65,7 +65,7 @@ public class StrategyStatistics extends BaseEntity {
     private Double principal; // 원금
 
     @Column(name = "accumulated_deposit_withdrawal_amount", nullable = false)
-    private Double accumulatedDepositWithdrawalAmount; // 누적입출입금
+    private Double accumulatedDepositWithdrawalAmount; // 누적입출금
 
     @Column(name = "accumulated_profit_loss_amount", nullable = false)
     private Double accumulatedProfitLossAmount; // 누적손익금
@@ -77,7 +77,7 @@ public class StrategyStatistics extends BaseEntity {
     private Double maximumAccumulatedProfitLossAmount; // 최대누적손익금
 
     @Column(name = "maximum_accumulated_profit_loss_rate", nullable = false)
-    private Double maximumAccumulatedProfitLossRate; // 최대누적손익금
+    private Double maximumAccumulatedProfitLossRate; // 최대누적손익율
 
     @Column(name = "current_capital_reduction_amount", nullable = false)
     private Double currentCapitalReductionAmount; // 현재자본인하금액

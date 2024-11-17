@@ -10,7 +10,8 @@ import java.util.List;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
-    boolean existsByName(String name); // 전략명 중복 확인
+    // 전략명 중복 확인
+    boolean existsByName(String name);
 
     @Query("SELECT s FROM Strategy s WHERE s.statusCode = 'PUBLIC'")
     List<Strategy> findAllByPublicStatus();
