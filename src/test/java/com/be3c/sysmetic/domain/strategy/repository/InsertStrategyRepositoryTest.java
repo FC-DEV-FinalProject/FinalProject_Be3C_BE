@@ -65,8 +65,6 @@ class InsertStrategyRepositoryTest {
         assertEquals(0, savedStrategy.getFollowerCount());
         assertEquals(0.0, savedStrategy.getKpRatio());
         assertEquals(0.0, savedStrategy.getSmScore());
-        assertNotNull(savedStrategy.getStrategyCreatedDate());
-        assertNotNull(savedStrategy.getStrategyModifiedDate());
     }
 
     @DisplayName("전략 등록 실패 테스트 - 멤버id 미존재")

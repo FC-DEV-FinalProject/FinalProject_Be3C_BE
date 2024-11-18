@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
@@ -73,10 +74,6 @@ public class UpdateStrategyRepositoryTest {
             existingStrategy.setCycle(updateRequestDto.getCycle());
         }
 
-        if(updateRequestDto.getMinOperationAmount() != null) {
-            existingStrategy.setMinOperationAmount(updateRequestDto.getMinOperationAmount());
-        }
-
         if(updateRequestDto.getContent() != null) {
             existingStrategy.setContent(updateRequestDto.getContent());
         }
@@ -89,7 +86,6 @@ public class UpdateStrategyRepositoryTest {
         assertEquals(updatedStrategy.getMethod().getId(), updateRequestDto.getMethodId());
         assertEquals(updatedStrategy.getName(), updateRequestDto.getName());
         assertEquals(updatedStrategy.getCycle(), updateRequestDto.getCycle());
-        assertEquals(updatedStrategy.getMinOperationAmount(), updateRequestDto.getMinOperationAmount());
         assertEquals(updatedStrategy.getContent(), updateRequestDto.getContent());
     }
 
@@ -98,8 +94,6 @@ public class UpdateStrategyRepositoryTest {
                 .id(1L)
                 .name("Auto")
                 .statusCode("Y")
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
 
         methodRepository.save(method);
@@ -110,8 +104,6 @@ public class UpdateStrategyRepositoryTest {
                 .id(2L)
                 .name("Auto")
                 .statusCode("Y")
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
 
         methodRepository.save(method);
@@ -127,14 +119,11 @@ public class UpdateStrategyRepositoryTest {
                 .phoneNumber("010-1234-5678")
                 .usingStatusCode("ACTIVE")
                 .totalFollow(100)
+                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now().minusDays(10))
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now().minusDays(30))
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
 
         memberRepository.save(member);
@@ -146,8 +135,6 @@ public class UpdateStrategyRepositoryTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
 
         stockRepository.saveAndFlush(stock);
@@ -188,10 +175,7 @@ public class UpdateStrategyRepositoryTest {
                 .statusCode(StrategyStatusCode.PRIVATE.name())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
-                .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(findMember().getId())
-                .modifiedBy(findMember().getId())
                 .build();
     }
 }

@@ -45,7 +45,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
             f.member.id=:memberId AND
             f.statusCode = :statusCode
     """)
-    Long countFoldersByUser(@Param("user") Long memberId, @Param("statusCode") String statusCode);
+    Long countFoldersByUser(@Param("memberId") Long memberId, @Param("statusCode") String statusCode);
 
     // update
     @Lock(LockModeType.PESSIMISTIC_WRITE)

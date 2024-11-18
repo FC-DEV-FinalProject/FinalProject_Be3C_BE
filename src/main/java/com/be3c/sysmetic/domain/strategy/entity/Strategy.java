@@ -3,7 +3,10 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +19,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "strategy")
 public class Strategy extends BaseEntity {
+
+    @PrePersist
+    public void prePersist() {
+        followerCount = 0L;
+        kpRatio = 0.0;
+        smScore = 0.0;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,9 +48,7 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_cycle", nullable = false)
     private Character cycle;
 
-    @Column(name = "min_operation_amount", nullable = false)
-    private Double minOperationAmount;
-
+    @Size(max = 500)
     @Column(name = "content", nullable = false)
     private String content;
 
@@ -52,4 +60,13 @@ public class Strategy extends BaseEntity {
 
     @Column(name = "sm_score")
     private Double smScore;
+
+    @CreatedDate
+    @Column(name = "strategy_created_date", nullable = false)
+    private LocalDateTime strategyCreatedDate;
+
+    @LastModifiedDate
+    @Column(name = "strategy_modified_date", nullable = false)
+    private LocalDateTime strategyModifiedDate;
+
 }
