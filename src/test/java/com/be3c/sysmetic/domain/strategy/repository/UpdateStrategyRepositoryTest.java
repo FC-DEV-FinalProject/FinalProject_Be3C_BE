@@ -31,6 +31,7 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
@@ -175,6 +176,7 @@ public class UpdateStrategyRepositoryTest {
 
     Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
+                .id(1L)
                 .trader(member)
                 .method(method)
                 .statusCode(StrategyStatusCode.PRIVATE.name())
