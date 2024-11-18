@@ -9,6 +9,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,33 +38,22 @@ public class StockController {
 
     /*
         종목명 중복 검사 메서드
+        1. 동일한 종목 명이 존재하지 않을 떄 : OK
+        2. 동일한 종목 명이 존재할 떄 : CONFLICT
+        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("admin/stock/availability")
-    public ResponseEntity<ApiResponse<String>> getCheckDupl(
-        @RequestParam String name
-    ) throws Exception {
-        try {
-                if(stockService.duplCheck(name)) {
-                    return ResponseEntity.status(HttpStatus.OK)
-                            .body(ApiResponse.success());
-                }
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
-        }
-    }
+
 
     /*
-        아이디로 종목 찾기
+        단일 종목 찾기
+        1. 해당 아이디의 종목을 찾는 데 성공했을 때 : OK
+        2. 해당 아이디의 종목을 찾는 데 실패했을 떄 : NOT_FOUND
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id}")
     public ResponseEntity<ApiResponse<StockGetResponseDto>> getItem(
-            @PathVariable Long id
+            @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             StockGetResponseDto findStock = stockService.findItemById(id);
@@ -73,21 +63,18 @@ public class StockController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
     /*
         종목 관리 - 종목 페이지 표시.
-        RequestParam - page
+        1. 해당 페이지의 종목을 찾는 데 성공했을 때 : OK
+        2. 해당 페이지에 아무런 종목이 존재하지 않을 때 : NOT_FOUND
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
     public ResponseEntity<ApiResponse<PageResponse<StockGetResponseDto>>> getStockPage(
-            @PathVariable Integer page
+            @NotBlank @PathVariable Integer page
     ) throws Exception {
         try {
             PageResponse<StockGetResponseDto> stockPage = stockService.findItemPage(page);
@@ -95,17 +82,18 @@ public class StockController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(ApiResponse.success(stockPage));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
     /*
         종목 저장하기
+        1. 종목을 저장하는 데 성공했을 때 : OK
+        2. 종목을 저장하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 중복 검사가 되지 않은 요청일 때 : BAD_REQUEST
+        4. NOT NULL 값에 NULL이 들어왔을 때 : BAD_REQUEST
+        5. 중복된 종목명이 존재할 때 : BAD_REQUEST
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
@@ -117,22 +105,21 @@ public class StockController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
     /*
         종목 수정하기
+        1. 종목을 수정하는 데 성공했을 때 : OK
+        2. 종목을 수정하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 수정해야할 종목을 찾지 못했을 때 : NOT_FOUND
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
@@ -144,24 +131,23 @@ public class StockController {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(ApiResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch(IllegalArgumentException |
                 IllegalStateException |
                 DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<ApiResponse<String>> deleteItem(
-            @PathVariable Long id
+            @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             if(stockService.deleteItem(id)) {
@@ -170,13 +156,9 @@ public class StockController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (NoSuchElementException |
-                 EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (AuthenticationCredentialsNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 }
