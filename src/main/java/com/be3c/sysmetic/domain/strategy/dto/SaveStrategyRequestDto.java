@@ -35,4 +35,8 @@ public class SaveStrategyRequestDto {
     @NotNull
     private Character cycle;
 
+    @DecimalMin("0.0")
+    @NotNull
+    private Double minOperationAmount;
+
 }
