@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,7 +21,7 @@ public class DailyGetResponseDto {
 
     @Schema(description = "일간분석 날짜", example = "2024-11-18")
     @NotNull
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Schema(description = "원금", example = "288000000")
     @NotNull
