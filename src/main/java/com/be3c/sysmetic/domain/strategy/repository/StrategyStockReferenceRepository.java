@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,4 +20,8 @@ public interface StrategyStockReferenceRepository extends JpaRepository<Strategy
     @Modifying
     @Query("DELETE FROM StrategyStockReference sr WHERE sr.strategy.id = :strategyId AND sr.stock.id IN :stockIds")
     void deleteByStrategyIdAndStockIds(Long strategyId, Set<Long> stockIds);
+
+    // MainPage에서 사용!
+    List<StrategyStockReference> findByStrategyId(Long id);
+    // List<StrategyStockReference> findByStrategy(Strategy s);
 }

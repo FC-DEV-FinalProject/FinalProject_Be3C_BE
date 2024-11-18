@@ -2,8 +2,8 @@ package com.be3c.sysmetic.domain.strategy.entity;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.global.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,22 +21,15 @@ import java.time.LocalDateTime;
 @Table(name = "strategy")
 public class Strategy extends BaseEntity {
 
-    @PrePersist
-    public void prePersist() {
-        followerCount = 0L;
-        kpRatio = 0.0;
-        smScore = 0.0;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member trader;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "method_id", nullable = false)
     private Method method;
 
@@ -61,6 +54,11 @@ public class Strategy extends BaseEntity {
 
     @Column(name = "sm_score")
     private Double smScore;
+
+    // 누적수익률 추가
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.0000")
+    @Column(name = "accum_profit_loss_rate", nullable = true)
+    private Double accumProfitLossRate;
 
     @CreatedDate
     @Column(name = "strategy_created_date", nullable = false)

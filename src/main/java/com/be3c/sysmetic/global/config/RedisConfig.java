@@ -31,6 +31,7 @@ public class RedisConfig {
     }
 
     @Bean
+    @Primary
     public RedisTemplate<String, String> redisTemplate0() {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
 
