@@ -9,6 +9,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,7 @@ public class DailyServiceImpl implements DailyService {
     private final StrategyRepository strategyRepository;
     private final StrategyCalculator strategyCalculator;
     private final MonthlyServiceImpl monthlyService;
+    private final StrategyStatisticsRepository statisticsRepository;
 
     // 일간분석 등록
     @Transactional
@@ -106,6 +108,7 @@ public class DailyServiceImpl implements DailyService {
     public void deleteDaily(Long strategyId, Long dailyId) {
         Daily daily = dailyRepository.findById(dailyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
         LocalDateTime date = daily.getDate();
+        Long countDaily = countDaily(strategyId);
 
         // DB 삭제
         dailyRepository.deleteById(dailyId);
@@ -116,6 +119,18 @@ public class DailyServiceImpl implements DailyService {
         // 월간분석 계산
         List<LocalDateTime> updatedDateList = List.of(date);
         monthlyService.updateMonthly(strategyId, updatedDateList);
+
+        if(countDaily < 4) {
+            // 삭제 전 일간분석 데이터 수가 3 이하일 경우, 삭제 후 비공개 전환 필요
+            strategyRepository.updateStatusToPrivate(strategyId);
+        }
+
+        if(countDaily == 0) {
+            // todo 일간분석 데이터 모두 삭제한 경우, 전략통계 삭제 -> 전략통계의 모든 데이터 0으로 업데이트? 리팩토링시 다시 고민. 프론트에 어떻게 받는 게 좋을지 질문.
+            // 일간분석 2개 이하일 경우 전략 비공개 상태로, 즉 현재 구현상으로는 계산 X
+            statisticsRepository.deleteByStrategyId(strategyId);
+        }
+
     }
 
     @Override
@@ -180,6 +195,11 @@ public class DailyServiceImpl implements DailyService {
         }
 
         return dailyList;
+    }
+
+    // 일간분석 총 개수 조회
+    private Long countDaily(Long strategyId) {
+        return dailyRepository.countByStrategyId(strategyId);
     }
 
     private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, SaveDailyRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
