@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Slf4j
+@Transactional
 @SpringBootTest
 public class UpdateStrategyRepositoryTest {
 
@@ -33,15 +35,28 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
+        strategyRepository.deleteAll();
+        methodRepository.deleteAll();
+        stockRepository.deleteAll();
+        memberRepository.deleteAll();
+
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE strategy AUTO_INCREMENT = 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE stock AUTO_INCREMENT = 1")
+                .executeUpdate();
+
         saveMember();
         saveMethod();
         saveModificationMethod();
         saveStock();
-
-        strategyRepository.deleteAll();
 
         strategyRepository.save(getStrategy(getRequestDto(), findMember(), findMethod()));
     }
