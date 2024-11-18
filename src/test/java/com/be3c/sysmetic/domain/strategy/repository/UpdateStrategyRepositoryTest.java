@@ -144,6 +144,7 @@ public class UpdateStrategyRepositoryTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
+                .stockCreatedDate(LocalDateTime.now())
                 .build();
 
         stockRepository.save(stock);
