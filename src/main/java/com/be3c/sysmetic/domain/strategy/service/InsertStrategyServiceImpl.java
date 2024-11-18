@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
@@ -40,16 +41,14 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
         // 종목 존재 여부 검증
         checkStock(requestDto.getStockIdList());
 
+        // TODO 시큐리티 완료 후 멤버 적용
         Strategy strategy = Strategy.builder()
                 .trader(findMember(requestDto.getTraderId()))
                 .method(findMethod(requestDto.getMethodId()))
                 .statusCode(StrategyStatusCode.PRIVATE.name()) // 비공개 설정
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
-                .minOperationAmount(requestDto.getMinOperationAmount())
                 .content(requestDto.getContent())
-                .createdBy(requestDto.getTraderId())
-                .modifiedBy(requestDto.getTraderId())
                 .build();
 
         // DB 저장
@@ -99,8 +98,6 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
             StrategyStockReference strategyStockReference = StrategyStockReference.builder()
                     .strategy(strategy)
                     .stock(stock)
-                    .createdBy(traderId)
-                    .modifiedBy(traderId)
                     .build();
 
             strategyStockReferenceRepository.save(strategyStockReference);
