@@ -42,6 +42,7 @@ public class UpdateStrategyRepositoryTest {
         saveStock();
 
         strategyRepository.deleteAll();
+
         strategyRepository.save(getStrategy(getRequestDto(), findMember(), findMethod()));
     }
 
