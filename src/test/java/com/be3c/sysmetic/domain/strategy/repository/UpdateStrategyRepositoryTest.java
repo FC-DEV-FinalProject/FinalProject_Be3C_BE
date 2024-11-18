@@ -49,7 +49,9 @@ public class UpdateStrategyRepositoryTest {
     @Test
     void updateStrategyTest_All() {
         // 전략 조회
-        Strategy existingStrategy = strategyRepository.findById(1L)
+        log.info("strategy : {}", strategyRepository.findAll());
+
+        Strategy existingStrategy = strategyRepository.findAll().stream().findFirst()
                 .orElseThrow(
                         () -> new StrategyBadRequestException(
                                         StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())
