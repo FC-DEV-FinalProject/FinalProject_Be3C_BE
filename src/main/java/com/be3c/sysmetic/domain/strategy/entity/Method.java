@@ -4,6 +4,7 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ public class Method extends BaseEntity {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
-    @CreationTimestamp
+    @CreatedDate
     @Column(name = "method_created_date", nullable = false)
     private LocalDateTime methodCreatedDate;
 }
