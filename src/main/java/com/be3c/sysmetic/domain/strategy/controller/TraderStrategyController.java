@@ -29,6 +29,8 @@ public class TraderStrategyController {
     private final DeleteStrategyServiceImpl deleteStrategyService;
     private final DailyServiceImpl dailyService;
 
+    // todo : 종목, 매매방식 조회 controller 추가, 트레이더 검증 로직 추가 필요. -> 리팩토링시 진행
+
     // 전략 등록
     @PostMapping("/strategy")
     public ResponseEntity<ApiResponse<Strategy>> insertStrategy(@Valid @RequestBody SaveStrategyRequestDto requestDto) {
@@ -37,9 +39,9 @@ public class TraderStrategyController {
                 .body(ApiResponse.success());
     }
 
-    // 전략명 중복
-    @GetMapping("/strategy/duplication-name")
-    public ResponseEntity<ApiResponse<Boolean>> checkDuplicationStrategyName(@RequestParam String name) {
+    // 전략명 중복 확인
+    @GetMapping("/strategy/duplication-name/{name}")
+    public ResponseEntity<ApiResponse<Boolean>> checkDuplicationStrategyName(@PathVariable String name) {
         boolean isDuplication = insertStrategyService.returnIsDuplicationName(name);
         // 중복 true, 미중복 false 반환
         return ResponseEntity.status(HttpStatus.OK)
