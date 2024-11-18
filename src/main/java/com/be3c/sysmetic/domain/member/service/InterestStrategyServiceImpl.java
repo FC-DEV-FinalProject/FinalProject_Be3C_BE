@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyLogRepository;
 import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -178,6 +179,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         5. 관심 전략 등록 로그를 저장한다.
      */
     private void followStrategy(Long userId, Long folderId, Long strategyId) {
+        Strategy strategy = strategyRepository
+                .findByIdAndStatusCode(
+                        strategyId,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
         interestStrategyRepository.save(
                 InterestStrategy.builder()
                         .member(memberRepository.findByIdAndUsingStatusCode(
@@ -189,14 +195,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                                 folderId,
                                 USING_STATE.getCode()
                         ).orElseThrow(EntityNotFoundException::new))
-                        .strategy(strategyRepository
-                                .findByIdAndStatusCode(
-                                        strategyId,
-                                        USING_STATE.getCode()
-                                ).orElseThrow(EntityNotFoundException::new)
-                        )
+                        .strategy(strategy)
                         .build()
         );
+
+        strategy.increaseFollowerCount();
 
         followStrategyLog(
                 userId,
@@ -224,6 +227,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         interestStrategy.setStatusCode(UNFOLLOW.getCode());
 
         interestStrategyRepository.save(interestStrategy);
+
+        interestStrategy.getStrategy().decreaseFollowerCount();
 
         followStrategyLog(
                 userId,
