@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -40,8 +37,8 @@ public class StrategyController {
     }
 
     // 통계 조회
-    @GetMapping("/strategy/statistics")
-    public ResponseEntity<ApiResponse> findStatistics(@RequestParam("strategyId") Long strategyId) {
+    @GetMapping("/strategy/statistics/{strategyId}")
+    public ResponseEntity<ApiResponse> findStatistics(@PathVariable Long strategyId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(strategyStatisticsService.findStrategyStatistics(strategyId)));
     }

@@ -40,8 +40,8 @@ public class TraderStrategyController {
     }
 
     // 전략명 중복 확인
-    @GetMapping("/strategy/duplication-name")
-    public ResponseEntity<ApiResponse<Boolean>> checkDuplicationStrategyName(@RequestParam String name) {
+    @GetMapping("/strategy/duplication-name/{name}")
+    public ResponseEntity<ApiResponse<Boolean>> checkDuplicationStrategyName(@PathVariable String name) {
         boolean isDuplication = insertStrategyService.returnIsDuplicationName(name);
         // 중복 true, 미중복 false 반환
         return ResponseEntity.status(HttpStatus.OK)
