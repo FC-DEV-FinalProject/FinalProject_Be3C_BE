@@ -10,6 +10,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import jakarta.el.MethodNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,7 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
@@ -39,6 +41,9 @@ public class UpdateStrategyRepositoryTest {
         saveStock();
 
         strategyRepository.deleteAll();
+        entityManager.createNativeQuery("ALTER TABLE strategy AUTO_INCREMENT = 1")
+                .executeUpdate();
+
         strategyRepository.save(getStrategy(getRequestDto(), findMember(), findMethod()));
     }
 
