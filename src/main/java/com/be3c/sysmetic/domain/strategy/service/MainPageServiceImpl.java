@@ -89,37 +89,29 @@ public class MainPageServiceImpl implements MainPageService {
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        // List<SmScoreTopFive> 빈 리스트 생성
         List<SmScoreTopFive> topFives = new ArrayList<>();
-        // List<Strategy> - mainPageRepository에서 가져오기
         Page<Strategy> strategyPage = mainPageRepository.findTop5SmScore(pageable);
 
         if (strategyPage.isEmpty())
             throw new NoSuchElementException("SM Score Top 5 전략을 찾지 못했습니다.");
 
-        // SmScoreTopFive에 저장할 전략 후처리
         for (Strategy s : strategyPage) {
-            // 각 전략의 종목 담을 HashSet 생성
             HashSet<Long> idSet = new HashSet<>();
             HashSet<String> nameSet = new HashSet<>();
 
-            // 전략에 해당하는 종목 모두 가져오기
             List<StrategyStockReference> references = strategyStockReferenceRepository.findByStrategyId(s.getId());
 
-            // 하나의 전략에 해당하는 종목을 매핑
             for (StrategyStockReference ref : references) {
                 Stock stock = ref.getStock();
                 idSet.add(stock.getId());
                 nameSet.add(stock.getName());
             }
 
-            // StockListDto 생성
             StockListDto stockListDto = StockListDto.builder()
                     .id(idSet)
                     .stockNames(nameSet)
                     .build();
 
-            // SmScoreTopFive Dto 생성
             SmScoreTopFive element = SmScoreTopFive.builder()
                     .id(s.getId())
                     .traderId(s.getTrader().getId())
@@ -129,10 +121,9 @@ public class MainPageServiceImpl implements MainPageService {
                     .smScore(s.getSmScore())
                     .build();
 
-            // topFives 추가
             topFives.add(element);
         }
-
         return topFives;
     }
+
 }
