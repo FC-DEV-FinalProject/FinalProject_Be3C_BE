@@ -9,6 +9,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.AccountImageRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class AccountImageServiceImpl implements AccountImageService {
 
     private final AccountImageRepository accountImageRepository;
     private final StrategyRepository strategyRepository;
+    private final SecurityUtils securityUtils;
     private final Integer size = 10;
 
     // 실계좌이미지 조회
@@ -53,8 +55,11 @@ public class AccountImageServiceImpl implements AccountImageService {
     // 실계좌이미지 삭제
     public void deleteAccountImage(Long accountImageId) {
         AccountImage accountImage = accountImageRepository.findById(accountImageId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-        // todo. security context에서 회원 id 받아서 비교 필요.
-        // if(accountImage.getCreatedBy() != id) throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+
+        // todo security 적용 후 주석 해제
+//        if(securityUtils.getUserIdInSecurityContext() != accountImage.getCreatedBy()) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+//        }
 
         accountImageRepository.deleteById(accountImageId);
     }
@@ -62,15 +67,17 @@ public class AccountImageServiceImpl implements AccountImageService {
     // 실계좌이미지 등록
     @Transactional
     public void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList) {
-        // todo. security context에서 회원 id 받아서 비교 필요.
-        // if(accountImage.getCreatedBy() != id) throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        // todo security 적용 후 주석 해제
+//        if(securityUtils.getUserIdInSecurityContext() != accountImage.getCreatedBy()) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+//        }
 
         List<AccountImage> accountImageList = requestDtoList.stream().map(requestDto -> AccountImage.builder()
                 .title(requestDto.getTitle())
                 .strategy(findStrategyByStrategyId(strategyId))
                 .build()).collect(Collectors.toList());
 
-        // todo. 이미지 파일 S3 업로드 로직 필요 -> 예슬님이 진행해 주실 예정입니다.
+        // todo. 이미지 파일 S3 업로드 로직 필요
         // requestDtos.get(0).getImage();
 
         accountImageRepository.saveAll(accountImageList);
@@ -80,7 +87,7 @@ public class AccountImageServiceImpl implements AccountImageService {
         return AccountImageResponseDto.builder()
                 .accountImageId(accountImage.getId())
                 .title(accountImage.getTitle())
-                // .imageUrl() todo. 파일 DB 조인 필요.
+                // .imageUrl() todo. 파일 DB 조인 필요
                 .build();
     }
 
