@@ -43,6 +43,17 @@ public class StockController {
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
+    @GetMapping("/admin/stock/availability")
+    public ResponseEntity<ApiResponse<String>> getCheckDupl(
+            @NotBlank @RequestParam String name
+    ) {
+       if(stockService.duplCheck(name)) {
+           return ResponseEntity.status(HttpStatus.OK)
+                   .body(ApiResponse.success());
+       }
+       return ResponseEntity.status(HttpStatus.CONFLICT)
+               .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+    }
 
 
     /*
@@ -144,6 +155,12 @@ public class StockController {
         }
     }
 
+    /*
+        종목 삭제하기 api
+        1. 종목을 삭제하는 데 성공했을 때 : OK
+        2. 종목을 삭제하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
+        3. 삭제할 종목을 찾지 못했을 때 : NOT_FOUND
+     */
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<ApiResponse<String>> deleteItem(
