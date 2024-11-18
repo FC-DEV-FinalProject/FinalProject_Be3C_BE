@@ -12,6 +12,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import jakarta.el.MethodNotFoundException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
+@Slf4j
 @SpringBootTest
 public class UpdateStrategyRepositoryTest {
 
@@ -110,6 +112,7 @@ public class UpdateStrategyRepositoryTest {
                 .id(2L)
                 .name("Auto")
                 .statusCode("Y")
+                .methodCreatedDate(LocalDateTime.now())
                 .build();
 
         methodRepository.save(method);
