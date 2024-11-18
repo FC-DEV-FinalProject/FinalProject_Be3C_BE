@@ -33,7 +33,6 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
-    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
@@ -102,6 +101,7 @@ public class UpdateStrategyRepositoryTest {
                 .id(1L)
                 .name("Auto")
                 .statusCode("Y")
+                .methodCreatedDate(LocalDateTime.now())
                 .build();
 
         methodRepository.save(method);
@@ -146,7 +146,7 @@ public class UpdateStrategyRepositoryTest {
                 .code("001")
                 .build();
 
-        stockRepository.saveAndFlush(stock);
+        stockRepository.save(stock);
     }
 
     Method findMethod() {
