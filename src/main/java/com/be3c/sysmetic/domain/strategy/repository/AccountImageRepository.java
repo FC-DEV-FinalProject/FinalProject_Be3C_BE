@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AccountImageRepository extends JpaRepository<AccountImage, Long> {
-    Page<AccountImage> findByStrategyId(Long strategyId, Pageable pageable);
+    Page<AccountImage> findAllByStrategyIdOrderByAccountImageCreatedAt(Long strategyId, Pageable pageable);
 }

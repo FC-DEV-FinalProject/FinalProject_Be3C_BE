@@ -1,8 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
 import lombok.*;
-
-import java.time.LocalDateTime;
+import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
@@ -10,12 +9,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountImageResponseDto {
-
-    private Long accountImageId;
-
+public class AccountImageRequestDto {
+    private MultipartFile image;
     private String title;
-
-    private String imageUrl;
-
 }
