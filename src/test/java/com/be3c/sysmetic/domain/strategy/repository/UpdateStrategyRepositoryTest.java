@@ -31,7 +31,6 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
-    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
@@ -41,9 +40,6 @@ public class UpdateStrategyRepositoryTest {
         saveStock();
 
         strategyRepository.deleteAll();
-        entityManager.createNativeQuery("ALTER TABLE strategy AUTO_INCREMENT = 1")
-                .executeUpdate();
-
         strategyRepository.save(getStrategy(getRequestDto(), findMember(), findMethod()));
     }
 
@@ -51,7 +47,11 @@ public class UpdateStrategyRepositoryTest {
     @Test
     void updateStrategyTest_All() {
         // 전략 조회
-        Strategy existingStrategy = strategyRepository.findById(1L).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy existingStrategy = strategyRepository.findById(1L)
+                .orElseThrow(
+                        () -> new StrategyBadRequestException(
+                                        StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())
+                );
 
         // 전략 상태 검증
         if(!existingStrategy.getStatusCode().equals(StrategyStatusCode.PRIVATE.name())) {
