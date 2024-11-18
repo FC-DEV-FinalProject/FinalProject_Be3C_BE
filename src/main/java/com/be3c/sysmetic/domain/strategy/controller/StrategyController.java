@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.MonthlyResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.MonthlyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.service.DailyServiceImpl;
 import com.be3c.sysmetic.domain.strategy.service.MonthlyServiceImpl;
  import com.be3c.sysmetic.global.common.response.APIResponse;
@@ -31,7 +31,7 @@ public class StrategyController {
     // 일간데이터 조회
     @Operation(summary = "일간분석 조회", description = "특정 전략의 일간분석을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 요청 성공",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DailyResponseDto.class))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DailyGetResponseDto.class))
     )
     @GetMapping("/strategy/daily")
     public ResponseEntity<APIResponse> findDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("page") int page, @RequestParam(value = "startDate", required = false) LocalDateTime startDate, @RequestParam(value = "endDate", required = false) LocalDateTime endDate) {
@@ -41,7 +41,7 @@ public class StrategyController {
 
     @Operation(summary = "월간분석 조회", description = "특정 전략의 월간분석을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 요청 성공",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MonthlyResponseDto.class))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MonthlyGetResponseDto.class))
     )
     // 월간데이터 조회
     @GetMapping("/strategy/monthly")

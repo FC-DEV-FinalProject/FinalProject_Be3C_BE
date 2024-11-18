@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
@@ -97,9 +97,9 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     }
 
     // 전략통계 조회
-    public StrategyStatisticsResponseDto findStrategyStatistics(Long strategyId) {
+    public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
-        return StrategyStatisticsResponseDto.builder()
+        return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
                 .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
                 .principal(statistics.getPrincipal())

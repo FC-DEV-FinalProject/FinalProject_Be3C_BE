@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -42,7 +42,7 @@ public class UpdateStrategyServiceImpl implements UpdateStrategyService {
 
     @Override
     @Transactional
-    public Strategy updateStrategy(Long id, SaveStrategyRequestDto requestDto) {
+    public Strategy updateStrategy(Long id, StrategyPostRequestDto requestDto) {
         if(id == null || requestDto == null) throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_VALUE.getMessage());
 
         Strategy existingStrategy = strategyRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));

@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,13 +48,13 @@ public class UpdateStrategyServiceTest {
     @Test
     void updateStrategySuccessTest() {
         // insert
-        SaveStrategyRequestDto requestDto = getRequestDto();
+        StrategyPostRequestDto requestDto = getRequestDto();
         Strategy strategy = insertStrategyService.insertStrategy(requestDto);
 
         assertNotNull(strategy);
 
         // update
-        SaveStrategyRequestDto updateRequestDto = getRequestDto();
+        StrategyPostRequestDto updateRequestDto = getRequestDto();
 //        updateRequestDto.setName("이름 수정");
         updateRequestDto.setContent("내용 수정");
         updateStrategyService.updateStrategy(strategy.getId(), updateRequestDto);
@@ -121,8 +120,8 @@ public class UpdateStrategyServiceTest {
         return stockRepository.findAll().stream().findFirst().get();
     }
 
-    SaveStrategyRequestDto getRequestDto() {
-        return SaveStrategyRequestDto.builder()
+    StrategyPostRequestDto getRequestDto() {
+        return StrategyPostRequestDto.builder()
                 .name("전략명")
                 .content("전략 내용")
                 .traderId(findMember().getId())
@@ -132,7 +131,7 @@ public class UpdateStrategyServiceTest {
                 .build();
     }
 
-    Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
+    Strategy getStrategy(StrategyPostRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
                 .trader(member)
                 .method(method)

@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -46,22 +46,22 @@ class InsertStrategyRepositoryTest {
     void insertStrategySuccessTest() {
 
         // request 객체
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto().toBuilder().name("전략1").build();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto().toBuilder().name("전략1").build();
 
         // DB 저장 객체
-        Strategy strategy = getStrategy(saveStrategyRequestDto, findMember(), findMethod());
+        Strategy strategy = getStrategy(strategyPostRequestDto, findMember(), findMethod());
 
         // DB 저장
         Strategy savedStrategy = strategyRepository.saveAndFlush(strategy);
 
         // 검증
         assertNotNull(savedStrategy);
-        assertEquals(saveStrategyRequestDto.getTraderId(), savedStrategy.getTrader().getId());
-        assertEquals(saveStrategyRequestDto.getMethodId(), savedStrategy.getMethod().getId());
+        assertEquals(strategyPostRequestDto.getTraderId(), savedStrategy.getTrader().getId());
+        assertEquals(strategyPostRequestDto.getMethodId(), savedStrategy.getMethod().getId());
         assertEquals(savedStrategy.getStatusCode(), StrategyStatusCode.PRIVATE.name());
-        assertEquals(saveStrategyRequestDto.getName(), savedStrategy.getName());
-        assertEquals(saveStrategyRequestDto.getCycle(), savedStrategy.getCycle());
-        assertEquals(saveStrategyRequestDto.getContent(), savedStrategy.getContent());
+        assertEquals(strategyPostRequestDto.getName(), savedStrategy.getName());
+        assertEquals(strategyPostRequestDto.getCycle(), savedStrategy.getCycle());
+        assertEquals(strategyPostRequestDto.getContent(), savedStrategy.getContent());
         assertEquals(0, savedStrategy.getFollowerCount());
         assertEquals(0.0, savedStrategy.getKpRatio());
         assertEquals(0.0, savedStrategy.getSmScore());
@@ -72,9 +72,9 @@ class InsertStrategyRepositoryTest {
     @DisplayName("전략 등록 실패 테스트 - 멤버id 미존재")
     @Test
     void insertStrategyFailureTest_NullMemberId() {
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto();
 
-        Strategy strategy = getStrategy(saveStrategyRequestDto, null, findMethod());
+        Strategy strategy = getStrategy(strategyPostRequestDto, null, findMethod());
 
         // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -85,9 +85,9 @@ class InsertStrategyRepositoryTest {
     @DisplayName("전략 등록 실패 테스트 - 전략명 미존재")
     @Test
     void insertStrategyFailureTest_NullStrategyName() {
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto().toBuilder().name(null).build();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto().toBuilder().name(null).build();
 
-        Strategy strategy = getStrategy(saveStrategyRequestDto, findMember(), findMethod());
+        Strategy strategy = getStrategy(strategyPostRequestDto, findMember(), findMethod());
 
         // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -98,9 +98,9 @@ class InsertStrategyRepositoryTest {
     @DisplayName("전략 등록 실패 테스트 - 매매방식 미존재")
     @Test
     void insertStrategyFailureTest_NullMethod() {
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto();
 
-        Strategy strategy = getStrategy(saveStrategyRequestDto, findMember(), null);
+        Strategy strategy = getStrategy(strategyPostRequestDto, findMember(), null);
 
         // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -111,9 +111,9 @@ class InsertStrategyRepositoryTest {
     @DisplayName("전략 등록 실패 테스트 - 주기 미존재")
     @Test
     void insertStrategyFailureTest_NullCycle() {
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto().toBuilder().cycle(null).build();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto().toBuilder().cycle(null).build();
 
-        Strategy strategy = getStrategy(saveStrategyRequestDto, findMember(), findMethod());
+        Strategy strategy = getStrategy(strategyPostRequestDto, findMember(), findMethod());
 
         // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -137,9 +137,9 @@ class InsertStrategyRepositoryTest {
     @DisplayName("전략 등록 실패 테스트 - 전략소개내용 미존재")
     @Test
     void insertStrategyFailureTest_NullContent() {
-        SaveStrategyRequestDto saveStrategyRequestDto = getRequestDto().toBuilder().content(null).build();
+        StrategyPostRequestDto strategyPostRequestDto = getRequestDto().toBuilder().content(null).build();
 
-        Strategy strategy = getStrategy(saveStrategyRequestDto, findMember(), findMethod());
+        Strategy strategy = getStrategy(strategyPostRequestDto, findMember(), findMethod());
 
         // 예외 검증
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -199,8 +199,8 @@ class InsertStrategyRepositoryTest {
         return stockRepository.findAll().stream().findFirst().get();
     }
 
-    SaveStrategyRequestDto getRequestDto() {
-        return SaveStrategyRequestDto.builder()
+    StrategyPostRequestDto getRequestDto() {
+        return StrategyPostRequestDto.builder()
                 .name("전략명")
                 .content("전략 내용")
                 .traderId(findMember().getId())
@@ -210,7 +210,7 @@ class InsertStrategyRepositoryTest {
                 .build();
     }
 
-    Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
+    Strategy getStrategy(StrategyPostRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
                 .trader(member)
                 .method(method)

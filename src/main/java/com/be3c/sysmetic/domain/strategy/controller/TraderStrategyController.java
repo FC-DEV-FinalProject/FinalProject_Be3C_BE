@@ -1,9 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.service.DailyServiceImpl;
 import com.be3c.sysmetic.domain.strategy.service.DeleteStrategyServiceImpl;
@@ -12,7 +11,6 @@ import com.be3c.sysmetic.domain.strategy.service.InsertStrategyServiceImpl;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,7 +47,7 @@ public class TraderStrategyController {
             }
     )
     @PostMapping("/strategy")
-    public ResponseEntity<APIResponse<Strategy>> insertStrategy(@Valid @RequestBody SaveStrategyRequestDto requestDto) {
+    public ResponseEntity<APIResponse<Strategy>> insertStrategy(@Valid @RequestBody StrategyPostRequestDto requestDto) {
         insertStrategyService.insertStrategy(requestDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success());
@@ -66,7 +64,7 @@ public class TraderStrategyController {
 
     // 전략 수정
     @PatchMapping("/strategy")
-    public ResponseEntity<APIResponse<Strategy>> updateStrategy(@RequestParam Long strategyId, @Valid @RequestBody SaveStrategyRequestDto requestDto) {
+    public ResponseEntity<APIResponse<Strategy>> updateStrategy(@RequestParam Long strategyId, @Valid @RequestBody StrategyPostRequestDto requestDto) {
         updateStrategyService.updateStrategy(strategyId, requestDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success());
@@ -82,8 +80,8 @@ public class TraderStrategyController {
 
     // 일간데이터 등록
     @PostMapping("/strategy/daily")
-    public ResponseEntity<APIResponse> insertDaily(@RequestParam("strategyId") Long strategyId, @Valid @RequestBody List<SaveDailyRequestDto> requestDtoList) {
-        SaveDailyResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
+    public ResponseEntity<APIResponse> insertDaily(@RequestParam("strategyId") Long strategyId, @Valid @RequestBody List<DailyPostRequestDto> requestDtoList) {
+        DailyPostResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
         dailyService.saveDaily(strategyId, requestDtoList);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -92,7 +90,7 @@ public class TraderStrategyController {
 
     // 일간데이터 수정
     @PatchMapping("/strategy/daily")
-    public ResponseEntity<APIResponse> updateDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("dailyId") Long dailyId, @RequestBody SaveDailyRequestDto requestDto) {
+    public ResponseEntity<APIResponse> updateDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("dailyId") Long dailyId, @RequestBody DailyPostRequestDto requestDto) {
         dailyService.updateDaily(strategyId, dailyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK)

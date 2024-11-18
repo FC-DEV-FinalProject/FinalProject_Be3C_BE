@@ -1,8 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
@@ -73,7 +73,7 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 등록
     @Transactional
     @Override
-    public void saveDaily(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
+    public void saveDaily(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
         List<Daily> dailyList = processingDaily(strategyId, null, requestDtoList);
         dailyRepository.saveAll(dailyList);
 
@@ -85,9 +85,9 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 수정
     @Transactional
     @Override
-    public void updateDaily(Long strategyId, Long dailyId, SaveDailyRequestDto requestDto) {
+    public void updateDaily(Long strategyId, Long dailyId, DailyPostRequestDto requestDto) {
         // 등록시 사용하는 메서드 사용하기 위해 List로 변환
-        List<SaveDailyRequestDto> requestDtoList = new ArrayList<>();
+        List<DailyPostRequestDto> requestDtoList = new ArrayList<>();
         requestDtoList.add(requestDto);
         Daily daily = processingDaily(strategyId, dailyId, requestDtoList).stream().findFirst().orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
@@ -134,26 +134,26 @@ public class DailyServiceImpl implements DailyService {
     }
 
     @Override
-    public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
-        for (SaveDailyRequestDto requestDto : requestDtoList) {
+    public DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
+        for (DailyPostRequestDto requestDto : requestDtoList) {
             // 이미 등록한 날짜가 하나라도 존재할 경우 true 반환
             if(findDuplicateDate(strategyId, requestDto.getDate()) != null) {
-                return SaveDailyResponseDto.builder()
+                return DailyPostResponseDto.builder()
                         .isDuplicate(true)
                         .build();
             }
         }
-        return SaveDailyResponseDto.builder()
+        return DailyPostResponseDto.builder()
                 .isDuplicate(false)
                 .build();
     }
 
     // 일간분석 조회
-    public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
+    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
 
-        PageResponse<DailyResponseDto> responseDto = PageResponse.<DailyResponseDto>builder()
+        PageResponse<DailyGetResponseDto> responseDto = PageResponse.<DailyGetResponseDto>builder()
                 .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
                 .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
                 .totalElement(dailyResponseDtoPage.getTotalElements())
@@ -165,13 +165,13 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // TODO 시큐리티 완료 후 수정 필요
-    private List<Daily> processingDaily(Long strategyId, Long dailyId, List<SaveDailyRequestDto> requestDtoList) {
+    private List<Daily> processingDaily(Long strategyId, Long dailyId, List<DailyPostRequestDto> requestDtoList) {
 
         final Daily beforeDaily = getBeforeDaily(strategyId);
         List<Daily> dailyList = new ArrayList<>();
         final Long createdBy = 1L;
 
-        for(SaveDailyRequestDto requestDto : requestDtoList) {
+        for(DailyPostRequestDto requestDto : requestDtoList) {
             Daily duplicatedDaily = findDuplicateDate(strategyId, requestDto.getDate());
 
             if(dailyId == null && duplicatedDaily != null) {
@@ -202,7 +202,7 @@ public class DailyServiceImpl implements DailyService {
         return dailyRepository.countByStrategyId(strategyId);
     }
 
-    private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, SaveDailyRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
+    private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, DailyPostRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
         Double dailyProfitLossRate = strategyCalculator.getDailyProfitLossRate(
                 isFirst,
                 requestDto.getDepositWithdrawalAmount(),
@@ -227,8 +227,8 @@ public class DailyServiceImpl implements DailyService {
                 .build();
     }
 
-    private DailyResponseDto entityToDto(Daily daily) {
-        return DailyResponseDto.builder()
+    private DailyGetResponseDto entityToDto(Daily daily) {
+        return DailyGetResponseDto.builder()
                 .dailyId(daily.getId())
                 .date(daily.getDate())
                 .principal(daily.getPrincipal())

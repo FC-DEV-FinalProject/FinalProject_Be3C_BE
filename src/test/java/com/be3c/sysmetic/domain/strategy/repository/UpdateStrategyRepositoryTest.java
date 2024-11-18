@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -53,7 +53,7 @@ public class UpdateStrategyRepositoryTest {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
 
-        SaveStrategyRequestDto updateRequestDto = SaveStrategyRequestDto.builder()
+        StrategyPostRequestDto updateRequestDto = StrategyPostRequestDto.builder()
                 .methodId(2L)
                 .name("전략수정")
                 .cycle('D')
@@ -154,8 +154,8 @@ public class UpdateStrategyRepositoryTest {
         return stockRepository.findAll().stream().findFirst().get();
     }
 
-    SaveStrategyRequestDto getRequestDto() {
-        return SaveStrategyRequestDto.builder()
+    StrategyPostRequestDto getRequestDto() {
+        return StrategyPostRequestDto.builder()
                 .traderId(null)
                 .methodId(1L)
                 .stockIdList(List.of(1L, 2L))
@@ -165,7 +165,7 @@ public class UpdateStrategyRepositoryTest {
                 .build();
     }
 
-    Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
+    Strategy getStrategy(StrategyPostRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
                 .trader(member)
                 .method(method)

@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -52,7 +52,7 @@ class InsertStrategyServiceTest {
     @Test
     void insertStrategySuccessTest() {
         // DB 저장
-        SaveStrategyRequestDto requestDto = getRequestDto();
+        StrategyPostRequestDto requestDto = getRequestDto();
         Strategy savedStrategy = strategyService.insertStrategy(requestDto);
 
         // 검증
@@ -73,7 +73,7 @@ class InsertStrategyServiceTest {
     @DisplayName("전략 등록 실패 테스트 - 멤버id 미존재")
     @Test
     void insertStrategyFailureTest_NullMemberId() {
-        SaveStrategyRequestDto requestDto = getRequestDto();
+        StrategyPostRequestDto requestDto = getRequestDto();
         requestDto.setTraderId(null);
 
         // 예외 검증
@@ -85,7 +85,7 @@ class InsertStrategyServiceTest {
     @DisplayName("전략 등록 실패 테스트 - 전략명 미존재")
     @Test
     void insertStrategyFailureTest_NullStrategyName() {
-        SaveStrategyRequestDto requestDto = getRequestDto();
+        StrategyPostRequestDto requestDto = getRequestDto();
         requestDto.setName(null);
 
         // 예외 검증
@@ -146,8 +146,8 @@ class InsertStrategyServiceTest {
         return stockRepository.findAll().stream().findFirst().get();
     }
 
-    SaveStrategyRequestDto getRequestDto() {
-        return SaveStrategyRequestDto.builder()
+    StrategyPostRequestDto getRequestDto() {
+        return StrategyPostRequestDto.builder()
                 .name("전략명")
                 .content("전략 내용")
                 .traderId(findMember().getId())
@@ -157,7 +157,7 @@ class InsertStrategyServiceTest {
                 .build();
     }
 
-    Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
+    Strategy getStrategy(StrategyPostRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
                 .trader(member)
                 .method(method)

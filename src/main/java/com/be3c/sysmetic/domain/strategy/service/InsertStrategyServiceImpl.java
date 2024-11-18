@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -34,7 +34,7 @@ public class InsertStrategyServiceImpl implements InsertStrategyService {
 
     @Override
     @Transactional
-    public Strategy insertStrategy(SaveStrategyRequestDto requestDto) {
+    public Strategy insertStrategy(StrategyPostRequestDto requestDto) {
         // 전략명 중복 여부 검증
         checkDuplicationName(requestDto.getName());
 

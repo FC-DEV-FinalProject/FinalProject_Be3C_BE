@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.SaveStrategyRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
@@ -50,7 +50,7 @@ public class DeleteStrategyServiceTest {
     @Test
     void deleteStrategySuccssTest() {
         // insert
-        SaveStrategyRequestDto requestDto = getRequestDto();
+        StrategyPostRequestDto requestDto = getRequestDto();
         Strategy strategy = insertStrategyService.insertStrategy(requestDto);
         assertNotNull(strategy);
 
@@ -112,8 +112,8 @@ public class DeleteStrategyServiceTest {
         return stockRepository.findAll().stream().findFirst().get();
     }
 
-    SaveStrategyRequestDto getRequestDto() {
-        return SaveStrategyRequestDto.builder()
+    StrategyPostRequestDto getRequestDto() {
+        return StrategyPostRequestDto.builder()
                 .name("전략명")
                 .content("전략 내용")
                 .traderId(findMember().getId())
@@ -123,7 +123,7 @@ public class DeleteStrategyServiceTest {
                 .build();
     }
 
-    Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
+    Strategy getStrategy(StrategyPostRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
                 .trader(member)
                 .method(method)

@@ -14,13 +14,13 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaveStrategyRequestDto {
+public class StrategyPostRequestDto {
 
-    @Schema(description = "트레이더 식별번호", example = "123")
+    @Schema(description = "트레이더 식별번호", example = "1")
     @NotNull
     private Long traderId;
 
-    @Schema(description = "매매방식 식별번호", example = "123")
+    @Schema(description = "매매방식 식별번호", example = "1")
     @NotNull
     private Long methodId;
 
@@ -37,7 +37,7 @@ public class SaveStrategyRequestDto {
     @NotBlank
     private String content;
 
-    @Schema(description = "주기 - D 또는 P만 입력 가능", example = "P")
+    @Schema(description = "주기 - D 또는 P", example = "P")
     @ValidCycle
     @NotNull
     private Character cycle;
