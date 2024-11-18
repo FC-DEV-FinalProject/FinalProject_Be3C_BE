@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.LoginRequestDto;
 import com.be3c.sysmetic.domain.member.service.LoginService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,7 +48,7 @@ public class LoginController {
 
 
     @PostMapping("/auth/login")
-        public ResponseEntity<ApiResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
+        public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
 
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();
@@ -61,7 +61,7 @@ public class LoginController {
             // 2. 비밀번호 비교
             if(!loginService.validatePassword(memberEmail, password)) {
                 // 로그인 실패(비밀번호 불일치)
-                return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "controller/pw- 이메일 또는 비밀번호가 일치하지 않습니다"));
+                return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST, "controller/pw- 이메일 또는 비밀번호가 일치하지 않습니다"));
             }
 
             // 3. rememberMe에 따른 Jwt 토큰 생성
@@ -73,11 +73,11 @@ public class LoginController {
             // 5. 생성된 토큰 Redis에 저장
             redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
 
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+            return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST,"controller/catch - 이메일 또는 비밀번호가 일치하지 않습니다"));
+            return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST,"controller/catch - 이메일 또는 비밀번호가 일치하지 않습니다"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "로그인 문제 발생"));
+            return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST, "로그인 문제 발생"));
         }
     }
 
