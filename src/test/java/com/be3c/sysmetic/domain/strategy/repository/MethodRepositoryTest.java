@@ -1,9 +1,8 @@
-package com.be3c.sysmetic.admin.Method;
+package com.be3c.sysmetic.domain.strategy.repository;
 
 
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
-import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;

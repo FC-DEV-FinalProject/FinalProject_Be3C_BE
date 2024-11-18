@@ -4,7 +4,7 @@ import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.StockService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,12 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.NoSuchElementException;
 
 @Controller
 @Slf4j
@@ -44,15 +40,15 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/availability")
-    public ResponseEntity<ApiResponse<String>> getCheckDupl(
+    public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     ) {
        if(stockService.duplCheck(name)) {
            return ResponseEntity.status(HttpStatus.OK)
-                   .body(ApiResponse.success());
+                   .body(APIResponse.success());
        }
        return ResponseEntity.status(HttpStatus.CONFLICT)
-               .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+               .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
     }
 
 
@@ -63,17 +59,17 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id}")
-    public ResponseEntity<ApiResponse<StockGetResponseDto>> getItem(
+    public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
             @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             StockGetResponseDto findStock = stockService.findItemById(id);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(findStock));
+                    .body(APIResponse.success(findStock));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -84,17 +80,17 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
-    public ResponseEntity<ApiResponse<PageResponse<StockGetResponseDto>>> getStockPage(
+    public ResponseEntity<APIResponse<PageResponse<StockGetResponseDto>>> getStockPage(
             @NotBlank @PathVariable Integer page
     ) throws Exception {
         try {
             PageResponse<StockGetResponseDto> stockPage = stockService.findItemPage(page);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(stockPage));
+                    .body(APIResponse.success(stockPage));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -108,21 +104,21 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
-    public ResponseEntity<ApiResponse<String>> saveitem(
+    public ResponseEntity<APIResponse<String>> saveitem(
             @Valid @RequestBody StockPostRequestDto stockPostRequestDto
     ) throws Exception {
         try {
             if(stockService.saveItem(stockPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         }
     }
 
@@ -134,24 +130,24 @@ public class StockController {
      */
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
-    public ResponseEntity<ApiResponse<String>> updateItem(
+    public ResponseEntity<APIResponse<String>> updateItem(
             @Valid @RequestBody StockPutRequestDto stockPutRequestDto
     ) throws Exception {
         try {
             if(stockService.updateItem(stockPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch(IllegalArgumentException |
                 IllegalStateException |
                 DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -163,19 +159,19 @@ public class StockController {
      */
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteItem(
+    public ResponseEntity<APIResponse<String>> deleteItem(
             @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             if(stockService.deleteItem(id)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 }

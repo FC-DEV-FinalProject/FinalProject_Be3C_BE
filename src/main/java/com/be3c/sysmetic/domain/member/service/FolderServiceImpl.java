@@ -84,7 +84,7 @@ public class FolderServiceImpl implements FolderService {
      */
     @Override
     public boolean insertFolder(FolderPostRequestDto folderPostRequestDto) {
-        if(folderPostRequestDto.getCheckDupl()) {
+        if(!folderPostRequestDto.getCheckDupl()) {
             throw new IllegalStateException();
         }
 
@@ -127,7 +127,7 @@ public class FolderServiceImpl implements FolderService {
      */
     @Override
     public boolean updateFolder(FolderPutRequestDto folderPutRequestDto) {
-        if(!folderPutRequestDto.getCheckDuplication()) {
+        if(!folderPutRequestDto.getCheckDupl()) {
             throw new IllegalStateException();
         }
 
@@ -138,7 +138,7 @@ public class FolderServiceImpl implements FolderService {
                         userId,
                         folderPutRequestDto.getFolderId(),
                         USING_STATE.getCode()
-                ).orElseThrow(() -> new UsernameNotFoundException(""));
+                ).orElseThrow(() -> new EntityNotFoundException(""));
 
         if(!duplCheck(folderPutRequestDto.getFolderName())) {
             throw new ConflictException();
@@ -166,6 +166,13 @@ public class FolderServiceImpl implements FolderService {
     public boolean deleteFolder(Long folder_id) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
+        Folder find_folder = folderRepository
+                .findByMemberIdAndIdAndStatusCode(
+                        userId,
+                        folder_id,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
+
         if(folderRepository
                 .countFoldersByUser(
                         userId,
@@ -173,13 +180,6 @@ public class FolderServiceImpl implements FolderService {
                 ) <= 1) {
             throw new IllegalStateException();
         }
-
-        Folder find_folder = folderRepository
-                .findByMemberIdAndIdAndStatusCode(
-                        userId,
-                        folder_id,
-                        USING_STATE.getCode()
-                ).orElseThrow(EntityNotFoundException::new);
 
         find_folder.setStatusCode(Code.NOT_USING_STATE.getCode());
 

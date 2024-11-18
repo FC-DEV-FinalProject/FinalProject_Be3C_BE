@@ -31,6 +31,8 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
             @Param("statusCode") String statusCode
     );
 
+    List<Folder> findByMemberIdAndStatusCode(Long memberId, String statusCode);
+
     Optional<Folder> findByMemberIdAndNameAndStatusCode(Long memberId, String folderName, String statusCode);
 
     Optional<Folder> findByIdAndStatusCode(Long folderId, String statusCode);

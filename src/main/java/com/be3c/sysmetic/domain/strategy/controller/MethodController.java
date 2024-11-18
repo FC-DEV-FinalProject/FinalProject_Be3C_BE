@@ -4,7 +4,7 @@ import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.MethodService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
@@ -44,15 +44,15 @@ public class MethodController {
         2. 중복된 이름의 매매 유형이 존재할 때 : CONFLICT
      */
     @GetMapping("/admin/method/availability")
-    public ResponseEntity<ApiResponse<String>> getCheckDupl(
+    public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     ) throws Exception {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success());
+                    .body(APIResponse.success());
         }
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 이름입니다."));
+                .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE, "중복된 이름입니다."));
     }
 
     /*
@@ -62,19 +62,19 @@ public class MethodController {
      */
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")
-    public ResponseEntity<ApiResponse<MethodGetResponseDto>> getMethod(
+    public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
             @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(methodService.findById(id)));
+                    .body(APIResponse.success(methodService.findById(id)));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -85,21 +85,21 @@ public class MethodController {
         3. 잘못된 데이터가 입력됐을 때 : BAD_REQUEST
      */
     @GetMapping("/admin/methodlist")
-    public ResponseEntity<ApiResponse<PageResponse<MethodGetResponseDto>>> getMethods(
+    public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @NotBlank @RequestParam Integer page
     ) throws Exception {
         try {
             PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(methodList));
+                    .body(APIResponse.success(methodList));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException |
                 NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -111,24 +111,24 @@ public class MethodController {
         4. 중복된 매매 유형명이 존재할 때 : CONFLICT
      */
     @PostMapping("/admin/method")
-    public ResponseEntity<ApiResponse<String>> postMethod(
+    public ResponseEntity<APIResponse<String>> postMethod(
             @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
     ) throws Exception {
         try {
             if(methodService.insertMethod(methodPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (ConflictException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         }
     }
 
@@ -141,27 +141,27 @@ public class MethodController {
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
     @PutMapping("/admin/method")
-    public ResponseEntity<ApiResponse<String>> putMethod(
+    public ResponseEntity<APIResponse<String>> putMethod(
             @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
     ) throws Exception {
         try {
             if(methodService.updateMethod(methodPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         } catch (ConflictException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         }
     }
 
@@ -173,23 +173,23 @@ public class MethodController {
      */
 //    @DeleteMapping("/admin/method/{id:[0-9]+}")
     @DeleteMapping("/admin/method/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteMethod(
+    public ResponseEntity<APIResponse<String>> deleteMethod(
             @NotBlank @PathVariable Long id
     ) throws Exception {
         try {
             if(methodService.deleteMethod(id)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 }

@@ -125,17 +125,16 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Optional<InterestStrategy> interestStrategy = interestStrategyRepository
-                .findByMemberIdAndStrategyIdAndStatusCode(
+                .findByMemberIdAndStrategyId(
                         userId,
-                        followPostRequestDto.getStrategyId(),
-                        USING_STATE.getCode()
+                        followPostRequestDto.getStrategyId()
                 );
 
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, followPostRequestDto.getFolderId(), followPostRequestDto.getStrategyId());
             return true;
-        } else if(interestStrategy.get().getStatusCode().equals(Code.NOT_USING_STATE.getCode())) {
-            interestStrategy.get().setStatusCode(USING_STATE.getCode());
+        } else if(interestStrategy.get().getStatusCode().equals(Code.UNFOLLOW.getCode())) {
+            interestStrategy.get().setStatusCode(FOLLOW.getCode());
             followStrategyLog(
                     userId,
                     followPostRequestDto.getFolderId(),
@@ -162,7 +161,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
         for(Long unfollowId : followDeleteRequestDto.getStrategyId()) {
             try {
-                unFollowStrategy(userId, followDeleteRequestDto.getFolderId(), unfollowId);
+                unFollowStrategy(userId, unfollowId);
             } catch (EntityNotFoundException e) {
                 fail_unfollow.put(unfollowId, e.getMessage());
             }
@@ -196,6 +195,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                                 USING_STATE.getCode()
                         ).orElseThrow(EntityNotFoundException::new))
                         .strategy(strategy)
+                        .statusCode(FOLLOW.getCode())
                         .build()
         );
 
@@ -215,13 +215,12 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         2. 해당 관심 전략의 상태를 UNFOLLOW 상태로 변경한다.
         3. 관심 전략 삭제 로그를 등록한다..
      */
-    private void unFollowStrategy(Long userId, Long folderId, Long strategyId) {
+    private void unFollowStrategy(Long userId, Long strategyId) {
         InterestStrategy interestStrategy = interestStrategyRepository
-                .findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
+                .findByMemberIdAndAndStrategyIdAndStatusCode(
                         userId,
-                        folderId,
                         strategyId,
-                        USING_STATE.getCode()
+                        FOLLOW.getCode()
                 ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_STRATEGY.getMessage()));
 
         interestStrategy.setStatusCode(UNFOLLOW.getCode());
@@ -232,7 +231,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
         followStrategyLog(
                 userId,
-                folderId,
+                interestStrategy.getFolder().getId(),
                 strategyId,
                 UNFOLLOW.getCode()
         );
@@ -261,8 +260,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                                         USING_STATE.getCode()
                                 ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_STRATEGY.getMessage())))
                         .LogCode(LogCode)
+                        .isSendMail(Code.NOT_SEND_FOLLOW_MAIL.getCode())
                         .build()
         );
-
     }
 }

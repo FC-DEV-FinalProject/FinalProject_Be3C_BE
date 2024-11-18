@@ -18,5 +18,5 @@ public class FolderPutRequestDto {
     private String folderName;
 
     @NotBlank
-    private Boolean checkDuplication;
+    private Boolean checkDupl;
 }

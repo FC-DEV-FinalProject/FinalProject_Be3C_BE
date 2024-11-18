@@ -22,7 +22,7 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
             null,
             s.followerCount,
             s.smScore,
-            ss.accumulatedProfitRate,
+            ss.accumulatedProfitLossRate,
             ss.maximumCapitalReductionRate
             )
         FROM InterestStrategy i
@@ -41,6 +41,14 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
 
     Optional<InterestStrategy> findByMemberIdAndFolderIdAndStrategyIdAndStatusCode(
             Long memberId, Long folderId, Long strategyId, String statusCode
+    );
+
+    Optional<InterestStrategy> findByMemberIdAndStrategyId(
+            Long memberId, Long strategyId
+    );
+
+    Optional<InterestStrategy> findByMemberIdAndAndStrategyIdAndStatusCode(
+            Long memberId, Long strategyId, String statusCode
     );
 
 }

@@ -2,7 +2,7 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.service.InterestStrategyService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.SuccessCode;
@@ -36,7 +36,7 @@ public class InterestStrategyController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
-    public ResponseEntity<ApiResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
+    public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
             @ModelAttribute InterestStrategyGetRequestDto interestStrategyGetRequestDto
     ) throws Exception {
         try {
@@ -46,15 +46,15 @@ public class InterestStrategyController {
                     );
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(interestStrategyPage));
+                    .body(APIResponse.success(interestStrategyPage));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (EntityNotFoundException |
                  NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
     /*
@@ -67,26 +67,26 @@ public class InterestStrategyController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PostMapping("/strategy/follow")
-    public ResponseEntity<ApiResponse<String>> follow(
+    public ResponseEntity<APIResponse<String>> follow(
         @Valid @RequestBody FollowPostRequestDto followPostRequestDto
     ) throws Exception {
         try {
             if(interestStrategyService.follow(followPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -98,23 +98,23 @@ public class InterestStrategyController {
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @PutMapping("/strategy/follow")
-    public ResponseEntity<ApiResponse<String>> MoveFolder(
+    public ResponseEntity<APIResponse<String>> MoveFolder(
             @Valid @RequestBody FollowPutRequestDto followPutRequestDto
     ) throws Exception {
         try {
             if(interestStrategyService.moveFolder(followPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 
@@ -126,7 +126,7 @@ public class InterestStrategyController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @DeleteMapping("/strategy/follow")
-    public ResponseEntity<ApiResponse<Map<Long, String>>> unfollow(
+    public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
     ) throws Exception {
         try {
@@ -136,15 +136,15 @@ public class InterestStrategyController {
 
             if(unFollowResult.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
 
             return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-                    .body(ApiResponse.success(SuccessCode.OK, unFollowResult));
+                    .body(APIResponse.success(SuccessCode.OK, unFollowResult));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 }

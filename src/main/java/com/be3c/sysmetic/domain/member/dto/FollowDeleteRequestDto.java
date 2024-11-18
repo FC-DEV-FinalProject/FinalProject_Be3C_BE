@@ -12,8 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class FollowDeleteRequestDto {
     @NotBlank
-    private Long folderId;
-
-    @NotBlank
     private List<Long> strategyId;
 }

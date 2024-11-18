@@ -5,7 +5,7 @@ import com.be3c.sysmetic.domain.member.dto.FolderPostRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.domain.member.exception.ResourceLimitExceededException;
 import com.be3c.sysmetic.domain.member.service.FolderService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,20 +37,20 @@ public class FolderController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder/availability")
-    public ResponseEntity<ApiResponse<String>> getDuplCheck(
+    public ResponseEntity<APIResponse<String>> getDuplCheck(
             @RequestParam String folderName
     ) throws Exception {
         try {
             if(folderService.duplCheck(folderName)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -62,20 +62,20 @@ public class FolderController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder")
-    public ResponseEntity<ApiResponse<List<FolderListResponseDto>>> getAllFolder(
+    public ResponseEntity<APIResponse<List<FolderListResponseDto>>> getAllFolder(
     ) throws Exception {
         try {
             List<FolderListResponseDto> folderList = folderService.getUserFolders();
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(ApiResponse.success(folderList));
+                    .body(APIResponse.success(folderList));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -89,30 +89,30 @@ public class FolderController {
         6. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @PostMapping("/member/folder/")
-    public ResponseEntity<ApiResponse<String>> postFolder(
+    public ResponseEntity<APIResponse<String>> postFolder(
             @Valid @RequestBody FolderPostRequestDto folderPostRequestDto
     ) throws Exception {
         try {
             if(folderService.insertFolder(folderPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (IllegalArgumentException |
                  IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch(ConflictException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
         } catch(ResourceLimitExceededException e) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(ApiResponse.fail(ErrorCode.RESOURCE_LIMIT));
+                    .body(APIResponse.fail(ErrorCode.RESOURCE_LIMIT));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -127,27 +127,27 @@ public class FolderController {
      */
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PutMapping("/member/folder")
-    public ResponseEntity<ApiResponse<String>> putFolder(
+    public ResponseEntity<APIResponse<String>> putFolder(
             @Valid @RequestBody FolderPutRequestDto folderPutRequestDto
     ) throws Exception {
         try {
             if(folderService.updateFolder(folderPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch(IllegalArgumentException |
                 IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -160,29 +160,29 @@ public class FolderController {
         5. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @DeleteMapping("/member/folder/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteFolder(
+    public ResponseEntity<APIResponse<String>> deleteFolder(
             @PathVariable Long id
     ) throws Exception {
         try {
             if(folderService.deleteFolder(id)) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(ApiResponse.success());
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch(IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         } catch (AuthenticationCredentialsNotFoundException |
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.fail(ErrorCode.FORBIDDEN));
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(ApiResponse.fail(ErrorCode.UNPROCESSABLE_ENTITY));
+                    .body(APIResponse.fail(ErrorCode.UNPROCESSABLE_ENTITY));
         }
     }
 }
