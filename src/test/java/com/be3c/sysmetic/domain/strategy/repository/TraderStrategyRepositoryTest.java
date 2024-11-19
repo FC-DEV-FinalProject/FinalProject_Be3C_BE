@@ -174,6 +174,7 @@ public class TraderStrategyRepositoryTest {
                 .password("sys1234!")
                 .name("한감자")
                 .nickname("감자")
+                .birth(LocalDateTime.now())
                 .phoneNumber("01022223333")
                 .usingStatusCode("")
                 .totalFollow(160)

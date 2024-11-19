@@ -44,14 +44,12 @@ public class RedisConfig {
     }
 
     @Bean
-    @Primary
     public RedisConnectionFactory redisConnectionFactory1() {
         log.info("redisConnectionFactory 1 : 등록");
         return createRedis(1);
     }
 
     @Bean
-    @Primary
     public RedisTemplate<Long, Object> redisTemplate1() {
         RedisTemplate<Long, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new GenericJackson2JsonRedisSerializer());

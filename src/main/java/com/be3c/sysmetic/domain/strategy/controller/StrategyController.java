@@ -1,7 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.MonthlyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
 import com.be3c.sysmetic.domain.strategy.service.AccountImageServiceImpl;
