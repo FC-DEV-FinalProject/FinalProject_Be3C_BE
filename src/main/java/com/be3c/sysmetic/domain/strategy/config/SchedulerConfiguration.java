@@ -22,9 +22,8 @@ public class SchedulerConfiguration {
     @Scheduled(cron = "0 00 00 * * ?")
     public void run() {
 
-        // todo : 비공개 상태에도 트레이더는 자신의 전략 통계 확인 가능. 즉 비공개 상태인 전략도 계산 필요. -> 리팩토링시 진행
-        List<Strategy> publicStrategies = strategyRepository.findAllByPublicStatus();
-        for (Strategy strategy : publicStrategies) {
+        List<Strategy> strategies = strategyRepository.findAll();
+        for (Strategy strategy : strategies) {
             try {
                 strategyStatisticsService.runStrategyStatistics(strategy.getId());
             } catch (Exception e) {

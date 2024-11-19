@@ -48,7 +48,7 @@ public class TraderStrategyController {
             summary = "전략 수정",
             description = "트레이더가 본인의 전략을 수정"
     )
-    @PatchMapping(value = "/strategy", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PatchMapping(value = "/strategy/{strategyId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse> updateStrategy(
             @PathVariable Long strategyId,
             @RequestPart @Valid StrategyPostRequestDto requestDto,
@@ -64,7 +64,7 @@ public class TraderStrategyController {
             summary = "전략 삭제",
             description = "트레이더가 본인의 전략을 삭제"
     )
-    @DeleteMapping("/strategy")
+    @DeleteMapping("/strategy/{strategyId}")
     public ResponseEntity<APIResponse> deleteStrategy(@PathVariable Long strategyId) {
         traderStrategyService.deleteStrategy(strategyId);
         return ResponseEntity.status(HttpStatus.OK)

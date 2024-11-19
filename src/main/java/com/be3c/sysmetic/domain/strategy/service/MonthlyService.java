@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface MonthlyService {
     void updateMonthly(Long strategyId, List<LocalDate> updatedDateList);
-    PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, Integer startYear, Integer startMonth, Integer endYear, Integer endMonth);
+    PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth);
     Monthly calculateMonthlyData(Long strategyId, int year, int month);
 }

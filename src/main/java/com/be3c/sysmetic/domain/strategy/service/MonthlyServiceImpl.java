@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,9 +65,11 @@ public class MonthlyServiceImpl implements MonthlyService {
     }
 
     @Override
-    public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, Integer startYear, Integer startMonth, Integer endYear, Integer endMonth) {
+    public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, startYear, startMonth, endYear, endMonth, pageable).map(this::entityToDto);
+        YearMonth start = parseYearMonth(startYearMonth);
+        YearMonth end = parseYearMonth(endYearMonth);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
 
         PageResponse<MonthlyGetResponseDto> responseDto = PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
@@ -114,8 +117,16 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .build();
     }
 
-    Strategy findStrategy(Long strategyId) {
+    private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+    }
+
+    private YearMonth parseYearMonth(String yearMonth) {
+        try {
+            return yearMonth != null ? YearMonth.parse(yearMonth) : null;
+        } catch (DateTimeParseException e) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage());
+        }
     }
 
 }

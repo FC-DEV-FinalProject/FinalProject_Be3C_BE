@@ -127,7 +127,6 @@ public class DailyServiceImpl implements DailyService {
         }
 
         if(countDaily == 0) {
-            // todo 일간분석 데이터 모두 삭제한 경우, 전략통계 삭제 -> 전략통계의 모든 데이터 0으로 업데이트? 리팩토링시 다시 고민. 프론트에 어떻게 받는 게 좋을지 질문.
             // 일간분석 2개 이하일 경우 전략 비공개 상태로, 즉 현재 구현상으로는 계산 X
             statisticsRepository.deleteByStrategyId(strategyId);
         }
@@ -150,7 +149,7 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // 일간분석 조회
-    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
+    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page, 10);
         Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
 
