@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
 
-@Controller
+@RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class MethodController {

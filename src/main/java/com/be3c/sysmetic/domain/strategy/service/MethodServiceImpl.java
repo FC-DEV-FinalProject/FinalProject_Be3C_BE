@@ -66,21 +66,21 @@ public class MethodServiceImpl implements MethodService {
     public PageResponse<MethodGetResponseDto> findMethodPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
 
-        Page<MethodGetResponseDto> find_page = methodRepository
+        Page<MethodGetResponseDto> findPage = methodRepository
                 .findAllByStatusCode(pageable, USING_STATE.getCode());
 
-        if(!find_page.hasContent()) {
+        if(!findPage.hasContent()) {
             throw new EntityNotFoundException();
         }
 
 //        파일 패스 찾는 메서드 추가 예정
 
         return PageResponse.<MethodGetResponseDto>builder()
-                .totalElement(find_page.getTotalElements())
-                .currentPage(find_page.getNumber())
-                .totalPages(find_page.getTotalPages())
-                .pageSize(find_page.getNumberOfElements())
-                .content(find_page.getContent())
+                .totalElement(findPage.getTotalElements())
+                .currentPage(findPage.getNumber())
+                .totalPages(findPage.getTotalPages())
+                .pageSize(findPage.getNumberOfElements())
+                .content(findPage.getContent())
                 .build();
     }
 

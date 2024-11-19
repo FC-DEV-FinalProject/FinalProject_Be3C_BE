@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FolderController {

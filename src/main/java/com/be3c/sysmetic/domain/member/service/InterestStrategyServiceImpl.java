@@ -157,17 +157,17 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     public Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Map<Long, String> fail_unfollow = new HashMap<>();
+        Map<Long, String> failUnfollow = new HashMap<>();
 
         for(Long unfollowId : followDeleteRequestDto.getStrategyId()) {
             try {
                 unFollowStrategy(userId, unfollowId);
             } catch (EntityNotFoundException e) {
-                fail_unfollow.put(unfollowId, e.getMessage());
+                failUnfollow.put(unfollowId, e.getMessage());
             }
         }
 
-        return fail_unfollow;
+        return failUnfollow;
     }
 
     /*

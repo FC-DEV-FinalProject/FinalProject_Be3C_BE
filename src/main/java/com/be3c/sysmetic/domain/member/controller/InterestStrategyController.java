@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class InterestStrategyController {
