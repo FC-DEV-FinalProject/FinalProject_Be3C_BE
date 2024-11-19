@@ -30,7 +30,7 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
 
     @Override
-    public boolean duplcheck(String name) {
+    public boolean duplCheck(String name) {
         return stockRepository.findByName(name).isEmpty();
     }
 
