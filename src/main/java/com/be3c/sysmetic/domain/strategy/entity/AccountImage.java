@@ -29,6 +29,6 @@ public class AccountImage extends BaseEntity {
 
     @CreatedDate
     @Column(name = "account_image_created_date", nullable = false)
-    private LocalDateTime accountImageCreatedDate;
+    private LocalDateTime accountImageCreatedAt;
 
 }
