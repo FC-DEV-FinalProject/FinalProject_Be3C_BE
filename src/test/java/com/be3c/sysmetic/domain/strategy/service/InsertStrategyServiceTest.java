@@ -66,6 +66,8 @@ class InsertStrategyServiceTest {
         assertEquals(0, savedStrategy.getFollowerCount());
         assertEquals(0.0, savedStrategy.getKpRatio());
         assertEquals(0.0, savedStrategy.getSmScore());
+        assertNotNull(savedStrategy.getStrategyCreatedDate());
+        assertNotNull(savedStrategy.getStrategyModifiedDate());
     }
 
     @DisplayName("전략 등록 실패 테스트 - 멤버id 미존재")
@@ -112,7 +114,6 @@ class InsertStrategyServiceTest {
                 .phoneNumber("010-1234-5678")
                 .usingStatusCode("ACTIVE")
                 .totalFollow(100)
-                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")
