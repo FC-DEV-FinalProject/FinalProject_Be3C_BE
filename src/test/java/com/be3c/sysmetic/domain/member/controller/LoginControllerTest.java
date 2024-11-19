@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.controller;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -21,6 +23,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestPropertySource(locations = "/application-test.properties")
+@Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
 class LoginControllerTest {
@@ -59,6 +63,7 @@ class LoginControllerTest {
                 .phoneNumber("01012341234")
                 .usingStatusCode("사용")
                 .totalFollow(0)
+                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
