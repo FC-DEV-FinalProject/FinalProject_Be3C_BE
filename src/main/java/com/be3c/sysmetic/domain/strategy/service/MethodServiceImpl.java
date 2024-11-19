@@ -15,6 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -122,5 +123,15 @@ public class MethodServiceImpl implements MethodService {
         method.setStatusCode(Code.NOT_USING_STATE.getCode());
         methodRepository.save(method);
         return true;
+    }
+
+    public List<MethodGetResponseDto> findAllUsingMethod() {
+        List<MethodGetResponseDto> responseDtoList = methodRepository.findAllByStatusCode(Code.USING_STATE.getCode());
+
+        if(responseDtoList.isEmpty()) {
+            throw new EntityNotFoundException();
+        }
+
+        return responseDtoList;
     }
 }

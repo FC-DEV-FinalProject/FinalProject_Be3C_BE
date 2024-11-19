@@ -7,7 +7,6 @@ import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +51,7 @@ public class TraderStrategyController {
     @PatchMapping(value = "/strategy", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse> updateStrategy(
             @PathVariable Long strategyId,
-            @Valid @RequestBody StrategyPostRequestDto requestDto,
+            @RequestPart @Valid StrategyPostRequestDto requestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         traderStrategyService.updateStrategy(strategyId, requestDto, file);
