@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.global.util.file.service;
 
+import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.global.util.file.dto.FileDto;
 import com.be3c.sysmetic.global.util.file.dto.FileResponseDto;
 import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
@@ -14,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
 @Service
-public class FileServiceImpl implements FileService{
+public class FileServiceImpl implements FileService {
 
     final FileRepository fileRepository;
     final FileMapper fileMapper;
@@ -28,10 +29,11 @@ public class FileServiceImpl implements FileService{
 
     /**
      * 파일 정보를 DB에 저장하는 메소드
-     * @param file 업로드 할 파일
-     * @param s3KeyName S3에 저장된 path
+     *
+     * @param file           업로드 할 파일
+     * @param s3KeyName      S3에 저장된 path
      * @param fileRequestDto 파일을 사용할 곳의 정보
-     *                         referenceType 참조할 테이블명 referenceId 참조id
+     *                       referenceType 참조할 테이블명 referenceId 참조id
      */
     private void fileEntityBuilderAndSaver(MultipartFile file, String s3KeyName, FileRequestDto fileRequestDto) {
         File fileEntity = File.builder()
@@ -55,16 +57,13 @@ public class FileServiceImpl implements FileService{
     public String uploadImage(MultipartFile file, FileRequestDto fileRequestDto) {
         String type = file.getContentType();
         String extension;
-        if(type.contains("jpeg")){  // null 조심
+        if (type.contains("jpeg")) {  // null 조심
             extension = ".jpg";
-        }
-        else if(type.contains("png")){
+        } else if (type.contains("png")) {
             extension = ".png";
-        }
-        else if(type.contains("gif")){
+        } else if (type.contains("gif")) {
             extension = ".gif";
-        }
-        else{
+        } else {
             throw new InvalidFileFormatException("파일 업로드 실패: 이미지 형식이 올바르지 않습니다.");
         }
 
@@ -79,7 +78,7 @@ public class FileServiceImpl implements FileService{
     public String uploadPdf(MultipartFile file, FileRequestDto fileRequestDto) {
         String type = file.getContentType();
         String extension;
-        if(type.contains("pdf")){
+        if (type.contains("pdf")) {
             extension = ".pdf";
         } else {
             throw new InvalidFileFormatException("파일 업로드 실패: pdf 파일 형식이 올바르지 않습니다.");
@@ -123,12 +122,8 @@ public class FileServiceImpl implements FileService{
         // size 2 이상일 시 로깅하기
 
 
-
-
         return s3Service.createPresignedGetUrl(file.getPath());
     }
-
-
 
 
     @Override
@@ -137,18 +132,15 @@ public class FileServiceImpl implements FileService{
 
 
         Map<Long, FileResponseDto> map = new HashMap<>();
-        for(File f : files){
+        for (File f : files) {
             String url = s3Service.createPresignedGetUrl(f.getPath());
             FileResponseDto fileResponseDto = new FileResponseDto(f.getReferenceId(), url, f.getOriginalName());
             map.put(f.getReferenceId(), fileResponseDto);
         }
 
 
-
-
         return map;
     }
-
 
 //    @Transactional
 //    @Override
@@ -169,7 +161,58 @@ public class FileServiceImpl implements FileService{
   /*
   download
   ------------------------------------------------------------------------------
-  file info
+  update / delete
    */
+
+    @Transactional
+    @Override
+    public String updateImage(MultipartFile file, FileRequestDto fileRequestDto) {
+        deleteFile(fileRequestDto);
+        String keyName = uploadImage(file, fileRequestDto);
+
+        return keyName;
+    }
+
+    @Transactional
+    @Override
+    public String updatePdf(MultipartFile file, FileRequestDto fileRequestDto) {
+        deleteFile(fileRequestDto);
+        String keyName = uploadPdf(file, fileRequestDto);
+
+        return keyName;
+    }
+
+    @Transactional
+    @Override
+    public String updateAnyFile(MultipartFile file, FileRequestDto fileRequestDto) {
+        deleteFile(fileRequestDto);
+        String keyName = uploadAnyFile(file, fileRequestDto);
+
+        return keyName;
+    }
+
+    // 이 방식(삭제+추가 -> 검색+수정)으로 추후 변경
+    void updateFile(MultipartFile file, FileRequestDto fileRequestDto) {
+        List<File> files = fileRepository.findFilesByFileReference(fileRequestDto);
+        File originalFile = files.get(0);
+
+        s3Service.updateObject(file, fileRequestDto, originalFile.getPath());
+
+        fileRepository.save(File.builder()
+                .id(originalFile.getId())
+                .type(file.getContentType())
+                .size(file.getSize())
+                .originalName(file.getOriginalFilename())
+                .build());
+    }
+
+    @Override
+    public boolean deleteFile(FileRequestDto fileRequestDto) {
+
+        List<File> file = fileRepository.findFilesByFileReference(fileRequestDto);
+        fileRepository.delete(file.get(0));
+
+        return s3Service.deleteObject(file.get(0).getPath());
+    }
 
 }

@@ -3,10 +3,13 @@ package com.be3c.sysmetic.global.util.file.service;
 import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -106,6 +109,46 @@ public class S3Service {
         System.out.println("HTTP method: [{}]" + presignedRequest.httpRequest().method());
 
         return presignedRequest.url().toExternalForm();
+    }
+
+    /**
+     * 버킷에 있는 파일 삭제
+     * @param keyName S3에 저장된 key
+     * @return 삭제 true/false
+     */
+    public boolean deleteObject(String keyName) {
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build();
+
+        DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
+
+        return response.sdkHttpResponse().isSuccessful();
+    }
+
+    public String updateObject(MultipartFile file, FileRequestDto fileRequestDto, String keyName){
+
+        try (InputStream inputStream = file.getInputStream()) {
+
+            RequestBody requestBody = RequestBody.fromInputStream(inputStream, file.getSize());
+            deleteObject(keyName);
+
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(keyName)
+                            .contentType(file.getContentType())
+                            .contentLength(file.getSize())
+                            .build(),
+                    requestBody);
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 입력 오류로 S3 파일 업로드에 실패했습니다: " + e, e);
+        }
+
+        return keyName;
     }
 
 }

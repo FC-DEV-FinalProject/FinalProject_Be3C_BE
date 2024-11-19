@@ -25,4 +25,9 @@ public interface FileService {
     public Map<Long, FileResponseDto> getFileResponseByReferenceId(FileRequestDto fileRequestDto);
 //    public List<FileResponseDto> getFileResponse(FileRequestDto fileRequestDto);
 
+
+    public String updateImage(MultipartFile file, FileRequestDto fileRequestDto);
+    public String updatePdf(MultipartFile file, FileRequestDto fileRequestDto);
+    public String updateAnyFile(MultipartFile file, FileRequestDto fileRequestDto);
+    public boolean deleteFile(FileRequestDto fileRequestDto);
 }
