@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.RegisterResponseDto;
+import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface RegisterService {
@@ -19,5 +19,5 @@ public interface RegisterService {
 
     // 5. 회원가입
     @Transactional
-    boolean registerMember(RegisterResponseDto dto);
+    boolean registerMember(RegisterRequestDto dto);
 }

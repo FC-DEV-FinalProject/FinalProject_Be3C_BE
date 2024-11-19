@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.RegisterResponseDto;
+import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
@@ -102,7 +102,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public boolean checkNicknameDuplication(String nickname) {
         Optional<Member> member = memberRepository.findByNickname(nickname);
-        if(member.isEmpty()) {
+        if(member.isPresent()) {
             return false; // 중복X
         }
         return true; // 중복O
@@ -111,14 +111,12 @@ public class RegisterServiceImpl implements RegisterService {
     // 5. 회원가입
     @Override
     @Transactional
-    public boolean registerMember(RegisterResponseDto dto) {
+    public boolean registerMember(RegisterRequestDto dto) {
         try {
-            String encryptedPassword = bCryptPasswordEncoder.encode(dto.getPassword());
-
             Member member = new Member().toBuilder()
                     .roleCode(dto.getRoleCode())
                     .email(dto.getEmail())
-                    .password(encryptedPassword)
+                    .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                     .name(dto.getName())
                     .nickname(dto.getNickname())
                     .birth(LocalDateTime.parse(dto.getBirth()))
@@ -129,10 +127,10 @@ public class RegisterServiceImpl implements RegisterService {
                     .marketingConsentDate(LocalDateTime.parse(dto.getMarketingConsentDate()))
                     .build();
             memberRepository.save(member);
+            return true;
         } catch (Exception e) {
             throw new RuntimeException("회원가입에 실패하였습니다.", e);
         }
-        return true;
     }
     
 }

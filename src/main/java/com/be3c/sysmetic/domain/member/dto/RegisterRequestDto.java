@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterResponseDto {
+public class RegisterRequestDto {
 
     @JsonProperty("profileImage")
     private MultipartFile profileImage; // 프로필 이미지 (선택)

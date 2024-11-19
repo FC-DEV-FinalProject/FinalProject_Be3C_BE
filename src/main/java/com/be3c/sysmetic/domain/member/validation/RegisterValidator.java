@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.validation;
 
-import com.be3c.sysmetic.domain.member.dto.RegisterResponseDto;
+import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -24,13 +24,13 @@ public class RegisterValidator implements Validator {
     // 검증하려는 클래스 체크
     @Override
     public boolean supports(Class<?> clazz) {
-        return RegisterResponseDto.class.equals(clazz);
+        return RegisterRequestDto.class.equals(clazz);
     }
 
     // 검증
     @Override
     public void validate(Object target, Errors errors) {
-        RegisterResponseDto dto = (RegisterResponseDto) target;
+        RegisterRequestDto dto = (RegisterRequestDto) target;
 
         /*
             [전제조건]
