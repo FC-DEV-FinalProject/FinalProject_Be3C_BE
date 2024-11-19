@@ -46,18 +46,18 @@ public class Strategy extends BaseEntity {
     @Column(name = "follower_count", nullable = false)
     private Long followerCount;
 
-    @Column(name = "mdd")
+    @Column(name = "mdd", nullable = false)
     private Double mdd;
 
-    @Column(name = "kp_ratio")
+    @Column(name = "kp_ratio", nullable = false)
     private Double kpRatio;
 
-    @Column(name = "sm_score")
+    @Column(name = "sm_score", nullable = false)
     private Double smScore;
 
     // 누적수익률 추가
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#00.00")
-    @Column(name = "accum_profit_loss_rate", nullable = true)
+    @Column(name = "accum_profit_loss_rate", nullable = false)
     private Double accumProfitLossRate;
 
     @CreationTimestamp

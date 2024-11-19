@@ -49,7 +49,6 @@ public class StrategyDetailDto {
     private Double mdd;     // MaximumDrawDown 전고점 대비 하락률
     private Double kpRatio;
     private Double smScore;
-    // 피그마에 있는 값
     private Double accumProfitLossRate;
     private Double maximumCapitalReductionAmount;
     private Double averageProfitLossRate;

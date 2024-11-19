@@ -96,6 +96,9 @@ public class StrategyDetailDummy implements CommandLineRunner {
                     .cycle('P')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
+                    .mdd(Math.random() * 100)
+                    .kpRatio(Math.random() * 100)
+                    .smScore(Math.random() * 100)
                     .accumProfitLossRate(Math.random() * 100)
                     .build();
             strategyRepository.saveAndFlush(s);
