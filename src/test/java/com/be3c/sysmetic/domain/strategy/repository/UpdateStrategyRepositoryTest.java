@@ -10,15 +10,12 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import jakarta.el.MethodNotFoundException;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,8 +23,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
-@Slf4j
-@Transactional
 @SpringBootTest
 public class UpdateStrategyRepositoryTest {
 
@@ -35,29 +30,15 @@ public class UpdateStrategyRepositoryTest {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final MemberRepository memberRepository;
-    private final EntityManager entityManager;
 
     @BeforeEach
     void setup() {
-        strategyRepository.deleteAll();
-        methodRepository.deleteAll();
-        stockRepository.deleteAll();
-        memberRepository.deleteAll();
-
-        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
-                .executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
-                .executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE strategy AUTO_INCREMENT = 1")
-                .executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE stock AUTO_INCREMENT = 1")
-                .executeUpdate();
-
         saveMember();
         saveMethod();
         saveModificationMethod();
         saveStock();
 
+        strategyRepository.deleteAll();
         strategyRepository.save(getStrategy(getRequestDto(), findMember(), findMethod()));
     }
 
@@ -65,13 +46,7 @@ public class UpdateStrategyRepositoryTest {
     @Test
     void updateStrategyTest_All() {
         // 전략 조회
-        log.info("strategy : {}", strategyRepository.findAll());
-
-        Strategy existingStrategy = strategyRepository.findAll().stream().findFirst()
-                .orElseThrow(
-                        () -> new StrategyBadRequestException(
-                                        StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())
-                );
+        Strategy existingStrategy = strategyRepository.findById(1L).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         // 전략 상태 검증
         if(!existingStrategy.getStatusCode().equals(StrategyStatusCode.PRIVATE.name())) {
@@ -82,7 +57,6 @@ public class UpdateStrategyRepositoryTest {
                 .methodId(2L)
                 .name("전략수정")
                 .cycle('D')
-                .minOperationAmount(1000.0)
                 .content("전략수정내용")
                 .build();
 
@@ -119,7 +93,6 @@ public class UpdateStrategyRepositoryTest {
                 .id(1L)
                 .name("Auto")
                 .statusCode("Y")
-                .methodCreatedDate(LocalDateTime.now())
                 .build();
 
         methodRepository.save(method);
@@ -130,7 +103,6 @@ public class UpdateStrategyRepositoryTest {
                 .id(2L)
                 .name("Auto")
                 .statusCode("Y")
-                .methodCreatedDate(LocalDateTime.now())
                 .build();
 
         methodRepository.save(method);
@@ -146,7 +118,6 @@ public class UpdateStrategyRepositoryTest {
                 .phoneNumber("010-1234-5678")
                 .usingStatusCode("ACTIVE")
                 .totalFollow(100)
-                .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now().minusDays(10))
                 .receiveMarketingConsent("Y")
@@ -162,10 +133,9 @@ public class UpdateStrategyRepositoryTest {
                 .name("국내종목")
                 .statusCode("PUBLIC")
                 .code("001")
-                .stockCreatedDate(LocalDateTime.now())
                 .build();
 
-        stockRepository.save(stock);
+        stockRepository.saveAndFlush(stock);
     }
 
     Method findMethod() {
@@ -191,14 +161,12 @@ public class UpdateStrategyRepositoryTest {
                 .stockIdList(List.of(1L, 2L))
                 .name("전략")
                 .cycle('P')
-                .minOperationAmount(300000.0)
                 .content("전략내용")
                 .build();
     }
 
     Strategy getStrategy(SaveStrategyRequestDto requestDto, Member member, Method method) {
         return Strategy.builder()
-                .id(1L)
                 .trader(member)
                 .method(method)
                 .statusCode(StrategyStatusCode.PRIVATE.name())
