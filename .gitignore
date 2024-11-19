@@ -1,6 +1,8 @@
 # app properties
 database.properties
 cloud.properties
+application-test.properties
+jwt.properties
 
 HELP.md
 build/
@@ -205,3 +207,4 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,intellij,java
+

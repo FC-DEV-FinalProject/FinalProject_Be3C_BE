@@ -38,6 +38,8 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'           // 추가
+	testAnnotationProcessor 'org.projectlombok:lombok'   // 추가
 
 	// MapStruct
 	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
@@ -63,8 +65,16 @@ dependencies {
 	// Thumbnailator
 	implementation 'net.coobird:thumbnailator:0.4.16'
 
+	// jjwt (241105 추가)
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6' // API 의존성
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' // 구현체 의존성
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6' // Jackson 사용 시 필요
+
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// Swagger
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
 }
 
 tasks.named('test') {

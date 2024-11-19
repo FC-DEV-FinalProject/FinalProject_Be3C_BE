@@ -38,4 +38,5 @@ public class StrategyApprovalHistory extends BaseEntity {
     @CreatedDate
     @Column(name = "strategy_approval_date", nullable = false)
     private LocalDateTime strategyApprovalDate;
+
 }

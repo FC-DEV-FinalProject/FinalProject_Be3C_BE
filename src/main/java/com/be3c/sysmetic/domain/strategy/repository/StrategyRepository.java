@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import java.util.List;
+
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
     boolean existsByName(String name); // 전략명 중복 확인
@@ -27,4 +29,11 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long> {
     @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
             "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")
     Page<Strategy> findByTraderNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
+
+    @Query("SELECT s FROM Strategy s WHERE s.statusCode = 'PUBLIC'")
+    List<Strategy> findAllByPublicStatus();
+
+    // 전략 비공개 상태로 변환
+    @Query("UPDATE Strategy s SET s.statusCode = 'PRIVATE' WHERE s.id = :strategyId")
+    int updateStatusToPrivate(@Param("strategyId") Long strategyId);
 }
