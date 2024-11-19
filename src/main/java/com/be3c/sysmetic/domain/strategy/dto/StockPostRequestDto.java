@@ -19,5 +19,7 @@ public class StockPostRequestDto {
     @NotNull
     @JsonProperty("checkDuplicate")
     private Boolean checkDuplicate;
-    //MultipartFile file;
+
+    @NotNull
+    private MultipartFile stockImage;
 }

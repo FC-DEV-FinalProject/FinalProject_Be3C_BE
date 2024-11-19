@@ -16,6 +16,7 @@ public class StockPutRequestDto {
     private String name;
     @NotNull
     private Boolean checkDuplicate;
-//    @NotNull
-    // private MultipartFile file;
+
+    @NotNull
+     private MultipartFile file;
 }

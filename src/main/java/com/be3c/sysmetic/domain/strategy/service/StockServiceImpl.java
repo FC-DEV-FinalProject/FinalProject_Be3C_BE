@@ -8,6 +8,9 @@ import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 public class StockServiceImpl implements StockService {
 
     private final StockRepository stockRepository;
+    private final FileService fileService;
 
     @Override
     public boolean duplcheck(String name) {
@@ -39,24 +43,32 @@ public class StockServiceImpl implements StockService {
         Stock findStock = stockRepository.findByIdAndStatusCode
                 (id, USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
-        
+
+        String filePath = fileService.getFilePath(new FileRequestDto(FileReferenceType.STOCK, id));
+
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
                 .name(findStock.getName())
-                // filepath 찾는 로직 추가 필요
+                .filepath(filePath)
                 .build();
     }
 
     @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
+        Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
-        if (stock_page.hasContent()) {
+        if (stockPage.hasContent()) {
+
+            for (StockGetResponseDto stockDto : stockPage.getContent()) {
+                String filePath = fileService.getFilePath(new FileRequestDto(FileReferenceType.STOCK, stockDto.getId()));
+                stockDto.setFilepath(filePath);
+            }
+
             return PageResponse.<StockGetResponseDto>builder()
-                    .totalPages(stock_page.getTotalPages())
-                    .totalElement(stock_page.getTotalElements())
-                    .pageSize(stock_page.getNumberOfElements())
+                    .totalPages(stockPage.getTotalPages())
+                    .totalElement(stockPage.getTotalElements())
+                    .pageSize(stockPage.getNumberOfElements())
                     .currentPage(page)
                     .build();
         }
@@ -76,12 +88,13 @@ public class StockServiceImpl implements StockService {
             throw new IllegalArgumentException();
         }
 
-        stockRepository.save(Stock.builder()
+        Stock savedStock = stockRepository.save(Stock.builder()
                         .name(requestDto.getName())
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        // 아이콘 S3에 업로드 + DB에 저장하는 코드 필요
+        fileService.uploadImage(requestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+
         return true;
     }
 
@@ -98,27 +111,30 @@ public class StockServiceImpl implements StockService {
             throw new ConflictException();
         });
 
-        Stock find_stock = stockRepository.findByIdAndStatusCode(
+        Stock findStock = stockRepository.findByIdAndStatusCode(
                 requestDto.getId(),
                 USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setName(requestDto.getName());
-        // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
+        findStock.setName(requestDto.getName());
+
+        fileService.updateImage(requestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, requestDto.getId()));
 
         return true;
     }
 
     @Override
     public boolean deleteItem(Long id) {
-        Stock find_stock = stockRepository.findByIdAndStatusCode
+        Stock findStock = stockRepository.findByIdAndStatusCode
                 (
                         id,
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
-        stockRepository.save(find_stock);
+        findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
+        stockRepository.save(findStock);
+
+        fileService.deleteFile(new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
