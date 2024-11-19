@@ -11,7 +11,7 @@ public enum Code {
     //전략 승인 관리 코드
     APPROVE_WAIT("SA001"),
     APPROVE_SUCCESS("SA002"),
-    APPROVE_FAIL("SA003"),
+    APPROVE_REJECT("SA003"),
 
     // 전략 상태 코드
     OPEN_STRATEGY("ST001"),

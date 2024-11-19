@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyApprovalGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.RejectStrategyApprovalDto;
 import com.be3c.sysmetic.domain.strategy.service.AdminStrategyService;
 import com.be3c.sysmetic.global.common.response.ApiResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -16,9 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @Slf4j
@@ -75,6 +74,23 @@ public class StrategyAllowController {
                  UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/admin/strategy/reject/")
+    public ResponseEntity<ApiResponse<String>> strategyReject(
+            @ModelAttribute RejectStrategyApprovalDto rejectStrategyApprovalDto
+    ) {
+        try {
+            if(adminStrategyService.rejectStrategyApproval(rejectStrategyApprovalDto)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(ApiResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
 }

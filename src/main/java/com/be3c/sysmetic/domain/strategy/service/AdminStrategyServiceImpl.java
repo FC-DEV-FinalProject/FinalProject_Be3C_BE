@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyApprovalGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.RejectStrategyApprovalDto;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
@@ -88,5 +89,21 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
         strategyApprovalRepository.save(find_approval);
 
         return true;
+    }
+
+    @Override
+    public boolean rejectStrategyApproval(RejectStrategyApprovalDto rejectStrategyApprovalDto) {
+        StrategyApprovalHistory strategyApproval = strategyApprovalRepository
+                .findByIdAndStatusCode(
+                        rejectStrategyApprovalDto.getApprovalId(),
+                        Code.WAIT_STRATEGY.getCode())
+                .orElseThrow(EntityNotFoundException::new);
+
+        strategyApproval.setStatusCode(Code.APPROVE_REJECT.getCode());
+        strategyApproval.setRejectReason(rejectStrategyApprovalDto.getRejectReason());
+
+        strategyApprovalRepository.save(strategyApproval);
+
+        return false;
     }
 }
