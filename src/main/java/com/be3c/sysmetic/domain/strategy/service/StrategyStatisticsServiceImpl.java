@@ -9,7 +9,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,8 +87,6 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
                 .highPointRenewalProgress(getHighPointRenewalProgress(strategyId, recentDaily))
                 .profitFactor(getProfitFactor(strategyId, recentDaily))
                 .roa(getRoa(recentDaily, accumulatedProfitLossAmount, maximumCapitalReductionAmount))
-                .firstRegistrationDate(firstDaily.getDate())
-                .lastRegistrationDate(lastDaily.getDate())
                 .build();
 
         // DB 저장

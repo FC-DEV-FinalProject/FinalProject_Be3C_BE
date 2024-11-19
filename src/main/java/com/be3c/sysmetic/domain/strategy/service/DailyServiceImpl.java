@@ -20,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public class DailyServiceImpl implements DailyService {
         dailyRepository.saveAll(dailyList);
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
+        List<LocalDate> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
@@ -98,7 +98,7 @@ public class DailyServiceImpl implements DailyService {
         recalculateAccumulatedData(strategyId, daily.getDate());
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = List.of(daily.getDate());
+        List<LocalDate> updatedDateList = List.of(daily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
@@ -107,7 +107,7 @@ public class DailyServiceImpl implements DailyService {
     @Override
     public void deleteDaily(Long strategyId, Long dailyId) {
         Daily daily = dailyRepository.findById(dailyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-        LocalDateTime date = daily.getDate();
+        LocalDate date = daily.getDate();
         Long countDaily = countDaily(strategyId);
 
         // DB 삭제
@@ -117,7 +117,7 @@ public class DailyServiceImpl implements DailyService {
         recalculateAccumulatedData(strategyId, daily.getDate());
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = List.of(date);
+        List<LocalDate> updatedDateList = List.of(date);
         monthlyService.updateMonthly(strategyId, updatedDateList);
 
         if(countDaily < 4) {
@@ -149,7 +149,7 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // 일간분석 조회
-    public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
+    public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page, 10);
         Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
 
@@ -250,8 +250,8 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // 날짜 중복 데이터 조회
-    private Daily findDuplicateDate(Long strategyId, LocalDateTime date) {
-        return dailyRepository.findByStrategyIdAndDate(strategyId, date.toLocalDate());
+    private Daily findDuplicateDate(Long strategyId, LocalDate date) {
+        return dailyRepository.findByStrategyIdAndDate(strategyId, date);
     }
 
     /*
@@ -277,15 +277,15 @@ public class DailyServiceImpl implements DailyService {
 
     // TODO 일간데이터 전체 삭제시 로직 추가 필요 - 통계 진행하면서 하겠습니다.
     // 수정 또는 삭제시 누적 데이터 다시 계산
-    public void recalculateAccumulatedData(Long strategyId, LocalDateTime startDate) {
+    public void recalculateAccumulatedData(Long strategyId, LocalDate startDate) {
         Double cumulativeProfitLossAmount = 0.0;
         Double cumulativeProfitLossRate = 0.0;
 
         // 수정 또는 삭제 이후의 데이터 조회
-        List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndDateAfterOrderByDateAsc(strategyId, startDate.toLocalDate());
+        List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndDateAfterOrderByDateAsc(strategyId, startDate);
 
         // 수정 또는 삭제 이전 데이터의 누적손익금액, 누적손익률 조회
-        Daily beforeDaily = dailyRepository.findFirstByStrategyIdAndDateBeforeOrderByDateDesc(strategyId, startDate.toLocalDate());
+        Daily beforeDaily = dailyRepository.findFirstByStrategyIdAndDateBeforeOrderByDateDesc(strategyId, startDate);
         if (beforeDaily != null) {
             cumulativeProfitLossAmount = beforeDaily.getAccumulatedProfitLossAmount();
             cumulativeProfitLossRate = beforeDaily.getAccumulatedProfitLossRate();

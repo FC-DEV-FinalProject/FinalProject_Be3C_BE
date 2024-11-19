@@ -9,8 +9,8 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.MonthRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +48,7 @@ public class MonthlyServiceImpl implements MonthlyService {
 
     // 월간분석 업데이트
     @Override
-    public void updateMonthly(Long strategyId, List<LocalDateTime> updatedDateList) {
+    public void updateMonthly(Long strategyId, List<LocalDate> updatedDateList) {
         Set<YearMonth> yearMonthSet = updatedDateList.stream()
                 .map(YearMonth::from)
                 .collect(Collectors.toSet());

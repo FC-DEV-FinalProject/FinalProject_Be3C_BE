@@ -4,7 +4,7 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "daily")
-public class Daily extends BaseEntity {
+public class Daily extends BaseEntity implements Comparable<Daily> {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +24,7 @@ public class Daily extends BaseEntity {
     private Strategy strategy;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(name = "principal", nullable = false)
     private Double principal;
@@ -50,4 +50,9 @@ public class Daily extends BaseEntity {
     @Column(name = "accumulated_profit_loss_rate", nullable = false)
     private Double accumulatedProfitLossRate;
 
+
+    @Override
+    public int compareTo(Daily other) {
+        return this.date.compareTo(other.date);
+    }
 }

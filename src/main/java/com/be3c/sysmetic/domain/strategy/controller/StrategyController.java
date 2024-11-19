@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @RestController
@@ -24,7 +24,7 @@ public class StrategyController {
 
     // 일간데이터 조회
     @GetMapping("/strategy/daily")
-    public ResponseEntity<ApiResponse> findDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("page") int page, @RequestParam(value = "startDate", required = false) LocalDateTime startDate, @RequestParam(value = "endDate", required = false) LocalDateTime endDate) {
+    public ResponseEntity<ApiResponse> findDaily(@RequestParam("strategyId") Long strategyId, @RequestParam("page") int page, @RequestParam(value = "startDate", required = false) LocalDate startDate, @RequestParam(value = "endDate", required = false) LocalDate endDate) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(dailyService.findDaily(strategyId, page, startDate, endDate)));
     }

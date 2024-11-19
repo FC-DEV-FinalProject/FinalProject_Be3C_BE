@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.strategy.validation.ValidDailyDate;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,7 +17,7 @@ public class SaveDailyRequestDto {
 
     @ValidDailyDate
     @NotNull
-    private LocalDateTime date;
+    private LocalDate date;
 
     @NotNull
     private Double depositWithdrawalAmount;
