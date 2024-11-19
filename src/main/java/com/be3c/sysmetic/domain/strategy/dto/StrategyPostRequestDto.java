@@ -33,7 +33,8 @@ public class StrategyPostRequestDto {
     @NotBlank
     private String name;
 
-    @Schema(description = "전략 내용", example = "테스트 전략입니다.")
+    @Schema(description = "전략 내용", example = "테스트 전략입니다.", maxLength = 500)
+    @Length(max = 500)
     @NotBlank
     private String content;
 
