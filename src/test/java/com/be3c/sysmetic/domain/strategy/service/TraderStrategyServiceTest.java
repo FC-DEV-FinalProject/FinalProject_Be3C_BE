@@ -51,7 +51,7 @@ public class TraderStrategyServiceTest {
     void insert_success_test() {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
-        traderStrategyService.insertStrategy(requestDto);
+        traderStrategyService.insertStrategy(requestDto, null);
 
         Strategy savedStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 
@@ -74,7 +74,7 @@ public class TraderStrategyServiceTest {
     void update_success_test() {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
-        traderStrategyService.insertStrategy(requestDto);
+        traderStrategyService.insertStrategy(requestDto, null);
 
         Strategy savedStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 
@@ -96,7 +96,7 @@ public class TraderStrategyServiceTest {
                 .content("전략 수정 테스트입니다.")
                 .build();
 
-        traderStrategyService.updateStrategy(savedStrategy.getId(), updateRequestDto);
+        traderStrategyService.updateStrategy(savedStrategy.getId(), updateRequestDto, null);
 
         Strategy updatedStrategy = strategyRepository.findById(savedStrategy.getId()).orElse(null);
 
@@ -112,7 +112,7 @@ public class TraderStrategyServiceTest {
     void delete_success_test() {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
-        traderStrategyService.insertStrategy(requestDto);
+        traderStrategyService.insertStrategy(requestDto, null);
 
         Strategy savedStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 
@@ -189,7 +189,7 @@ public class TraderStrategyServiceTest {
     // get insert strategy request dto
     private StrategyPostRequestDto getStrategyPostRequestDto() {
         return StrategyPostRequestDto.builder()
-                .traderId(findMember().getId())
+                .traderId(findMember().getId()) // todo. security 적용 후 제거 필요
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStock().getId()))
                 .name("테스트 전략")
