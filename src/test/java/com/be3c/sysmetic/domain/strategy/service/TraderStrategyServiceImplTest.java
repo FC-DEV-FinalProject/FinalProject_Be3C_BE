@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @SpringBootTest
-public class TraderStrategyServiceTest {
+public class TraderStrategyServiceImplTest {
     private final MemberRepository memberRepository;
     private final StockRepository stockRepository;
     private final MethodRepository methodRepository;
@@ -132,7 +133,7 @@ public class TraderStrategyServiceTest {
 
         Strategy findStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 
-        assertNull(findStrategy);
+        assertTrue(findStrategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name()));
     }
 
 

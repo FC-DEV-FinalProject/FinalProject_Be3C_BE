@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class MonthlyGetResponseDto {
     private Long monthId;
 
     @Schema(description = "년월", example = "2024-10")
-    @NotNull
+    @NotBlank
     private String yearMonth;
 
     @Schema(description = "월 평균원금", example = "288000000")

@@ -168,13 +168,4 @@ public class StockServiceImpl implements StockService {
         return true;
     }
 
-    public List<StockGetResponseDto> findAllUsingStock() {
-        List<StockGetResponseDto> responseDtoList = stockRepository.findAllByStatusCode(Code.USING_STATE.getCode());
-
-        if(responseDtoList.isEmpty()) {
-            throw new EntityNotFoundException();
-        }
-
-        return responseDtoList;
-    }
 }

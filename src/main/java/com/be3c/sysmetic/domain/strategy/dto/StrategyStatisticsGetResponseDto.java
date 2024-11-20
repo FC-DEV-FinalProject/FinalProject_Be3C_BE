@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class StrategyStatisticsGetResponseDto {
     private Double principal;
 
     @Schema(description = "운용기간", example = "2년 6개월")
-    @NotNull
+    @NotBlank
     private String operationPeriod;
 
     @Schema(description = "시작일자", example = "2024-11-10")

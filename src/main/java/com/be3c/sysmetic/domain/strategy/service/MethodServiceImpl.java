@@ -162,13 +162,4 @@ public class MethodServiceImpl implements MethodService {
         return true;
     }
 
-    public List<MethodGetResponseDto> findAllUsingMethod() {
-        List<MethodGetResponseDto> responseDtoList = methodRepository.findAllByStatusCode(Code.USING_STATE.getCode());
-
-        if(responseDtoList.isEmpty()) {
-            throw new EntityNotFoundException();
-        }
-
-        return responseDtoList;
-    }
 }

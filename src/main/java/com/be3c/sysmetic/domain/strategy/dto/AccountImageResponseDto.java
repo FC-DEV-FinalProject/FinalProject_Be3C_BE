@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -19,11 +20,11 @@ public class AccountImageResponseDto {
     private Long accountImageId;
 
     @Schema(description = "실계좌 이미지 제목")
-    @NotNull
+    @NotBlank
     private String title;
 
     @Schema(description = "실계좌 이미지 파일 경로")
-    @NotNull
+    @NotBlank
     private String imageUrl;
 
 }

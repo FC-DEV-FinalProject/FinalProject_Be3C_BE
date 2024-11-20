@@ -48,8 +48,8 @@ public class StrategyStatistics extends BaseEntity {
         highPointRenewalProgress : 고점갱신후경과일
         profitFactor :Profit Factor
         roa : ROA
-        firstRegistrationDate : 최초등록일시
-        lastRegistrationDate : 최종등록일시
+        firstRegistrationDate : 최초등록일
+        lastRegistrationDate : 최종등록일
     */
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -142,10 +142,10 @@ public class StrategyStatistics extends BaseEntity {
 
     @CreatedDate
     @Column(name = "first_registration_date", nullable = false)
-    private LocalDate firstRegistrationDate; // 최초등록일시
+    private LocalDate firstRegistrationDate; // 최초등록일
 
     @LastModifiedDate
     @Column(name = "last_registration_date", nullable = false)
-    private LocalDate lastRegistrationDate; // 최종등록일시
+    private LocalDate lastRegistrationDate; // 최종등록일
 
 }
