@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DailyRepository extends JpaRepository<Daily, Long> {
@@ -182,5 +182,8 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     Double findTotalLossAmountByStrategyId(@Param("strategyId") Long strategyId);
 
 
-    // -----
+    /* 엑셀을 위한 메서드 */
+    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
+    List<Daily> findByDateGreaterThanEqualOrderByDateAsc(LocalDate date);
+    Optional<Daily> findTop1ByDateBeforeOrderByDateDesc(LocalDate date);
 }

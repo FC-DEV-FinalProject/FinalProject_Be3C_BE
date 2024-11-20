@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class ExcelServiceTest {
 
+    @Autowired
     private ExcelService excelService;
 
     @Autowired
@@ -59,8 +60,6 @@ public class ExcelServiceTest {
 
     @BeforeEach
     void setUp() {
-        excelService = new ExcelServiceImpl(dailyRepository, monthlyRepository, strategyRepository,  doubleHandler, strategyCalculator);
-
         // Member 객체 초기화
         Member member = Member.builder()
                 .roleCode("USER")
@@ -180,20 +179,6 @@ public class ExcelServiceTest {
 
         Strategy strategy = strategyRepository.findAll().get(0);
         Long strategyId = strategy.getId();   // 참조할 전략id
-
-        Daily oldEntity1 = Daily.builder()
-                .strategy(strategy)
-                .date(LocalDate.of(2024, 11, 12))
-                .depositWithdrawalAmount(1000.0)
-                .profitLossAmount(200.0)
-                .build();
-
-        Daily oldEntity2 = Daily.builder()
-                .strategy(strategy)
-                .date(LocalDate.of(2024, 11, 13))
-                .depositWithdrawalAmount(2000.0)
-                .profitLossAmount(400.0)
-                .build();
 
         // 4. Call the service method
         excelService.uploadExcel(file, strategyId);

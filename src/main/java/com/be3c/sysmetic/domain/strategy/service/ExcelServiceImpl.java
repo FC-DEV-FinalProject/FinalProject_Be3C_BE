@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +42,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public void uploadExcel(MultipartFile file, Long strategyId) {
 
-        Strategy strategy = strategyRepository.findById(strategyId).get();
+        Strategy strategy = strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new IllegalArgumentException("전략을 찾지 못했습니다 : " + strategyId));
 
         if (!isValidExcelFile(file)) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 형식이 올바르지 않습니다.");
@@ -60,7 +60,12 @@ public class ExcelServiceImpl implements ExcelService {
             List<DailyTransactionInputDataDto> newDtos = new ArrayList<>(sheet.getPhysicalNumberOfRows());
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
+                if (row == null || row.getRowNum() == 0) continue;
+
+                for(int i = 0; i<3; i++){
+                    if(row.getCell(i) == null)
+                        throw new InvalidFileFormatException("엑셀에 필요한 항목이 부족합니다. row 번호 : " + row.getRowNum());
+                }
 
                 Date firstColumn = row.getCell(0).getDateCellValue();
                 Double secondColumn = row.getCell(1).getNumericCellValue();
@@ -94,7 +99,7 @@ public class ExcelServiceImpl implements ExcelService {
             /* 비교해서 save */
             List<Daily> saveTargets = new ArrayList<>();
 
-            List<Daily> existingEntities = dailyRepository.findAll(Sort.by(Sort.Order.asc("date"))); // date로 잘라서 가져오게 수정하자
+            List<Daily> existingEntities = dailyRepository.findByDateGreaterThanEqualOrderByDateAsc(newDtos.get(0).date());
 
             for (DailyTransactionInputDataDto newDto : newDtos) {
 
@@ -102,23 +107,27 @@ public class ExcelServiceImpl implements ExcelService {
 
                 int existingIndex = Collections.binarySearch(existingEntities, newDto.toEntity(strategy));
 
-                /* Add completely new data */
-                if (existingIndex < 0) {
+                if (existingIndex < 0) {    /* Add completely new data */
 
                     Daily daily = Daily.builder()
                             .strategy(strategy)
                             .date(newDailyDate)
                             .depositWithdrawalAmount(newDto.depositWithdrawalAmount())
                             .profitLossAmount(newDto.profitLossAmount())
+
+                            .principal(0.0)
+                            .currentBalance(0.0)
+                            .standardAmount(0.0)
+                            .profitLossRate(0.0)
+                            .accumulatedProfitLossAmount(0.0)
+                            .accumulatedProfitLossRate(0.0)
                             .build();
 
                     saveTargets.add(daily);
 
-                } else {
-                    /* Add updated data */
+                } else {    /* Add updated data - only when they are different */
 
-                    int insertPoint = -(existingIndex + 1);
-                    Daily existingEntity = existingEntities.get(insertPoint);
+                    Daily existingEntity = existingEntities.get(existingIndex);
 
                     Daily.DailyBuilder entityBuilder = Daily.builder();
                     boolean buildFlag = false;
@@ -138,116 +147,51 @@ public class ExcelServiceImpl implements ExcelService {
                                 .strategy(existingEntity.getStrategy())
                                 .id(existingEntity.getId())
                                 .date(existingEntity.getDate())
+
+                                .principal(0.0)
+                                .currentBalance(0.0)
+                                .standardAmount(0.0)
+                                .profitLossRate(0.0)
+                                .accumulatedProfitLossAmount(0.0)
+                                .accumulatedProfitLossRate(0.0)
                                 .build());
                     }
                 }
 
             }
+            dailyRepository.saveAll(saveTargets);
 
-/**
- *
- *
- * 계산 항목을 추가하는 걸로 바꾸기
- *
- *
- */
+
+            /* 계산 타겟을 추가하기 */
+            List<Daily> calculateTargets = dailyRepository.findByDateGreaterThanEqualOrderByDateAsc(saveTargets.get(0).getDate());
+            List<Daily> calculatedTargets = new ArrayList<>(calculateTargets.size());
 
             /* 계산하기 */
-            for (int i = 0; i < saveTargets.size(); i++) {
+            // 첫번째 요소
+            Daily firstCalculateTarget = calculateTargets.get(0);
+            Optional<Daily> optionalBeforeDaily = dailyRepository.findTop1ByDateBeforeOrderByDateDesc(firstCalculateTarget.getDate());
 
-                Daily saveTarget = saveTargets.get(i);
+            boolean isFirst = optionalBeforeDaily.isEmpty();
+            Daily firstCalculateStandard = isFirst? null : optionalBeforeDaily.get();
 
-                LocalDate targetDate = saveTarget.getDate();
+            calculatedTargets.add(
+                    calculate(firstCalculateTarget, isFirst, firstCalculateStandard)
+            );
 
-                /* 계산을 위한 기존 데이터 찾기 */
-                int indexSearchResult = Collections.binarySearch(existingEntities, saveTarget);
-                int insertPoint = indexSearchResult < 0 ? -(indexSearchResult + 1) : indexSearchResult;
+            // 두번째 이후 요소
+            for (int i = 1; i < calculateTargets.size(); i++) {
 
-                // 첫번째 요소인지 명시, 첫번째 요소가 아니라면 데이터 찾아오기
-                boolean isFirstElement = (insertPoint == 0);
-                Optional<Daily> formerExistingData = isFirstElement ?
-                        Optional.empty() :
-                        Optional.ofNullable(existingEntities.get(insertPoint - 1));
+                Daily calculateTarget = calculateTargets.get(i);
+                Daily calculateStandard = calculateTargets.get(i-1);
 
-                boolean isFirstSaveTarget = (i == 0);
-
-
-                Daily calculateStadard = null;
-
-                if (!isFirstSaveTarget && !isFirstElement) {
-                    Daily formerSaveTarget = saveTargets.get(i - 1);
-
-                    boolean flag = isClosestDateDate1(targetDate,
-                            formerExistingData.get().getDate(),
-                            formerSaveTarget.getDate());
-
-                    calculateStadard = flag ? formerExistingData.get() : formerSaveTarget;
-                } else if (!isFirstSaveTarget && isFirstElement) {
-                    calculateStadard = saveTargets.get(i - 1);
-                } else if (isFirstSaveTarget && !isFirstElement) {
-                    calculateStadard = formerExistingData.get();
-                } else if (isFirstSaveTarget && isFirstElement) {
-                    calculateStadard = Daily.builder()
-                            .currentBalance(0.0)
-                            .build();
-                }
-
-
-                Double deposit = saveTarget.getDepositWithdrawalAmount();
-                Double profit = saveTarget.getProfitLossAmount();
-
-                boolean isFirst = isFirstSaveTarget && isFirstElement;
-
-                saveTarget.setPrincipal(
-                        strategyCalculator.getPrincipal(
-                                isFirst,
-                                deposit,
-                                profit,
-                                calculateStadard.getCurrentBalance()
-                        ));
-                saveTarget.setCurrentBalance(
-                        strategyCalculator.getCurrentBalance(
-                                isFirst,
-                                calculateStadard.getCurrentBalance(),
-                                deposit,
-                                profit
-                        )
-                );
-                saveTarget.setStandardAmount(
-                        strategyCalculator.getStandardAmount(
-                                isFirst,
-                                deposit,
-                                profit,
-                                calculateStadard.getCurrentBalance(),
-                                calculateStadard.getPrincipal()));
-                saveTarget.setProfitLossRate(
-                        strategyCalculator.getDailyProfitLossRate(
-                                isFirst,
-                                deposit,
-                                profit,
-                                calculateStadard.getCurrentBalance(),
-                                calculateStadard.getPrincipal(),
-                                calculateStadard.getStandardAmount()
-                        ));
-                saveTarget.setAccumulatedProfitLossAmount(
-                        strategyCalculator.getAccumulatedProfitLossAmount(
-                                saveTarget.getStrategy().getId(),
-                                profit,
-                                calculateStadard.getProfitLossAmount()
-                        )
-                );
-                saveTarget.setAccumulatedProfitLossRate(
-                        strategyCalculator.getAccumulatedProfitLossRate(
-                                saveTarget.getStrategy().getId(),
-                                saveTarget.getProfitLossRate()
-                        )
+                calculatedTargets.add(
+                        calculate(calculateTarget, false, calculateStandard)
                 );
             }
 
-            dailyRepository.saveAll(saveTargets);
+            dailyRepository.saveAll(calculatedTargets);
 
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 읽기에 실패했습니다.", e);
         } catch (EmptyFileException e) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 내용이 올바르지 않습니다.", e);
@@ -264,7 +208,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public InputStream downloadDailyExcel(Long strategyId) {
 
-        List<Daily> entities = dailyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
+        List<Daily> entities = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
@@ -302,7 +246,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public InputStream downloaDailyExcelWithStatistics(Long strategyId) {
 
-        List<Daily> entities = dailyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
+        List<Daily> entities = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
@@ -343,7 +287,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public InputStream downloadMonthlyExcel(Long strategyId) {
 
-        List<Monthly> entities = monthlyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
+        List<Monthly> entities = monthlyRepository.findAllByStrategyIdOrderByYearNumberAscMonthNumberAsc(strategyId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
@@ -392,17 +336,67 @@ public class ExcelServiceImpl implements ExcelService {
 
 
     /**
-     * 이전 날짜 중 가장 최신인 것을 기준으로 계산하기 위한 식
-     * @param standardDate 기준 날짜
-     * @param date1 기준 날짜와 비교할 날짜1
-     * @param date2 기준 날짜와 비교할 날짜2
-     * @return 날짜1이 더 가까우면 true
+     * 통계 컬럼을 계산하는 메서드
+     * @param calculateTarget 계산할 Daily
+     * @param isFirst 가장 날짜가 작은 엔티티인지
+     * @param calculateStadard 계산 기준 (날짜 기준 직전 엔티티)
+     * @return 계산된 Daily
      */
-    private boolean isClosestDateDate1(LocalDate standardDate, LocalDate date1, LocalDate date2) {
+    private Daily calculate(Daily calculateTarget, boolean isFirst, Daily calculateStadard){
 
-        long daysDifference1 = Math.abs(standardDate.toEpochDay() - date1.toEpochDay());
-        long daysDifference2 = Math.abs(standardDate.toEpochDay() - date2.toEpochDay());
+        Double deposit = calculateTarget.getDepositWithdrawalAmount();
+        Double profit = calculateTarget.getProfitLossAmount();
 
-        return daysDifference1 <= daysDifference2;
+        Double formerBalance = isFirst? null : calculateStadard.getCurrentBalance();
+        Double formerStandard = isFirst? null : calculateStadard.getStandardAmount();
+        Double formerPrincipal = isFirst? null : calculateStadard.getPrincipal();
+        Double formerProfitAmount = isFirst? null : calculateStadard.getProfitLossAmount();
+        Double formerProfitRate = isFirst? null : calculateStadard.getProfitLossRate();
+
+        calculateTarget.setPrincipal(
+                strategyCalculator.getPrincipal(
+                        isFirst,
+                        deposit,
+                        profit,
+                        formerBalance
+                ));
+        calculateTarget.setCurrentBalance(
+                strategyCalculator.getCurrentBalance(
+                        isFirst,
+                        formerBalance,
+                        deposit,
+                        profit
+                )
+        );
+        calculateTarget.setStandardAmount(
+                strategyCalculator.getStandardAmount(
+                        isFirst,
+                        deposit,
+                        profit,
+                        formerBalance,
+                        formerStandard));
+        calculateTarget.setProfitLossRate(
+                strategyCalculator.getDailyProfitLossRate(
+                        isFirst,
+                        deposit,
+                        profit,
+                        formerBalance,
+                        formerPrincipal,
+                        formerStandard
+                ));
+        calculateTarget.setAccumulatedProfitLossAmount(
+                strategyCalculator.getAccumulatedProfitLossAmount(
+                        profit,
+                        formerProfitAmount
+                )
+        );
+        calculateTarget.setAccumulatedProfitLossRate(
+                strategyCalculator.getAccumulatedProfitLossRate(
+                        calculateTarget.getProfitLossRate(),
+                        formerProfitRate
+                )
+        );
+
+        return calculateTarget;
     }
 }

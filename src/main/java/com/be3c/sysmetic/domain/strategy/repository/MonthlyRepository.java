@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
 
@@ -24,5 +26,8 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
             @Param("endMonth") Integer endMonth,
             @Param("pageable") Pageable pageable
     );
+
+    /* 엑셀을 위한 메서드 */
+    List<Monthly> findAllByStrategyIdOrderByYearNumberAscMonthNumberAsc(Long strategyId);
 
 }
