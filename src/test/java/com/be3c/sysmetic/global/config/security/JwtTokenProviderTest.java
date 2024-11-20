@@ -3,7 +3,6 @@ package com.be3c.sysmetic.global.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.hibernate.validator.internal.constraintvalidators.bv.AssertTrueValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,16 +43,6 @@ class JwtTokenProviderTest {
         7
         - access 토큰을 넣었을 때, memberId, email, role 정보가 제대로 추출되는지 확인
         - 잘못된 토큰을 입력했을 때, 예외 처리나 오류 응답 확인
-
-        8
-        - Redis에 토큰을 저장했을 때, 제대로 저장되는지
-        - 여러 번 동일한 내용으로 저장할 경우, 기존 토큰을 덮어쓰거나 중복 저장되진 않는지
-        9
-        - 저장한 토큰을 조회했을 때 올바른 값이 조회되는지
-        - 없는 토큰을 조회했을 때 null이나 예외가 반환되는지
-        10
-        - 저장된 토큰을 정상적으로 삭제할 수 있는지
-        - 없는 토큰을 삭제했을 때 예외가 발생하진 않는지
      */
 
     @Autowired
