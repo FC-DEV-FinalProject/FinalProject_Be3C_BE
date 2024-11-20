@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 public interface ExcelService {
     void uploadExcel(MultipartFile file, Long strategyId);
-    InputStream downloadExcel(Long strategyId);
-    InputStream downloadExcelWithStatistics(Long strategyId);
+    InputStream downloadDailyExcel(Long strategyId);
+    InputStream downloaDailyExcelWithStatistics(Long strategyId);
+    InputStream downloadMonthlyExcel(Long strategyId);
 }

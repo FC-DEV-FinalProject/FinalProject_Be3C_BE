@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MonthRepository extends JpaRepository<Monthly, Long> {
+public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
 
     // 특정 년월의 월간분석 데이터 조회
     // year, month null일 경우 전체 조회

@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import org.apache.poi.ss.usermodel.*;
@@ -39,6 +40,9 @@ public class ExcelServiceTest {
     private DailyRepository dailyRepository;
 
     @Autowired
+    private MonthlyRepository monthlyRepository;
+
+    @Autowired
     private StrategyRepository strategyRepository;
 
     @Autowired
@@ -55,7 +59,7 @@ public class ExcelServiceTest {
 
     @BeforeEach
     void setUp() {
-        excelService = new ExcelServiceImpl(dailyRepository, strategyRepository,  doubleHandler, strategyCalculator);
+        excelService = new ExcelServiceImpl(dailyRepository, monthlyRepository, strategyRepository,  doubleHandler, strategyCalculator);
 
         // Member 객체 초기화
         Member member = Member.builder()
@@ -239,7 +243,7 @@ public class ExcelServiceTest {
 
 
     @Test
-    public void testDownloadExcelWithStatistics() throws Exception {
+    public void testDownloaDailyExcelWithStatistics() throws Exception {
         Strategy strategy = strategyRepository.findAll().get(0);
 
         // 1. 테스트 데이터 준비
@@ -273,7 +277,7 @@ public class ExcelServiceTest {
         dailyRepository.saveAll(dailyList);
 
         // 3. 메서드 실행
-        InputStream inputStream = excelService.downloadExcelWithStatistics(strategy.getId());
+        InputStream inputStream = excelService.downloaDailyExcelWithStatistics(strategy.getId());
 
         // 4. 엑셀 파일 검증
         assertNotNull(inputStream, "엑셀 파일이 null이어서는 안 됩니다.");

@@ -2,8 +2,10 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.DailyTransactionInputDataDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
+import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
@@ -27,6 +29,7 @@ import java.util.*;
 public class ExcelServiceImpl implements ExcelService {
 
     final DailyRepository dailyRepository;
+    final MonthlyRepository monthlyRepository;
     final StrategyRepository strategyRepository;
     final DoubleHandler doubleHandler;
     final StrategyCalculator strategyCalculator;
@@ -93,9 +96,7 @@ public class ExcelServiceImpl implements ExcelService {
 
             List<Daily> existingEntities = dailyRepository.findAll(Sort.by(Sort.Order.asc("date"))); // date로 잘라서 가져오게 수정하자
 
-            for (int i = 0; i < newDtos.size(); i++) {
-
-                DailyTransactionInputDataDto newDto = newDtos.get(i);
+            for (DailyTransactionInputDataDto newDto : newDtos) {
 
                 LocalDate newDailyDate = newDto.date();
 
@@ -164,7 +165,7 @@ public class ExcelServiceImpl implements ExcelService {
 
                 // 첫번째 요소인지 명시, 첫번째 요소가 아니라면 데이터 찾아오기
                 boolean isFirstElement = (insertPoint == 0);
-                Optional<Daily> formerExistingData = (insertPoint == 0) ?
+                Optional<Daily> formerExistingData = isFirstElement ?
                         Optional.empty() :
                         Optional.ofNullable(existingEntities.get(insertPoint - 1));
 
@@ -261,7 +262,7 @@ public class ExcelServiceImpl implements ExcelService {
      * @return 엑셀 파일
      */
     @Override
-    public InputStream downloadExcel(Long strategyId) {
+    public InputStream downloadDailyExcel(Long strategyId) {
 
         List<Daily> entities = dailyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
 
@@ -299,7 +300,7 @@ public class ExcelServiceImpl implements ExcelService {
      * @return 엑셀 파일
      */
     @Override
-    public InputStream downloadExcelWithStatistics(Long strategyId) {
+    public InputStream downloaDailyExcelWithStatistics(Long strategyId) {
 
         List<Daily> entities = dailyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
 
@@ -325,6 +326,47 @@ public class ExcelServiceImpl implements ExcelService {
                 row.createCell(4).setCellValue(daily.getProfitLossRate());
                 row.createCell(5).setCellValue(daily.getAccumulatedProfitLossAmount());
                 row.createCell(6).setCellValue(daily.getAccumulatedProfitLossRate());
+            }
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            workbook.write(byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+            return new ByteArrayInputStream(byteArray);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public InputStream downloadMonthlyExcel(Long strategyId) {
+
+        List<Monthly> entities = monthlyRepository.findAll(); // 전략 아이디로 찾아야 함...!!
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Daily Transaction Data");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("년도");
+            headerRow.createCell(1).setCellValue("월");
+            headerRow.createCell(2).setCellValue("월 평균 원금");
+            headerRow.createCell(3).setCellValue("월 손익");
+            headerRow.createCell(4).setCellValue("월 손익률");
+            headerRow.createCell(5).setCellValue("누적 손익");
+            headerRow.createCell(6).setCellValue("누적 손익률");
+
+            int rowNum = 1;
+            for (Monthly monthly : entities) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(monthly.getYearNumber());
+                row.createCell(1).setCellValue(monthly.getMonthNumber());
+                row.createCell(2).setCellValue(monthly.getAverageMonthlyPrincipal());
+                row.createCell(3).setCellValue(monthly.getProfitLossAmount());
+                row.createCell(4).setCellValue(monthly.getProfitLossRate());
+                row.createCell(5).setCellValue(monthly.getAccumulatedProfitLossAmount());
+                row.createCell(6).setCellValue(monthly.getAccumulatedProfitLossRate());
             }
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
