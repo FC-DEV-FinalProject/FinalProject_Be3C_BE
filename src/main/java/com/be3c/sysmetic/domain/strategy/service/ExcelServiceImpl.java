@@ -4,12 +4,15 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyTransactionInputDataDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.util.file.exception.InvalidFileFormatException;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,18 +23,13 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class ExcelServiceImpl implements ExcelService {
 
     final DailyRepository dailyRepository;
+    final StrategyRepository strategyRepository;
     final DoubleHandler doubleHandler;
-    final StrategyCalculator strategyCalculator;    // 합친 후 추가
-
-    public ExcelServiceImpl(DailyRepository dailyRepository, DoubleHandler doubleHandler, StrategyCalculator strategyCalculator) {
-        this.dailyRepository = dailyRepository;
-        this.doubleHandler = doubleHandler;
-        this.strategyCalculator = strategyCalculator;
-    }
-
+    final StrategyCalculator strategyCalculator;
 
     /**
      * 엑셀 파일을 읽어서 일간 데이터를 DB에 저장
@@ -41,6 +39,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Transactional
     @Override
     public void uploadExcel(MultipartFile file, Long strategyId) {
+
+        Strategy strategy = strategyRepository.findById(strategyId).get();
 
         if (!isValidExcelFile(file)) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 형식이 올바르지 않습니다.");
@@ -52,8 +52,7 @@ public class ExcelServiceImpl implements ExcelService {
         /* 엑셀 to DTO */
         try (InputStream inputStream = file.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(inputStream);
-            int numberOfSheets = workbook.getNumberOfSheets();  // 여러개 해야되나?
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = workbook.getSheetAt(0);   // 첫번째 시트만 읽음
 
             List<DailyTransactionInputDataDto> newDtos = new ArrayList<>(sheet.getPhysicalNumberOfRows());
 
@@ -65,7 +64,7 @@ public class ExcelServiceImpl implements ExcelService {
                 Double thirdColumn = row.getCell(2).getNumericCellValue();
 
                 LocalDate date = firstColumn.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                if(date.isAfter(LocalDate.now())){
+                if (date.isAfter(LocalDate.now())) {
                     throw new InvalidFileFormatException("엑셀 업로드 실패: 미래의 데이터는 입력할 수 없습니다.");
                 }
                 Double depositWithdrawalAmount = doubleHandler.cutDouble(secondColumn);
@@ -75,65 +74,184 @@ public class ExcelServiceImpl implements ExcelService {
 
             }
 
+            /* 날짜 순 정렬 보장하기 */
+            boolean isSorted = true;
+            for (int i = 1; i < newDtos.size(); i++) {
+                if (newDtos.get(i).date().isBefore(newDtos.get(i - 1).date())) {
+                    isSorted = false;
+                    break;
+                }
+            }
+
+            if (!isSorted) {
+                newDtos.sort(Comparator.comparing(DailyTransactionInputDataDto::date));
+            }
+
 
             /* 비교해서 save */
-            List<Daily> saveTarget = new ArrayList<>();
+            List<Daily> saveTargets = new ArrayList<>();
 
-            List<Daily> existingEntities = dailyRepository.findAll();
-            Map<LocalDate, Daily> existingEntityMap = new HashMap<>();
-            for (Daily existingEntity : existingEntities) {
-                existingEntityMap.put(existingEntity.getDate(), existingEntity);
-            }
+            List<Daily> existingEntities = dailyRepository.findAll(Sort.by(Sort.Order.asc("date"))); // date로 잘라서 가져오게 수정하자
 
-            for (DailyTransactionInputDataDto newDto : newDtos) {
+            for (int i = 0; i < newDtos.size(); i++) {
 
-                Daily existingEntity = existingEntityMap.get(newDto.date());
+                DailyTransactionInputDataDto newDto = newDtos.get(i);
+
+                LocalDate newDailyDate = newDto.date();
+
+                int existingIndex = Collections.binarySearch(existingEntities, newDto.toEntity(strategy));
 
                 /* Add completely new data */
-                if (existingEntity == null) {
-                    saveTarget.add(Daily.builder()
-                            .strategy(Strategy.builder()
-                                    .id(strategyId).build())
-                            .date(newDto.date())
+                if (existingIndex < 0) {
+
+                    Daily daily = Daily.builder()
+                            .strategy(strategy)
+                            .date(newDailyDate)
                             .depositWithdrawalAmount(newDto.depositWithdrawalAmount())
                             .profitLossAmount(newDto.profitLossAmount())
-                            .build());
-                    continue;
+                            .build();
+
+                    saveTargets.add(daily);
+
+                } else {
+                    /* Add updated data */
+
+                    int insertPoint = -(existingIndex + 1);
+                    Daily existingEntity = existingEntities.get(insertPoint);
+
+                    Daily.DailyBuilder entityBuilder = Daily.builder();
+                    boolean buildFlag = false;
+
+                    if (!doubleHandler.compare(newDto.depositWithdrawalAmount(), existingEntity.getDepositWithdrawalAmount())) {
+                        entityBuilder.depositWithdrawalAmount(newDto.depositWithdrawalAmount());
+                        buildFlag = true;
+                    }
+
+                    if (!doubleHandler.compare(newDto.profitLossAmount(), existingEntity.getProfitLossAmount())) {
+                        entityBuilder.profitLossAmount(newDto.profitLossAmount());
+                        buildFlag = true;
+                    }
+
+                    if (buildFlag) {
+                        saveTargets.add(entityBuilder
+                                .strategy(existingEntity.getStrategy())
+                                .id(existingEntity.getId())
+                                .date(existingEntity.getDate())
+                                .build());
+                    }
                 }
 
-                /* Add updated data */
-                Daily.DailyBuilder entityBuilder = Daily.builder()
-                        .strategy(existingEntity.getStrategy())
-                        .id(existingEntity.getId())
-                        .date(existingEntity.getDate());
-                boolean buildFlag = false;
-
-                if (!doubleHandler.compare(newDto.depositWithdrawalAmount(), existingEntity.getDepositWithdrawalAmount())) {
-                    entityBuilder.depositWithdrawalAmount(newDto.depositWithdrawalAmount());
-                    buildFlag = true;
-                }
-
-                if (!doubleHandler.compare(newDto.profitLossAmount(), existingEntity.getProfitLossAmount())) {
-                    entityBuilder.profitLossAmount(newDto.profitLossAmount());
-                    buildFlag = true;
-                }
-
-                if (buildFlag) {
-                    saveTarget.add(entityBuilder.build());
-                }
             }
 
-            dailyRepository.saveAll(saveTarget);
+/**
+ *
+ *
+ * 계산 항목을 추가하는 걸로 바꾸기
+ *
+ *
+ */
 
-            // 남은 데이터 처리
-//            if (!dataList.isEmpty()) {
-//                processData(dataList, dailyDtos);
-//            }
-        } catch (IOException e) {
+            /* 계산하기 */
+            for (int i = 0; i < saveTargets.size(); i++) {
+
+                Daily saveTarget = saveTargets.get(i);
+
+                LocalDate targetDate = saveTarget.getDate();
+
+                /* 계산을 위한 기존 데이터 찾기 */
+                int indexSearchResult = Collections.binarySearch(existingEntities, saveTarget);
+                int insertPoint = indexSearchResult < 0 ? -(indexSearchResult + 1) : indexSearchResult;
+
+                // 첫번째 요소인지 명시, 첫번째 요소가 아니라면 데이터 찾아오기
+                boolean isFirstElement = (insertPoint == 0);
+                Optional<Daily> formerExistingData = (insertPoint == 0) ?
+                        Optional.empty() :
+                        Optional.ofNullable(existingEntities.get(insertPoint - 1));
+
+                boolean isFirstSaveTarget = (i == 0);
+
+
+                Daily calculateStadard = null;
+
+                if (!isFirstSaveTarget && !isFirstElement) {
+                    Daily formerSaveTarget = saveTargets.get(i - 1);
+
+                    boolean flag = isClosestDateDate1(targetDate,
+                            formerExistingData.get().getDate(),
+                            formerSaveTarget.getDate());
+
+                    calculateStadard = flag ? formerExistingData.get() : formerSaveTarget;
+                } else if (!isFirstSaveTarget && isFirstElement) {
+                    calculateStadard = saveTargets.get(i - 1);
+                } else if (isFirstSaveTarget && !isFirstElement) {
+                    calculateStadard = formerExistingData.get();
+                } else if (isFirstSaveTarget && isFirstElement) {
+                    calculateStadard = Daily.builder()
+                            .currentBalance(0.0)
+                            .build();
+                }
+
+
+                Double deposit = saveTarget.getDepositWithdrawalAmount();
+                Double profit = saveTarget.getProfitLossAmount();
+
+                boolean isFirst = isFirstSaveTarget && isFirstElement;
+
+                saveTarget.setPrincipal(
+                        strategyCalculator.getPrincipal(
+                                isFirst,
+                                deposit,
+                                profit,
+                                calculateStadard.getCurrentBalance()
+                        ));
+                saveTarget.setCurrentBalance(
+                        strategyCalculator.getCurrentBalance(
+                                isFirst,
+                                calculateStadard.getCurrentBalance(),
+                                deposit,
+                                profit
+                        )
+                );
+                saveTarget.setStandardAmount(
+                        strategyCalculator.getStandardAmount(
+                                isFirst,
+                                deposit,
+                                profit,
+                                calculateStadard.getCurrentBalance(),
+                                calculateStadard.getPrincipal()));
+                saveTarget.setProfitLossRate(
+                        strategyCalculator.getDailyProfitLossRate(
+                                isFirst,
+                                deposit,
+                                profit,
+                                calculateStadard.getCurrentBalance(),
+                                calculateStadard.getPrincipal(),
+                                calculateStadard.getStandardAmount()
+                        ));
+                saveTarget.setAccumulatedProfitLossAmount(
+                        strategyCalculator.getAccumulatedProfitLossAmount(
+                                saveTarget.getStrategy().getId(),
+                                profit,
+                                calculateStadard.getProfitLossAmount()
+                        )
+                );
+                saveTarget.setAccumulatedProfitLossRate(
+                        strategyCalculator.getAccumulatedProfitLossRate(
+                                saveTarget.getStrategy().getId(),
+                                saveTarget.getProfitLossRate()
+                        )
+                );
+            }
+
+            dailyRepository.saveAll(saveTargets);
+
+        } catch (
+                IOException e) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 읽기에 실패했습니다.", e);
         } catch (EmptyFileException e) {
             throw new InvalidFileFormatException("엑셀 업로드 실패: 파일 내용이 올바르지 않습니다.", e);
         }
+
     }
 
 
@@ -228,5 +346,21 @@ public class ExcelServiceImpl implements ExcelService {
     private boolean isValidExcelFile(MultipartFile file) {
         String contentType = file.getContentType();
         return contentType != null && contentType.contains("spreadsheetml.sheet");
+    }
+
+
+    /**
+     * 이전 날짜 중 가장 최신인 것을 기준으로 계산하기 위한 식
+     * @param standardDate 기준 날짜
+     * @param date1 기준 날짜와 비교할 날짜1
+     * @param date2 기준 날짜와 비교할 날짜2
+     * @return 날짜1이 더 가까우면 true
+     */
+    private boolean isClosestDateDate1(LocalDate standardDate, LocalDate date1, LocalDate date2) {
+
+        long daysDifference1 = Math.abs(standardDate.toEpochDay() - date1.toEpochDay());
+        long daysDifference2 = Math.abs(standardDate.toEpochDay() - date2.toEpochDay());
+
+        return daysDifference1 <= daysDifference2;
     }
 }
