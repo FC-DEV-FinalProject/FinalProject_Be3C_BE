@@ -55,11 +55,11 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
                 .content(requestDto.getContent())
                 .build();
 
-        Strategy savedStrategy = strategyRepository.save(saveStrategy);
+        strategyRepository.save(saveStrategy);
 
         // todo. 전략 제안서 파일 등록 로직 필요
 
-        insertStrategyStockReference(requestDto.getStockIdList(), savedStrategy);
+        insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
     }
 
     // 전략 수정
