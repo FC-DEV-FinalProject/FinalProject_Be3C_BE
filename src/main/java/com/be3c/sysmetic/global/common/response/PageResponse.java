@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.global.common.response;
 
-import com.be3c.sysmetic.domain.member.entity.Inquiry;
-import com.be3c.sysmetic.domain.member.service.InquiryService;
+import lombok.*;
 import lombok.Builder;
 import lombok.Getter;
 

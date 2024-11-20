@@ -6,7 +6,6 @@ plugins {
 
 group = 'com.be3c'
 version = '0.0.1-SNAPSHOT'
-//sourceCompatibility = '17'
 
 java {
 	toolchain {
@@ -89,8 +88,4 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-clean {
-	delete file('src/main/generated')
 }
