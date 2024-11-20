@@ -30,21 +30,8 @@ public class InquiryAnswer extends BaseEntity {
     @Column(name = "answer_registration_date", columnDefinition = "Timestamp")
     private LocalDateTime answerRegistrationDate;
 
-//    @Column(name = "created_by", nullable = false)
-//    private Long createdBy;
-//
-//    @Column(name = "created_date", nullable = false, columnDefinition = "Timestamp default now()")
-//    private LocalDateTime createdDate;
-//
-//    @Column(name = "modified_by", nullable = false)
-//    private Long modifiedBy;
-//
-//    @Column(name = "modified_date", nullable = false,  columnDefinition = "Timestamp default now() on update now()")
-//    private LocalDateTime modifiedDate;
-
     //==생성 메서드==//
     public static InquiryAnswer createInquiryAnswer(Inquiry inquiry, String answerContent) {
-//    public static InquiryAnswer createInquiryAnswer(String answerContent) {
         InquiryAnswer inquiryAnswer = new InquiryAnswer();
         inquiryAnswer.setInquiry(inquiry);
         inquiryAnswer.setAnswerContent(answerContent);

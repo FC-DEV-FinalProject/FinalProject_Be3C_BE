@@ -33,22 +33,6 @@ public class InquiryServiceTest {
     @Autowired InquiryService inquiryService;
     @Autowired InquiryRepository inquiryRepository;
 
-//    @Test
-//    public void 문의_등록() throws Exception {
-//        //given
-//        Strategy strategy = createStrategy();
-//        Member member = createMember();
-//
-//        Inquiry inquiry = Inquiry.createInquiry(strategy, member, "질문1", "내용1");
-//
-//        //when
-//        Long savedId = inquiryService.saveInquiry(inquiry);
-//
-//        //then
-//        assertEquals(inquiry, inquiryRepository.findOne(savedId));
-//
-//    }
-
     @Test
     public void 전체_조회() throws Exception {
         //given
@@ -64,16 +48,6 @@ public class InquiryServiceTest {
         inquiryService.registerInquiry(member3.getId(), strategy.getId(), "질문3", "내용3");
         inquiryService.registerInquiry(member4.getId(), strategy.getId(), "질문4", "내용4");
         inquiryService.registerInquiry(member5.getId(), strategy.getId(), "질문5", "내용5");
-//        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member1, "질문1", "내용1");
-//        inquiryService.saveInquiry(inquiry1);
-//        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member2, "질문2", "내용2");
-//        inquiryService.saveInquiry(inquiry2);
-//        Inquiry inquiry3 = Inquiry.createInquiry(strategy, member3, "질문3", "내용3");
-//        inquiryService.saveInquiry(inquiry3);
-//        Inquiry inquiry4 = Inquiry.createInquiry(strategy, member4, "질문4", "내용4");
-//        inquiryService.saveInquiry(inquiry4);
-//        Inquiry inquiry5 = Inquiry.createInquiry(strategy, member5, "질문5", "내용5");
-//        inquiryService.saveInquiry(inquiry5);
 
         int offset = 0;
         int limit = 3;
@@ -106,16 +80,6 @@ public class InquiryServiceTest {
         inquiryService.registerInquiry(member1.getId(), strategy3.getId(), "질문3", "내용3");
         inquiryService.registerInquiry(member1.getId(), strategy4.getId(), "질문4", "내용4");
         inquiryService.registerInquiry(member1.getId(), strategy5.getId(), "질문5", "내용5");
-//        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
-//        inquiryService.saveInquiry(inquiry1);
-//        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
-//        inquiryService.saveInquiry(inquiry2);
-//        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
-//        inquiryService.saveInquiry(inquiry3);
-//        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member1, "질문4", "내용4");
-//        inquiryService.saveInquiry(inquiry4);
-//        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
-//        inquiryService.saveInquiry(inquiry5);
 
         int offset = 0;
         int limit = 3;
@@ -250,9 +214,9 @@ public class InquiryServiceTest {
     public void 문의_검색() throws Exception {
         //given
         ShowInquiryRequestDto inquirySearch = new ShowInquiryRequestDto();
-        inquirySearch.setStrategyKeyword("삼성");
-//        inquirySearch.setQuestionerKeyword(" ");
-//        inquirySearch.setTraderKeyword(" ");
+        inquirySearch.setSearchCondition("전략명");
+        inquirySearch.setSearchKeyword("삼성");
+        inquirySearch.setTab(InquiryStatus.ALL);
 
         Strategy strategy = createStrategy();
         Member member = createMember();
@@ -260,15 +224,12 @@ public class InquiryServiceTest {
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문1", "내용1");
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문2", "내용2");
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문3", "내용3");
-//        Inquiry inquiry1 = Inquiry.createInquiry(strategy, member, "질문1", "내용1");
-//        inquiryService.saveInquiry(inquiry1);
-//        Inquiry inquiry2 = Inquiry.createInquiry(strategy, member, "질문2", "내용2");
-//        inquiryService.saveInquiry(inquiry2);
-//        Inquiry inquiry3 = Inquiry.createInquiry(strategy, member, "질문3", "내용3");
-//        inquiryService.saveInquiry(inquiry3);
+
+        int offset = 0;
+        int limit = 3;
 
         //when
-        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquirySearch);
+        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquirySearch, offset, limit);
 
         //then
         assertEquals(3, inquiryList.size());

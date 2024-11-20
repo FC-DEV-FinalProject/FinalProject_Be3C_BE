@@ -16,7 +16,7 @@ public class ShowInquiryRequestDto {
 
     private InquiryStatus tab; // ALL, CLOSED, UNCLOSED
 
-    private String searchCondition; // 전략명, 트레이더, 질문자
+    private String searchCondition; // 전략명, 트레이더, 질문자, strategy, trader,
     private String searchKeyword;
 
 //    private Long page;

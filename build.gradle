@@ -64,16 +64,16 @@ dependencies {
 	// Thumbnailator
 	implementation 'net.coobird:thumbnailator:0.4.16'
 
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-
 	// jjwt (241105 추가)
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6' // API 의존성
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' // 구현체 의존성
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6' // Jackson 사용 시 필요
 
-//	runtimeOnly 'com.h2database:h2'
-//	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// Swagger
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
 
 	//JUnit4 추가
 	testImplementation("org.junit.vintage:junit-vintage-engine") {

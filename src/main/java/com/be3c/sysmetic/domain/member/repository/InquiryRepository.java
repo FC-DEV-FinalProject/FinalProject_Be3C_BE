@@ -18,15 +18,9 @@ import java.util.List;
 public class InquiryRepository {
 
     private final EntityManager em;
-//    private final EnableSpringDataWebSupport.QuerydslActivator querydslActivator;
 
     public void save(Inquiry inquiry) {
         em.persist(inquiry);
-//        if (inquiry.getId() == null) {
-//            em.persist(inquiry);
-//        } else {
-//            em.merge(inquiry);
-//        }
     }
 
     // 문의 단건 조회
@@ -145,19 +139,7 @@ public class InquiryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     public List<Inquiry> dynamicQueryWithBooleanBuilder(ShowInquiryRequestDto showInquiryRequestDto, int offset, int limit) {
-//        em.createQuery("select i, m, s from Inquiry i left join i.member m left join i.strategy s");
-//        em.createQuery("select i from Inquiry i join fetch i.member join fetch i.strategy " +
-//                "where i.strategy.name like concat('%', :strategyKeyword, '%')", Inquiry.class)
-//                .setParameter("strategyKeyword", inquirySearchDto.getStrategyKeyword())
-//                .getResultList();
-//        em.createQuery("select i from Inquiry i join fetch i.member join fetch i.strategy " +
-//                "where i.member.name like concat('%', :questionerKeyword, '%')", Inquiry.class)
-//                .setParameter("questionerKeyword", inquirySearchDto.getQuestionerKeyword())
-//                .getResultList();
-//        em.createQuery("select i from Inquiry i join fetch i.member join fetch i.strategy " +
-//                "where i.strategy.trader.name like concat('%', :traderKeyword, '%')", Inquiry.class)
-//                .setParameter("traderKeyword", inquirySearchDto.getTraderKeyword())
-//                .getResultList();
+
         BooleanBuilder predicate = new BooleanBuilder();
         QInquiry inquiry = QInquiry.inquiry;
 
@@ -272,21 +254,4 @@ public class InquiryRepository {
                 .where(predicate)
                 .fetchOne();
     }
-
-
-
-//    public List<Inquiry> findByIdAndStrategy(Long id, Strategy strategy) {
-//        return em.createQuery("select i from Inquiry i where i.id = :id and i.strategy.id = :strategyId order by i.inquiryRegistrationDate desc", Inquiry.class)
-//                .setParameter("id", id)
-//                .setParameter("strategyId", strategy.getId())
-//                .getResultList();
-//    }
-
-//    public List<Inquiry> findByIdAndInquiryStatusAndStrategy(Long id, InquiryStatus inquiryStatus, Strategy strategy) {
-//        return em.createQuery("select i from Inquiry i where i.id = :id and i.inquiryStatus = :inquiryStatus and i.strategy.id = :strategyId order by i.inquiryRegistrationDate desc", Inquiry.class)
-//                .setParameter("id", id)
-//                .setParameter("inquiryStatus", inquiryStatus)
-//                .setParameter("strategyId", strategy.getId())
-//                .getResultList();
-//    }
 }

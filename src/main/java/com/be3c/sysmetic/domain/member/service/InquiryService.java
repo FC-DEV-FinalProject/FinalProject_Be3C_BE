@@ -19,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InquiryService {
 
-//    private final EntityManager em;
-
     private final InquiryRepository inquiryRepository;
     private final MemberRepository memberRepository;
     private final StrategyRepository strategyRepository;
@@ -106,7 +104,6 @@ public class InquiryService {
     // 수정
     @Transactional
     public void modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent) {
-//        Inquiry inquiry = em.find(Inquiry.class, inquiryId);
 
         Inquiry inquiry = inquiryRepository.findOne(inquiryId);
 
@@ -122,7 +119,6 @@ public class InquiryService {
     // 삭제
     @Transactional
     public void deleteInquiry(Long inquiryId) {
-//        Inquiry inquiry = em.find(Inquiry.class, inquiryId);
 
         Inquiry inquiry = inquiryRepository.findOne(inquiryId);
 

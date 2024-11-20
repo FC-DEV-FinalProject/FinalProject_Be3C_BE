@@ -27,15 +27,6 @@ public class Inquiry extends BaseEntity {
     public void setInquiryAnswer (InquiryAnswer inquiryAnswer) {
         this.inquiryAnswer = inquiryAnswer;
         inquiryAnswer.setInquiry(this);
-
-//        if (this.inquiryAnswer != null) {
-//            this.inquiryAnswer.setInquiry(null);
-//        }
-//
-//        this.inquiryAnswer = inquiryAnswer;
-//        if (inquiryAnswer != null) {
-//            inquiryAnswer.setInquiry(this);
-//        }
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,23 +51,9 @@ public class Inquiry extends BaseEntity {
     @Column(name = "inquiry_registration_date", columnDefinition = "Timestamp", nullable = false)
     private LocalDateTime inquiryRegistrationDate;
 
-//    @Column(name = "created_by", nullable = false)
-//    private Long createdBy;
-//
-//    @Column(name = "created_date", nullable = false, columnDefinition = "Timestamp default now()")
-//    private LocalDateTime createdDate;
-//
-//    @Column(name = "modified_by", nullable = false)
-//    private Long modifiedBy;
-//
-//    @Column(name = "modified_date", nullable = false,  columnDefinition = "Timestamp default now() on update now()")
-//    private LocalDateTime modifiedDate;
-
     //==생성 메서드==//
-//    public static Inquiry createInquiry(InquiryAnswer inquiryAnswer, Strategy strategy, Member member, String inquiryTitle, String inquiryContent) {
     public static Inquiry createInquiry(Strategy strategy, Member member, String inquiryTitle, String inquiryContent) {
         Inquiry inquiry = new Inquiry();
-//        inquiry.setInquiryAnswer(inquiryAnswer);
         inquiry.setStrategy(strategy);
         inquiry.setMember(member);
 
