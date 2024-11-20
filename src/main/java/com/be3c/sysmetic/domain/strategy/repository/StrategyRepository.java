@@ -15,8 +15,6 @@ import java.util.List;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
-    boolean existsByName(String name); // 전략명 중복 확인
-
     @Query("""
         SELECT new com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto(
             s.id, s.name, s.trader.name, s.statusCode
@@ -29,6 +27,11 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long> {
     @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
             "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")
     Page<Strategy> findByTraderNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
+
+    Optional<Strategy> findByIdAndStatusCode(Long id, String statusCode);
+
+    // 전략명 중복 확인
+    boolean existsByName(String name);
 
     @Query("SELECT s FROM Strategy s WHERE s.statusCode = 'PUBLIC'")
     List<Strategy> findAllByPublicStatus();

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
 
+@RestController
 @Tag(name = "매매 방식 API", description = "관리자 매매 방식 API")
 @Controller
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

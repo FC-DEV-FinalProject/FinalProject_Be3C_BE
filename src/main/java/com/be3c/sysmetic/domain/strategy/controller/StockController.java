@@ -25,7 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "종목 API", description = "관리자 종목 API")
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StockController {
@@ -76,7 +76,6 @@ public class StockController {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
     }
-
 
     /*
         단일 종목 찾기

@@ -57,6 +57,10 @@ class LoginServiceTest {
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now())
+//                .createdBy(1L)
+//                .createdDate(LocalDateTime.now())
+//                .modifiedBy(1L)
+//                .modifiedDate(LocalDateTime.now())
                 .build();
         memberRepository.save(member);
     }

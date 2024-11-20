@@ -22,8 +22,11 @@ public enum Code {
     // 전략 상태 코드
     OPEN_STRATEGY("ST001"),
     CLOSE_STRATEGY("ST002"),
-    WAIT_STRATEGY("ST003");
+    WAIT_STRATEGY("ST003"),
 
-    String code;
+    // 팔로우 메일 전송 여부 코드
+    SEND_FOLLOW_MAIL("SM001"),
+    NOT_SEND_FOLLOW_MAIL("SM002");
 
-    }
+    private String code;
+}
