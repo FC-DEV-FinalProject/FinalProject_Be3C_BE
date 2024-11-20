@@ -27,7 +27,7 @@ public class InquiryAnswer extends BaseEntity {
     @Column(name = "answer_content", length = 1000)
     private String answerContent;
 
-    @Column(name = "answer_registration_date", columnDefinition = "Timestamp")
+    @Column(name = "answer_registration_date")
     private LocalDateTime answerRegistrationDate;
 
     //==생성 메서드==//

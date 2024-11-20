@@ -48,7 +48,7 @@ public class Inquiry extends BaseEntity {
     @Column(name = "inquiry_content", length = 1000, nullable = false)
     private String inquiryContent;
 
-    @Column(name = "inquiry_registration_date", columnDefinition = "Timestamp", nullable = false)
+    @Column(name = "inquiry_registration_date", nullable = false)
     private LocalDateTime inquiryRegistrationDate;
 
     //==생성 메서드==//
