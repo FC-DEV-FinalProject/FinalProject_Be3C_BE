@@ -22,23 +22,23 @@ public class QStrategyStatistics extends EntityPathBase<StrategyStatistics> {
 
     public static final QStrategyStatistics strategyStatistics = new QStrategyStatistics("strategyStatistics");
 
-    public final NumberPath<Double> accumulatedDepositWithdrawalAmount = createNumber("accumulatedDepositWithdrawalAmount", Double.class);
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
 
-    public final NumberPath<Double> accumulatedProfitAmount = createNumber("accumulatedProfitAmount", Double.class);
+    public final NumberPath<Double> accumulatedDepositWithdrawalAmount = createNumber("accumulatedDepositWithdrawalAmount", Double.class);
 
     public final NumberPath<Double> accumulatedProfitLossAmount = createNumber("accumulatedProfitLossAmount", Double.class);
 
     public final NumberPath<Double> accumulatedProfitLossRate = createNumber("accumulatedProfitLossRate", Double.class);
 
-    public final NumberPath<Double> accumulatedProfitRate = createNumber("accumulatedProfitRate", Double.class);
-
     public final NumberPath<Double> averageProfitLossAmount = createNumber("averageProfitLossAmount", Double.class);
 
     public final NumberPath<Double> averageProfitLossRate = createNumber("averageProfitLossRate", Double.class);
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final NumberPath<Double> currentBalance = createNumber("currentBalance", Double.class);
 
@@ -48,23 +48,25 @@ public class QStrategyStatistics extends EntityPathBase<StrategyStatistics> {
 
     public final NumberPath<Long> currentContinuousProfitLossDays = createNumber("currentContinuousProfitLossDays", Long.class);
 
-    public final DateTimePath<java.time.LocalDateTime> firstRegistrationDate = createDateTime("firstRegistrationDate", java.time.LocalDateTime.class);
+    public final DatePath<java.time.LocalDate> firstRegistrationDate = createDate("firstRegistrationDate", java.time.LocalDate.class);
 
-    public final DateTimePath<java.time.LocalDateTime> highPointRenewalProgress = createDateTime("highPointRenewalProgress", java.time.LocalDateTime.class);
+    public final NumberPath<Long> highPointRenewalProgress = createNumber("highPointRenewalProgress", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<java.time.LocalDateTime> lastRegistrationDate = createDateTime("lastRegistrationDate", java.time.LocalDateTime.class);
+    public final DatePath<java.time.LocalDate> lastRegistrationDate = createDate("lastRegistrationDate", java.time.LocalDate.class);
 
-    public final NumberPath<Double> lastYearProfitRate = createNumber("lastYearProfitRate", Double.class);
+    public final NumberPath<Double> maximumAccumulatedProfitLossAmount = createNumber("maximumAccumulatedProfitLossAmount", Double.class);
 
-    public final NumberPath<Long> maxContinuousLossDays = createNumber("maxContinuousLossDays", Long.class);
-
-    public final NumberPath<Long> maxContinuousProfitDays = createNumber("maxContinuousProfitDays", Long.class);
+    public final NumberPath<Double> maximumAccumulatedProfitLossRate = createNumber("maximumAccumulatedProfitLossRate", Double.class);
 
     public final NumberPath<Double> maximumCapitalReductionAmount = createNumber("maximumCapitalReductionAmount", Double.class);
 
     public final NumberPath<Double> maximumCapitalReductionRate = createNumber("maximumCapitalReductionRate", Double.class);
+
+    public final NumberPath<Long> maximumContinuousLossDays = createNumber("maximumContinuousLossDays", Long.class);
+
+    public final NumberPath<Long> maximumContinuousProfitDays = createNumber("maximumContinuousProfitDays", Long.class);
 
     public final NumberPath<Double> maximumDailyLossAmount = createNumber("maximumDailyLossAmount", Double.class);
 
@@ -74,17 +76,17 @@ public class QStrategyStatistics extends EntityPathBase<StrategyStatistics> {
 
     public final NumberPath<Double> maximumDailyProfitRate = createNumber("maximumDailyProfitRate", Double.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final NumberPath<Double> principal = createNumber("principal", Double.class);
 
     public final NumberPath<Double> profitFactor = createNumber("profitFactor", Double.class);
 
     public final NumberPath<Double> roa = createNumber("roa", Double.class);
-
-    public final NumberPath<Double> standardDeviation = createNumber("standardDeviation", Double.class);
 
     public final QStrategy strategy;
 

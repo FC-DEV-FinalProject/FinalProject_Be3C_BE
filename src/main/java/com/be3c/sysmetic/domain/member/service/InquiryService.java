@@ -5,8 +5,8 @@ import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -91,8 +91,8 @@ public class InquiryService {
     // 등록
     @Transactional
     public Long registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent) {
-        Strategy strategy = strategyRepository.findOne(strategyId);
-        Member member = memberRepository.findOne(memberId);
+        Strategy strategy = strategyRepository.findById(strategyId).get(); // .orElseThrow() 예외처리
+        Member member = memberRepository.findById(memberId).get();
 
         Inquiry inquiry = Inquiry.createInquiry(strategy, member, inquiryTitle, inquiryContent);
 

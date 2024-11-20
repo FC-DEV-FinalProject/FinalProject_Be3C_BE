@@ -19,19 +19,23 @@ public class QMethod extends EntityPathBase<Method> {
 
     public static final QMethod method = new QMethod("method");
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath explanation = createString("explanation");
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final DateTimePath<java.time.LocalDateTime> methodCreatedDate = createDateTime("methodCreatedDate", java.time.LocalDateTime.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final StringPath name = createString("name");
 

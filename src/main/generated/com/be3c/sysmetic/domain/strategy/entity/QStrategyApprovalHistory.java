@@ -22,17 +22,23 @@ public class QStrategyApprovalHistory extends EntityPathBase<StrategyApprovalHis
 
     public static final QStrategyApprovalHistory strategyApprovalHistory = new QStrategyApprovalHistory("strategyApprovalHistory");
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final com.be3c.sysmetic.domain.member.entity.QMember manager;
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final StringPath statusCode = createString("statusCode");
 

@@ -22,31 +22,39 @@ public class QDaily extends EntityPathBase<Daily> {
 
     public static final QDaily daily = new QDaily("daily");
 
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
+
     public final NumberPath<Double> accumulatedProfitLossAmount = createNumber("accumulatedProfitLossAmount", Double.class);
 
     public final NumberPath<Double> accumulatedProfitLossRate = createNumber("accumulatedProfitLossRate", Double.class);
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
-    public final DateTimePath<java.time.LocalDateTime> dailyCreatedDate = createDateTime("dailyCreatedDate", java.time.LocalDateTime.class);
+    public final NumberPath<Double> currentBalance = createNumber("currentBalance", Double.class);
 
-    public final NumberPath<Double> dailyLossAmount = createNumber("dailyLossAmount", Double.class);
-
-    public final NumberPath<Double> dailyLossRate = createNumber("dailyLossRate", Double.class);
-
-    public final DateTimePath<java.time.LocalDateTime> date = createDateTime("date", java.time.LocalDateTime.class);
+    public final DatePath<java.time.LocalDate> date = createDate("date", java.time.LocalDate.class);
 
     public final NumberPath<Double> depositWithdrawalAmount = createNumber("depositWithdrawalAmount", Double.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final NumberPath<Double> principal = createNumber("principal", Double.class);
+
+    public final NumberPath<Double> profitLossAmount = createNumber("profitLossAmount", Double.class);
+
+    public final NumberPath<Double> profitLossRate = createNumber("profitLossRate", Double.class);
+
+    public final NumberPath<Double> standardAmount = createNumber("standardAmount", Double.class);
 
     public final QStrategy strategy;
 

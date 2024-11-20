@@ -19,9 +19,15 @@ public class QMember extends EntityPathBase<Member> {
 
     public static final QMember member = new QMember("member1");
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.LocalDateTime> birth = createDateTime("birth", java.time.LocalDateTime.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final StringPath email = createString("email");
 
@@ -31,9 +37,11 @@ public class QMember extends EntityPathBase<Member> {
 
     public final DateTimePath<java.time.LocalDateTime> marketingConsentDate = createDateTime("marketingConsentDate", java.time.LocalDateTime.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final StringPath name = createString("name");
 
@@ -50,6 +58,8 @@ public class QMember extends EntityPathBase<Member> {
     public final StringPath roleCode = createString("roleCode");
 
     public final NumberPath<Integer> totalFollow = createNumber("totalFollow", Integer.class);
+
+    public final NumberPath<Integer> totalStrategyCount = createNumber("totalStrategyCount", Integer.class);
 
     public final StringPath usingStatusCode = createString("usingStatusCode");
 

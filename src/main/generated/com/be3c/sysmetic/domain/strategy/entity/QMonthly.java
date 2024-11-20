@@ -22,29 +22,37 @@ public class QMonthly extends EntityPathBase<Monthly> {
 
     public static final QMonthly monthly = new QMonthly("monthly");
 
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
+
     public final NumberPath<Double> accumulatedProfitLossAmount = createNumber("accumulatedProfitLossAmount", Double.class);
 
     public final NumberPath<Double> accumulatedProfitLossRate = createNumber("accumulatedProfitLossRate", Double.class);
 
-    public final NumberPath<Double> averageMonthlyWage = createNumber("averageMonthlyWage", Double.class);
+    public final NumberPath<Double> averageMonthlyPrincipal = createNumber("averageMonthlyPrincipal", Double.class);
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
-    public final NumberPath<Integer> month_number = createNumber("month_number", Integer.class);
+    public final NumberPath<Integer> monthNumber = createNumber("monthNumber", Integer.class);
 
-    public final NumberPath<Double> monthlyProfitLossAmount = createNumber("monthlyProfitLossAmount", Double.class);
+    public final NumberPath<Double> profitLossAmount = createNumber("profitLossAmount", Double.class);
 
-    public final NumberPath<Double> monthlyProfitRate = createNumber("monthlyProfitRate", Double.class);
+    public final NumberPath<Double> profitLossRate = createNumber("profitLossRate", Double.class);
 
     public final QStrategy strategy;
+
+    public final NumberPath<Integer> yearNumber = createNumber("yearNumber", Integer.class);
 
     public QMonthly(String variable) {
         this(Monthly.class, forVariable(variable), INITS);

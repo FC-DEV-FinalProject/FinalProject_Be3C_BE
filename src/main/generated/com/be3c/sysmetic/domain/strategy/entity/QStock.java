@@ -19,13 +19,17 @@ public class QStock extends EntityPathBase<Stock> {
 
     public static final QStock stock = new QStock("stock");
 
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
+
     public final StringPath code = createString("code");
 
     public final StringPath country = createString("country");
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final DateTimePath<java.time.LocalDateTime> delistedDate = createDateTime("delistedDate", java.time.LocalDateTime.class);
 
@@ -35,9 +39,11 @@ public class QStock extends EntityPathBase<Stock> {
 
     public final DateTimePath<java.time.LocalDateTime> listedDate = createDateTime("listedDate", java.time.LocalDateTime.class);
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final StringPath name = createString("name");
 

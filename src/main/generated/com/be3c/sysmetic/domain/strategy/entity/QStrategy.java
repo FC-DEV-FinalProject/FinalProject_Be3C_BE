@@ -22,11 +22,15 @@ public class QStrategy extends EntityPathBase<Strategy> {
 
     public static final QStrategy strategy = new QStrategy("strategy");
 
+    public final com.be3c.sysmetic.global.entity.QBaseEntity _super = new com.be3c.sysmetic.global.entity.QBaseEntity(this);
+
     public final StringPath content = createString("content");
 
-    public final NumberPath<Long> createdBy = createNumber("createdBy", Long.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final DateTimePath<java.time.LocalDateTime> createdDate = createDateTime("createdDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath createdBy = _super.createdBy;
 
     public final ComparablePath<Character> cycle = createComparable("cycle", Character.class);
 
@@ -38,11 +42,11 @@ public class QStrategy extends EntityPathBase<Strategy> {
 
     public final QMethod method;
 
-    public final NumberPath<Double> minOperationAmount = createNumber("minOperationAmount", Double.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final NumberPath<Long> modifiedBy = createNumber("modifiedBy", Long.class);
-
-    public final DateTimePath<java.time.LocalDateTime> modifiedDate = createDateTime("modifiedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final StringPath modifiedBy = _super.modifiedBy;
 
     public final StringPath name = createString("name");
 
