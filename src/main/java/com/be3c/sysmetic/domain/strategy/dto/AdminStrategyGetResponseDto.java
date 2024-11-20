@@ -3,6 +3,9 @@ package com.be3c.sysmetic.domain.strategy.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -11,11 +14,11 @@ import lombok.*;
 @AllArgsConstructor
 @Schema(description = "")
 public class AdminStrategyGetResponseDto {
-    /*
-        수정 예정
-     */
-    private Long strategy_id;
-    private String strategy_name;
-    private String trader_name;
-    private String status_code;
+    private Long strategyId;
+    private String strategyName;
+    private String traderName;
+    private String openStatusCode;
+    private String ApprovalStatusCode;
+    private LocalDateTime strategyCreateDate;
+    private List<String> iconFilePath;
 }
