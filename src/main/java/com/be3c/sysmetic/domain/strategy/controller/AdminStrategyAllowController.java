@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class StrategyAllowController {
+public class AdminStrategyAllowController {
 
     private final AdminStrategyService adminStrategyService;
 

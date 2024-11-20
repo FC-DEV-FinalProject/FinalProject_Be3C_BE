@@ -32,4 +32,19 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long> {
     // 전략 비공개 상태로 변환
     @Query("UPDATE Strategy s SET s.statusCode = 'PRIVATE' WHERE s.id = :strategyId")
     int updateStatusToPrivate(@Param("strategyId") Long strategyId);
+
+    @Query("""
+        SELECT
+            s
+        FROM Strategy s
+        WHERE
+            s.id = :id
+        AND s.trader.id = :userId
+        AND s.statusCode = :statusCode
+    """)
+    Optional<Strategy> findByIdAndTraderIdAndStatusCode(
+            @Param("id") Long id,
+            @Param("userId") Long userId,
+            @Param("statusCode") String statusCode
+    );
 }

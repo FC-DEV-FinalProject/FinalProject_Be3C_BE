@@ -4,10 +4,8 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MonthlyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
-import com.be3c.sysmetic.domain.strategy.service.AccountImageServiceImpl;
-import com.be3c.sysmetic.domain.strategy.service.DailyServiceImpl;
-import com.be3c.sysmetic.domain.strategy.service.MonthlyServiceImpl;
-import com.be3c.sysmetic.domain.strategy.service.StrategyStatisticsServiceImpl;
+import com.be3c.sysmetic.domain.strategy.service.*;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
  import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,6 +34,7 @@ public class StrategyController {
     private final MonthlyServiceImpl monthlyService;
     private final StrategyStatisticsServiceImpl strategyStatisticsService;
     private final AccountImageServiceImpl accountImageService;
+    private final StrategyService strategyService;
 
     // todo : 페이지 response 변경 필요. -> 리팩토링시 진행
 
@@ -80,6 +81,24 @@ public class StrategyController {
             @RequestPart List<AccountImageRequestDto> accountImages, @RequestParam Long strategyId) {
         accountImageService.saveAccountImage(strategyId, accountImages);
         return ResponseEntity.ok(APIResponse.success());
+    }
+
+    // 비공개 전환
+    @PatchMapping("/strategy/{id}/visibilaty")
+    public ResponseEntity<APIResponse<String>> patchStrategy(
+            @NotBlank @PathVariable Long id
+    ) {
+        try {
+            if(strategyService.privateStrategy(id)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 }

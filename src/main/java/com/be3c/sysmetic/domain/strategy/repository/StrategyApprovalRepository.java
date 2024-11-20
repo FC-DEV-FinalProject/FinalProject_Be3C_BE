@@ -22,7 +22,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
             StrategyApprovalHistory s
         WHERE
             s.id = :id
-        AND s.statusCode IN ('SA001', 'SA002')
+        AND s.statusCode = 'SA001'
     """)
     Optional<StrategyApprovalHistory> findByStrategyIdAndStatusCodeNotApproval(Long id);
 
@@ -33,7 +33,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
             StrategyApprovalHistory s
         WHERE
             s.id = :id
-        AND s.statusCode IN ('SA001', 'SA002')
+        AND s.statusCode = 'SA001'
     """)
     Optional<StrategyApprovalHistory> findByStrategyIdNotApproval(Long id);
 
