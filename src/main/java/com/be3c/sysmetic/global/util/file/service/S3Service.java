@@ -1,12 +1,11 @@
 package com.be3c.sysmetic.global.util.file.service;
 
 import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
@@ -22,21 +21,14 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class S3Service {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
-    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
-    }
-
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
-
-    @Value("${cloud.aws.region.static}")
-    private Region region;
 
 
     /**
@@ -128,7 +120,7 @@ public class S3Service {
         return response.sdkHttpResponse().isSuccessful();
     }
 
-    public String updateObject(MultipartFile file, FileRequestDto fileRequestDto, String keyName){
+    public String updateObject(MultipartFile file, String keyName){
 
         try (InputStream inputStream = file.getInputStream()) {
 

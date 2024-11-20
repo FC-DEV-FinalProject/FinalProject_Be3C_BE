@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @Transactional
 public class FileRepositoryTest {
+
     @Autowired
     private FileRepository fileRepository;
 
@@ -41,7 +42,7 @@ public class FileRepositoryTest {
     }
 
     @Test
-    public void  findTest() throws Exception {
+    public void  findTest() {
         List<File> saveList = fileEntityBuilderAndSaver(3);
         FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.STRATEGY, 1L);
         List<File> findList = fileRepository.findFilesByFileReference(fileRequestDto);
