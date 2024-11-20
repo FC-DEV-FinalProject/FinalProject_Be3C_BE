@@ -21,8 +21,8 @@ public class SchedulerConfiguration {
     // 매일 자정에 계산 - cron 초, 분, 시
     @Scheduled(cron = "0 00 00 * * ?")
     public void run() {
-
-        List<Strategy> strategies = strategyRepository.findAll();
+        // 미사용 상태가 아닌 전략 조회
+        List<Strategy> strategies = strategyRepository.findAllUsingState();
         for (Strategy strategy : strategies) {
             try {
                 strategyStatisticsService.runStrategyStatistics(strategy.getId());

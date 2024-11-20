@@ -101,8 +101,14 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         findStrategy(strategyId);
         // todo. checkTrader(existingStrategy.getCreatedBy());
         // todo. 전략 제안서 파일 삭제 로직 필요
-        strategyStockReferenceRepository.deleteByStrategyId(strategyId);
-        strategyRepository.deleteById(strategyId);
+
+        // DB 삭제가 아닌 미사용 상태로 변경
+        // strategyStockReferenceRepository.deleteByStrategyId(strategyId);
+        // strategyRepository.deleteById(strategyId);
+
+        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
+        strategyRepository.save(savedStrategy);
     }
 
     // 전략명 중복 여부 검증
