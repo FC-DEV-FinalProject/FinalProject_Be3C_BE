@@ -150,8 +150,8 @@ public class InterestStrategyServiceTest {
                 .highPointRenewalProgress(30L)
                 .profitFactor(1.5)
                 .roa(0.08)
-                .firstRegistrationDate(LocalDateTime.now().minusMonths(6))
-                .lastRegistrationDate(LocalDateTime.now())
+                .firstRegistrationDate(LocalDateTime.now().minusMonths(6).toLocalDate())
+                .lastRegistrationDate(LocalDateTime.now().toLocalDate())
                 .build();
 
         methodRepository.save(method);

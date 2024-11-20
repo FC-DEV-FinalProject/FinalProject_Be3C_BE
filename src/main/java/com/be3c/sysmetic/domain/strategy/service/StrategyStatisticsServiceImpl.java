@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
@@ -97,15 +97,15 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     }
 
     // 전략통계 조회
-    public StrategyStatisticsResponseDto findStrategyStatistics(Long strategyId) {
+    public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
-        return StrategyStatisticsResponseDto.builder()
+        return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
                 .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
                 .principal(statistics.getPrincipal())
-                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate().toLocalDate(), statistics.getLastRegistrationDate().toLocalDate()))
-                .startDate(statistics.getFirstRegistrationDate().toLocalDate())
-                .endDate(statistics.getLastRegistrationDate().toLocalDate())
+                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate(), statistics.getLastRegistrationDate()))
+                .startDate(statistics.getFirstRegistrationDate())
+                .endDate(statistics.getLastRegistrationDate())
                 .accumulatedProfitLossAmount(statistics.getAccumulatedProfitLossAmount())
                 .accumulatedProfitLossRate(statistics.getAccumulatedProfitLossRate())
                 .maximumAccumulatedProfitLossAmount(statistics.getMaximumAccumulatedProfitLossAmount())

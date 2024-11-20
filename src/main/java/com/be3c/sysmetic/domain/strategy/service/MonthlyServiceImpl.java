@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.MonthlyResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.MonthlyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -18,8 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,7 +50,7 @@ public class MonthlyServiceImpl implements MonthlyService {
 
     // 월간분석 업데이트
     @Override
-    public void updateMonthly(Long strategyId, List<LocalDateTime> updatedDateList) {
+    public void updateMonthly(Long strategyId, List<LocalDate> updatedDateList) {
         Set<YearMonth> yearMonthSet = updatedDateList.stream()
                 .map(YearMonth::from)
                 .collect(Collectors.toSet());
@@ -63,11 +65,13 @@ public class MonthlyServiceImpl implements MonthlyService {
     }
 
     @Override
-    public PageResponse<MonthlyResponseDto> findMonthly(Long strategyId, Integer page, Integer startYear, Integer startMonth, Integer endYear, Integer endMonth) {
+    public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<MonthlyResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, startYear, startMonth, endYear, endMonth, pageable).map(this::entityToDto);
+        YearMonth start = parseYearMonth(startYearMonth);
+        YearMonth end = parseYearMonth(endYearMonth);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
 
-        PageResponse<MonthlyResponseDto> responseDto = PageResponse.<MonthlyResponseDto>builder()
+        PageResponse<MonthlyGetResponseDto> responseDto = PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
                 .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
                 .totalElement(monthlyResponseDtoPage.getTotalElements())
@@ -101,11 +105,11 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .build();
     }
 
-    private MonthlyResponseDto entityToDto(Monthly monthly) {
-        return MonthlyResponseDto.builder()
+    private MonthlyGetResponseDto entityToDto(Monthly monthly) {
+        return MonthlyGetResponseDto.builder()
                 .monthId(monthly.getId())
                 .yearMonth(monthly.getYearNumber() + "-" + monthly.getMonthNumber())
-                .avragePrincipal(monthly.getAverageMonthlyPrincipal())
+                .averagePrincipal(monthly.getAverageMonthlyPrincipal())
                 .profitLossAmount(monthly.getProfitLossAmount())
                 .profitLossRate(monthly.getProfitLossRate())
                 .accumulatedProfitLossAmount(monthly.getAccumulatedProfitLossAmount())
@@ -113,8 +117,16 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .build();
     }
 
-    Strategy findStrategy(Long strategyId) {
+    private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+    }
+
+    private YearMonth parseYearMonth(String yearMonth) {
+        try {
+            return yearMonth != null ? YearMonth.parse(yearMonth) : null;
+        } catch (DateTimeParseException e) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage());
+        }
     }
 
 }

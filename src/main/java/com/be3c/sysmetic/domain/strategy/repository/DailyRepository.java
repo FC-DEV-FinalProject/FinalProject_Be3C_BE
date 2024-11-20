@@ -41,7 +41,7 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Query("SELECT d FROM Daily d WHERE (:startDate IS NULL OR d.date >= :startDate) " +
             "AND d.strategy.id = :strategyId " +
             "AND (:endDate IS NULL OR d.date <= :endDate)")
-    Page<Daily> findAllByStrategyIdAndDateBetween(@Param("strategyId") Long strategyId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, @Param("pageable") Pageable pageable);
+    Page<Daily> findAllByStrategyIdAndDateBetween(@Param("strategyId") Long strategyId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("pageable") Pageable pageable);
 
     // 일간분석데이터 목록 조회 - 특정 년월
     @Query(value = "SELECT * FROM daily d WHERE d.strategy_id = :strategyId " +

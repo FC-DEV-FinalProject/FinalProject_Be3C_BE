@@ -1,8 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.DailyResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.SaveDailyResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,21 +74,21 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 등록
     @Transactional
     @Override
-    public void saveDaily(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
+    public void saveDaily(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
         List<Daily> dailyList = processingDaily(strategyId, null, requestDtoList);
         dailyRepository.saveAll(dailyList);
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
+        List<LocalDate> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
     // 일간분석 수정
     @Transactional
     @Override
-    public void updateDaily(Long strategyId, Long dailyId, SaveDailyRequestDto requestDto) {
+    public void updateDaily(Long strategyId, Long dailyId, DailyPostRequestDto requestDto) {
         // 등록시 사용하는 메서드 사용하기 위해 List로 변환
-        List<SaveDailyRequestDto> requestDtoList = new ArrayList<>();
+        List<DailyPostRequestDto> requestDtoList = new ArrayList<>();
         requestDtoList.add(requestDto);
         Daily daily = processingDaily(strategyId, dailyId, requestDtoList).stream().findFirst().orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
@@ -98,7 +99,7 @@ public class DailyServiceImpl implements DailyService {
         recalculateAccumulatedData(strategyId, daily.getDate());
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = List.of(daily.getDate());
+        List<LocalDate> updatedDateList = List.of(daily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
@@ -107,7 +108,7 @@ public class DailyServiceImpl implements DailyService {
     @Override
     public void deleteDaily(Long strategyId, Long dailyId) {
         Daily daily = dailyRepository.findById(dailyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-        LocalDateTime date = daily.getDate();
+        LocalDate date = daily.getDate();
         Long countDaily = countDaily(strategyId);
 
         // DB 삭제
@@ -117,7 +118,7 @@ public class DailyServiceImpl implements DailyService {
         recalculateAccumulatedData(strategyId, daily.getDate());
 
         // 월간분석 계산
-        List<LocalDateTime> updatedDateList = List.of(date);
+        List<LocalDate> updatedDateList = List.of(date);
         monthlyService.updateMonthly(strategyId, updatedDateList);
 
         if(countDaily < 4) {
@@ -126,7 +127,6 @@ public class DailyServiceImpl implements DailyService {
         }
 
         if(countDaily == 0) {
-            // todo 일간분석 데이터 모두 삭제한 경우, 전략통계 삭제 -> 전략통계의 모든 데이터 0으로 업데이트? 리팩토링시 다시 고민. 프론트에 어떻게 받는 게 좋을지 질문.
             // 일간분석 2개 이하일 경우 전략 비공개 상태로, 즉 현재 구현상으로는 계산 X
             statisticsRepository.deleteByStrategyId(strategyId);
         }
@@ -134,26 +134,26 @@ public class DailyServiceImpl implements DailyService {
     }
 
     @Override
-    public SaveDailyResponseDto getIsDuplicate(Long strategyId, List<SaveDailyRequestDto> requestDtoList) {
-        for (SaveDailyRequestDto requestDto : requestDtoList) {
+    public DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
+        for (DailyPostRequestDto requestDto : requestDtoList) {
             // 이미 등록한 날짜가 하나라도 존재할 경우 true 반환
             if(findDuplicateDate(strategyId, requestDto.getDate()) != null) {
-                return SaveDailyResponseDto.builder()
+                return DailyPostResponseDto.builder()
                         .isDuplicate(true)
                         .build();
             }
         }
-        return SaveDailyResponseDto.builder()
+        return DailyPostResponseDto.builder()
                 .isDuplicate(false)
                 .build();
     }
 
     // 일간분석 조회
-    public PageResponse<DailyResponseDto> findDaily(Long strategyId, int page, LocalDateTime startDate, LocalDateTime endDate) {
+    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<DailyResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
 
-        PageResponse<DailyResponseDto> responseDto = PageResponse.<DailyResponseDto>builder()
+        PageResponse<DailyGetResponseDto> responseDto = PageResponse.<DailyGetResponseDto>builder()
                 .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
                 .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
                 .totalElement(dailyResponseDtoPage.getTotalElements())
@@ -165,13 +165,13 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // TODO 시큐리티 완료 후 수정 필요
-    private List<Daily> processingDaily(Long strategyId, Long dailyId, List<SaveDailyRequestDto> requestDtoList) {
+    private List<Daily> processingDaily(Long strategyId, Long dailyId, List<DailyPostRequestDto> requestDtoList) {
 
         final Daily beforeDaily = getBeforeDaily(strategyId);
         List<Daily> dailyList = new ArrayList<>();
         final Long createdBy = 1L;
 
-        for(SaveDailyRequestDto requestDto : requestDtoList) {
+        for(DailyPostRequestDto requestDto : requestDtoList) {
             Daily duplicatedDaily = findDuplicateDate(strategyId, requestDto.getDate());
 
             if(dailyId == null && duplicatedDaily != null) {
@@ -202,7 +202,7 @@ public class DailyServiceImpl implements DailyService {
         return dailyRepository.countByStrategyId(strategyId);
     }
 
-    private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, SaveDailyRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
+    private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, DailyPostRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
         Double dailyProfitLossRate = strategyCalculator.getDailyProfitLossRate(
                 isFirst,
                 requestDto.getDepositWithdrawalAmount(),
@@ -227,8 +227,8 @@ public class DailyServiceImpl implements DailyService {
                 .build();
     }
 
-    private DailyResponseDto entityToDto(Daily daily) {
-        return DailyResponseDto.builder()
+    private DailyGetResponseDto entityToDto(Daily daily) {
+        return DailyGetResponseDto.builder()
                 .dailyId(daily.getId())
                 .date(daily.getDate())
                 .principal(daily.getPrincipal())
@@ -250,8 +250,8 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // 날짜 중복 데이터 조회
-    private Daily findDuplicateDate(Long strategyId, LocalDateTime date) {
-        return dailyRepository.findByStrategyIdAndDate(strategyId, date.toLocalDate());
+    private Daily findDuplicateDate(Long strategyId, LocalDate date) {
+        return dailyRepository.findByStrategyIdAndDate(strategyId, date);
     }
 
     /*
@@ -277,15 +277,15 @@ public class DailyServiceImpl implements DailyService {
 
     // TODO 일간데이터 전체 삭제시 로직 추가 필요 - 통계 진행하면서 하겠습니다.
     // 수정 또는 삭제시 누적 데이터 다시 계산
-    public void recalculateAccumulatedData(Long strategyId, LocalDateTime startDate) {
+    public void recalculateAccumulatedData(Long strategyId, LocalDate startDate) {
         Double cumulativeProfitLossAmount = 0.0;
         Double cumulativeProfitLossRate = 0.0;
 
         // 수정 또는 삭제 이후의 데이터 조회
-        List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndDateAfterOrderByDateAsc(strategyId, startDate.toLocalDate());
+        List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndDateAfterOrderByDateAsc(strategyId, startDate);
 
         // 수정 또는 삭제 이전 데이터의 누적손익금액, 누적손익률 조회
-        Daily beforeDaily = dailyRepository.findFirstByStrategyIdAndDateBeforeOrderByDateDesc(strategyId, startDate.toLocalDate());
+        Daily beforeDaily = dailyRepository.findFirstByStrategyIdAndDateBeforeOrderByDateDesc(strategyId, startDate);
         if (beforeDaily != null) {
             cumulativeProfitLossAmount = beforeDaily.getAccumulatedProfitLossAmount();
             cumulativeProfitLossRate = beforeDaily.getAccumulatedProfitLossRate();

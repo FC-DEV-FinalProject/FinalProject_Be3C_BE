@@ -8,20 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.YearMonth;
+
 @Repository
 public interface MonthRepository extends JpaRepository<Monthly, Long> {
 
     // 특정 년월의 월간분석 데이터 조회
     // year, month null일 경우 전체 조회
     @Query("SELECT m FROM Monthly m WHERE m.strategy.id = :strategyId " +
-            "AND (:startYear IS NULL OR (m.yearNumber > :startYear OR (m.yearNumber = :startYear AND (:startMonth IS NULL OR m.monthNumber >= :startMonth)))) " +
-            "AND (:endYear IS NULL OR (m.yearNumber < :endYear OR (m.yearNumber = :endYear AND (:endMonth IS NULL OR m.monthNumber <= :endMonth))))")
+            "AND (:startYearMonth IS NULL OR (m.yearNumber > :#{#startYearMonth?.year} " +
+            "OR (m.yearNumber = :#{#startYearMonth?.year} AND m.monthNumber >= :#{#startYearMonth?.monthValue}))) " +
+            "AND (:endYearMonth IS NULL OR (m.yearNumber < :#{#endYearMonth?.year} " +
+            "OR (m.yearNumber = :#{#endYearMonth?.year} AND m.monthNumber <= :#{#endYearMonth?.monthValue})))")
     Page<Monthly> findAllByStrategyIdAndDateBetween(
             @Param("strategyId") Long strategyId,
-            @Param("startYear") Integer startYear,
-            @Param("startMonth") Integer startMonth,
-            @Param("endYear") Integer endYear,
-            @Param("endMonth") Integer endMonth,
+            @Param("startYearMonth") YearMonth startYearMonth,
+            @Param("endYearMonth") YearMonth endYearMonth,
             @Param("pageable") Pageable pageable
     );
 
