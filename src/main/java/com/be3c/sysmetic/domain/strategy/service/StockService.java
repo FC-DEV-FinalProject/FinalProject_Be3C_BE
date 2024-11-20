@@ -7,7 +7,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 
 public interface StockService {
     StockGetResponseDto findItemById(Long id);
-    boolean duplcheck(String name);
+    boolean duplCheck(String name);
     PageResponse<StockGetResponseDto> findItemPage(Integer page);
 
     boolean saveItem(StockPostRequestDto requestDto);

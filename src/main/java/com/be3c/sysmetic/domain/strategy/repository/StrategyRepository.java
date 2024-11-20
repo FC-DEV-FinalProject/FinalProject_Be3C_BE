@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
+    Optional<Strategy> findByIdAndStatusCode(Long id, String statusCode);
+
     // 전략명 중복 확인
     boolean existsByName(String name);
 
