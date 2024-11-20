@@ -37,7 +37,7 @@ public class InterestStrategyController {
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
-            @ModelAttribute InterestStrategyGetRequestDto interestStrategyGetRequestDto
+            InterestStrategyGetRequestDto interestStrategyGetRequestDto
     ) throws Exception {
         try {
             PageResponse<InterestStrategyGetResponseDto> interestStrategyPage =
@@ -77,10 +77,6 @@ public class InterestStrategyController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
@@ -108,10 +104,6 @@ public class InterestStrategyController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
@@ -129,22 +121,16 @@ public class InterestStrategyController {
     public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
     ) throws Exception {
-        try {
-            Map<Long, String> unFollowResult = interestStrategyService.unfollow(
-                    followPostRequestDto
-            );
+        Map<Long, String> unFollowResult = interestStrategyService.unfollow(
+                followPostRequestDto
+        );
 
-            if(unFollowResult.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(APIResponse.success());
-            }
-
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-                    .body(APIResponse.success(SuccessCode.OK, unFollowResult));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
+        if(unFollowResult.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success());
         }
+
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                .body(APIResponse.success(SuccessCode.OK, unFollowResult));
     }
 }

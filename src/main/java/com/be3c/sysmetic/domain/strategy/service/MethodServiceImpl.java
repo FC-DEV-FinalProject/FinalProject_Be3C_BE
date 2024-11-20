@@ -94,7 +94,7 @@ public class MethodServiceImpl implements MethodService {
      */
     @Override
     public boolean insertMethod(MethodPostRequestDto methodPostRequestDto) {
-        if(!methodPostRequestDto.getCheckDuplicate()) {
+        if(!methodPostRequestDto.getCheckDuplicate(w)) {
             throw new IllegalStateException();
         }
 

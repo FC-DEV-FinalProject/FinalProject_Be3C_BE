@@ -40,18 +40,12 @@ public class FolderController {
     public ResponseEntity<APIResponse<String>> getDuplCheck(
             @RequestParam String folderName
     ) throws Exception {
-        try {
-            if(folderService.duplCheck(folderName)) {
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(APIResponse.success());
-            }
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
+        if(folderService.duplCheck(folderName)) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success());
         }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
     }
 
     /*
@@ -72,10 +66,6 @@ public class FolderController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -109,10 +99,6 @@ public class FolderController {
         } catch(ResourceLimitExceededException e) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(APIResponse.fail(ErrorCode.RESOURCE_LIMIT));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -144,10 +130,6 @@ public class FolderController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         }
     }
 
@@ -176,10 +158,6 @@ public class FolderController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(APIResponse.fail(ErrorCode.UNPROCESSABLE_ENTITY));
