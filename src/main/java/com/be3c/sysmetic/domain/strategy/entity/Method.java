@@ -29,5 +29,5 @@ public class Method extends BaseEntity {
     @CreationTimestamp
     @Column(name = "method_created_date", nullable = false)
     private LocalDateTime methodCreatedDate;
-
 }
+

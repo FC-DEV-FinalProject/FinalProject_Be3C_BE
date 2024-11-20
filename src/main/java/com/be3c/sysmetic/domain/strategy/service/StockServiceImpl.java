@@ -29,15 +29,32 @@ public class StockServiceImpl implements StockService {
 
     private final StockRepository stockRepository;
 
+    /*
+        종목명 중복 체크 메서드
+        1. stockName + statusCode를 사용해 DB 검색
+        1-1. 같은 이름의 종목이 존재할 시 return false
+        1-2. 같은 이름의 종목이 존재하지 않을 시 return true
+     */
     @Override
-    public boolean duplcheck(String name) {
-        return stockRepository.findByName(name).isEmpty();
+    public boolean duplCheck(String name) {
+        return stockRepository.findByNameAndStatusCode(
+                name,
+                USING_STATE.getCode()
+        ).isEmpty();
     }
 
+
+    /*
+        단일 종목 찾기 메서드
+        1. stockId + statusCode를 사용하여 종목 검색
+        1-1. 종목이 존재하지 않을 시 EntityNotFoundException을 발생시킨다.
+        2. stockGetResponseDto로 변환시켜 반환한다.
+     */
     @Override
     public StockGetResponseDto findItemById(Long id) {
-        Stock findStock = stockRepository.findByIdAndStatusCode
-                (id, USING_STATE.getCode())
+        Stock findStock = stockRepository.findByIdAndStatusCode(
+                        id,
+                        USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
         
         return StockGetResponseDto.builder()
@@ -47,37 +64,49 @@ public class StockServiceImpl implements StockService {
                 .build();
     }
 
+    /*
+        종목 찾기 (페이지) 메서드
+        1. 현재 페이지 + 페이지 사이즈 + 생성 날짜를 기준으로 Pageable 생성
+        2. statusCode + pageable을 사용하여 페이지를 검색
+        2-1. 찾은 페이지 객체에 아무 데이터도 존재하지 않는다면 EntityNotFoundException을 발생시킨다.
+        3. PageResponse로 변경하여 반환한다.
+     */
     @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
-        Page<StockGetResponseDto> stock_page = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
+        // Pageable 반환하는 메서드를 만들어서 사용하는 게 좋지 않을까?
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
+        Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
-        if (stock_page.hasContent()) {
+        if (stockPage.hasContent()) {
             return PageResponse.<StockGetResponseDto>builder()
-                    .totalPages(stock_page.getTotalPages())
-                    .totalElement(stock_page.getTotalElements())
-                    .pageSize(stock_page.getNumberOfElements())
+                    .totalPages(stockPage.getTotalPages())
+                    .totalElement(stockPage.getTotalElements())
+                    .pageSize(stockPage.getNumberOfElements())
                     .currentPage(page)
                     .build();
         }
         throw new EntityNotFoundException();
     }
 
+    /*
+        종목 저장 메서드
+        1. 중복 체크를 진행하지 않은 요청일 경우 IllegalStateException을 발생시킨다.
+        2. 중복된 이름의 종목이 존재할 경우 ConflictException을 발생시킨다.
+        3. 종목을 저장한다.
+        4. true를 반환해, 성공 여부를 알린다.
+     */
     @Override
-    public boolean saveItem(StockPostRequestDto requestDto) {
-        if(!requestDto.getCheckDuplicate()) {
+    public boolean saveItem(StockPostRequestDto stockPostRequestDto) {
+        if(!stockPostRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
 
-        if(stockRepository.findByNameAndStatusCode(
-                requestDto.getName(),
-                USING_STATE.getCode()
-        ).isPresent()) {
-            throw new IllegalArgumentException();
+        if(!duplCheck(stockPostRequestDto.getName())) {
+            throw new ConflictException();
         }
 
         stockRepository.save(Stock.builder()
-                        .name(requestDto.getName())
+                        .name(stockPostRequestDto.getName())
                         .statusCode(USING_STATE.getCode())
                         .build());
 
@@ -85,40 +114,53 @@ public class StockServiceImpl implements StockService {
         return true;
     }
 
+    /*
+        종목 수정 메서드
+        1. 중복 체크를 진행하지 않은 요청일 경우 IllegalStateException을 발생시킨다.
+        2. 중복된 이름의 종목이 존재할 경우 ConflictException을 발생시킨다.
+        3. stockId + statusCode를 통해 수정하려는 종목을 찾는다.
+        3-1. 수정할 종목이 존재하지 않을 때, EntityNotFoundException을 발생시킨다.
+        4. 종목을 수정한다.
+        5. true를 반환해 성공 여부를 알린다.
+     */
     @Override
-    public boolean updateItem(StockPutRequestDto requestDto) {
-        if(!requestDto.getCheckDuplicate()) {
+    public boolean updateItem(StockPutRequestDto stockPutRequestDto) {
+        if(!stockPutRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
 
-        stockRepository.findByNameAndStatusCode(
-                requestDto.getName(),
-                USING_STATE.getCode()
-        ).ifPresent(a -> {
+        if(!duplCheck(stockPutRequestDto.getName())) {
             throw new ConflictException();
-        });
+        }
 
         Stock find_stock = stockRepository.findByIdAndStatusCode(
-                requestDto.getId(),
-                USING_STATE.getCode())
-                .orElseThrow(EntityNotFoundException::new);
+                        stockPutRequestDto.getId(),
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setName(requestDto.getName());
+        find_stock.setName(stockPutRequestDto.getName());
         // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
 
         return true;
     }
 
+    /*
+        종목 삭제 메서드
+        1. stockId + statusCode를 사용해 삭제하려는 종목을 찾는다.
+        1-1. 삭제할 종목을 찾지 못했다면, EntityNotFoundException을 발생시킨다.
+        2. 종목의 상태를 NOT USING STATE로 변경한다.
+        3. 종목을 저장한다.
+        4. true를 반환해 성공 여부를 알린다.
+     */
     @Override
     public boolean deleteItem(Long id) {
-        Stock find_stock = stockRepository.findByIdAndStatusCode
-                (
+        Stock findStock = stockRepository.findByIdAndStatusCode(
                         id,
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setStatusCode(Code.NOT_USING_STATE.getCode());
-        stockRepository.save(find_stock);
+        findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
+        stockRepository.save(findStock);
 
         return true;
     }

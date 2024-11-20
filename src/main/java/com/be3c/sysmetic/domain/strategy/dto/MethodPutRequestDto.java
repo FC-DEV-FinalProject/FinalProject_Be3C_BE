@@ -1,8 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -10,15 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MethodPutRequestDto {
-    @NotNull
+    @NotBlank
     private Long id;
 
-    @NotNull
+    @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     private Boolean checkDuplicate;
 
-//    @NotNull
 //    private MultipartFile filePath;
 }

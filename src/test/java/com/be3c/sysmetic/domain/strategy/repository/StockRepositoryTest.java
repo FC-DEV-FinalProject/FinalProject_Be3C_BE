@@ -1,9 +1,8 @@
-package com.be3c.sysmetic.admin.Stock;
+package com.be3c.sysmetic.domain.strategy.repository;
 
 
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
-import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
