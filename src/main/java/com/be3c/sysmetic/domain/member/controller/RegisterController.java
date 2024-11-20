@@ -49,7 +49,7 @@ public class RegisterController {
     }
 
     // 2. 이메일 인증코드 전송
-    @PostMapping("/auth/send-verification-code")
+    @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
         // 이메일 인증코드 발송 내용 추가되면 수정.
         String authCode = "ABC";
@@ -59,7 +59,7 @@ public class RegisterController {
     }
 
     // 3. 이메일 인증코드 확인
-    @PostMapping("/auth/verify-code")
+    @PostMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> verifyCode(@Valid @RequestBody EmailResponseDto emailResponseDto) {
         if (registerService.checkVerifyEmailCode(emailResponseDto.getEmail(), emailResponseDto.getAuthCode())) {
             // 인증 성공
@@ -68,7 +68,7 @@ public class RegisterController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "인증코드가 일치하지 않습니다. 올바른 인증코드로 입력해 주세요."));
     }
 
-    // 닉네임 중복확인
+    // 4. 닉네임 중복확인
     @GetMapping("/auth/check-nickname")
     public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@NotNull @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "닉네임은 한글 또는 숫자로 3자 이상 10자 이내로 입력해야 합니다.") @RequestParam String nickname) {
         if(registerService.checkNicknameDuplication(nickname)) {
@@ -79,7 +79,7 @@ public class RegisterController {
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
 
-    // 회원가입
+    // 5. 회원가입
     @PostMapping("/auth/register")
     public ResponseEntity<APIResponse<String>> register(@Valid @RequestBody RegisterRequestDto registerResponseDto, Errors errors) {
         // Valid 에러 처리

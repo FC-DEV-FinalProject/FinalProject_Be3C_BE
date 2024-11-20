@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.global.config.security;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,8 @@ class RedisUtilsTest {
 
     @Test
     void saveEmailAuthCodeWithExpireTime() {
+        redisUtils.saveEmailAuthCodeWithExpireTime("test1@test.com", "abc", 60 * 60 * 1000L);
+        Assertions.assertEquals("abc", redisUtils.getEmailAuthCode("test1@test.com"));
     }
 
     @Test
