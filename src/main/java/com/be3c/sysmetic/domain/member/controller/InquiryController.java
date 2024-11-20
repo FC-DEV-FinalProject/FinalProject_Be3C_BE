@@ -9,8 +9,15 @@ import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.service.MemberService;
 import com.be3c.sysmetic.domain.strategy.service.MemberServiceImpl;
 import com.be3c.sysmetic.domain.strategy.service.StrategyService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 @RequiredArgsConstructor
 @RestController
 public class InquiryController {
@@ -75,9 +83,33 @@ public class InquiryController {
 //                .body(ApiResponse.success(adminInquiryPage));
 //    }
 
-    // 관리자 문의 검색 API : searchAdminInquiry
+    // 관리자 문의 조회, 검색 API : searchAdminInquiry
+    @Operation(
+            summary = "관리자 문의 조회, 검색",
+            description = "관리자가 문의를 조회, 검색하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "관리자 문의 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<ApiResponse<PageResponse<InquiryDto>>> showAdminInquiry(
+    public ResponseEntity<APIResponse<PageResponse<InquiryDto>>> showAdminInquiry(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "search_condition", required = false) String searchCondition,
@@ -124,12 +156,36 @@ public class InquiryController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(adminInquiryPage));
+                .body(APIResponse.success(adminInquiryPage));
     }
 
     // 관리자 문의 상세 조회 API
+    @Operation(
+            summary = "관리자 문의 상세 조회",
+            description = "관리자가 문의를 상세 조회하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "관리자 문의 상세 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/admin/inquiry/view")
-    public ResponseEntity<ApiResponse<InquiryAnswerDto>> showAdminInquiryDetail(
+    public ResponseEntity<APIResponse<InquiryAnswerDto>> showAdminInquiryDetail(
             @RequestParam(value = "no") long no,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
@@ -153,7 +209,7 @@ public class InquiryController {
         inquiryAnswerDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(inquiryAnswerDto));
+                .body(APIResponse.success(inquiryAnswerDto));
     }
 
     // 질문자 문의 조회 API : showMemberInquiry
@@ -209,9 +265,33 @@ public class InquiryController {
 //                .body(ApiResponse.success(memberInquiryPage));
 //    }
 
-    // 질문자 문의 검색 API : searchMemberInquiry
+    // 질문자 문의 조회, 검색 API : searchMemberInquiry
+    @Operation(
+            summary = "질문자 문의 조회, 검색",
+            description = "질문자가 문의를 조회, 검색하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "질문자 문의 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/member/inquiry")
-    public ResponseEntity<ApiResponse<PageResponse<InquiryDto>>> searchMemberInquiry(
+    public ResponseEntity<APIResponse<PageResponse<InquiryDto>>> showMemberInquiry(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "search_condition", required = false) String searchCondition,
@@ -259,12 +339,36 @@ public class InquiryController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(memberInquiryPage));
+                .body(APIResponse.success(memberInquiryPage));
     }
 
     // 질문자 문의 상세 조회 API : showMemberInquiryDetail
+    @Operation(
+            summary = "질문자 문의 상세 조회",
+            description = "질문자가 문의를 상세 조회하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "질문자 문의 상세 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/member/inquiry/view")
-    public ResponseEntity<ApiResponse<InquiryAnswerDto>> showMemberInquiryDetail(
+    public ResponseEntity<APIResponse<InquiryAnswerDto>> showMemberInquiryDetail(
             @RequestParam(value = "no") long no,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
@@ -288,12 +392,30 @@ public class InquiryController {
         inquiryAnswerDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(inquiryAnswerDto));
+                .body(APIResponse.success(inquiryAnswerDto));
     }
 
     // 질문자 문의 등록 API
+    @Operation(
+            summary = "질문자 문의 등록",
+            description = "질문자가 문의를 등록하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "질문자 문의 등록 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @PostMapping("/member/inquiry")
-    public ResponseEntity<ApiResponse<Long>> saveMemberInquiry(
+    public ResponseEntity<APIResponse<Long>> saveMemberInquiry(
             @RequestBody SaveInquiryRequestDto saveInquiryRequestDto) {
 
         Long inquiryId = inquiryService.registerInquiry(saveInquiryRequestDto.getMemberId(),
@@ -302,12 +424,36 @@ public class InquiryController {
                 saveInquiryRequestDto.getInquiryContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(inquiryId));
+                .body(APIResponse.success(inquiryId));
     }
 
     // 질문자 문의 수정 API
+    @Operation(
+            summary = "질문자 문의 수정",
+            description = "질문자가 문의를 수정하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "질문자 문의 수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @PutMapping("/member/inquiry")
-    public ResponseEntity<ApiResponse<Long>> modifyMemberInquiry(
+    public ResponseEntity<APIResponse<Long>> modifyMemberInquiry(
             @RequestBody @Valid ModifyInquiryRequestDto modifyInquiryRequestDto) {
 
         inquiryService.modifyInquiry(modifyInquiryRequestDto.getInquiryId(),
@@ -315,18 +461,42 @@ public class InquiryController {
                 modifyInquiryRequestDto.getInquiryContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(modifyInquiryRequestDto.getInquiryId()));
+                .body(APIResponse.success(modifyInquiryRequestDto.getInquiryId()));
     }
 
     // 질문자 문의 삭제 API
+    @Operation(
+            summary = "질문자 문의 삭제",
+            description = "질문자가 문의를 삭제하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "질문자 문의 삭제 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @DeleteMapping("/member/inquiry")
-    public ResponseEntity<ApiResponse<Long>> deleteMemberInquiry(
+    public ResponseEntity<APIResponse<Long>> deleteMemberInquiry(
             @RequestBody @Valid DeleteInquiryRequestDto deleteInquiryRequestDto) {
 
         inquiryService.deleteInquiry(deleteInquiryRequestDto.getInquiryId());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(deleteInquiryRequestDto.getInquiryId()));
+                .body(APIResponse.success(deleteInquiryRequestDto.getInquiryId()));
     }
 
     @Data
@@ -336,15 +506,33 @@ public class InquiryController {
     }
 
     // 트레이더 문의 답변 등록 API
+    @Operation(
+            summary = "트레이더 문의 답변 등록",
+            description = "트레이더가 문의 답변을 등록하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "트레이더 문의 답변 등록 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @PostMapping("/trader/inquiry")
-    public ResponseEntity<ApiResponse<Long>> saveTraderInquiry(
+    public ResponseEntity<APIResponse<Long>> saveTraderInquiry(
             @RequestBody @Valid SaveInquiryDetailRequestDto saveInquiryDetailRequestDto) {
 
         Long inquiryAnswerId = inquiryAnswerService.registerInquiryAnswer(saveInquiryDetailRequestDto.getInquiryId(),
                 saveInquiryDetailRequestDto.getAnswerContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(inquiryAnswerId));
+                .body(APIResponse.success(inquiryAnswerId));
     }
 
     // 트레이더 문의 조회 API
@@ -400,9 +588,33 @@ public class InquiryController {
 //                .body(ApiResponse.success(traderInquiryPage));
 //    }
 
-    // 트레이더 문의 검색 API
+    // 트레이더 문의 조회, 검색 API : searchTraderInquiry
+    @Operation(
+            summary = "트레이더 문의 조회, 검색",
+            description = "트레이더가 문의를 조회, 검색하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "트레이더 문의 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<ApiResponse<PageResponse<InquiryDto>>> searchTraderInquiry(
+    public ResponseEntity<APIResponse<PageResponse<InquiryDto>>> showTraderInquiry(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "search_condition", required = false) String searchCondition,
@@ -450,12 +662,36 @@ public class InquiryController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(traderInquiryPage));
+                .body(APIResponse.success(traderInquiryPage));
     }
 
     // 트레이더 문의 상세 조회 API
+    @Operation(
+            summary = "트레이더 문의 상세 조회",
+            description = "트레이더가 문의를 상세 조회하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "트레이더 문의 상세 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인되지 않음 (UNAUTHRORIZED)",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "문의가 존재하지 않음",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorCode.class))
+            )
+    })
     @GetMapping("/trader/inquiry/view")
-    public ResponseEntity<ApiResponse<InquiryAnswerDto>> showTraderInquiryDetail(
+    public ResponseEntity<APIResponse<InquiryAnswerDto>> showTraderInquiryDetail(
             @RequestParam(value = "no") long no,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
@@ -479,6 +715,6 @@ public class InquiryController {
         inquiryAnswerDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(inquiryAnswerDto));
+                .body(APIResponse.success(inquiryAnswerDto));
     }
 }
