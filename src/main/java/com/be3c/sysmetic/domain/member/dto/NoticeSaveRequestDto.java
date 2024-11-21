@@ -17,8 +17,8 @@ public class NoticeSaveRequestDto {
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
     private String noticeContent;
 
-    @Schema(description = "작성자 ID", example = "12345")
-    private Long writerId;
+    @Schema(description = "작성자 닉네임", example = "홍길동")
+    private String writerNickname;
 
     @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
     private Integer isAttatchment;

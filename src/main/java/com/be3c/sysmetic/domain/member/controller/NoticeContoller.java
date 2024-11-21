@@ -74,7 +74,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice/{noticeId}/modify")
-    public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showModifyAdminNotice(
+    public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,

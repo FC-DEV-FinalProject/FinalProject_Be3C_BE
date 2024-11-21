@@ -19,8 +19,8 @@ public class NoticeAdminShowResponseDto {
     @Schema(description = "공지사항 제목", example = "공지사항 제목 예시")
     private String noticeTitle;
 
-    @Schema(description = "작성자 이름", example = "홍길동")
-    private String writerName;
+    @Schema(description = "작성자 닉네임", example = "홍길동")
+    private String writerNickname;
 
     @Schema(description = "작성일시", example = "2023-11-21T10:15:30")
     private LocalDateTime writeDate;

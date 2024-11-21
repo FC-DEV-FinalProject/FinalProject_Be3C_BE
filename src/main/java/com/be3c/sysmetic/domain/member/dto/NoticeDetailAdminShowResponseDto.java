@@ -28,8 +28,8 @@ public class NoticeDetailAdminShowResponseDto {
     @Schema(description = "수정일시", example = "2023-11-22T14:00:00")
     private LocalDateTime correctDate;
 
-    @Schema(description = "작성자 이름", example = "홍길동")
-    private String writerName;
+    @Schema(description = "작성자 닉네임", example = "홍길동")
+    private String writerNickname;
 
     @Schema(description = "조회수", example = "100")
     private Long hits;
