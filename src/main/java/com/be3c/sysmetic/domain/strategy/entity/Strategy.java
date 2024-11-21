@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.strategy.entity;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -70,4 +69,12 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
 
+
+    public void increaseFollowerCount() {
+        followerCount++;
+    }
+
+    public void decreaseFollowerCount() {
+        followerCount--;
+    }
 }

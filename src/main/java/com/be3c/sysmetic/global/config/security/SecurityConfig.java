@@ -59,7 +59,9 @@ public class SecurityConfig {
                 // HTTP 요청에 대한 역할별 URL 접근 권한 부여
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/", "/auth/login", "/auth/register", "/error/*").permitAll()
+                                .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
+                                .permitAll()
+                                .requestMatchers("/", "/**", "/auth/login", "/auth/register", "/error").permitAll()
                                 .requestMatchers("/admin").hasRole("ADMIN")
                                 .requestMatchers("/manager").hasRole("MANAGER")
                                 .requestMatchers("/trader").hasRole("TRADER")

@@ -7,14 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long> {
+    Optional<Strategy> findByIdAndStatusCode(Long id, String statusCode);
+
     // 전략명 중복 확인
     boolean existsByName(String name);
 
-    @Query("SELECT s FROM Strategy s WHERE s.statusCode = 'PUBLIC'")
-    List<Strategy> findAllByPublicStatus();
+    @Query("SELECT s FROM Strategy s WHERE s.statusCode != 'NOT_USING_STATE'")
+    List<Strategy> findAllUsingState();
 
     // 전략 비공개 상태로 변환
     @Query("UPDATE Strategy s SET s.statusCode = 'PRIVATE' WHERE s.id = :strategyId")
