@@ -9,25 +9,33 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Builder(toBuilder = true)
+//@Builder(toBuilder = true)
 @NoArgsConstructor
 //@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
-@Table(name = "ResetPasswordLog")
+@Table(name = "reset_password_log")
 public class ResetPasswordLog extends BaseEntity {
+    /*
+        id : 비밀번호재설정이력 식별번호
+        tryIp : 시도한 ip
+        member : 시도한 회원 id
+        tryDate : 시도일시
+     */
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "try_ip", nullable = false)
     private String tryIp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "result", nullable = false)
-    private String result;
+    @Column(name = "try_date", nullable = false)
+    private LocalDateTime tryDate;
+
 }
+

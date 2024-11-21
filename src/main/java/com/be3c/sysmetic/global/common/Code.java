@@ -1,5 +1,10 @@
 package com.be3c.sysmetic.global.common;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum Code {
     USING_STATE("US001"),
     NOT_USING_STATE("US002"),
@@ -15,6 +20,9 @@ public enum Code {
     // 메일 수신 동의 상태
     RECEIVE_MAIL("RM001"),
     NOT_RECEIVE_MAIL("RM002"),
+    // 팔로우 메일 전송 여부 코드
+    SEND_FOLLOW_MAIL("SM001"),
+    NOT_SEND_FOLLOW_MAIL("SM002"),
 
     // 회원 등급
     ROLE_USER("UR001"),
@@ -22,13 +30,5 @@ public enum Code {
     ROLE_MANAGER("UR003"),
     ROLE_ADMIN("UR004");
 
-    String code;
-
-    Code(String code) {
-        this.code = code;
-    }
-
-    public String getCode() {
-        return code;
-    }
+    private String code;
 }
