@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,8 +152,8 @@ public class StrategyApprovalServiceTest {
                 .highPointRenewalProgress(30L)
                 .profitFactor(1.5)
                 .roa(0.08)
-                .firstRegistrationDate(LocalDateTime.now().minusMonths(6))
-                .lastRegistrationDate(LocalDateTime.now())
+                .firstRegistrationDate(LocalDate.now())
+                .lastRegistrationDate(LocalDate.now())
                 .build();
 
         methodRepository.save(method);
