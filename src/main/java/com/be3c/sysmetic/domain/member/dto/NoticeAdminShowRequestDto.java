@@ -16,9 +16,9 @@ public class NoticeAdminShowRequestDto {
     private Integer isOpen;
 
     // 검색
-    @Schema(description = "검색 조건 (제목, 내용, 제목+내용, 작성자)", example = "title")
-    private String searchCondition;
+    @Schema(description = "검색 유형 (제목, 내용, 제목+내용, 작성자)", example = "title")
+    private String searchType;
 
-    @Schema(description = "검색 키워드", example = "키워드")
-    private String searchKeyword;
+    @Schema(description = "검색 텍스트", example = "트레이더1")
+    private String searchText;
 }
