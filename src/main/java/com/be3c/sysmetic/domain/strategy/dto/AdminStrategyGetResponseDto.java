@@ -12,13 +12,27 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "")
+@Schema(description = "관리자 전략 조회 응답 DTO")
 public class AdminStrategyGetResponseDto {
+
+    @Schema(description = "전략 ID", example = "1001")
     private Long strategyId;
+
+    @Schema(description = "전략 이름", example = "최적의 투자 전략")
     private String strategyName;
+
+    @Schema(description = "트레이더 이름", example = "John Doe")
     private String traderName;
+
+    @Schema(description = "공개 상태 코드", example = "OPEN")
     private String openStatusCode;
+
+    @Schema(description = "승인 상태 코드", example = "APPROVED")
     private String ApprovalStatusCode;
+
+    @Schema(description = "전략 생성 날짜", example = "2024-11-20T14:23:45")
     private LocalDateTime strategyCreateDate;
+
+    @Schema(description = "아이콘 파일 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
     private List<String> iconFilePath;
 }

@@ -28,11 +28,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.NoSuchElementException;
 
 @RestController
-@Tag(name = "매매 방식 API", description = "관리자 매매 방식 API")
-@Controller
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class MethodController {
+@RequestMapping("/api")
+public class MethodController implements MethodControllerDocs {
 
     private final MethodService methodService;
 
@@ -50,26 +49,11 @@ public class MethodController {
         1. 중복된 이름의 매매 유형이 존재하지 않을 때 : OK
         2. 중복된 이름의 매매 유형이 존재할 때 : CONFLICT
      */
-    @Operation(
-            summary = "매매 유형 명 중복 확인",
-            description = "매매 유형 명이 중복되었는지 확인하는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "중복된 매매 유형 명이 없음",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "중복된 매매 유형 명이 존재함",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
     @GetMapping("/admin/method/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
-    ) throws Exception {
+    ) {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success());
@@ -83,32 +67,12 @@ public class MethodController {
         1. 매매 유형 찾기 성공했을 때 : OK
         2. 매매 유형 찾기 실패했을 때 : NOT_FOUND
      */
-    @Operation(
-            summary = "매매 유형 찾기",
-            description = "매매 유형 Id로 매매 유형 정보를 찾는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "매매 유형 찾기 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Id를 포함하지 않은 요청",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "매매 유형 찾기 실패",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(methodService.findById(id)));
@@ -128,31 +92,11 @@ public class MethodController {
         2. 페이지에 아무런 데이터도 존재하지 않을 때 : NOT_FOUND
         3. 잘못된 데이터가 입력됐을 때 : BAD_REQUEST
      */
-    @Operation(
-            summary = "매매 유형 페이지로 찾기",
-            description = "매매 유형을 페이지네이션 방식으로 조회하는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "매매 유형 페이지 찾기 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지에 아무런 데이터도 존재하지 않음 / 페이지를 입력하지 않은 요청",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 데이터 입력",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
     @GetMapping("/admin/methodlist")
     public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @NotBlank @RequestParam Integer page
-    ) throws Exception {
+    ) {
         try {
             PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
@@ -175,36 +119,11 @@ public class MethodController {
         3. 중복 체크를 진행하지 않은 요청일 때 : BAD_REQUEST
         4. 중복된 매매 유형명이 존재할 때 : CONFLICT
      */
-    @Operation(
-            summary = "매매 유형 등록",
-            description = "새로운 매매 유형을 등록하는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "매매 유형 등록 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "중복 체크를 진행하지 않은 요청",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "중복된 매매 유형명이 존재",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "매매 유형 등록 실패 (서버 에러)",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
     @PostMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> postMethod(
             @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(methodService.insertMethod(methodPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -231,41 +150,11 @@ public class MethodController {
         4. 수정하려는 매매 유형이 존재하지 않을 때 : NOT_FOUND
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
-    @Operation(
-            summary = "매매 유형 수정",
-            description = "기존 매매 유형 정보를 수정하는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "매매 유형 수정 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "중복 체크를 진행하지 않은 요청",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "수정하려는 매매 유형이 존재하지 않음",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "동일한 매매 유형명이 존재",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "매매 유형 수정 실패 (서버 에러)",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
     @PutMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> putMethod(
             @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(methodService.updateMethod(methodPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -294,31 +183,11 @@ public class MethodController {
         3. 삭제하려는 매매 유형을 찾지 못했을 때 : NOT_FOUND
      */
 //    @DeleteMapping("/admin/method/{id:[0-9]+}")
-    @Operation(
-            summary = "매매 유형 삭제",
-            description = "기존 매매 유형을 삭제하는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "매매 유형 삭제 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "삭제하려는 매매 유형을 찾지 못함",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "매매 유형 삭제 실패 (서버 에러)",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
+    @Override
     @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<String>> deleteMethod(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             if(methodService.deleteMethod(id)) {
                 return ResponseEntity.status(HttpStatus.OK)

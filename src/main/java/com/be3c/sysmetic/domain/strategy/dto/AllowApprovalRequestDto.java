@@ -11,8 +11,12 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "")
+@Schema(description = "승인 요청 DTO")
 public class AllowApprovalRequestDto {
-    List<Long> approvalId;
-    String approvalCode;
+
+    @Schema(description = "승인 ID 리스트", example = "[1, 2, 3]")
+    private List<Long> approvalId;
+
+    @Schema(description = "승인 코드", example = "APPROVED")
+    private String approvalCode;
 }

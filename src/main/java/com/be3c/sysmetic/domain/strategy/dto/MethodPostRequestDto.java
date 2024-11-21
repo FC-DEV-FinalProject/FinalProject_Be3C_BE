@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @Schema(description = "매매 유형 등록 요청 객체")
 public class MethodPostRequestDto {
+
     @Schema(description = "매매 유형명", example = "Manual")
     @NotNull
     private String name;

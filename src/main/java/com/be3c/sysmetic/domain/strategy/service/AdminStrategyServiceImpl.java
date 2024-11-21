@@ -6,7 +6,6 @@ import com.be3c.sysmetic.domain.strategy.dto.AllowApprovalRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.RejectStrategyApprovalDto;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,21 +44,22 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     ) {
         Pageable pageable = PageRequest.of(adminStrategySearchGetDto.getPage(), 10);
 
-        Page<AdminStrategyGetResponseDto> find_page = strategyApprovalRepository.findStrategiesAdminPage(
+        Page<AdminStrategyGetResponseDto> findPage = strategyApprovalRepository.findStrategiesAdminPage(
                 adminStrategySearchGetDto.getOpenStatus(),
                 adminStrategySearchGetDto.getApprovalStatus(),
                 adminStrategySearchGetDto.getKeyword(),
                 pageable);
 
-        if(!find_page.hasContent()) {
+        if(!findPage.hasContent()) {
             throw new NoSuchElementException();
         }
 
         return PageResponse.<AdminStrategyGetResponseDto>builder()
-                .totalPages(find_page.getTotalPages())
-                .currentPage(find_page.getNumber())
-                .pageSize(find_page.getNumberOfElements())
-                .totalElement(find_page.getTotalElements())
+                .totalPages(findPage.getTotalPages())
+                .currentPage(findPage.getNumber())
+                .pageSize(findPage.getNumberOfElements())
+                .totalElement(findPage.getTotalElements())
+                .content(findPage.getContent())
                 .build();
     }
 

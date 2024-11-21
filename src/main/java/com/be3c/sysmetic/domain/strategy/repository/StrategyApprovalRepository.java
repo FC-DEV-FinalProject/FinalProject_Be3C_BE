@@ -38,43 +38,52 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
     Optional<StrategyApprovalHistory> findByStrategyIdNotApproval(Long id);
 
     @Query(value = """
-        SELECT
-            s.id AS strategyId,
-            s.strategy_name AS strategyName,
-            m.name AS traderName,
-            s.status_code AS openStatusCode,
-            s.created_at AS strategyCreateDate,
-            sa.status_code AS approvalStatusCode,
-            null
-        FROM
-            strategy s
-        JOIN
-            member m ON s.member_id = m.id
-        JOIN
-            (
-                SELECT
-                    strategy_id,
-                    status_code,
-                    modified_at
-                FROM
-                    strategy_approval_history
-                WHERE
-                    (strategy_id, modified_at) IN (
-                        SELECT
-                            strategy_id,
-                            MAX(modified_at)
-                        FROM
-                            strategy_approval_history
-                        GROUP BY
-                            strategy_id
-                    )
-            ) sa ON sa.strategy_id = s.id
-        WHERE
-            (:openStatus IS NULL OR s.status_code = :openStatus)
-            AND (:approvalStatusCode IS NULL OR sa.status_code = :approvalStatusCode)
-            AND (:strategyName IS NULL OR s.strategy_name LIKE CONCAT('%', :strategyName, '%'));
-        ORDER BY strategyCreateDate DESC
-    """, nativeQuery = true)
+            SELECT new com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto(
+                s.id,
+                s.name,
+                m.name,
+                s.statusCode,
+                COALESCE(sa.statusCode, 'SA001'),
+                s.createdAt,
+                null
+            )
+            FROM Strategy s
+            JOIN s.trader m
+            LEFT JOIN (
+                SELECT sah.strategy.id AS strategyId, sah.statusCode AS statusCode, sah.modifiedAt AS modifiedAt
+                FROM StrategyApprovalHistory sah
+                JOIN (
+                    SELECT sah2.strategy.id AS strategyId, MAX(sah2.modifiedAt) AS maxModifiedAt
+                    FROM StrategyApprovalHistory sah2
+                    GROUP BY sah2.strategy.id
+                ) sub ON sah.strategy.id = sub.strategyId AND sah.modifiedAt = sub.maxModifiedAt
+            ) sa ON sa.strategyId = s.id
+            WHERE
+                (:openStatus IS NULL OR s.statusCode = :openStatus)
+                AND (:approvalStatusCode IS NULL OR COALESCE(sa.statusCode, 'SA001') = :approvalStatusCode)
+                AND (:strategyName IS NULL OR s.name LIKE CONCAT('%', :strategyName, '%'))
+            ORDER BY s.createdAt DESC
+        """,
+            countQuery = """
+            SELECT
+                COUNT(*)
+            FROM Strategy s
+            JOIN s.trader m
+            LEFT JOIN (
+                SELECT sah.strategy.id AS strategyId, sah.statusCode AS statusCode, sah.modifiedAt AS modifiedAt
+                FROM StrategyApprovalHistory sah
+                JOIN (
+                    SELECT sah2.strategy.id AS strategyId, MAX(sah2.modifiedAt) AS maxModifiedAt
+                    FROM StrategyApprovalHistory sah2
+                    GROUP BY sah2.strategy.id
+                ) sub ON sah.strategy.id = sub.strategyId AND sah.modifiedAt = sub.maxModifiedAt
+            ) sa ON sa.strategyId = s.id
+            WHERE
+                (:openStatus IS NULL OR s.statusCode = :openStatus)
+                AND (:approvalStatusCode IS NULL OR COALESCE(sa.statusCode, 'SA001') = :approvalStatusCode)
+                AND (:strategyName IS NULL OR s.name LIKE CONCAT('%', :strategyName, '%'))
+            ORDER BY s.createdAt DESC
+        """)
     /* 윈도우 함수 사용 쿼리
     @Query(value = """
         WITH LatestApprovalHistory AS (

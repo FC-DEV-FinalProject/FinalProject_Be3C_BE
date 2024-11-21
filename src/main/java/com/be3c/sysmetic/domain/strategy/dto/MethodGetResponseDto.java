@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @Schema(description="매매 방식 조회 응답 객체")
 public class MethodGetResponseDto {
+
     @Schema(description="매매 방식 Id", example="1")
     private Long id;
 
