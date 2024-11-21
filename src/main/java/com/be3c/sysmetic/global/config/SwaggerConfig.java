@@ -1,16 +1,23 @@
 package com.be3c.sysmetic.global.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+
+@OpenAPIDefinition(
+        servers = {
+                @Server(url = "https://3.39.211.122.nip.io", description = "개발 서버"),
+                @Server(url = "http://localhost:8080", description = "로컬 서버")
+        })
 @Configuration
 public class SwaggerConfig {
 
@@ -29,18 +36,11 @@ public class SwaggerConfig {
                 .bearerFormat("JWT"));
 
 
-        // 서버 URL 설정
-        Server httpsServer = new Server();
-        httpsServer.setUrl("https://3.39.211.112.nip.io");
-        httpsServer.setDescription("Sysmetic https 서버입니다.");
-
-
         // Components 객체 - 보안 스키마, 파라미터, 응답 등 정의
         return new OpenAPI()
                 .components(new Components())
                 .components(components)
                 .addSecurityItem(securityRequirement)
-                .servers(List.of(httpsServer))
                 .info(apiInfo());
     }
 
