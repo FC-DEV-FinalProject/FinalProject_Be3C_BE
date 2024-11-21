@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.global.util.doublehandler;
+package com.be3c.sysmetic.domain.strategy.util;
 
 import org.springframework.stereotype.Component;
 
@@ -8,8 +8,7 @@ public class DoubleHandler {
 
     private static final double EPSILON = 0.0001;
     private static final int SCALE = 10000;
-
-
+    
     public Double cutDouble(Double originalDoubleNumber){
 
         return Math.floor(originalDoubleNumber * SCALE) / SCALE;

@@ -28,7 +28,7 @@ public class StockController {
 
     /*
         추가 필요 사항
-        1. S3에 아이콘 업로드 / DB 수정 코드
+        1. S3에 아이콘 업로드 / DB 수정 코드 => 완료
         2. Global Exception Handler - AuthorizationException 처리 핸들러 필요.
      */
 
