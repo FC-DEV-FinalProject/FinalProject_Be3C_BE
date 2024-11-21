@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "관리자 문의 목록 응답 DTO")
 public class InquiryAdminShowRequestDto {
 
     @Schema(description = "답변 상태 탭", example = "ALL, CLOSED, UNCLOSED")

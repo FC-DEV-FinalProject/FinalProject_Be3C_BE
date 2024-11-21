@@ -8,6 +8,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "문의 등록 페이지 조회 응답 DTO")
 public class InquirySavePageShowResponseDto {
 
     // 전략 위 아이콘

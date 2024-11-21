@@ -8,6 +8,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "문의 등록 요청 DTO")
 public class InquirySaveRequestDto {
 
     @Schema(description = "회원 ID", example = "12345")

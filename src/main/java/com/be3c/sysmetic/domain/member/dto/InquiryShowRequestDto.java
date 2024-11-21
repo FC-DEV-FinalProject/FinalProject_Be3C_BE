@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "문의 조회 요청 DTO")
 public class InquiryShowRequestDto {
 
     // 멤버 아이디

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "문의 조회 응답 DTO")
 public class InquiryShowResponseDto {
 
     @Schema(description = "문의 ID", example = "1001")
