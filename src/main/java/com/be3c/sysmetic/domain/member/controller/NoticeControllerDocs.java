@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +34,7 @@ public interface NoticeControllerDocs {
     })
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody SaveNoticeRequestDto saveNoticeRequestDto);
+            @RequestBody NoticeSaveRequestDto noticeSaveRequestDto);
 
 
     // 관리자 공지사항 조회 / 검색 API
@@ -56,7 +55,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/admin/notice")
-    public ResponseEntity<APIResponse<PageResponse<ShowAdminNoticeResponseDto>>> showAdminNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeAdminShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -80,7 +79,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/admin/notice/{noticeId}/view")
-    public ResponseEntity<APIResponse<ShowAdminNoticeDetailResponseDto>> showAdminNoticeDetail(
+    public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -105,7 +104,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/admin/notice/{noticeId}/modify")
-    public ResponseEntity<APIResponse<ShowAdminNoticeDetailResponseDto>> showModifyAdminNotice(
+    public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -137,7 +136,7 @@ public interface NoticeControllerDocs {
     @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
-            @RequestBody @Valid ModifyNoticeRequestDto modifyNoticeRequestDto);
+            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto);
 
 
     // 관리자 공지사항 삭제 API
@@ -191,7 +190,7 @@ public interface NoticeControllerDocs {
     })
     @DeleteMapping("/admin/notice/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNoticeList(
-            @RequestBody @Valid DeleteNoticeListRequestDto deleteNoticeListRequestDto);
+            @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto);
 
     // 공지사항 조회 / 검색 API
     @Operation(
@@ -211,7 +210,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/notice")
-    public ResponseEntity<APIResponse<PageResponse<ShowNoticeResponseDto>>> showNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText);
 
@@ -234,7 +233,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/notice/{noticeId}/view")
-    public ResponseEntity<APIResponse<ShowNoticeDetailResponseDto>> showNoticeDetail(
+    public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText);

@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "공지사항 삭제 요청 DTO")
-public class DeleteNoticeListRequestDto {
+public class NoticeListDeleteRequestDto {
 
     @Schema(description = "삭제할 공지사항 ID 리스트", example = "[1, 2, 3]")
     private List<Long> noticeIds;

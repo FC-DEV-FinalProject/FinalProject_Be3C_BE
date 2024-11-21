@@ -23,7 +23,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody SaveNoticeRequestDto saveNoticeRequestDto) {
+            @RequestBody NoticeSaveRequestDto noticeSaveRequestDto) {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(noticeId));
@@ -36,7 +36,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice")
-    public ResponseEntity<APIResponse<PageResponse<ShowAdminNoticeResponseDto>>> showAdminNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeAdminShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -52,7 +52,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice/{noticeId}/view")
-    public ResponseEntity<APIResponse<ShowAdminNoticeDetailResponseDto>> showAdminNoticeDetail(
+    public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -69,7 +69,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice/{noticeId}/modify")
-    public ResponseEntity<APIResponse<ShowAdminNoticeDetailResponseDto>> showModifyAdminNotice(
+    public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -89,10 +89,10 @@ public class NoticeContoller implements NoticeControllerDocs {
     @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
-            @RequestBody @Valid ModifyNoticeRequestDto modifyNoticeRequestDto) {
+            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(modifyNoticeRequestDto.getNoticeId()));
+                .body(APIResponse.success(noticeModifyRequestDto.getNoticeId()));
     }
 
     /*
@@ -119,7 +119,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
     @DeleteMapping("/admin/notice/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNoticeList(
-            @RequestBody @Valid DeleteNoticeListRequestDto deleteNoticeListRequestDto) {
+            @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(deleteCount));
@@ -132,7 +132,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/notice")
-    public ResponseEntity<APIResponse<PageResponse<ShowNoticeResponseDto>>> showNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
@@ -147,7 +147,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/notice/{noticeId}/view")
-    public ResponseEntity<APIResponse<ShowNoticeDetailResponseDto>> showNoticeDetail(
+    public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "관리자 공지사항 상세 조회 응답 DTO")
-public class ShowAdminNoticeDetailResponseDto {
+public class NoticeDetailAdminShowResponseDto {
 
     @Schema(description = "공지사항 ID", example = "123")
     private Long noticeId;
