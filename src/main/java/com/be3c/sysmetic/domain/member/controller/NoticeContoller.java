@@ -17,8 +17,10 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 등록 API
-        1. 공지사항이 등록에 성공했을 때 : OK
-        2. 공지사항이 등록에 실패했을 때 : INTERNAL_SERVER_ERROR
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항이 등록에 성공했을 때 : OK
+        3. 공지사항이 등록에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @PostMapping("/admin/notice/write")
@@ -31,8 +33,9 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 조회 / 검색 API
-        1. 공지사항 데이터 조회에 성공했을 때 : OK
-        2. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항 데이터 조회에 성공했을 때 : OK
+        3. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
     @GetMapping("/admin/notice")
@@ -47,8 +50,9 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 상세 조회 API
-        1. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
-        2. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
+        3. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
     @GetMapping("/admin/notice/{noticeId}/view")
@@ -64,8 +68,9 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 수정 화면 조회 API
-        1. 공지사항 수정 화면 조회에 성공했을 때 : OK
-        2. 공지사항 수정 화면 조회에 실패했을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항 수정 화면 조회에 성공했을 때 : OK
+        3. 공지사항 수정 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
     @GetMapping("/admin/notice/{noticeId}/modify")
@@ -81,9 +86,11 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 수정 API
-        1. 공지사항 수정에 성공했을 때 : OK
-        2. 공지사항 수정에 실패했을 때 : INTERNAL_SERVER_ERROR
-        3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항 수정에 성공했을 때 : OK
+        3. 공지사항 수정에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        5. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @PutMapping("/admin/notice/{noticeId}/modify")
@@ -97,9 +104,10 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 삭제 API
-        1. 공지사항 삭제에 성공했을 때 : OK
-        2. 공지사항 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
-        3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항 삭제에 성공했을 때 : OK
+        3. 공지사항 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
     @DeleteMapping("/admin/notice/{noticeId}/delete")
@@ -112,9 +120,10 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         관리자 공지사항 목록 삭제 API
-        1. 공지사항 목록 삭제에 성공했을 때 : OK
-        2. 공지사항 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
-        3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항 목록 삭제에 성공했을 때 : OK
+        3. 공지사항 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
     @DeleteMapping("/admin/notice/delete")
