@@ -42,7 +42,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     public PageResponse<AdminStrategyGetResponseDto> findStrategyPage(
             AdminStrategySearchGetDto adminStrategySearchGetDto
     ) {
-        Pageable pageable = PageRequest.of(adminStrategySearchGetDto.getPage(), 10);
+        Pageable pageable = PageRequest.of(adminStrategySearchGetDto.getPage() - 1, 10);
 
         Page<AdminStrategyGetResponseDto> findPage = strategyApprovalRepository.findStrategiesAdminPage(
                 adminStrategySearchGetDto.getOpenStatus(),

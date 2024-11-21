@@ -61,7 +61,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Pageable pageable = PageRequest.of(
-                interestStrategyGetRequestDto.getPage(),
+                interestStrategyGetRequestDto.getPage() - 1,
                 10,
                 Sort.by("modifiedAt").descending());
 

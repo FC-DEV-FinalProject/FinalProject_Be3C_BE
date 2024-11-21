@@ -62,7 +62,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
                 (:openStatus IS NULL OR s.statusCode = :openStatus)
                 AND (:approvalStatusCode IS NULL OR COALESCE(sa.statusCode, 'SA001') = :approvalStatusCode)
                 AND (:strategyName IS NULL OR s.name LIKE CONCAT('%', :strategyName, '%'))
-            ORDER BY s.createdAt DESC
+            ORDER BY s.createdAt ASC
         """,
             countQuery = """
             SELECT
@@ -82,7 +82,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
                 (:openStatus IS NULL OR s.statusCode = :openStatus)
                 AND (:approvalStatusCode IS NULL OR COALESCE(sa.statusCode, 'SA001') = :approvalStatusCode)
                 AND (:strategyName IS NULL OR s.name LIKE CONCAT('%', :strategyName, '%'))
-            ORDER BY s.createdAt DESC
+            ORDER BY s.createdAt ASC
         """)
     /* 윈도우 함수 사용 쿼리
     @Query(value = """
