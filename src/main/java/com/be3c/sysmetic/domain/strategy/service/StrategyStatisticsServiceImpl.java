@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
@@ -9,7 +9,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,8 +87,6 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
                 .highPointRenewalProgress(getHighPointRenewalProgress(strategyId, recentDaily))
                 .profitFactor(getProfitFactor(strategyId, recentDaily))
                 .roa(getRoa(recentDaily, accumulatedProfitLossAmount, maximumCapitalReductionAmount))
-                .firstRegistrationDate(firstDaily.getDate())
-                .lastRegistrationDate(lastDaily.getDate())
                 .build();
 
         // DB 저장
@@ -97,15 +95,15 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     }
 
     // 전략통계 조회
-    public StrategyStatisticsResponseDto findStrategyStatistics(Long strategyId) {
+    public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
-        return StrategyStatisticsResponseDto.builder()
+        return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
                 .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
                 .principal(statistics.getPrincipal())
-                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate().toLocalDate(), statistics.getLastRegistrationDate().toLocalDate()))
-                .startDate(statistics.getFirstRegistrationDate().toLocalDate())
-                .endDate(statistics.getLastRegistrationDate().toLocalDate())
+                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate(), statistics.getLastRegistrationDate()))
+                .startDate(statistics.getFirstRegistrationDate())
+                .endDate(statistics.getLastRegistrationDate())
                 .accumulatedProfitLossAmount(statistics.getAccumulatedProfitLossAmount())
                 .accumulatedProfitLossRate(statistics.getAccumulatedProfitLossRate())
                 .maximumAccumulatedProfitLossAmount(statistics.getMaximumAccumulatedProfitLossAmount())

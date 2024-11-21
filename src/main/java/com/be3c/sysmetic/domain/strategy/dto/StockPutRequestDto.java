@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -25,7 +26,6 @@ public class StockPutRequestDto {
     @NotBlank
     private Boolean checkDuplicate;
 
-//    @Schema(description = "종목 아이콘 파일")
-//    @NotBlank
-//    private MultipartFile file;
+    @NotNull
+    private MultipartFile file;
 }

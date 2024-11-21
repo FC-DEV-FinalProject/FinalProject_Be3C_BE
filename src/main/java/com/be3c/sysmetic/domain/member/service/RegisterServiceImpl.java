@@ -32,7 +32,7 @@ public class RegisterServiceImpl implements RegisterService {
         마케팅 수신 동의 여부
         마케팅 수신 동의일
 
-        [자동 입력할 데이터 - 회원가입 트랜잭션 완료가 될 때 입력된다.]
+        [자동 입력할 데이터 - 회원가입 트랜잭션 완료될 때 입력]
         식별 번호 - auto increase
         사용 상태 코드 - 유효
         총 팔로워 수 - 0
@@ -76,8 +76,9 @@ public class RegisterServiceImpl implements RegisterService {
         // 예슬메서드 리턴값 = 인증코드(있/없)
         // 발송 안됐을 때 return null;
         // Optional<String> authCode = 예슬서비스.예슬메서드(email)
+
         Optional<String> authCode = Optional.of("abc");
-        String savedAuthCode = authCode.toString();
+        String savedAuthCode = authCode.get();
 
         // Redis에 토큰 전송 이력(email, authCode, expireTime(1시간 유효)) 저장
         redisUtils.saveEmailAuthCodeWithExpireTime(email, savedAuthCode, EXPIRE_TIME);

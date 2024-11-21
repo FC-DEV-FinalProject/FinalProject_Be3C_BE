@@ -48,4 +48,8 @@ public class APIResponse<T> {
     public static <T> APIResponse<T> create(int code, String message, T data) {
         return new APIResponse<>(code, message, data);
     }
+
+    public static <T> APIResponse<T> create() {
+        return new APIResponse<>(SuccessCode.CREATED.getStatusCode(), SuccessCode.CREATED.getMessage(), null);
+    }
 }

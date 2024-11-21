@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
@@ -8,6 +9,9 @@ import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 
 @Service
@@ -28,6 +34,7 @@ import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 public class StockServiceImpl implements StockService {
 
     private final StockRepository stockRepository;
+    private final FileService fileService;
 
     /*
         종목명 중복 체크 메서드
@@ -56,11 +63,13 @@ public class StockServiceImpl implements StockService {
                         id,
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
-        
+
+        String filePath = fileService.getFilePath(new FileRequestDto(FileReferenceType.STOCK, id));
+
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
                 .name(findStock.getName())
-                // filepath 찾는 로직 추가 필요
+                .filePath(filePath)
                 .build();
     }
 
@@ -106,12 +115,13 @@ public class StockServiceImpl implements StockService {
             throw new ConflictException();
         }
 
-        stockRepository.save(Stock.builder()
+        Stock savedStock = stockRepository.save(Stock.builder()
                         .name(stockPostRequestDto.getName())
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        // 아이콘 S3에 업로드 + DB에 저장하는 코드 필요
+        fileService.uploadImage(stockPostRequestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+
         return true;
     }
 
@@ -134,13 +144,14 @@ public class StockServiceImpl implements StockService {
             throw new ConflictException();
         }
 
-        Stock find_stock = stockRepository.findByIdAndStatusCode(
+        Stock findStock = stockRepository.findByIdAndStatusCode(
                         stockPutRequestDto.getId(),
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
-        find_stock.setName(stockPutRequestDto.getName());
-        // 아이콘 S3에 업로드 + DB 업데이트 코드 필요.
+        findStock.setName(stockPutRequestDto.getName());
+
+        fileService.updateImage(stockPutRequestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
@@ -163,6 +174,9 @@ public class StockServiceImpl implements StockService {
         findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(findStock);
 
+        fileService.deleteFile(new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+
         return true;
     }
+
 }
