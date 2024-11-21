@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "관리자 공지사항 조회 요청 DTO")
-public class ShowAdminNoticeRequestDto {
+public class NoticeAdminShowRequestDto {
 
     // 공개 여부별
     @Schema(description = "공개 여부 (0: 비공개, 1: 공개)", example = "1")

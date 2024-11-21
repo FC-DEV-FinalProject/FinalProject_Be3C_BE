@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "공지사항 수정 요청 DTO")
-public class ModifyNoticeRequestDto {
+public class NoticeModifyRequestDto {
 
 //    private Long noticeId;
 
