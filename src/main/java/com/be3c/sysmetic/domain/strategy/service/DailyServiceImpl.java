@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
@@ -146,6 +147,14 @@ public class DailyServiceImpl implements DailyService {
         return DailyPostResponseDto.builder()
                 .isDuplicate(false)
                 .build();
+    }
+
+    // kp ratio, sm score 갱신
+    public void updateKpRatioAndSmScore(Long strategyId) {
+        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        savedStrategy.setKpRatio(getKpRatio(strategyId));
+        savedStrategy.setSmScore(getSmScore(strategyId, savedStrategy.getKpRatio()));
+        strategyRepository.save(savedStrategy);
     }
 
     // 일간분석 조회
@@ -305,4 +314,47 @@ public class DailyServiceImpl implements DailyService {
         dailyRepository.saveAll(dailyList);
     }
 
+    private Double getKpRatio(Long strategyId) {
+        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateDesc(strategyId);
+
+        Double highProfitLossRate = 0.0;
+        Double minDrawDown = 0.0;
+        Double sumDrawDown = 0.0;
+        Long sumDrawDownPeriod = 0L;
+
+        for(int i=0; i<dailyList.size(); i++) {
+            Double currentProfitLossRate = dailyList.get(i).getAccumulatedProfitLossRate();
+
+            if(highProfitLossRate > currentProfitLossRate) {
+                // 손익률 인하되는 시점
+                sumDrawDownPeriod++;
+                if(currentProfitLossRate - highProfitLossRate < minDrawDown) {
+                    // DD 갱신
+                    minDrawDown = currentProfitLossRate - highProfitLossRate;
+                }
+            } else {
+                highProfitLossRate = currentProfitLossRate;
+                sumDrawDown += minDrawDown;
+                minDrawDown = 0.0;
+            }
+        }
+
+        StrategyStatistics statistics = statisticsRepository.findByStrategyId(strategyId);
+        return strategyCalculator.getKpRatio(statistics.getAccumulatedProfitLossRate(), sumDrawDown, sumDrawDownPeriod, statistics.getTotalTradingDays());
+    }
+
+    private Double getSmScore(Long strategyId, Double kpRatio) {
+        List<Strategy> strategyList = strategyRepository.findAllUsingState();
+
+        List<Double> kpRatioList = strategyList.stream()
+                .map(Strategy::getKpRatio)
+                .collect(Collectors.toList());
+
+        // kp ratio 평균
+        Double averageKpRatio = strategyCalculator.calculateAverage(kpRatioList);
+        // kp ratio 표준편차
+        Double standardDeviationKpRatio = strategyCalculator.calculateStandardDeviation(kpRatioList);
+
+        return StrategyCalculator.getSmScore(kpRatio, averageKpRatio, standardDeviationKpRatio);
+    }
 }
