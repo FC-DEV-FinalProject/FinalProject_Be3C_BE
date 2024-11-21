@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.controller;
 
-import com.be3c.sysmetic.domain.member.dto.notice.*;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
