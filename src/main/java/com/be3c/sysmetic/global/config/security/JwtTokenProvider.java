@@ -2,6 +2,7 @@ package com.be3c.sysmetic.global.config.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ public class JwtTokenProvider {
         5. 재발급 필요 여부 확인 메서드
         6. Access 와 Refresh Token 재발급 메서드
         7. Access 토큰에서 사용자 정보 추출 메서드
+        8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
     */
 
     @Autowired
@@ -211,6 +213,15 @@ public class JwtTokenProvider {
             log.info("토큰이 비어있거나 잘못된 값입니다.", e);
             throw new AuthenticationCredentialsNotFoundException("인증에 실패했습니다.");
         }
+    }
+
+    // 8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
+    public String extractToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("bearer ")) {
+            return bearerToken.substring(7); // "Bearer "를 제외한 순수 토큰만 추출
+        }
+        return null;
     }
 
 }
