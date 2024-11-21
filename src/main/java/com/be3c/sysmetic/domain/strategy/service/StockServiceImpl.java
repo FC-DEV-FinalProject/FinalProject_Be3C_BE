@@ -69,7 +69,7 @@ public class StockServiceImpl implements StockService {
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
                 .name(findStock.getName())
-                .filepath(filePath)
+                .filePath(filePath)
                 .build();
     }
 
@@ -114,12 +114,12 @@ public class StockServiceImpl implements StockService {
             throw new ConflictException();
         }
 
-        stockRepository.save(Stock.builder()
+        Stock savedStock = stockRepository.save(Stock.builder()
                         .name(stockPostRequestDto.getName())
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        fileService.uploadImage(requestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+        fileService.uploadImage(stockPostRequestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
 
         return true;
     }
@@ -150,7 +150,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
-        fileService.updateImage(requestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, requestDto.getId()));
+        fileService.updateImage(stockPutRequestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }

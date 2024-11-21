@@ -228,7 +228,7 @@ public class ExcelServiceTest {
 
 
     @Test
-    public void testDownloaDailyExcelWithStatistics() throws Exception {
+    public void testDownloadDailyExcelWithStatistics() throws Exception {
         Strategy strategy = strategyRepository.findAll().get(0);
 
         // 1. 테스트 데이터 준비
@@ -262,7 +262,7 @@ public class ExcelServiceTest {
         dailyRepository.saveAll(dailyList);
 
         // 3. 메서드 실행
-        InputStream inputStream = excelService.downloaDailyExcelWithStatistics(strategy.getId());
+        InputStream inputStream = excelService.downloadDailyExcelWithStatistics(strategy.getId());
 
         // 4. 엑셀 파일 검증
         assertNotNull(inputStream, "엑셀 파일이 null이어서는 안 됩니다.");

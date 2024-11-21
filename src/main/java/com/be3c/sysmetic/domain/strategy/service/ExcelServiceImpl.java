@@ -244,7 +244,7 @@ public class ExcelServiceImpl implements ExcelService {
      * @return 엑셀 파일
      */
     @Override
-    public InputStream downloaDailyExcelWithStatistics(Long strategyId) {
+    public InputStream downloadDailyExcelWithStatistics(Long strategyId) {
 
         List<Daily> entities = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
 
