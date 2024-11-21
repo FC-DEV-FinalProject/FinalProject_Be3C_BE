@@ -48,7 +48,7 @@ public class LoginController {
 
 
     @PostMapping("/auth/login")
-        public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
+    public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
 
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();

@@ -37,8 +37,15 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
     """)
     Optional<StrategyApprovalHistory> findByStrategyIdNotApproval(Long id);
 
+    // 만약 정말 정말 동일한 시간 대에 승인 요청이 온 것이 있다면, 에러가 날 수 있다.
+
+    /**
+     * 1. 동일한 전략
+     * 2. 완전히 동일한 시간 대에 발생한 승인 요청
+     * 3. 해당 승인 요청만큼 중복된 전략이 반환된다.
+     */
     @Query(value = """
-            SELECT new com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto(
+            SELECT DISTINCT new com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto(
                 s.id,
                 s.name,
                 m.name,
@@ -50,12 +57,20 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
             FROM Strategy s
             JOIN s.trader m
             LEFT JOIN (
-                SELECT sah.strategy.id AS strategyId, sah.statusCode AS statusCode, sah.modifiedAt AS modifiedAt
-                FROM StrategyApprovalHistory sah
+                SELECT
+                    sah.strategy.id AS strategyId,
+                    sah.statusCode AS statusCode,
+                    sah.modifiedAt AS modifiedAt
+                FROM
+                    StrategyApprovalHistory sah
                 JOIN (
-                    SELECT sah2.strategy.id AS strategyId, MAX(sah2.modifiedAt) AS maxModifiedAt
-                    FROM StrategyApprovalHistory sah2
-                    GROUP BY sah2.strategy.id
+                    SELECT
+                        sah2.strategy.id AS strategyId,
+                        MAX(sah2.modifiedAt) AS maxModifiedAt
+                    FROM
+                        StrategyApprovalHistory sah2
+                    GROUP BY
+                        sah2.strategy.id
                 ) sub ON sah.strategy.id = sub.strategyId AND sah.modifiedAt = sub.maxModifiedAt
             ) sa ON sa.strategyId = s.id
             WHERE

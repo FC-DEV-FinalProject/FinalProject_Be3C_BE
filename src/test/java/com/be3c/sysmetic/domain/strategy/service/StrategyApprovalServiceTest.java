@@ -13,7 +13,9 @@ import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.config.security.CustomUserDetails;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -58,6 +60,8 @@ public class StrategyApprovalServiceTest {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final StrategyStatisticsRepository strategyStatisticsRepository;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     @BeforeEach
     public void setUp() {
@@ -204,5 +208,61 @@ public class StrategyApprovalServiceTest {
                         .build()
                 )
         );
+    }
+
+    @Test
+    @DisplayName("나는 피곤하다")
+    @Order(3)
+    public void imtired() {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        List<StrategyApprovalHistory> approvalHistoryList = new ArrayList<>();
+
+        for(int i = 1; i <= 3; i++) {
+            StrategyApprovalHistory approvalHistory = StrategyApprovalHistory.builder()
+                    .manager(memberRepository.findById(userId).orElseThrow(EntityNotFoundException::new))
+                    .strategy(strategyRepository.findById((long) i).orElseThrow(EntityNotFoundException::new))
+                    .statusCode(Code.APPROVE_WAIT.getCode())
+                    .build();
+
+            approvalHistoryList.add(approvalHistory);
+            strategyApprovalRepository.save(approvalHistory);
+        }
+
+        for(int i = 2; i <= 6; i++) {
+            StrategyApprovalHistory approvalHistory = StrategyApprovalHistory.builder()
+                    .manager(memberRepository.findById(userId).orElseThrow(EntityNotFoundException::new))
+                    .strategy(strategyRepository.findById((long) i).orElseThrow(EntityNotFoundException::new))
+                    .statusCode(Code.APPROVE_SUCCESS.getCode())
+                    .build();
+
+            approvalHistoryList.add(approvalHistory);
+            strategyApprovalRepository.save(approvalHistory);
+        }
+
+        for(int i = 4; i <= 9; i++) {
+            StrategyApprovalHistory approvalHistory = StrategyApprovalHistory.builder()
+                    .manager(memberRepository.findById(userId).orElseThrow(EntityNotFoundException::new))
+                    .strategy(strategyRepository.findById((long) i).orElseThrow(EntityNotFoundException::new))
+                    .statusCode(Code.APPROVE_REJECT.getCode())
+
+                    .build();
+
+            approvalHistoryList.add(approvalHistory);
+            strategyApprovalRepository.save(approvalHistory);
+        }
+
+        PageResponse<AdminStrategyGetResponseDto> pageResponse =
+                adminStrategyService
+                        .findStrategyPage(AdminStrategySearchGetDto.builder()
+                                .page(1)
+                                .build()
+                        );
+
+        AtomicInteger expectedId = new AtomicInteger(1);
+
+        pageResponse.getContent().forEach(dto -> {
+                log.info(dto.toString());
+            assertEquals(expectedId.getAndIncrement(), dto.getStrategyId());
+        });
     }
 }
