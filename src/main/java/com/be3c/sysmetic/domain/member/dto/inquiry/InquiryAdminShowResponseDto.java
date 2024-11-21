@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShowAdminInquiryResponseDto {
+public class InquiryAdminShowResponseDto {
 
     private Long id;
     private Long inquiryAnswerId;

@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.repository;
 
-import com.be3c.sysmetic.domain.member.dto.inquiry.ShowInquiryRequestDto;
+import com.be3c.sysmetic.domain.member.dto.inquiry.InquiryShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.QInquiry;
@@ -138,16 +138,16 @@ public class InquiryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    public List<Inquiry> dynamicQueryWithBooleanBuilder(ShowInquiryRequestDto showInquiryRequestDto, int offset, int limit) {
+    public List<Inquiry> dynamicQueryWithBooleanBuilder(InquiryShowRequestDto inquiryShowRequestDto, int offset, int limit) {
 
         BooleanBuilder predicate = new BooleanBuilder();
         QInquiry inquiry = QInquiry.inquiry;
 
-        Long memberId = showInquiryRequestDto.getMemberId();
-        Long traderId = showInquiryRequestDto.getTraderId();
-        InquiryStatus tab = showInquiryRequestDto.getTab();
-        String searchCondition = showInquiryRequestDto.getSearchCondition();
-        String searchKeyword = showInquiryRequestDto.getSearchKeyword();
+        Long memberId = inquiryShowRequestDto.getMemberId();
+        Long traderId = inquiryShowRequestDto.getTraderId();
+        InquiryStatus tab = inquiryShowRequestDto.getTab();
+        String searchCondition = inquiryShowRequestDto.getSearchCondition();
+        String searchKeyword = inquiryShowRequestDto.getSearchKeyword();
 
         // 질문자 별
         if (memberId != null) {
@@ -198,15 +198,15 @@ public class InquiryRepository {
                 .fetch();
     }
 
-    public long totalCountDynamicQueryWithBooleanBuilder(ShowInquiryRequestDto showInquiryRequestDto) {
+    public long totalCountDynamicQueryWithBooleanBuilder(InquiryShowRequestDto inquiryShowRequestDto) {
         BooleanBuilder predicate = new BooleanBuilder();
         QInquiry inquiry = QInquiry.inquiry;
 
-        Long memberId = showInquiryRequestDto.getMemberId();
-        Long traderId = showInquiryRequestDto.getTraderId();
-        InquiryStatus tab = showInquiryRequestDto.getTab();
-        String searchCondition = showInquiryRequestDto.getSearchCondition();
-        String searchKeyword = showInquiryRequestDto.getSearchKeyword();
+        Long memberId = inquiryShowRequestDto.getMemberId();
+        Long traderId = inquiryShowRequestDto.getTraderId();
+        InquiryStatus tab = inquiryShowRequestDto.getTab();
+        String searchCondition = inquiryShowRequestDto.getSearchCondition();
+        String searchKeyword = inquiryShowRequestDto.getSearchKeyword();
 
         // 질문자 별
         if (memberId != null) {

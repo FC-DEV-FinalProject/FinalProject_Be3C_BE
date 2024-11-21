@@ -8,7 +8,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShowInquiryRequestDto {
+public class InquiryShowRequestDto {
 
     // 일반회원 별
     private Long memberId;

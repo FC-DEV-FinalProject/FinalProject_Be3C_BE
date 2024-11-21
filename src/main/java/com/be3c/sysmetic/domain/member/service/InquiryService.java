@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.inquiry.ShowInquiryRequestDto;
+import com.be3c.sysmetic.domain.member.dto.inquiry.InquiryShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
@@ -130,11 +130,11 @@ public class InquiryService {
     }
 
     // 검색
-    public List<Inquiry> findInquiresByStrategyQuestionerTrader(ShowInquiryRequestDto showInquiryRequestDto, int offset, int limit) {
-        return inquiryRepository.dynamicQueryWithBooleanBuilder(showInquiryRequestDto, offset, limit);
+    public List<Inquiry> findInquiresByStrategyQuestionerTrader(InquiryShowRequestDto inquiryShowRequestDto, int offset, int limit) {
+        return inquiryRepository.dynamicQueryWithBooleanBuilder(inquiryShowRequestDto, offset, limit);
     }
 
-    public long totalCountByStrategyQuestionerTrader(ShowInquiryRequestDto showInquiryRequestDto) {
-        return inquiryRepository.totalCountDynamicQueryWithBooleanBuilder(showInquiryRequestDto);
+    public long totalCountByStrategyQuestionerTrader(InquiryShowRequestDto inquiryShowRequestDto) {
+        return inquiryRepository.totalCountDynamicQueryWithBooleanBuilder(inquiryShowRequestDto);
     }
 }

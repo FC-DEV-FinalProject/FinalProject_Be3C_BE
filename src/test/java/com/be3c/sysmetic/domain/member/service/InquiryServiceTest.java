@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.inquiry.ShowInquiryRequestDto;
+import com.be3c.sysmetic.domain.member.dto.inquiry.InquiryShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
@@ -213,7 +213,7 @@ public class InquiryServiceTest {
     @Test
     public void 문의_검색() throws Exception {
         //given
-        ShowInquiryRequestDto inquirySearch = new ShowInquiryRequestDto();
+        InquiryShowRequestDto inquirySearch = new InquiryShowRequestDto();
         inquirySearch.setSearchCondition("전략명");
         inquirySearch.setSearchKeyword("삼성");
         inquirySearch.setTab(InquiryStatus.ALL);
