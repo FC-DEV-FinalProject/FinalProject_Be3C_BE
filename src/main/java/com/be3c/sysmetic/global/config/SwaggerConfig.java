@@ -34,21 +34,13 @@ public class SwaggerConfig {
         httpsServer.setUrl("https://3.39.211.112.nip.io");
         httpsServer.setDescription("Sysmetic https 서버입니다.");
 
-        Server httpServer = new Server();
-        httpServer.setUrl("http://3.39.211.112.nip.io");
-        httpServer.setDescription("Sysmetic http 서버입니다.");
-
-        Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080");
-        localServer.setDescription("Sysmetic local 서버입니다.");
-
 
         // Components 객체 - 보안 스키마, 파라미터, 응답 등 정의
         return new OpenAPI()
                 .components(new Components())
                 .components(components)
                 .addSecurityItem(securityRequirement)
-                .servers(List.of(httpsServer, httpServer, localServer))
+                .servers(List.of(httpsServer))
                 .info(apiInfo());
     }
 
