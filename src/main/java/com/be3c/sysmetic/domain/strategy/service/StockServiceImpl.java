@@ -83,6 +83,7 @@ public class StockServiceImpl implements StockService {
                     .totalElement(stockPage.getTotalElements())
                     .pageSize(stockPage.getNumberOfElements())
                     .currentPage(page)
+                    .content(stockPage.getContent())
                     .build();
         }
         throw new EntityNotFoundException();
