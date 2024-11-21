@@ -1,16 +1,16 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.MonthlyResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.MonthlyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.MonthRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,8 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,14 +42,14 @@ public class MonthlyServiceImpl implements MonthlyService {
         3. 해당 기간의 월간분석 데이터를 한 페이지에 10개 노출한다.
      */
 
-    private final MonthRepository monthRepository;
+    private final MonthlyRepository monthlyRepository;
     private final DailyRepository dailyRepository;
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
 
     // 월간분석 업데이트
     @Override
-    public void updateMonthly(Long strategyId, List<LocalDateTime> updatedDateList) {
+    public void updateMonthly(Long strategyId, List<LocalDate> updatedDateList) {
         Set<YearMonth> yearMonthSet = updatedDateList.stream()
                 .map(YearMonth::from)
                 .collect(Collectors.toSet());
@@ -58,16 +59,18 @@ public class MonthlyServiceImpl implements MonthlyService {
             int month = yearMonth.getMonthValue();
 
             Monthly updatedMonthly = calculateMonthlyData(strategyId, year, month);
-            monthRepository.save(updatedMonthly);
+            monthlyRepository.save(updatedMonthly);
         });
     }
 
     @Override
-    public PageResponse<MonthlyResponseDto> findMonthly(Long strategyId, Integer page, Integer startYear, Integer startMonth, Integer endYear, Integer endMonth) {
+    public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
-        Page<MonthlyResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, startYear, startMonth, endYear, endMonth, pageable).map(this::entityToDto);
+        YearMonth start = parseYearMonth(startYearMonth);
+        YearMonth end = parseYearMonth(endYearMonth);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
 
-        PageResponse<MonthlyResponseDto> responseDto = PageResponse.<MonthlyResponseDto>builder()
+        PageResponse<MonthlyGetResponseDto> responseDto = PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
                 .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
                 .totalElement(monthlyResponseDtoPage.getTotalElements())
@@ -101,11 +104,11 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .build();
     }
 
-    private MonthlyResponseDto entityToDto(Monthly monthly) {
-        return MonthlyResponseDto.builder()
+    private MonthlyGetResponseDto entityToDto(Monthly monthly) {
+        return MonthlyGetResponseDto.builder()
                 .monthId(monthly.getId())
                 .yearMonth(monthly.getYearNumber() + "-" + monthly.getMonthNumber())
-                .avragePrincipal(monthly.getAverageMonthlyPrincipal())
+                .averagePrincipal(monthly.getAverageMonthlyPrincipal())
                 .profitLossAmount(monthly.getProfitLossAmount())
                 .profitLossRate(monthly.getProfitLossRate())
                 .accumulatedProfitLossAmount(monthly.getAccumulatedProfitLossAmount())
@@ -113,8 +116,16 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .build();
     }
 
-    Strategy findStrategy(Long strategyId) {
+    private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+    }
+
+    private YearMonth parseYearMonth(String yearMonth) {
+        try {
+            return yearMonth != null ? YearMonth.parse(yearMonth) : null;
+        } catch (DateTimeParseException e) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage());
+        }
     }
 
 }

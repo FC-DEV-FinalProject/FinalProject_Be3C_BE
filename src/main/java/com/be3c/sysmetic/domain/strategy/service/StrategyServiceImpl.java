@@ -2,6 +2,11 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.dto.MethodAndStockGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import static com.be3c.sysmetic.global.common.Code.*;
 
 @Service
@@ -18,6 +24,8 @@ import static com.be3c.sysmetic.global.common.Code.*;
 @Transactional
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StrategyServiceImpl implements StrategyService {
+    private final MethodRepository methodRepository;
+    private final StockRepository stockRepository;
 
     private final StrategyRepository strategyRepository;
 
@@ -31,5 +39,19 @@ public class StrategyServiceImpl implements StrategyService {
         strategy.setStatusCode(Code.CLOSE_STRATEGY.getCode());
         strategyRepository.save(strategy);
         return true;
+    }
+
+    @Override
+    public MethodAndStockGetResponseDto findMethodAndStock() {
+        List<MethodGetResponseDto> methodList = methodRepository.findAllByStatusCode(Code.USING_STATE.getCode());
+        if(methodList.isEmpty()) throw new EntityNotFoundException();
+
+        List<StockGetResponseDto> stockList = stockRepository.findAllByStatusCode(Code.USING_STATE.getCode());
+        if(stockList.isEmpty()) throw new EntityNotFoundException();
+
+        return MethodAndStockGetResponseDto.builder()
+                .methodList(methodList)
+                .stockList(stockList)
+                .build();
     }
 }

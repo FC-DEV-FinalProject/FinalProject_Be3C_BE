@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -25,5 +26,6 @@ public class StockPostRequestDto {
     @Schema(description = "중복 체크 여부", example = "true", required = true)
     private Boolean checkDuplicate;
 
-    // MultipartFile file;
+    @NotNull
+    private MultipartFile stockImage;
 }
