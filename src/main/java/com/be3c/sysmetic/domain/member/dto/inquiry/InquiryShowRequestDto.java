@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.member.dto;
+package com.be3c.sysmetic.domain.member.dto.inquiry;
 
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import lombok.*;
@@ -10,13 +10,17 @@ import lombok.*;
 @AllArgsConstructor
 public class ShowInquiryRequestDto {
 
+    // 일반회원 별
     private Long memberId;
 
+    // 트레이더 별
     private Long traderId;
 
+    // 답변상태 탭
     private InquiryStatus tab; // ALL, CLOSED, UNCLOSED
 
-    private String searchCondition; // 전략명, 트레이더, 질문자, strategy, trader,
+    // 검색
+    private String searchCondition; // 전략명, 트레이더, 질문자
     private String searchKeyword;
 
 //    private Long page;

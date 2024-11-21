@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.repository;
 
-import com.be3c.sysmetic.domain.member.dto.ShowInquiryRequestDto;
+import com.be3c.sysmetic.domain.member.dto.inquiry.ShowInquiryRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.QInquiry;

@@ -1,6 +1,5 @@
-package com.be3c.sysmetic.domain.member.dto;
+package com.be3c.sysmetic.domain.member.dto.inquiry;
 
-import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import lombok.*;
 
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class InquiryDto {
+public class ShowAdminInquiryResponseDto {
 
     private Long id;
     private Long inquiryAnswerId;

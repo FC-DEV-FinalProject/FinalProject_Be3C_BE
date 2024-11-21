@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.member.dto;
+package com.be3c.sysmetic.domain.member.dto.inquiry;
 
 import lombok.*;
 
