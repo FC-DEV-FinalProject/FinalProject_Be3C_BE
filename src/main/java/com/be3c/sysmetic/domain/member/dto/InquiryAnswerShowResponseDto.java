@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.member.dto.inquiry;
+package com.be3c.sysmetic.domain.member.dto;
 
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

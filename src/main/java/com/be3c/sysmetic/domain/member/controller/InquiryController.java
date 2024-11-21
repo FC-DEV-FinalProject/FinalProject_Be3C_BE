@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.controller;
 
-import com.be3c.sysmetic.domain.member.dto.inquiry.*;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
