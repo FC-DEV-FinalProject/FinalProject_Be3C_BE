@@ -7,10 +7,10 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.MonthRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -43,7 +42,7 @@ public class MonthlyServiceImpl implements MonthlyService {
         3. 해당 기간의 월간분석 데이터를 한 페이지에 10개 노출한다.
      */
 
-    private final MonthRepository monthRepository;
+    private final MonthlyRepository monthlyRepository;
     private final DailyRepository dailyRepository;
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
@@ -60,7 +59,7 @@ public class MonthlyServiceImpl implements MonthlyService {
             int month = yearMonth.getMonthValue();
 
             Monthly updatedMonthly = calculateMonthlyData(strategyId, year, month);
-            monthRepository.save(updatedMonthly);
+            monthlyRepository.save(updatedMonthly);
         });
     }
 
@@ -69,7 +68,7 @@ public class MonthlyServiceImpl implements MonthlyService {
         Pageable pageable = PageRequest.of(page, 10);
         YearMonth start = parseYearMonth(startYearMonth);
         YearMonth end = parseYearMonth(endYearMonth);
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
 
         PageResponse<MonthlyGetResponseDto> responseDto = PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())

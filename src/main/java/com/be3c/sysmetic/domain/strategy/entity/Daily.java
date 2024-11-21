@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "daily")
-public class Daily extends BaseEntity {
+public class Daily extends BaseEntity implements Comparable<Daily> {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,4 +50,9 @@ public class Daily extends BaseEntity {
     @Column(name = "accumulated_profit_loss_rate", nullable = false)
     private Double accumulatedProfitLossRate;
 
+
+    @Override
+    public int compareTo(Daily other) {
+        return this.date.compareTo(other.date);
+    }
 }

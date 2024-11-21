@@ -27,5 +27,5 @@ public class DailyPostRequestDto {
     @Schema(description = "손익금", example = "240000")
     @NotNull
     private Double dailyProfitLossAmount;
-    
+
 }
