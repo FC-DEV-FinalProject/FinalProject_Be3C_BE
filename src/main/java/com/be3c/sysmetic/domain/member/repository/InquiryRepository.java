@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.repository;
 
-import com.be3c.sysmetic.domain.member.dto.inquiry.InquiryShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.inquiry.InquiryAdminShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.QInquiry;
@@ -138,16 +138,16 @@ public class InquiryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    public List<Inquiry> dynamicQueryWithBooleanBuilder(InquiryShowRequestDto inquiryShowRequestDto, int offset, int limit) {
+    public List<Inquiry> dynamicQueryWithBooleanBuilder(InquiryAdminShowRequestDto inquiryAdminShowRequestDto, int offset, int limit) {
 
         BooleanBuilder predicate = new BooleanBuilder();
         QInquiry inquiry = QInquiry.inquiry;
 
-        Long memberId = inquiryShowRequestDto.getMemberId();
-        Long traderId = inquiryShowRequestDto.getTraderId();
-        InquiryStatus tab = inquiryShowRequestDto.getTab();
-        String searchCondition = inquiryShowRequestDto.getSearchCondition();
-        String searchKeyword = inquiryShowRequestDto.getSearchKeyword();
+        Long memberId = inquiryAdminShowRequestDto.getMemberId();
+        Long traderId = inquiryAdminShowRequestDto.getTraderId();
+        InquiryStatus tab = inquiryAdminShowRequestDto.getTab();
+        String searchType = inquiryAdminShowRequestDto.getSearchType();
+        String searchText = inquiryAdminShowRequestDto.getSearchText();
 
         // 질문자 별
         if (memberId != null) {
@@ -167,22 +167,22 @@ public class InquiryRepository {
         }
 
         // 검색 (전략명, 트레이더, 질문자)
-        if (searchCondition != null) {
-            if (searchCondition.equals("strategy")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.strategy.name.contains(searchKeyword));
+        if (searchType != null) {
+            if (searchType.equals("strategy")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.strategy.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchCondition.equals("trader")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.strategy.trader.name.contains(searchKeyword));
+            } else if (searchType.equals("trader")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.strategy.trader.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchCondition.equals("questioner")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.member.name.contains(searchKeyword));
+            } else if (searchType.equals("questioner")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.member.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
@@ -198,15 +198,15 @@ public class InquiryRepository {
                 .fetch();
     }
 
-    public long totalCountDynamicQueryWithBooleanBuilder(InquiryShowRequestDto inquiryShowRequestDto) {
+    public long totalCountDynamicQueryWithBooleanBuilder(InquiryAdminShowRequestDto inquiryAdminShowRequestDto) {
         BooleanBuilder predicate = new BooleanBuilder();
         QInquiry inquiry = QInquiry.inquiry;
 
-        Long memberId = inquiryShowRequestDto.getMemberId();
-        Long traderId = inquiryShowRequestDto.getTraderId();
-        InquiryStatus tab = inquiryShowRequestDto.getTab();
-        String searchCondition = inquiryShowRequestDto.getSearchCondition();
-        String searchKeyword = inquiryShowRequestDto.getSearchKeyword();
+        Long memberId = inquiryAdminShowRequestDto.getMemberId();
+        Long traderId = inquiryAdminShowRequestDto.getTraderId();
+        InquiryStatus tab = inquiryAdminShowRequestDto.getTab();
+        String searchType = inquiryAdminShowRequestDto.getSearchType();
+        String searchText = inquiryAdminShowRequestDto.getSearchText();
 
         // 질문자 별
         if (memberId != null) {
@@ -226,22 +226,22 @@ public class InquiryRepository {
         }
 
         // 검색 (전략명, 트레이더, 질문자)
-        if (searchCondition != null) {
-            if (searchCondition.equals("전략명")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.strategy.name.contains(searchKeyword));
+        if (searchType != null) {
+            if (searchType.equals("전략명")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.strategy.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchCondition.equals("트레이더")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.strategy.trader.name.contains(searchKeyword));
+            } else if (searchType.equals("트레이더")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.strategy.trader.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchCondition.equals("질문자")) {
-                if (StringUtils.hasText(searchKeyword)) {
-                    predicate.and(inquiry.member.name.contains(searchKeyword));
+            } else if (searchType.equals("질문자")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(inquiry.member.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }

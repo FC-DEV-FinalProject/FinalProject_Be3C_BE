@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.dto.inquiry;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import lombok.*;
 
@@ -10,18 +11,15 @@ import lombok.*;
 @AllArgsConstructor
 public class InquiryShowRequestDto {
 
-    // 일반회원 별
-    private Long memberId;
+    // 멤버 아이디
+    @Schema(description = "문의자 ID", example = "1001")
+    private Long inquirerId;
 
-    // 트레이더 별
-    private Long traderId;
+    // 정렬 순 셀렉트 박스
+    @Schema(description = "정렬 순서 ('최신순', '전략명')", example = "최신순")
+    private String sort;
 
-    // 답변상태 탭
-    private InquiryStatus tab; // ALL, CLOSED, UNCLOSED
-
-    // 검색
-    private String searchCondition; // 전략명, 트레이더, 질문자
-    private String searchKeyword;
-
-//    private Long page;
+    // 답변상태 셀렉트 박스
+    @Schema(description = "답변 상태 (ALL, CLOSED, UNCLOSED)", example = "ALL")
+    private InquiryStatus tab;
 }

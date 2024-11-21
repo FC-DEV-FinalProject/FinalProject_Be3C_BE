@@ -24,16 +24,20 @@ public class InquiryAnswer extends BaseEntity {
     @JoinColumn(name = "inquiry_id", unique = true)
     private Inquiry inquiry;
 
-    @Column(name = "answer_content", length = 1000)
+    @Column(name = "answer_title", length = 100, nullable = false)
+    private String answerTitle;
+
+    @Column(name = "answer_content", length = 1000, nullable = false)
     private String answerContent;
 
     @Column(name = "answer_registration_date")
     private LocalDateTime answerRegistrationDate;
 
     //==생성 메서드==//
-    public static InquiryAnswer createInquiryAnswer(Inquiry inquiry, String answerContent) {
+    public static InquiryAnswer createInquiryAnswer(Inquiry inquiry, String answerTitle, String answerContent) {
         InquiryAnswer inquiryAnswer = new InquiryAnswer();
         inquiryAnswer.setInquiry(inquiry);
+        inquiryAnswer.setAnswerTitle(answerTitle);
         inquiryAnswer.setAnswerContent(answerContent);
         inquiryAnswer.setAnswerRegistrationDate(LocalDateTime.now());
         inquiry.setInquiryAnswer(inquiryAnswer);

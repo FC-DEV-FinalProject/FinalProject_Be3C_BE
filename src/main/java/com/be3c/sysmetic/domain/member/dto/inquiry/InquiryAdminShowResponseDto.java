@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.dto.inquiry;
 
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,18 +13,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InquiryAdminShowResponseDto {
 
-    private Long id;
-    private Long inquiryAnswerId;
-    private Long strategyId;
-    private Long traderId;
-    private Long memberId;
-    private String inquiryContent;
+    @Schema(description = "문의 ID", example = "12345")
+    private Long inquiryId;
 
+    @Schema(description = "트레이더 닉네임", example = "TraderNick")
+    private String traderNickname;
 
+    // 전략 위 아이콘들
+
+    @Schema(description = "전략 이름", example = "Strategy A")
     private String strategyName;
-    private String inquiryTitle;
-    private String traderName;
-    private LocalDateTime inquiryRegistrationDate;
-    private InquiryStatus inquiryStatus;
 
+    @Schema(description = "문의 등록 일시", example = "2024-11-22T15:30:00")
+    private LocalDateTime inquiryRegistrationDate;
+
+    @Schema(description = "질문자 닉네임", example = "InquirerNick")
+    private String inquirerNickname;
+
+    @Schema(description = "문의 상태", example = "CLOSED")
+    private InquiryStatus inquiryStatus;
 }
