@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -69,6 +70,29 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
 
+    // StrategyStockReference 매핑
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StrategyStockReference> stockReferences;
+
+    // StrategyApprovalHistory 매핑
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StrategyApprovalHistory> approvalHistories;
+
+    // StrategyStatistics 매핑
+    @OneToOne(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private StrategyStatistics statistics;
+
+    // Monthly 매핑
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Monthly> monthlyData;
+
+    // Daily 매핑
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Daily> dailyData;
+
+    // AccountImage 매핑
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AccountImage> accountImages;
 
     public void increaseFollowerCount() {
         followerCount++;

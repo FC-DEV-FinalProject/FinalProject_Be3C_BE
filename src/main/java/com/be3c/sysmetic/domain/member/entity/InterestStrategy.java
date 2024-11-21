@@ -5,6 +5,8 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -32,4 +34,7 @@ public class InterestStrategy extends BaseEntity {
 
     @Column(name = "status_code", nullable = false, length = 20)
     private String statusCode;
+
+    @OneToMany(mappedBy = "interestStrategy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<InterestStrategyLog> logs;
 }

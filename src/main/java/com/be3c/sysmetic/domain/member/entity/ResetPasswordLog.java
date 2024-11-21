@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-//@Builder(toBuilder = true)
+@Builder(toBuilder = true)
 @NoArgsConstructor
 //@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
@@ -30,7 +30,8 @@ public class ResetPasswordLog extends BaseEntity {
     @Column(name = "try_ip", nullable = false)
     private String tryIp;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_reset_password_log_member"))
     @JoinColumn(name = "member_id")
     private Member member;
 

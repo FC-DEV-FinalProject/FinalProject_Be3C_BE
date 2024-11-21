@@ -1,10 +1,13 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.domain.strategy.entity.Reply;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -84,4 +87,10 @@ public class Member extends BaseEntity {
 
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Strategy> strategies;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Reply> replies;
 }

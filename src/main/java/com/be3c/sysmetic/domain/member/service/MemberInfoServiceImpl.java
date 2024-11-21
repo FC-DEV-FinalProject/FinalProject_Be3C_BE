@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,9 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public boolean changePassword(MemberPutPasswordRequestDto memberPutPasswordRequestDto, Long userId, HttpServletRequest request) {
+    public boolean changePassword(MemberPutPasswordRequestDto memberPutPasswordRequestDto, HttpServletRequest request) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         if(memberPutPasswordRequestDto.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
@@ -57,6 +60,8 @@ public class MemberInfoServiceImpl implements MemberInfoService {
             member.setPassword(passwordEncoder.encode(memberPutPasswordRequestDto.getNewPassword()));
 
             saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_SUCCESS.getCode());
+
+            return true;
         }
         saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
 
@@ -64,7 +69,9 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     }
 
     @Override
-    public boolean changeMemberInfo(MemberPatchInfoRequestDto memberPatchInfoRequestDto, Long userId) {
+    public boolean changeMemberInfo(MemberPatchInfoRequestDto memberPatchInfoRequestDto) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         if(memberPatchInfoRequestDto.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
@@ -96,37 +103,28 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     }
 
     @Override
-    public boolean deleteUser(Long userId, HttpServletRequest request) {
+    public boolean deleteUser(Long userId, HttpServletRequest request) throws AuthenticationCredentialsNotFoundException {
+        Long requestId = securityUtils.getUserIdInSecurityContext();
+
+        if(!requestId.equals(userId)) {
+            throw new AuthenticationCredentialsNotFoundException("");
+        }
+
         if(!securityUtils.getUserIdInSecurityContext().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
         Member member = findMemberById(userId);
 
-        if(member.getRoleCode().equals(Code.ROLE_USER.getCode())) {
-            deleteUser(userId);
-        } else if(member.getRoleCode().equals(Code.ROLE_TRADER.getCode())) {
-            deleteTrader(userId);
-        }
-
         memberRepository.delete(member);
 
-        return false;
-    }
-
-    private void deleteUser(Long userId) {
-
-    }
-
-    private void deleteTrader(Long userId) {
-
+        return true;
     }
 
     private void saveChangePasswordLog(HttpServletRequest request, Member member, String resultCode) {
         ResetPasswordLog passwordLog = ResetPasswordLog.builder()
                 .tryIp(request.getHeader("X-FORWARDED-FOR"))
                 .member(member)
-                .result(resultCode)
                 .build();
 
         resetPasswordLogRepository.save(passwordLog);
@@ -134,7 +132,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     private Member findMemberById(Long userId) {
         return memberRepository
-                .findByIdAndStatusCode(
+                .findByIdAndUsingStatusCode(
                         userId,
                         Code.USING_STATE.getCode())
                 .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
