@@ -1,4 +1,4 @@
-package com.be3c.sysmetic.domain.member.dto.notice;
+package com.be3c.sysmetic.domain.member.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
