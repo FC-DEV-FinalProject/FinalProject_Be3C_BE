@@ -11,10 +11,10 @@ import lombok.*;
 @AllArgsConstructor
 public class InquiryAdminShowRequestDto {
 
-    @Schema(description = "답변 상태 탭", example = "ALL, CLOSED, UNCLOSED")
+    @Schema(description = "답변 상태 탭 (ALL, CLOSED, UNCLOSED)", example = "ALL")
     private InquiryStatus tab; // ALL, CLOSED, UNCLOSED
 
-    @Schema(description = "검색 유형", example = "전략명, 트레이더, 질문자")
+    @Schema(description = "검색 유형 (전략명, 트레이더, 질문자)", example = "strategy")
     private String searchType; // 전략명, 트레이더, 질문자
 
     @Schema(description = "검색 텍스트", example = "트레이더1")
