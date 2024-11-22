@@ -9,15 +9,14 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -39,12 +38,10 @@ public class StrategySearchServiceImpl implements StrategySearchService {
     @Override
     public PageResponse<StrategySearchResponseDto> searchConditions(
             Integer pageNum, StrategySearchRequestDto strategySearchRequestDto) {
-        // log.info("controller log=pageNum={}, strategySearchRequestDto={}", pageNum, strategySearchRequestDto);
 
         int pageSize = 10;
-        // TODO 정렬 기준 필요
+
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        // Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
         Page<Strategy> sPage = strategyRepository.searchByConditions(pageable, strategySearchRequestDto);
 

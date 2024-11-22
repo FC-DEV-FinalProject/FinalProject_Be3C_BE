@@ -34,41 +34,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
 
-    @Query(value = """
-        SELECT new com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto(
-            m.id, m.roleCode, m.email, m.name, m.nickname, m.birth, m.phoneNumber
-        )
-        FROM Member m
-        WHERE (
-            (:role = 'all' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004')) OR
-            (:role = 'user' AND m.roleCode = 'RC001') OR
-            (:role = 'trader' AND m.roleCode = 'RC002') OR
-            (:role = 'manager' AND m.roleCode IN ('RC003', 'RC004'))
-        )
-        AND (
-            :searchType IS NULL OR
-            (:searchType = 'email' AND m.email LIKE %:searchKeyword%) OR
-            (:searchType = 'name' AND m.name LIKE %:searchKeyword%) OR
-            (:searchType = 'nickname' AND m.nickname LIKE %:searchKeyword%) OR
-            (:searchType = 'phoneNumber' AND m.phoneNumber LIKE %:searchKeyword%) OR
-            (:searchType = 'birth' AND FUNCTION('DATE_FORMAT', m.birth, '%Y-%m-%d') LIKE %:searchKeyword%) OR
-            (:searchType = 'all' AND (
-                m.email LIKE %:searchKeyword% OR
-                m.name LIKE %:searchKeyword% OR
-                m.nickname LIKE %:searchKeyword% OR
-                m.phoneNumber LIKE %:searchKeyword% OR
-                FUNCTION('DATE_FORMAT', m.birth, '%Y-%m-%d') LIKE %:searchKeyword%
-            ))
-        )
-        ORDER BY m.id DESC
-    """, nativeQuery = true)
+
     Page<MemberGetResponseDto> findMembers(
             @Param("role") String role,
             @Param("searchType") String searchType,
             @Param("searchKeyword") String searchKeyword,
             Pageable pageable
     );
-
-
 
 }
