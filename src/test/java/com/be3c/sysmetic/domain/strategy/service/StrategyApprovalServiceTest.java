@@ -94,9 +94,9 @@ public class StrategyApprovalServiceTest {
                 .roleCode("TRADER")
                 .name("테스트")
                 .nickname("테스트")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("01012341234")
                 .usingStatusCode("US001")
-                .birth(LocalDateTime.now())
                 .totalFollow(0)
                 .totalStrategyCount(0)
                 .receiveInfoConsent("Y")
@@ -169,6 +169,8 @@ public class StrategyApprovalServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "TRADER", // role
+                "",
+                "",
                 authorities // 권한 목록
         );
 
