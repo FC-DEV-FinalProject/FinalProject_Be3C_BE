@@ -58,7 +58,7 @@ public class FolderServiceTest {
         memberRepository.deleteAll();
         folderRepository.deleteAll();
 
-        entityManager.createNativeQuery("ALTER TABLE Member AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE folder AUTO_INCREMENT = 1")
                 .executeUpdate();

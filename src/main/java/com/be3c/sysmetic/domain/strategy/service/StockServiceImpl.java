@@ -83,7 +83,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         // Pageable 반환하는 메서드를 만들어서 사용하는 게 좋지 않을까?
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createdAt").descending());
         Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
         if (stockPage.hasContent()) {
@@ -92,6 +92,7 @@ public class StockServiceImpl implements StockService {
                     .totalElement(stockPage.getTotalElements())
                     .pageSize(stockPage.getNumberOfElements())
                     .currentPage(page)
+                    .content(stockPage.getContent())
                     .build();
         }
         throw new EntityNotFoundException();

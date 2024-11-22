@@ -62,7 +62,7 @@ public class LoginController {
             description = "사용자가 이메일과 비밀번호를 통해 로그인하는 API"
     )
     @PostMapping("/auth/login")
-        public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
+    public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
 
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();
