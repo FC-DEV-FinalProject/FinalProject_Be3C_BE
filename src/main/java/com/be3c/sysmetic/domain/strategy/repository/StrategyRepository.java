@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface StrategyRepository extends JpaRepository<Strategy, Long> {
+public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
     // 전략명 중복 확인
     boolean existsByName(String name);
 
