@@ -1,22 +1,21 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyDeleteRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.ReplyGetPageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Reply;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.ReplyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
+
+import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 
 @Service
 @Slf4j
@@ -43,7 +44,7 @@ public class ReplyServiceImpl implements ReplyService{
     private final StrategyRepository strategyRepository;
 
     @Override
-    public PageResponseDto<PageReplyResponseDto> getMyReplyPage(Integer page) {
+    public PageResponse<PageReplyResponseDto> getMyReplyPage(Integer page) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Pageable pageable = PageRequest.of(
@@ -55,16 +56,17 @@ public class ReplyServiceImpl implements ReplyService{
         Page<PageReplyResponseDto> findReplyPage = replyRepository
                 .findPageByMemberIdAndStatusCode(
                         userId,
-                        Code.USING_STATE.getCode(),
+                        USING_STATE.getCode(),
                         pageable
                 );
 
         if(!findReplyPage.hasContent()) {
-            return PageResponseDto.<PageReplyResponseDto>builder()
-                    .totalItemCount(findReplyPage.getTotalElements())
-                    .totalPageCount(findReplyPage.getTotalPages())
-                    .currentPage(page)
-                    .list(findReplyPage.getContent())
+            return PageResponse.<PageReplyResponseDto>builder()
+                    .totalPages(findReplyPage.getNumber())
+                    .totalElement(findReplyPage.getTotalElements())
+                    .currentPage(findReplyPage.getNumber())
+                    .pageSize(findReplyPage.getSize())
+                    .content(findReplyPage.getContent())
                     .build();
         }
 
@@ -72,28 +74,29 @@ public class ReplyServiceImpl implements ReplyService{
     }
 
     @Override
-    public PageResponseDto<PageReplyResponseDto> getReplyPage(ReplyGetPageRequestDto replyGetPageRequestDto) {
+    public PageResponse<PageReplyResponseDto> getReplyPage(Long strategyId, Integer page) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Pageable pageable = PageRequest.of(
-                replyGetPageRequestDto.getPage(),
+                page,
                 10,
                 Sort.by("createdAt").descending()
         );
 
         Page<PageReplyResponseDto> findReplyPage = replyRepository
                 .findPageByStrategyIdAndStatusCode(
-                        replyGetPageRequestDto.getStrategyId(),
-                        Code.USING_STATE.getCode(),
+                        strategyId,
+                        USING_STATE.getCode(),
                         pageable
                 );
 
         if(!findReplyPage.hasContent()) {
-            return PageResponseDto.<PageReplyResponseDto>builder()
-                    .totalItemCount(findReplyPage.getTotalElements())
-                    .totalPageCount(findReplyPage.getTotalPages())
-                    .currentPage(replyGetPageRequestDto.getPage())
-                    .list(findReplyPage.getContent())
+            return PageResponse.<PageReplyResponseDto>builder()
+                    .totalElement(findReplyPage.getTotalElements())
+                    .currentPage(findReplyPage.getNumber())
+                    .pageSize(findReplyPage.getNumberOfElements())
+                    .totalPages(findReplyPage.getTotalPages())
+                    .content(findReplyPage.getContent())
                     .build();
         }
 
@@ -104,23 +107,19 @@ public class ReplyServiceImpl implements ReplyService{
     public boolean insertReply(ReplyPostRequestDto replyPostRequestDto) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Member member = memberRepository
-                .findByIdAndStatusCode(
-                        userId,
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 멤버를 찾을 수 없습니다."));
-
-        Strategy strategy = strategyRepository
-                .findByIdAndStatusCode(
-                        replyPostRequestDto.getStrategyId(),
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다."));
-
         Reply reply = Reply.builder()
-                .member(member)
-                .strategy(strategy)
+                .member(memberRepository
+                        .findByIdAndUsingStatusCode(
+                                userId,
+                                USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 멤버를 찾을 수 없습니다.")))
+                .strategy(strategyRepository
+                        .findByIdAndStatusCode(
+                                replyPostRequestDto.getStrategyId(),
+                                USING_STATE.getCode()
+                        ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다.")))
                 .content(replyPostRequestDto.getContent())
-                .statusCode(Code.USING_STATE.getCode())
+                .statusCode(USING_STATE.getCode())
                 .build();
 
         replyRepository.save(reply);
@@ -133,25 +132,17 @@ public class ReplyServiceImpl implements ReplyService{
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Member member = memberRepository
-                .findByIdAndStatusCode(
+                .findByIdAndUsingStatusCode(
                         userId,
-                        Code.USING_STATE.getCode()
+                        USING_STATE.getCode()
                 ).orElseThrow(() -> new EntityNotFoundException("해당 멤버를 찾을 수 없습니다."));
 
         // 관리자도 댓글 삭제가 가능한가?
-        if(member.getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        }
 
-        Strategy strategy = strategyRepository
-                .findByIdAndStatusCode(
-                        replyDeleteRequestDto.getStrategyId(),
-                        Code.USING_STATE.getCode()
-                ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다."));
-
-        Reply reply = replyRepository.findByIdAndStatusCode(
+        Reply reply = replyRepository.findByStrategyIdAndIdAndStatusCode(
+                replyDeleteRequestDto.getStrategyId(),
                 replyDeleteRequestDto.getId(),
-                Code.USING_STATE.getCode()
+                USING_STATE.getCode()
         ).orElseThrow(() -> new EntityNotFoundException("해당 댓글을 찾을 수 없습니다."));
 
         reply.setStatusCode(Code.NOT_USING_STATE.getCode());
