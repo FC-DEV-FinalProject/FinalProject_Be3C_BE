@@ -38,6 +38,7 @@ public interface InterestStrategyControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에 userId가 존재하지 않음",
                     content = @Content)
     })
+
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
             InterestStrategyGetRequestDto interestStrategyGetRequestDto
