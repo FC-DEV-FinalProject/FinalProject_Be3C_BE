@@ -231,6 +231,11 @@ public interface NoticeControllerDocs {
                     responseCode = "404",
                     description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
                     content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "207",
+                    description = "공지사항 중 일부만 삭제에 실패 (MULTI_STATUS)",
+                    content = @Content(mediaType = "application/json")
             )
     })
     @DeleteMapping("/admin/notice/delete")

@@ -124,6 +124,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         2. 공지사항 목록 삭제에 성공했을 때 : OK
         3. 공지사항 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        5. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
     @DeleteMapping("/admin/notice/delete")
