@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +43,7 @@ class AccountControllerTest {
                 .password(bCryptPasswordEncoder.encode("Password1!"))
                 .name("테스트")
                 .nickname("테스트닉네임")
-                .birth(LocalDateTime.parse("2000-01-01T12:00:00"))
+                .birth(LocalDate.parse("2000-01-01T12:00:00"))
                 .phoneNumber("01012341234")
                 .totalStrategyCount(0)
                 .receiveInfoConsent("true")
