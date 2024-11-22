@@ -126,6 +126,43 @@ public class InquiryController implements InquiryControllerDocs {
 
 
     /*
+        관리자 문의 삭제 API
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 문의 삭제에 성공했을 때 : OK
+        3. 문의 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
+     */
+    @Override
+    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
+    public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
+            @PathVariable Long inquiryId) {
+
+        inquiryService.deleteInquiry(deleteInquiryRequestDto.getInquiryId());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(APIResponse.success(deleteInquiryRequestDto.getInquiryId()));
+    }
+
+
+    /*
+        관리자 문의 목록 삭제 API
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 문의 목록 삭제에 성공했을 때 : OK
+        3. 문의 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
+        5. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
+     */
+    @Override
+    @DeleteMapping("/admin/inquiry/delete")
+    public ResponseEntity<APIResponse<Long>> deleteAdminInquiryList(
+            @RequestBody @Valid InquiryListDeleteRequestDto noticeListDeleteRequestDto) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(APIResponse.success(deleteCount));
+    }
+
+
+    /*
         질문자 문의 등록 화면 조회 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 질문자 문의 등록 화면 조회에 성공했을 때 : OK
@@ -287,7 +324,7 @@ public class InquiryController implements InquiryControllerDocs {
         5. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
      @Override
-     @PatchMapping("/member/inquiry/{inquiryId}/modify")
+     @PutMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
@@ -309,7 +346,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/member/inquiry/{inquiryId}")
+    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
 

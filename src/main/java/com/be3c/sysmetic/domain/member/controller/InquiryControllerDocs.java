@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,6 +76,75 @@ public interface InquiryControllerDocs {
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
+
+
+    // 관리자 문의 삭제 API
+    @Operation(
+            summary = "관리자 문의 삭제",
+            description = "관리자가 특정 문의를 삭제하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "문의 삭제 성공 (OK)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "문의 삭제 실패 (INTERNAL_SERVER_ERROR)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 문의를 찾지 못함 (NOT_FOUND)",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
+    public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
+            @PathVariable Long inquiryId);
+
+
+    // 관리자 문의 목록 삭제 API
+    @Operation(
+            summary = "관리자 문의 목록 삭제",
+            description = "관리자가 다수의 문의를 삭제하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "문의 목록 삭제 성공 (OK)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "문의 목록 삭제 실패 (INTERNAL_SERVER_ERROR)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 문의를 찾지 못함 (NOT_FOUND)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "207",
+                    description = "문의 중 일부만 삭제 실패 (MULTI_STATUS)",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @DeleteMapping("/admin/inquiry/delete")
+    public ResponseEntity<APIResponse<Long>> deleteAdminInquiryList(
+            @RequestBody @Valid InquiryListDeleteRequestDto noticeListDeleteRequestDto);
 
 
     // 질문자 문의 등록 화면 조회 API
@@ -257,7 +327,7 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PatchMapping("/member/inquiry/{inquiryId}/modify")
+    @PutMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto);
@@ -290,7 +360,7 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @DeleteMapping("/member/inquiry/{inquiryId}")
+    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId);
 
