@@ -4,6 +4,9 @@ cloud.properties
 application-test.properties
 jwt.properties
 
+# QueryDSL Q파일 경로
+src/main/generated/
+
 HELP.md
 build/
 !gradle/wrapper/gradle-wrapper.jar
