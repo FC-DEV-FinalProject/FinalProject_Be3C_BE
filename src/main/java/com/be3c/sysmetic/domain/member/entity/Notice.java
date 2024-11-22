@@ -35,12 +35,12 @@ public class Notice {
     @Column(name = "write_date", nullable = false)
     private LocalDateTime writeDate;
 
-//    @Column(name = "corrector")
-//    private Long corrector;
+    @Column(name = "corrector")
+    private Long correctorId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member corrector;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id")
+//    private Member corrector;
 
     @Column(name = "correct_date")
     private LocalDateTime correctDate;
@@ -57,7 +57,6 @@ public class Notice {
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
-//                                      Member corrector,
                                       Integer isAttatchment,
                                       Integer isOpen) {
         Notice notice = new Notice();
@@ -66,7 +65,7 @@ public class Notice {
         notice.setNoticeContent(noticeContent);
         notice.setWriter(writer);
         notice.setWriteDate(LocalDateTime.now());
-//        notice.setCorrector(corrector);
+        notice.setCorrectorId(writer.getId());
         notice.setHits(0L);
         notice.setIsAttatchment(isAttatchment);
         notice.setIsOpen(isOpen);
