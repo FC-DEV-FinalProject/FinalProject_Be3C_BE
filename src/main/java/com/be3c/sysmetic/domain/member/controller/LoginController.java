@@ -66,7 +66,7 @@ public class LoginController {
 
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();
-        String rememberMe = requestDto.getRememberMe();
+        Boolean rememberMe = requestDto.getRememberMe();
 
         try {
             // 1. 이메일 확인
