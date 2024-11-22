@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
+import com.be3c.sysmetic.domain.member.service.NoticeService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.validation.Valid;
@@ -49,6 +50,21 @@ public class NoticeContoller implements NoticeControllerDocs {
     }
 
     /*
+        관리자 공지사항 목록 공개여부 수정 API
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공개여부 수정에 성공했을 때 : OK
+        3. 공개여부 수정에 실패했을 때 : INTERNAL_SERVER_ERROR
+        4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+     */
+    @Override
+    @PutMapping("/admin/notice/{noticeId}/closed")
+    public ResponseEntity<APIResponse<Long>> modifyNoticeClosed() {
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(APIResponse.success(noticeModifyRequestDto.getNoticeId()));
+    }
+
+    /*
         관리자 공지사항 상세 조회 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
@@ -81,7 +97,7 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestParam(value = "searchText", required = false) String searchText) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showAdminNoticeDetailResponseDto);
+                .body(APIResponse.success(showAdminNoticeDetailResponseDto));
     }
 
     /*

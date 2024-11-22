@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,6 +75,37 @@ public interface NoticeControllerDocs {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
+
+
+    // 관리자 공지사항 목록 공개여부 수정 API
+    @Operation(
+            summary = "관리자 공지사항 목록 공개여부 수정",
+            description = "관리자가 공지사항의 공개여부를 수정하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "공개여부 수정 성공 (OK)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "공개여부 수정 실패 (INTERNAL_SERVER_ERROR)",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @PutMapping("/admin/notice/{noticeId}/closed")
+    public ResponseEntity<APIResponse<Long>> modifyNoticeClosed();
 
 
     // 관리자 공지사항 상세 조회 API

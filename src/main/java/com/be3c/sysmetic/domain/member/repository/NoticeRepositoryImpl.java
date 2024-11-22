@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+//import com.be3c.sysmetic.domain.member.entity.
 
 import java.util.List;
 
@@ -17,7 +18,8 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
     private final QNotice notice = QNotice.notice;
 
     @Override
-    List<Notice> findAdminNoticeSearch(String searchType, String searchText) {
+    public List<Notice> adminNoticeSearchWithBooleanBuilder(String searchType, String searchText) {
+
         BooleanBuilder predicate = new BooleanBuilder();
 
         // 검색 (전략명, 트레이더, 질문자)
@@ -52,32 +54,33 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .fetch();
     }
     @Override
-    Long findAdminNoticeSearchCount(String searchType, String searchText) {
+    public Long adminNoticeCountWithBooleanBuilder(String searchType, String searchText) {
 
-        return jpaQueryFactory
-                .select(inquiry.count())
-                .from(inquiry)
-                .where(predicate)
-                .fetchOne();
+//        return jpaQueryFactory
+//                .select(inquiry.count())
+//                .from(inquiry)
+//                .where(predicate)
+//                .fetchOne();
+        return null;
     }
 
     @Override
-    List<Notice> findNoticeSearch(String searchText) {
-        BooleanBuilder predicate = new BooleanBuilder();
-
-        if (name != null) {
-            predicate.and(notice.restaurantName.eq(name));
-        }
-
-        if (score != null) {
-            predicate.and(notice.restaurantStar.goe(4.0f));
-        }
-
-        return jpaQueryFactory
-                .selectFrom(notice)
-                .where(predicate)
-                .fetch();
+    public List<Notice> noticeSearchWithBooleanBuilder(String searchText) {
+//        BooleanBuilder predicate = new BooleanBuilder();
+//
+//        if (name != null) {
+//            predicate.and(notice.restaurantName.eq(name));
+//        }
+//
+//        return jpaQueryFactory
+//                .selectFrom(notice)
+//                .where(predicate)
+//                .fetch();
+        return null;
     }
+
     @Override
-    Long findNoticeSearchCount(String searchText);
+    public Long noticeCountWithBooleanBuilder(String searchText) {
+        return null;
+    }
 }

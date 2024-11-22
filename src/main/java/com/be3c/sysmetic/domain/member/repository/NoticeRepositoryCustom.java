@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface NoticeRepositoryCustom {
 
-    List<Notice> findAdminNoticeSearch(String searchType, String searchText);
-    Long findAdminNoticeSearchCount(String searchType, String searchText);
+    List<Notice> adminNoticeSearchWithBooleanBuilder(String searchType, String searchText);
+    Long adminNoticeCountWithBooleanBuilder(String searchType, String searchText);
 
-    List<Notice> findNoticeSearch(String searchText);
-    Long findNoticeSearchCount(String searchText);
+    List<Notice> noticeSearchWithBooleanBuilder(String searchText);
+    Long noticeCountWithBooleanBuilder(String searchText);
 }
