@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DailyRepository extends JpaRepository<Daily, Long> {
@@ -41,7 +41,7 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Query("SELECT d FROM Daily d WHERE (:startDate IS NULL OR d.date >= :startDate) " +
             "AND d.strategy.id = :strategyId " +
             "AND (:endDate IS NULL OR d.date <= :endDate)")
-    Page<Daily> findAllByStrategyIdAndDateBetween(@Param("strategyId") Long strategyId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, @Param("pageable") Pageable pageable);
+    Page<Daily> findAllByStrategyIdAndDateBetween(@Param("strategyId") Long strategyId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("pageable") Pageable pageable);
 
     // 일간분석데이터 목록 조회 - 특정 년월
     @Query(value = "SELECT * FROM daily d WHERE d.strategy_id = :strategyId " +
@@ -181,4 +181,9 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Query("SELECT SUM(d.profitLossAmount) FROM Daily d WHERE d.strategy.id = :strategyId AND d.profitLossAmount < 0")
     Double findTotalLossAmountByStrategyId(@Param("strategyId") Long strategyId);
 
+
+    /* 엑셀을 위한 메서드 */
+    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
+    List<Daily> findByDateGreaterThanEqualOrderByDateAsc(LocalDate date);
+    Optional<Daily> findTop1ByDateBeforeOrderByDateDesc(LocalDate date);
 }

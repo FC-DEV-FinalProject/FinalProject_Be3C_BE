@@ -3,7 +3,11 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
@@ -27,10 +32,9 @@ public class LoginServiceImpl implements LoginService {
         - 로그인 유지 기능을 사용하는지 (사용X -> Refresh 토큰의 시간이 짧아져야 할 것 같다. ex. 1시간)
 
         [필요한 메서드]
-        0. 이메일 및 비밀번호 형식 확인 메서드
-        0. 이메일 DB 조회 메서드
-        0. 비밀번호 DB 조회 메서드
-        0. 로그인 유지 기능 체크에 따른 Token 생성 메서드
+        1. 이메일 DB 조회 메서드
+        2. 비밀번호 DB 조회 메서드
+        3. 로그인 유지 기능 체크에 따른 Token 생성 메서드
 
         [순서]
         1. email, pw 형식 체크
@@ -52,12 +56,16 @@ public class LoginServiceImpl implements LoginService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final JwtTokenProvider jwtTokenProvider;
+    private final FileService fileService;
 
     // 1. DB에서 Email 조회
     @Override
     public String findEmail(String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("1이메일 또는 비밀번호가 일치하지 않습니다"));
+                .orElseThrow(() -> {
+                    log.info("존재하지 않는 이메일");
+                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
+                });
         return member.getEmail();
     }
 
@@ -66,25 +74,31 @@ public class LoginServiceImpl implements LoginService {
     public boolean validatePassword(String email, String password) {
         // DB에 저장된 pw 조회
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("2이메일 또는 비밀번호가 일치하지 않습니다"));
         // 비교
+                .orElseThrow(() -> {
+                    log.info("비밀번호 불일치");
+                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
+                });
         return bCryptPasswordEncoder.matches(password, member.getPassword());
     }
 
     // 3. rememberMe 체크여부에 따른 jwt 토큰 생성 메서드
     @Override
-    public Map<String, String> generateTokenBasedOnRememberMe(String email, String rememberMe) {
+    public Map<String, String> generateTokenBasedOnRememberMe(String email, Boolean rememberMe) {
         // 회원 정보 가져오기
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("3이메일 또는 비밀번호가 일치하지 않습니다"));
-
+                .orElseThrow(() -> {
+                    log.info("입력한 이메일로 저장된 회원정보가 존재하지 않습니다.");
+                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
+                });
+        String memberProfileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, member.getId()));
         // 토큰 생성
-        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode());
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
         String refreshToken = null;
-        if("Y".equals(rememberMe)) {
-            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
+        if(rememberMe) {
+            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
         } else {
-            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
+            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
         }
 
         Map<String, String> tokenMap = new HashMap<>();

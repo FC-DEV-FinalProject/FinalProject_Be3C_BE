@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.security.core.parameters.P;
 
 @Configuration
 @EnableRedisRepositories
@@ -42,10 +43,25 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory1() {
+        log.info("redisConnectionFactory 1 : 등록");
+        return createRedis(1);
+    }
+
+    @Bean
+    public RedisTemplate<Long, Object> redisTemplate1() {
+        RedisTemplate<Long, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setConnectionFactory(redisConnectionFactory1());
+        return redisTemplate;
+    }
+
 //    @Bean
 //    public RedisConnectionFactory redisConnectionFactory1() {
 //        log.info("redisConnectionFactory 1 : 등록");
-//        return CreateRedis(1);
+//        return createRedis(1);
 //    }
 //
 //    @Bean

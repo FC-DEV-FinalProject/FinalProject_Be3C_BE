@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 이미지 표시</title>
+    <script>
+        // 이미지 URL을 가져오는 함수
+        function fetchImage() {
+            // 입력 값 가져오기
+            const referenceType = document.getElementById('referenceType').value;
+            const referenceId = document.getElementById('referenceId').value;
+
+            // 입력 값이 비어있으면 경고
+            if (!referenceType || !referenceId) {
+                alert('referenceType과 referenceId를 모두 입력해주세요.');
+                return;
+            }
+
+            // URL 생성 (서버에서 이 URL을 처리한다고 가정)
+            const url = new URL('http://localhost:8080/api/file/url', window.location.origin);
+            // 쿼리 파라미터로 추가
+            url.searchParams.append('referenceType', referenceType);
+            url.searchParams.append('referenceId', referenceId);
+
+            // 서버에 요청 보내기
+            fetch(url)
+                .then(response => response.text())  // 서버에서 URL 반환
+                .then(imageUrl => {
+                    // 반환된 URL을 이미지로 표시
+                    document.getElementById('file-image').src = imageUrl;
+                    document.getElementById('image-link').href = imageUrl;
+                    document.getElementById('image-link').innerText = imageUrl;
+                    console.log(imageUrl);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+<h1>파일 이미지 표시</h1>
+<p>이미지를 가져올 정보를 입력하세요:</p>
+
+<!-- 사용자 입력을 위한 폼 -->
+<div>
+    <label for="referenceType">referenceType:</label>
+    <input type="text" id="referenceType" placeholder="예: image" required>
+</div>
+<div>
+    <label for="referenceId">referenceId:</label>
+    <input type="number" id="referenceId" placeholder="예: 1" required>
+</div>
+
+<button onclick="fetchImage()">이미지 가져오기</button>
+
+<div>
+    <p>이미지:</p>
+    <img id="file-image" src="" alt="파일 이미지" width="300" height="auto" />
+</div>
+
+<div>
+    <p>URL:</p>
+    <a id="image-link" href="#" target="_blank">URL 로 이동</a>
+</div>
+</body>
+</html>

@@ -32,4 +32,14 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     // 상세 검색에서 사용
     @Query("SELECT s.id FROM Stock s WHERE s.name IN :names")
     List<Long> findIdsByNames(@Param("names") List<String> names);
+
+    @Query("""
+        SELECT new com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto(
+            s.id, s.name, null
+        )
+        FROM Stock s
+        WHERE s.statusCode = :statusCode
+    """)
+    // 전략관리 페이지 종목 조회
+    List<StockGetResponseDto> findAllByStatusCode(String statusCode);
 }
