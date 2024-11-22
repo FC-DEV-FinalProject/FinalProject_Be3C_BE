@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
-import com.be3c.sysmetic.global.config.security.RedisUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -18,10 +17,8 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-@TestPropertySource(locations = "/application-test.properties")
 @Slf4j
 @SpringBootTest
 class LoginServiceTest {
