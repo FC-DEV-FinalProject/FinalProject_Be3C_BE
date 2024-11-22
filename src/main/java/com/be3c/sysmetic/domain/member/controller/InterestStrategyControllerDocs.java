@@ -6,6 +6,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,27 +29,17 @@ public interface InterestStrategyControllerDocs {
         2. 해당 페이지에 관심 전략이 존재하지 않을 때 : NOT_FOUND
         3. SecurityContext에 userId가 존재하지 않을 때 : FORBIDDEN
      */
-    @Operation(
-            summary = "폴더 내 관심 전략 조회",
-            description = "폴더 내 관심 전략을 페이지 형태로 가져오는 API"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "관심 전략 페이지 조회 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "해당 페이지에 관심 전략이 존재하지 않음",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
-            )
+    @Operation(summary = "폴더 내 관심 전략 조회", description = "폴더 내 관심 전략을 페이지 단위로 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "관심 전략 페이지 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = InterestStrategyGetResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "해당 페이지에 관심 전략이 존재하지 않음",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "SecurityContext에 userId가 존재하지 않음",
+                    content = @Content)
     })
+
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
