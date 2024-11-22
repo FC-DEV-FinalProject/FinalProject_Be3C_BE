@@ -35,6 +35,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
 
 
+    // ❗️❗️❗️❗️❗️TODO 임시 코드 - 정아님 수정 예정 (11월 22일 발생) ❗️❗️❗️❗️❗️
+    @Query(value = "SELECT m FROM Member m WHERE m.roleCode = :role AND m.roleCode= :searchType AND m.name = :searchKeyword")
     Page<MemberGetResponseDto> findMembers(
             @Param("role") String role,
             @Param("searchType") String searchType,

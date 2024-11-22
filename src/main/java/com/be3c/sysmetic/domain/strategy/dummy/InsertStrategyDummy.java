@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -53,6 +54,7 @@ public class InsertStrategyDummy implements CommandLineRunner {
             Member trader = Member.builder()
                     .roleCode("trader")
                     .email("trader" + i + "@gmail.com")
+                    .birth(LocalDate.now())
                     .password("1234")
                     .name("홍길동" + i)
                     .nickname("트레이더" + (i+1))
