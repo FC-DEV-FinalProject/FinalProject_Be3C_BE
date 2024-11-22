@@ -137,7 +137,7 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showAdminNoticeDetailResponseDto);
+                .body(APIResponse.success(showAdminNoticeDetailResponseDto));
     }
 
 
