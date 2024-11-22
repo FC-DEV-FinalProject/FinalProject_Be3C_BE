@@ -67,6 +67,7 @@ public class ExcelServiceTest {
                 .password("password123")
                 .name("Test User")
                 .nickname("testuser")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("010-1234-5678")
                 .usingStatusCode("ACTIVE")
                 .totalFollow(100)
