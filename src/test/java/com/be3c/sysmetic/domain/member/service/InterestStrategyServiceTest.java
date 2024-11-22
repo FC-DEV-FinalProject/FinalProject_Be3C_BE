@@ -167,6 +167,8 @@ public class InterestStrategyServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "USER", // role
+                "",
+                "",
                 authorities // 권한 목록
         );
 

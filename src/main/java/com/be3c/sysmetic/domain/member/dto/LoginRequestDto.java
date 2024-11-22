@@ -27,6 +27,6 @@ public class LoginRequestDto {
 
     @NotNull
     @JsonProperty("rememberMe")
-    private String rememberMe; // 로그인 유지 여부 //(Boolean)으로 바꿔야 한다.
+    private Boolean rememberMe; // 로그인 유지 여부
 
 }

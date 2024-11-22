@@ -91,7 +91,9 @@ public class FolderServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "USER", // role
-                authorities // 권한 목록
+                "",
+                "",
+                authorities // 권한 목록,
         );
 
         // Authentication 객체 생성

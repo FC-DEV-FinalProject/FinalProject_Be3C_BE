@@ -63,9 +63,9 @@ class LoginControllerTest {
                 .usingStatusCode("사용")
                 .totalFollow(0)
                 .totalStrategyCount(0)
-                .receiveInfoConsent("Y")
+                .receiveInfoConsent("true")
                 .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("Y")
+                .receiveMarketingConsent("true")
                 .marketingConsentDate(LocalDateTime.now())
 //                .createdBy(1L)
 //                .createdDate(LocalDateTime.now())
@@ -80,7 +80,7 @@ class LoginControllerTest {
     void successLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
 
         String requestBody = String.format(
                 "{\"email\":\"%s\", \"password\":\"%s\", \"rememberMe\":%b}",
@@ -114,7 +114,7 @@ class LoginControllerTest {
     void failLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
         // 1. 로그인 형식 불일치
         // 1-1. 이메일 형식 불일치
         String invalidEmailRequestBody = String.format(

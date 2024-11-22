@@ -14,8 +14,10 @@ import java.util.Collection;
 public class CustomUserDetails implements UserDetails {
 
     private Long memberId;
-    private String email;
     private String role;
+    private String email;
+    private String nickname;
+    private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     @Override

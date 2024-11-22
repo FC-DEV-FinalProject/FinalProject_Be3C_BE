@@ -104,7 +104,7 @@ class LoginServiceTest {
          */
         String email = "test@test.com";
         // 1. 로그인 유지 선택O -> 30일 짜리 refresh 토큰 생성 확인
-        Map<String, String> tokenMap = loginService.generateTokenBasedOnRememberMe(email,"Y");
+        Map<String, String> tokenMap = loginService.generateTokenBasedOnRememberMe(email,true);
 
         String refreshToken = tokenMap.get("refreshToken");
         Claims claims = jwtTokenProvider.parseTokenClaims(refreshToken);
@@ -116,7 +116,7 @@ class LoginServiceTest {
         Assertions.assertTrue(Math.abs(timeDifference - (2592000000L)) < 1000, "The difference should be close to 30 days in milliseconds");
 
         // 2. 로그인 유지 선택X -> 1시간 짜리 refresh 토큰 생성 확인
-        tokenMap = loginService.generateTokenBasedOnRememberMe(email, "N");
+        tokenMap = loginService.generateTokenBasedOnRememberMe(email, false);
 
         refreshToken = tokenMap.get("refreshToken");
         claims = jwtTokenProvider.parseTokenClaims(refreshToken);
