@@ -38,6 +38,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         // 필터링된 결과 쿼리 실행
         List<Strategy> results = jpaQueryFactory.selectFrom(strategy)
                 .where(booleanBuilder)
+                .orderBy(strategy.accumProfitLossRate.desc())
                 .offset(pageable.getOffset())  // 페이지 오프셋 적용
                 .limit(pageable.getPageSize()) // 페이지 크기 적용
                 .fetch();
