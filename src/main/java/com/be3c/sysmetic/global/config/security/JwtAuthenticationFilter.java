@@ -38,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {    // api �
          - Request Header에 포함된 JWT Access 토큰을 확인하고, 토큰의 유효성을 검증
         [기본 메서드]
          1. doFilterInternal() : jwt 토큰을 요청 헤더에서 추출, 유효성 검증, 인증 성공 시 SecurityContext에 Authentication 객체를 설정.
-         2. extractToken() : 요청 헤더에서 Jwt 토큰을 추출하는 메서드
         [흐름]
          - Access 토큰 받기 -> Access 토큰 추출 -> Access 토큰 유효성 검증
            > (토큰없는경우) -> 다음 필터로 요청 전달
@@ -53,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {    // api �
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 1. request header에서 JWT 토큰 추출
-        String token = extractToken(request);
+        String token = jwtTokenProvider.extractToken(request);
         if(token == null) {
             log.info("jwt토큰이 비어있습니다.");
             chain.doFilter(request, response);
@@ -84,21 +83,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {    // api �
         }
 
         // 3-2. tokenMap 이 null 이 아닌 경우 (토큰이 제대로 담긴 경우)
-        // 재발급된 access 토큰 -> 사용자에게 전달 필요 (어떻게 전달하지? respone Header로 전달해보자)
+        // 재발급된 access 토큰 -> response에 담아서 전달
         response.setHeader("Authorization", "Bearer " + tokenMap.get("accessToken"));
         // 재발급된 refresh 토큰 -> Redis에 저장
         redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
         // 기존 refresh 토큰 -> Redis에서 삭제
         redisUtils.deleteToken(token);
 
-        // 4. 사용자 정보 추출
+        // 4. 사용자 정보 추출 (재발급한 토큰으로 추출 / 기존 토큰으로 추출)
         Claims claims = null;
         if(jwtTokenProvider.needsReissueToken(token)) {
             claims = jwtTokenProvider.parseTokenClaims(tokenMap.get("accessToken"));
         } else {
             claims = jwtTokenProvider.parseTokenClaims(token);
         }
-            // 경우의 수 = request 토큰으로 추출할 때 / 재발급한 토큰으로 추출할 때
+
         Long memberId = claims.get("memberId", Long.class);
         String email = claims.get("email", String.class);
         String role = claims.get("role", String.class);
@@ -115,13 +114,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {    // api �
 
         // 6. 다음 필터로 요청 전달
         chain.doFilter(request, response);
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("bearer ")) {
-            return bearerToken.substring(7); // "Bearer "를 제외한 순수 토큰만 추출
-        }
-        return null;
     }
 }
