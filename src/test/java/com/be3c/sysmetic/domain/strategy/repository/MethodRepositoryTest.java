@@ -128,7 +128,7 @@ public class MethodRepositoryTest {
 
         // then
         assertEquals(
-                methodList.get(find_random),
+                methodList.get(find_random - 1),
                 methodRepository.findByIdAndStatusCode((long) find_random, Code.USING_STATE.getCode()).get()
         );
     }
