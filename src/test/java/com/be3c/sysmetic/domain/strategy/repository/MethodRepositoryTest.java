@@ -123,12 +123,12 @@ public class MethodRepositoryTest {
         methodRepository.saveAll(methodList);
 
         // when
-        int find_random = (int) (Math.random() * total_count);
+        int find_random = (int) (Math.random() * total_count) + 1;
 //        log.info("찾는 위치 : {}", find_random);
 
         // then
         assertEquals(
-                methodList.get(find_random),
+                methodList.get(find_random - 1),
                 methodRepository.findByIdAndStatusCode((long) find_random, Code.USING_STATE.getCode()).get()
         );
     }

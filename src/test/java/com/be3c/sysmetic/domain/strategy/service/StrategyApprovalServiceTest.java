@@ -88,7 +88,6 @@ public class StrategyApprovalServiceTest {
                 .email("test@test.com")
                 .password(bCryptPasswordEncoder.encode("encodedPassword"))
                 // 초기값 설정
-                .id(1L)
                 .roleCode("TRADER")
                 .name("테스트")
                 .nickname("테스트")
