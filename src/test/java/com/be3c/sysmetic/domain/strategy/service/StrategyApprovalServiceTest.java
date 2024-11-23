@@ -123,6 +123,8 @@ public class StrategyApprovalServiceTest {
                     .build());
         }
 
+        strategyRepository.saveAll(strategyList);
+
         StrategyStatistics strategyStatistics = StrategyStatistics.builder()
                 .strategy(strategyList.get(1))
                 .currentBalance(1000000.0)
@@ -156,9 +158,6 @@ public class StrategyApprovalServiceTest {
                 .lastRegistrationDate(LocalDate.now())
                 .build();
 
-        methodRepository.save(method);
-        memberRepository.save(member);
-        strategyRepository.saveAll(strategyList);
         strategyStatisticsRepository.save(strategyStatistics);
 
         // 권한 설정
