@@ -105,6 +105,8 @@ public class StrategyApprovalServiceTest {
                 .marketingConsentDate(LocalDateTime.now())
                 .build();
 
+        memberRepository.save(member);
+
         Method method = Method.builder()
                 .name("테스트매매유형")
                 .statusCode(Code.USING_STATE.getCode())
@@ -157,7 +159,6 @@ public class StrategyApprovalServiceTest {
                 .build();
 
         methodRepository.save(method);
-        memberRepository.save(member);
         strategyRepository.saveAll(strategyList);
         strategyStatisticsRepository.save(strategyStatistics);
 
