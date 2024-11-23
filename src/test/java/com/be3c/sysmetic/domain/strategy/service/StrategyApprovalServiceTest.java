@@ -1,6 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.member.entity.InterestStrategy;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.FolderRepository;
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategySearchGetDto;
@@ -49,6 +52,10 @@ public class StrategyApprovalServiceTest {
 
     private final MemberRepository memberRepository;
 
+    private final FolderRepository folderRepository;
+
+    private final InterestStrategyRepository interestStrategyRepository;
+
     private final MethodRepository methodRepository;
 
     private final StrategyRepository strategyRepository;
@@ -56,6 +63,8 @@ public class StrategyApprovalServiceTest {
     private final DailyRepository dailyRepository;
 
     private final EntityManager entityManager;
+
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -65,11 +74,14 @@ public class StrategyApprovalServiceTest {
 
     @BeforeEach
     public void setUp() {
-        memberRepository.deleteAll();
+        strategyStockReferenceRepository.deleteAll();
+        interestStrategyRepository.deleteAll();
+        folderRepository.deleteAll();
         strategyRepository.deleteAll();
         methodRepository.deleteAll();
         dailyRepository.deleteAll();
         strategyApprovalRepository.deleteAll();
+        memberRepository.deleteAll();
 
         entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
