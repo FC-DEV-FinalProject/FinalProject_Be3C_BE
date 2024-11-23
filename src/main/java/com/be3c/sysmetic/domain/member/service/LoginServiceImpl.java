@@ -74,7 +74,7 @@ public class LoginServiceImpl implements LoginService {
     public boolean validatePassword(String email, String password) {
         // DB에 저장된 pw 조회
         Member member = memberRepository.findByEmail(email)
-        // 비교
+                // 비교
                 .orElseThrow(() -> {
                     log.info("비밀번호 불일치");
                     return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
@@ -91,7 +91,14 @@ public class LoginServiceImpl implements LoginService {
                     log.info("입력한 이메일로 저장된 회원정보가 존재하지 않습니다.");
                     return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
                 });
-        String memberProfileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, member.getId()));
+
+        String memberProfileImage = null;
+        try {
+            memberProfileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, member.getId()));
+        } catch (Exception e) {
+            log.info("파일 이미지 가져오기 에러 발생");
+        }
+
         // 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
         String refreshToken = null;

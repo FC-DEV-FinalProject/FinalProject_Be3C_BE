@@ -23,16 +23,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByNickname(String nickname);
 
-    @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phone_number = :phoneNumber", nativeQuery = true)
-    String findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
-
     @Modifying
     @Query("UPDATE Member m SET m.password = :newPassword WHERE m.email = :email")
     int updatePasswordByEmail(@Param("email") String email, @Param("newPassword") String newPassword);
 
+    // 이름과 휴대번호로 이메일 찾기 (이메일이 여러 개 존재할 수 있어서 List로 반환)
+    @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phone_number = :phoneNumber", nativeQuery = true)
+    List<String> findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
+
+
     @Modifying
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
+
 
     @Query(value = """
         SELECT new com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto(
