@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Slf4j
@@ -82,9 +81,8 @@ public class StrategyApprovalServiceTest {
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
                 .executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
-                .executeUpdate();
 
+        entityManager.clear();
 
         Member member = Member.builder()
                 .email("test@test.com")
@@ -125,6 +123,11 @@ public class StrategyApprovalServiceTest {
                     .statusCode(Code.OPEN_STRATEGY.getCode())
                     .cycle('D')
                     .build());
+        }
+
+        for (Strategy strategy : strategyList) {
+            assertNotNull(strategy.getTrader(), "Strategy의 trader가 null입니다.");
+            assertNotNull(strategy.getTrader().getId(), "Strategy의 trader에 저장된 Member의 ID가 null입니다.");
         }
 
         strategyRepository.saveAll(strategyList);
