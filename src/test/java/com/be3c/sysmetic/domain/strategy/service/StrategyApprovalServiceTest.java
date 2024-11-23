@@ -105,10 +105,14 @@ public class StrategyApprovalServiceTest {
                 .marketingConsentDate(LocalDateTime.now())
                 .build();
 
+        memberRepository.save(member);
+
         Method method = Method.builder()
                 .name("테스트매매유형")
                 .statusCode(Code.USING_STATE.getCode())
                 .build();
+
+        methodRepository.save(method);
 
         List<Strategy> strategyList = new ArrayList<>();
 
