@@ -112,6 +112,8 @@ public class StrategyApprovalServiceTest {
                 .statusCode(Code.USING_STATE.getCode())
                 .build();
 
+        methodRepository.save(method);
+
         List<Strategy> strategyList = new ArrayList<>();
 
         for(int i = 1; i <= 20; i++) {
@@ -158,7 +160,7 @@ public class StrategyApprovalServiceTest {
                 .lastRegistrationDate(LocalDate.now())
                 .build();
 
-        methodRepository.save(method);
+
         strategyRepository.saveAll(strategyList);
         strategyStatisticsRepository.save(strategyStatistics);
 
