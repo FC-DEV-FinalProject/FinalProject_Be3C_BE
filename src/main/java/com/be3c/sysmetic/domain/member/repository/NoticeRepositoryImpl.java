@@ -22,23 +22,29 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
 
         BooleanBuilder predicate = new BooleanBuilder();
 
-        // 검색 (전략명, 트레이더, 질문자)
+        // 검색 (제목, 내용, 제목+내용, 작성자)
         if (searchType != null) {
-            if (searchType.equals("strategy")) {
+            if (searchType.equals("title")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategy.name.contains(searchText));
+                    predicate.and(notice.noticeTitle.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchType.equals("trader")) {
+            } else if (searchType.equals("content")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategy.trader.name.contains(searchText));
+                    predicate.and(notice.noticeContent.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
-            } else if (searchType.equals("questioner")) {
+            } else if (searchType.equals("all")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.member.name.contains(searchText));
+                    predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+                } else {
+                    throw new IllegalArgumentException("검색어를 입력하세요.");
+                }
+            } else if (searchType.equals("writer")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(notice.writer.name.contains(searchText));
                 } else {
                     throw new IllegalArgumentException("검색어를 입력하세요.");
                 }
@@ -46,41 +52,86 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         }
 
         return jpaQueryFactory
-                .selectFrom(inquiry)
+                .selectFrom(notice)
                 .where(predicate)
-                .orderBy(inquiry.inquiryRegistrationDate.desc())
-                .offset(offset)
-                .limit(limit)
+                .orderBy(notice.writeDate.desc())
                 .fetch();
     }
+
     @Override
     public Long adminNoticeCountWithBooleanBuilder(String searchType, String searchText) {
 
-//        return jpaQueryFactory
-//                .select(inquiry.count())
-//                .from(inquiry)
-//                .where(predicate)
-//                .fetchOne();
-        return null;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        // 검색 (제목, 내용, 제목+내용, 작성자)
+        if (searchType != null) {
+            if (searchType.equals("title")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(notice.noticeTitle.contains(searchText));
+                } else {
+                    throw new IllegalArgumentException("검색어를 입력하세요.");
+                }
+            } else if (searchType.equals("content")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(notice.noticeContent.contains(searchText));
+                } else {
+                    throw new IllegalArgumentException("검색어를 입력하세요.");
+                }
+            } else if (searchType.equals("all")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+                } else {
+                    throw new IllegalArgumentException("검색어를 입력하세요.");
+                }
+            } else if (searchType.equals("writer")) {
+                if (StringUtils.hasText(searchText)) {
+                    predicate.and(notice.writer.name.contains(searchText));
+                } else {
+                    throw new IllegalArgumentException("검색어를 입력하세요.");
+                }
+            }
+        }
+
+        return jpaQueryFactory
+                .select(notice.count())
+                .from(notice)
+                .where(predicate)
+                .fetchOne();
     }
+
 
     @Override
     public List<Notice> noticeSearchWithBooleanBuilder(String searchText) {
-//        BooleanBuilder predicate = new BooleanBuilder();
-//
-//        if (name != null) {
-//            predicate.and(notice.restaurantName.eq(name));
-//        }
-//
-//        return jpaQueryFactory
-//                .selectFrom(notice)
-//                .where(predicate)
-//                .fetch();
-        return null;
+
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (StringUtils.hasText(searchText)) {
+            predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+        } else {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        return jpaQueryFactory
+                .selectFrom(notice)
+                .where(predicate)
+                .orderBy(notice.writeDate.desc())
+                .fetch();
     }
 
     @Override
     public Long noticeCountWithBooleanBuilder(String searchText) {
-        return null;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (StringUtils.hasText(searchText)) {
+            predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+        } else {
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
+
+        return jpaQueryFactory
+                .select(notice.count())
+                .from(notice)
+                .where(predicate)
+                .fetchOne();
     }
 }
