@@ -38,24 +38,37 @@ public class MemberManagementServiceImpl implements MemberManagementService {
     }
 
     @Override
-    public void changeRoleCode(Long memberId, boolean changeRoleCode) {
-        // (changeRoleCode) true = 매니저로 변경, false = 일반회원/트레이더로 변경
+    public void changeRoleCode(Long memberId, boolean hasManagerRights) {
+        /*
+            관리자 지정하는 경우 (hasManagerRights = true)
+                RC001 이나 RC002 인 경우, 변경O - RC001 > RC003, RC002 > RC004
+                RC003 이나 RC004 인 경우, 변경X
+            관리자 해지하는 경우 (hasManagerRights = false)
+                RC001 이나 RC002 인 경우, 변경X
+                RC003 이나 RC004 인 경우, 변경O - RC003 > RC001, RC004 > RC002
+         */
         Member member = memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
         String roleCode = member.getRoleCode();
 
-        // RC001(일반) <-> RC003
-        // RC002(트레이더) <-> RC004
-        if(roleCode.equals("RC001") && changeRoleCode) {
-            memberRepository.updateRoleCode(memberId, "RC003");
-        }
-        if(roleCode.equals("RC002") && changeRoleCode) {
-            memberRepository.updateRoleCode(memberId, "RC004");
-        }
-        if(roleCode.equals("RC003") && !changeRoleCode) {
-            memberRepository.updateRoleCode(memberId, "RC001");
-        }
-        if(roleCode.equals("RC004") && !changeRoleCode) {
-            memberRepository.updateRoleCode(memberId, "RC002");
+        final String ROLE_USER = "RC001";
+        final String ROLE_TRADER = "RC002";
+        final String ROLE_MANAGER_USER = "RC003";
+        final String ROLE_MANAGER_TRADER = "RC004";
+
+        if (hasManagerRights) {
+            // 관리자 지정
+            if (ROLE_USER.equals(roleCode)) {
+                memberRepository.updateRoleCode(memberId, ROLE_MANAGER_USER);
+            } else if (ROLE_TRADER.equals(roleCode)) {
+                memberRepository.updateRoleCode(memberId, ROLE_MANAGER_TRADER);
+            }
+        } else {
+            // 관리자 해지
+            if (ROLE_MANAGER_USER.equals(roleCode)) {
+                memberRepository.updateRoleCode(memberId, ROLE_USER);
+            } else if (ROLE_MANAGER_TRADER.equals(roleCode)) {
+                memberRepository.updateRoleCode(memberId, ROLE_TRADER);
+            }
         }
     }
 

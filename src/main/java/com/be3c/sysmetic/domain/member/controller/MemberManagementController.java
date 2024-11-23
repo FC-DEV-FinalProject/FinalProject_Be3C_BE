@@ -1,8 +1,10 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
+import com.be3c.sysmetic.domain.member.dto.MemberManagementPatchResponseDto;
 import com.be3c.sysmetic.domain.member.service.MemberManagementService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @Tag(name = "회원관리 API", description = "관리자의 회원관리")
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -28,7 +33,7 @@ public class MemberManagementController {
         2. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
     */
     @Operation(
-            summary = "관리자 회원 조회",
+            summary = "관리자 - 회원 조회",
             description = "관리자가 특정 역할(role)과 검색 조건을 기반으로 회원 목록을 조회하는 API"
     )
     @ApiResponses({
@@ -65,7 +70,7 @@ public class MemberManagementController {
         2. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
     */
     @Operation(
-            summary = "관리자 회원 등급 변경",
+            summary = "관리자 - 회원등급 변경",
             description = "관리자가 특정 회원의 등급을 변경하는 API"
     )
     @ApiResponses({
@@ -86,8 +91,14 @@ public class MemberManagementController {
             )
     })
     @PatchMapping("/admin/members")
-    public ResponseEntity<APIResponse<String>> changeMemberRoleCode(@RequestParam Long memberId, @RequestParam boolean changeRoleCode) {
-        memberManagementService.changeRoleCode(memberId, changeRoleCode);
+    public ResponseEntity<APIResponse<String>> changeMemberRoleCode(@RequestBody MemberManagementPatchResponseDto responseDto) {
+        if(responseDto.getMemberId() == null || responseDto.getMemberId().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "회원이 선택되지 않았습니다."));
+        }
+
+        for(Long member : responseDto.getMemberId()) {
+            memberManagementService.changeRoleCode(member, responseDto.getHasManagerRights());
+        }
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
 
@@ -98,7 +109,7 @@ public class MemberManagementController {
         2. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
     */
     @Operation(
-            summary = "관리자 회원 강제 탈퇴",
+            summary = "관리자 - 회원 강제 탈퇴",
             description = "관리자가 특정 회원을 강제 탈퇴시키는 API"
     )
     @ApiResponses({
@@ -119,7 +130,7 @@ public class MemberManagementController {
             )
     })
     @DeleteMapping("/admin/members")
-    public ResponseEntity<APIResponse<String>> banMember(@RequestParam Long memberId) {
+    public ResponseEntity<APIResponse<String>> banMember(@RequestBody List<Long> memberId) {
         // 승열님 서비스 메서드 코드 추가 필요
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
