@@ -72,7 +72,7 @@ public class StrategyApprovalServiceTest {
         dailyRepository.deleteAll();
         strategyApprovalRepository.deleteAll();
 
-        entityManager.createNativeQuery("ALTER TABLE Member AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE folder AUTO_INCREMENT = 1")
                 .executeUpdate();
@@ -183,7 +183,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 졸리다.")
+    @DisplayName("전략 관리 페이징 : 성공 - 페이징 테스트")
     @Order(1)
     public void imsleepy() {
         PageResponse<AdminStrategyGetResponseDto> pageResponse =
@@ -201,7 +201,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 졸렸다.")
+    @DisplayName("전략 관리 페이징 : 실패 - 빈 페이지 호출")
     @Order(2)
     public void iwassleepy() {
         assertThrows(NoSuchElementException.class, () ->
@@ -214,7 +214,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 피곤하다")
+    @DisplayName("전략 관리 페이징 : 성공 - 여러 개의 관심 전략 승인 목록")
     @Order(3)
     public void imtired() {
         Long userId = securityUtils.getUserIdInSecurityContext();
