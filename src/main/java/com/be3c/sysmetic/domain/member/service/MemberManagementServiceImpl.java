@@ -2,6 +2,8 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
+import com.be3c.sysmetic.domain.member.entity.MemberSearchType;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,8 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
-
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberManagementServiceImpl implements MemberManagementService {
@@ -21,20 +21,17 @@ public class MemberManagementServiceImpl implements MemberManagementService {
     private final MemberRepository memberRepository;
 
     @Override
-    public PageResponse<MemberGetResponseDto> findMemberPage(String role, Integer page, String searchType, String searchKeyword) {
+    public PageResponse<MemberGetResponseDto> findMemberPage(MemberSearchRole role, Integer page, MemberSearchType searchType, String searchKeyword) {
         Pageable pageable = PageRequest.of(page-1, 10);
-        Page<MemberGetResponseDto> members = memberRepository.findMembers(role, searchType, searchKeyword, pageable);
+        Page<MemberGetResponseDto> members = memberRepository.findMembers(role.getCode(), searchType.getCode(), searchKeyword, pageable);
 
-        if(members.hasContent()) {
-            return PageResponse.<MemberGetResponseDto>builder()
-                    .totalPages(members.getTotalPages())
-                    .totalElement(members.getTotalElements())
-                    .pageSize(members.getNumberOfElements())
-                    .currentPage(page)
-                    .content(members.getContent())
-                    .build();
-        }
-        throw new NoSuchElementException();
+        return PageResponse.<MemberGetResponseDto>builder()
+                .totalPages(members.getTotalPages())
+                .totalElement(members.getTotalElements())
+                .pageSize(members.getNumberOfElements())
+                .currentPage(page)
+                .content(members.getContent())
+                .build();
     }
 
     @Override

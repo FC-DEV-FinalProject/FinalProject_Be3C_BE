@@ -2,6 +2,8 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.dto.MemberManagementPatchResponseDto;
+import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
+import com.be3c.sysmetic.domain.member.entity.MemberSearchType;
 import com.be3c.sysmetic.domain.member.service.MemberManagementService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -54,7 +56,7 @@ public class MemberManagementController {
             )
     })
     @GetMapping("/admin/members")
-    public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam String role, @RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "all", required = false) String searchType, @RequestParam(required = false) String searchKeyword) {
+    public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam MemberSearchRole role, @RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "all", required = false) MemberSearchType searchType, @RequestParam(required = false) String searchKeyword) {
         /*
             조회 대상) all, user, trader, manager
             검색 필터) all, email, name, nickname, phoneNumber, birth
