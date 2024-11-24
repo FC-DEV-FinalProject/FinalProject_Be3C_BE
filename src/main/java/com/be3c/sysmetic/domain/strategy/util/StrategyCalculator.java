@@ -85,8 +85,7 @@ public class StrategyCalculator {
     /*
     표준편차
      */
-    public Double calculateStandardDeviation(List<Double> dataList) {
-        Double avg = calculateAverage(dataList);
+    public Double calculateStandardDeviation(List<Double> dataList, Double avg) {
         Double sumSquaredDifferences = 0.0;
 
         for (Double data : dataList) {

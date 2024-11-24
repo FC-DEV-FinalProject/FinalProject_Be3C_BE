@@ -42,6 +42,10 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         // 최근 통계 조회
         final StrategyStatistics savedStatistics = strategyStatisticsRepository.findByStrategyId(strategyId);
 
+        if(recentDaily == null) {
+            return;
+        }
+
         // 다회 사용시 여러번 조회하지 않도록 저장하여 사용
         final Daily firstDaily = dailyRepository.findTopByStrategyIdOrderByDateAsc(strategyId);
         final Daily lastDaily = dailyRepository.findTopByStrategyIdOrderByDateDesc(strategyId);

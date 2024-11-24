@@ -315,7 +315,7 @@ public class DailyServiceImpl implements DailyService {
     }
 
     private Double getKpRatio(Long strategyId) {
-        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateDesc(strategyId);
+        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
 
         Double highProfitLossRate = 0.0;
         Double minDrawDown = 0.0;
@@ -339,8 +339,8 @@ public class DailyServiceImpl implements DailyService {
             }
         }
 
-        StrategyStatistics statistics = statisticsRepository.findByStrategyId(strategyId);
-        return strategyCalculator.getKpRatio(statistics.getAccumulatedProfitLossRate(), sumDrawDown, sumDrawDownPeriod, statistics.getTotalTradingDays());
+//        StrategyStatistics statistics = statisticsRepository.findByStrategyId(strategyId);
+        return strategyCalculator.getKpRatio(dailyList.stream().findFirst().get().getAccumulatedProfitLossRate(), sumDrawDown, sumDrawDownPeriod, Long.valueOf(dailyList.stream().toList().size()));
     }
 
     private Double getSmScore(Long strategyId, Double kpRatio) {
@@ -353,7 +353,7 @@ public class DailyServiceImpl implements DailyService {
         // kp ratio 평균
         Double averageKpRatio = strategyCalculator.calculateAverage(kpRatioList);
         // kp ratio 표준편차
-        Double standardDeviationKpRatio = strategyCalculator.calculateStandardDeviation(kpRatioList);
+        Double standardDeviationKpRatio = strategyCalculator.calculateStandardDeviation(kpRatioList, averageKpRatio);
 
         return StrategyCalculator.getSmScore(kpRatio, averageKpRatio, standardDeviationKpRatio);
     }
