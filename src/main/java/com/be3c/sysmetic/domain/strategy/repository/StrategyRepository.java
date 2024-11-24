@@ -47,4 +47,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long> {
             @Param("userId") Long userId,
             @Param("statusCode") String statusCode
     );
+
+
+    @Query("SELECT COUNT(*) FROM Strategy s, Member m WHERE m.id = :id AND s.statusCode = :strategyStatusCode")
+    Long countTotalPublicStrategyCount(@Param("id") Long id, @Param("strategyStatusCode") String strategyStatusCode);
 }

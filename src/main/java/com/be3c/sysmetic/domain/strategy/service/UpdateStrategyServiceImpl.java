@@ -115,8 +115,6 @@ public class UpdateStrategyServiceImpl implements UpdateStrategyService {
                         return StrategyStockReference.builder()
                                 .strategy(strategy)
                                 .stock(stock)
-                                .createdBy(strategy.getTrader().getId())
-                                .modifiedBy(strategy.getTrader().getId())
                                 .build();
                     }).collect(Collectors.toList());
 

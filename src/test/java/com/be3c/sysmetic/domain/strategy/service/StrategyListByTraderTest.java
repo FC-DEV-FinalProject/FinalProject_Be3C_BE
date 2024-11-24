@@ -1,10 +1,10 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -155,10 +155,6 @@ public class StrategyListByTraderTest {
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("NO")
                 .marketingConsentDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         // trader 저장
         memberRepository.save(trader);
@@ -169,8 +165,6 @@ public class StrategyListByTraderTest {
         Method method = Method.builder()
                 .name("Manual")
                 .statusCode("MS001")
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
         // method 저장
         methodRepository.save(method);

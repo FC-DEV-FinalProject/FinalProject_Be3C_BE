@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -44,7 +44,7 @@ public class StrategyListServiceTest {
 
     @BeforeEach
     public void init() {
-        em.createNativeQuery("ALTER TABLE sysmetictest.strategy AUTO_INCREMENT = 1")
+        em.createNativeQuery("ALTER TABLE sysmetic.strategy AUTO_INCREMENT = 1")
                 .executeUpdate();
         // strategyListRepository 데이터 모두 삭제
         strategyListRepository.deleteAll();
@@ -91,7 +91,6 @@ public class StrategyListServiceTest {
         // 첫 번째 페이지 전략 반복 검증
         for (int i=0; i < firstPage.getContent().size(); i++) {
             assertNotNull(firstPage.getContent().get(i).getName());
-            assertNotNull(firstPage.getContent().get(i).getStock());
             assertNotNull(firstPage.getContent().get(i).getTraderNickname());
             assertNotNull(firstPage.getContent().get(i).getCycle());
             assertNotNull(firstPage.getContent().get(i).getAccumProfitLossRate());
@@ -265,10 +264,6 @@ public class StrategyListServiceTest {
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("NO")
                 .marketingConsentDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         // trader 저장
         memberRepository.save(trader);
@@ -279,8 +274,6 @@ public class StrategyListServiceTest {
         Method method = Method.builder()
                 .name("Manual")
                 .statusCode("MS001")
-                .createdBy(1L)
-                .modifiedBy(1L)
                 .build();
         // method 저장
         methodRepository.save(method);

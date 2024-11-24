@@ -1,11 +1,15 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.strategy.repository.MemberRepository;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,9 @@ public class StrategyListServiceImpl implements StrategyListService {
 
     private final StrategyListRepository strategyListRepository;
     private final MemberRepository memberRepository;
+    private final StockGetter stockGetter;
+    private final DoubleHandler doubleHandler;
+    private final StrategyRepository strategyRepository;
 
     /*
     getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
@@ -43,26 +50,28 @@ public class StrategyListServiceImpl implements StrategyListService {
         Strategy 엔티티를 StrategyListDto로 반환
     */
     @Override
-    // public Page<StrategyListDto> findStrategyPage(Integer pageNum) {
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
 
         int pageSize = 10;
-        String statusCode = "ST001"; // 공개중인 전략
+        String statusCode = "PUBLIC";
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
          Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(statusCode, pageable)
                 .map(strategy -> new StrategyListDto(
                         strategy.getId(),
                         strategy.getTrader().getId(),
-                        strategy.getMethod().getId(),
                         strategy.getTrader().getNickname(),
+                        strategy.getMethod().getId(),
+                        strategy.getMethod().getName(),
                         strategy.getName(),
                         strategy.getCycle(),
-                        "stock name", // 종목 이름 가져오는 메서드 필요
-                        strategy.getAccumProfitLossRate(),
-                        strategy.getMdd(),
-                        strategy.getSmScore()
+                        stockGetter.getStocks(strategy.getId()),
+                        doubleHandler.cutDouble(strategy.getAccumProfitLossRate()),
+                        doubleHandler.cutDouble(strategy.getMdd()),
+                        doubleHandler.cutDouble(strategy.getSmScore())
                 ));
+
+         log.info("service ={}", strategies.hasContent());
 
          return PageResponse.<StrategyListDto>builder()
                  .currentPage(strategies.getNumber())
@@ -102,7 +111,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
 
         int pageSize = 10;
-        String statusCode = "ST001";
+        String statusCode = "PUBLIC";
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
 
         // traderId로 Member 가져오기
@@ -111,17 +120,20 @@ public class StrategyListServiceImpl implements StrategyListService {
 
         Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findAllByTraderAndStatusCode(trader, statusCode, pageable)
                 .map(strategy -> new StrategyListByTraderDto(
+                        strategy.getTrader().getId(),
                         strategy.getTrader().getNickname(),
-                        strategy.getId(),
                         strategy.getMethod().getId(),
-                        strategy.getCycle(),
+                        strategy.getMethod().getName(),
+                        stockGetter.getStocks(strategy.getId()),
+                        strategy.getId(),
                         strategy.getName(),
-                        strategy.getMdd(),
-                        strategy.getSmScore(),
-                        strategy.getAccumProfitLossRate(),
-                        strategy.getFollowerCount()
+                        strategy.getCycle(),
+                        strategy.getFollowerCount(),
+                        strategyRepository.countTotalPublicStrategyCount(strategy.getTrader().getId(), statusCode),
+                        doubleHandler.cutDouble(strategy.getAccumProfitLossRate()),
+                        doubleHandler.cutDouble(strategy.getMdd()),
+                        doubleHandler.cutDouble(strategy.getSmScore())
                 ));
-
 
         return PageResponse.<StrategyListByTraderDto>builder()
                 .currentPage(strategiesByTrader.getNumber())

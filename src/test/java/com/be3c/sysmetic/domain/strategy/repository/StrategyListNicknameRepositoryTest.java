@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -46,7 +47,7 @@ public class StrategyListNicknameRepositoryTest {
 
     @BeforeEach
     public void init() {
-        em.createNativeQuery("ALTER TABLE sysmetictest.strategy AUTO_INCREMENT = 1")
+        em.createNativeQuery("ALTER TABLE sysmetic.strategy AUTO_INCREMENT = 1")
                 .executeUpdate();
         // strategyListRepository 데이터 모두 삭제
         strategyListRepository.deleteAll();
@@ -200,10 +201,6 @@ public class StrategyListNicknameRepositoryTest {
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("NO")
                 .marketingConsentDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         // trader 저장
         memberRepository.save(trader);
@@ -227,10 +224,6 @@ public class StrategyListNicknameRepositoryTest {
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("NO")
                 .marketingConsentDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         // trader 저장
         memberRepository.save(trader);
@@ -243,10 +236,6 @@ public class StrategyListNicknameRepositoryTest {
                 .name(name)
                 .statusCode("MS001")
                 .methodCreatedDate(LocalDateTime.now())
-                .createdBy(1L)
-                .createdDate(LocalDateTime.now())
-                .modifiedBy(1L)
-                .modifiedDate(LocalDateTime.now())
                 .build();
         // method 저장
         methodRepository.save(method);

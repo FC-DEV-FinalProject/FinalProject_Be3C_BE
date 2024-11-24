@@ -7,28 +7,38 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-// 트레이더 별 전략 목록
 public class StrategyListByTraderDto {
     /*
-    methodIcon : 매매방식 아이콘
-    periodIcon : 주기 아이콘
-    stockIconList : 종목 아이콘 List
-    traderName : 트레이더이름
-    traderIcon : 트레이더아이콘
-    mdd : 최대자본인하율
-    smScore : SM Score
-    accumulatedProfitRate : 누적 수익률
-    followerCount : follower 수
+
+        StrategyListByTraderDto : 트레이더별 전략 목록 응답용 DTO
+
+        traderId : 트레이더 id
+        traderNickname : 트레이더 닉네임
+        methodId : 매매방식 id
+        methodName : 매매방식명
+        stockList : 종목 리스트
+        strategyId : 전략 ID
+        strategyName : 전략명
+        cycle : 주기
+        followerCount : 팔로우 수
+        strategyCount : 등록한 전략 개수
+        accumProfitLossRate : 누적손익률
+        mdd : MDD
+        smScore : SM Score
      */
 
+    // 11월 24일
+    private Long traderId;
     private String traderNickname;
-    private Long strategyId;
     private Long methodId;
-    private Character cycle;
-    // private List<String> stockIconList;     // 종목 다수 선택 & 아이콘 추후 고려
+    private String methodName;
+    private StockListDto stockList;
+    private Long strategyId;
     private String strategyName;
+    private Character cycle;
+    private Long followerCount;
+    private Long strategyCount;
+    private Double accumProfitLossRate;
     private Double mdd;
     private Double smScore;
-    private Double accumProfitLossRate;
-    private Long followerCount;
 }

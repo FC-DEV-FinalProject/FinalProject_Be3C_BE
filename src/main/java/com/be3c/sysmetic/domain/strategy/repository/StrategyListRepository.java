@@ -25,11 +25,11 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
 
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto(" +
             "t.id, t.nickname, t.roleCode, t.totalFollow, " +
-            "COUNT(CASE WHEN s.statusCode = 'ST001' THEN 1 END)) " +
+            "COUNT(CASE WHEN s.statusCode = 'PUBLIC' THEN 1 END)) " +
             "FROM Member t JOIN Strategy s ON s.trader.id = t.id " +
             "WHERE t.nickname LIKE concat('%', :nickname, '%') AND t.roleCode = 'trader' " +
             "GROUP BY t.id, t.nickname, t.roleCode, t.totalFollow " +
-            "ORDER BY COUNT(CASE WHEN s.statusCode ='ST001' THEN 1 END) DESC")
+            "ORDER BY COUNT(CASE WHEN s.statusCode ='PUBLIC' THEN 1 END) DESC")
     Page<TraderNicknameListDto> findDistinctByTraderNickname(@Param("nickname") String nickname, Pageable pageable);
 
 
