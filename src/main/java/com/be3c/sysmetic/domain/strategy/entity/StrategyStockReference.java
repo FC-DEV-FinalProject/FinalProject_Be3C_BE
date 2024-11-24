@@ -26,4 +26,5 @@ public class StrategyStockReference extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
+
 }

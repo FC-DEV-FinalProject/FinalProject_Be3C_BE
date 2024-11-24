@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.global.common.response;
 
+import lombok.*;
 import lombok.Builder;
 import lombok.Getter;
 

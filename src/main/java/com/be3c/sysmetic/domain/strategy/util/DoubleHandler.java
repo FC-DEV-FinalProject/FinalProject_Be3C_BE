@@ -8,7 +8,7 @@ public class DoubleHandler {
 
     private static final double EPSILON = 0.0001;
     private static final int SCALE = 10000;
-
+    
     public Double cutDouble(Double originalDoubleNumber){
 
         return Math.floor(originalDoubleNumber * SCALE) / SCALE;
