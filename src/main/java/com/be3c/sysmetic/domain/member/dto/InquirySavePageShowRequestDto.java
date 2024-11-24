@@ -12,5 +12,5 @@ import lombok.*;
 public class InquirySavePageShowRequestDto {
 
     @Schema(description = "전략 ID", example = "12345")
-    private String strategyId;
+    private Long strategyId;
 }

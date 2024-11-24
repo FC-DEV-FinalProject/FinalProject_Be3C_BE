@@ -11,8 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "문의 목록 삭제 요청 DTO")
-public class InquiryListDeleteRequestDto {
+public class InquiryAdminListDeleteRequestDto {
 
     @Schema(description = "삭제할 문의 ID 리스트", example = "[1, 2, 3]")
-    private List<Long> inquiryIds;
+    private List<Long> inquiryIdList;
 }

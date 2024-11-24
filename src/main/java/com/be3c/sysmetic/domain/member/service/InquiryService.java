@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.InquiryAdminShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.InquiryAdminListShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.InquiryListShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
@@ -8,7 +9,11 @@ import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,68 +36,50 @@ public class InquiryService {
 
     // 문의 단건 조회
     public Inquiry findOneInquiry(Long inquiryId) {
-        return inquiryRepository.findOne(inquiryId);
+        return inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
     }
 
     // 문의 전체 조회
-    public List<Inquiry> findInquiryAll(int offset, int limit) {
-        return inquiryRepository.findAll(offset, limit);
-    }
-
-    public long totalCountAll() {
-        return inquiryRepository.totalCountAll();
+    public Page<Inquiry> findInquiryAll(Integer page) {
+        return inquiryRepository.findAll(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 상태별 문의 조회
-    public List<Inquiry> findInquiryByStatus(InquiryStatus inquiryStatus, int offset, int limit) {
-        return inquiryRepository.findByInquiryStatus(inquiryStatus, offset, limit);
-    }
-
-    public long totalCountByStatus(InquiryStatus inquiryStatus) {
-        return inquiryRepository.totalCountInquiryStatus(inquiryStatus);
+    public Page<Inquiry> findInquiryByInquiryStatus(InquiryStatus inquiryStatus, Integer page) {
+        return inquiryRepository.findByInquiryStatus(inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 일반회원별 문의 조회
-    public List<Inquiry> findInquiryByMember(Long memberId, int offset, int limit) {
-        return inquiryRepository.findByMemberId(memberId, offset, limit);
-    }
-
-    public long totalCountByMember(Long memberId) {
-        return inquiryRepository.totalCountMemberId(memberId);
+    public Page<Inquiry> findInquiryByInquirerId(Long inquirerId, Integer page) {
+        return inquiryRepository.findByInquirerId(inquirerId, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 일반회원별 상태별 문의 조회
-    public List<Inquiry> findInquiryByMemberAndStatus(Long memberId, InquiryStatus inquiryStatus, int offset, int limit) {
-        return inquiryRepository.findByMemberIdAndInquiryStatus(memberId, inquiryStatus, offset, limit);
-    }
-
-    public long totalCountByMemberAndStatus(Long memberId, InquiryStatus inquiryStatus) {
-        return inquiryRepository.totalCountMemberIdAndInquiryStatus(memberId, inquiryStatus);
+    public Page<Inquiry> findInquiryByInquirerIdAndInquiryStatus(Long inquirerId, InquiryStatus inquiryStatus, Integer page) {
+        return inquiryRepository.findByInquirerIdAndInquiryStatus(inquirerId, inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 트레이더별 문의 조회
-    public List<Inquiry> findInquiryByTrader(Long traderId, int offset, int limit) {
-        return inquiryRepository.findByTraderId(traderId, offset, limit);
-    }
-
-    public long totalCountByTrader(Long traderId) {
-        return inquiryRepository.totalCountTraderId(traderId);
+    public Page<Inquiry> findInquiryByTraderId(Long traderId, Integer page) {
+        return inquiryRepository.findByTraderId(traderId, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 트레이더별 상태별 문의 조회
-    public List<Inquiry> findInquiryByTraderAndStatus(Long traderId, InquiryStatus inquiryStatus, int offset, int limit) {
-        return inquiryRepository.findByTraderIdAndInquiryStatus(traderId, inquiryStatus, offset, limit);
+    public Page<Inquiry> findInquiryByTraderIdAndInquiryStatus(Long traderId, InquiryStatus inquiryStatus, Integer page) {
+        return inquiryRepository.findByTraderIdAndInquiryStatus(traderId, inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
-    public long totalCountByTraderAndStatus(Long traderId, InquiryStatus inquiryStatus) {
-        return inquiryRepository.totalCountTraderIdAndInquiryStatus(traderId, inquiryStatus);
+    // 전략 문의 등록 화면 조회
+    public Strategy findStrategyForInquiryPage(Long strategyId) {
+        return strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new);
     }
 
     // 등록
     @Transactional
     public Long registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent) {
-        Strategy strategy = strategyRepository.findById(strategyId).get(); // .orElseThrow() 예외처리
-        Member member = memberRepository.findById(memberId).get();
+
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new);
+        Member member = memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
 
         Inquiry inquiry = Inquiry.createInquiry(strategy, member, inquiryTitle, inquiryContent);
 
@@ -105,9 +92,9 @@ public class InquiryService {
     @Transactional
     public void modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent) {
 
-        Inquiry inquiry = inquiryRepository.findOne(inquiryId);
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
 
-        if (inquiry.getInquiryStatus() == InquiryStatus.UNCLOSED) {
+        if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
             inquiry.setInquiryTitle(inquiryTitle);
             inquiry.setInquiryContent(inquiryContent);
             inquiryRepository.save(inquiry);
@@ -116,25 +103,49 @@ public class InquiryService {
         }
     }
 
-    // 삭제
+    // 질문자 삭제
     @Transactional
     public void deleteInquiry(Long inquiryId) {
 
-        Inquiry inquiry = inquiryRepository.findOne(inquiryId);
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
 
-        if (inquiry.getInquiryStatus() == InquiryStatus.UNCLOSED) {
-            inquiryRepository.deleteInquiry(inquiry);
+        if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+            inquiryRepository.delete(inquiry);
         } else {
-            throw new IllegalStateException("답변이 등록된 문의는 삭제할 수 없습니다.");
+            throw new IllegalStateException("답변이 등록된 문의는 삭제할 수 없습니다."); // 이미 관심 전략에 등록된 전략일 때 : BAD_REQUEST
         }
     }
 
-    // 검색
-    public List<Inquiry> findInquiresByStrategyQuestionerTrader(InquiryAdminShowRequestDto inquiryAdminShowRequestDto, int offset, int limit) {
-        return inquiryRepository.dynamicQueryWithBooleanBuilder(inquiryAdminShowRequestDto, offset, limit);
+    // 관리자 삭제
+    @Transactional
+    public void deleteAdminInquiry(Long inquiryId) {
+
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+
+        inquiryRepository.delete(inquiry);
     }
 
-    public long totalCountByStrategyQuestionerTrader(InquiryAdminShowRequestDto inquiryAdminShowRequestDto) {
-        return inquiryRepository.totalCountDynamicQueryWithBooleanBuilder(inquiryAdminShowRequestDto);
+
+    // 관리자 목록 삭제
+    @Transactional
+    public void deleteAdminInquiryList(List<Long> inquiryIdList) {
+
+        inquiryRepository.bulkDelete(inquiryIdList);
+    }
+
+    // 관리자 검색 조회
+    // 전체, 답변 대기, 답변 완료
+    // 검색 (전략명, 트레이더, 질문자)
+    public Page<Inquiry> findInquiresAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page) {
+
+        return inquiryRepository.adminInquirySearchWithBooleanBuilder(inquiryAdminListShowRequestDto, PageRequest.of(page, 10));
+    }
+
+    // 문의자, 트레이더 검색 조회
+    // 정렬 순 셀렉트 박스 (최신순, 전략명)
+    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    public Page<Inquiry> findInquires(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page) {
+
+        return inquiryRepository.inquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
     }
 }

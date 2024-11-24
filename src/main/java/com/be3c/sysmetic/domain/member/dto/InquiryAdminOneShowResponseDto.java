@@ -6,13 +6,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "관리자 문의 상세 조회 응답 DTO")
-public class InquiryAdminShowResponseDto {
+public class InquiryAdminOneShowResponseDto {
 
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;

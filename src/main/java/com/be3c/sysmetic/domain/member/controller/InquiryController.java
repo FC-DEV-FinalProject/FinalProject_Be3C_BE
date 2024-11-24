@@ -6,11 +6,13 @@ import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,49 +38,46 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryAdminShowResponseDto>>> showAdminInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
+    public ResponseEntity<APIResponse<InquiryAdminListShowResponseDto>> showAdminInquiry (
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        InquiryAdminShowRequestDto inquiryAdminShowRequestDto = new InquiryAdminShowRequestDto();
-        inquiryAdminShowRequestDto.setTab(inquiryStatus);
-        inquiryAdminShowRequestDto.setSearchType(searchType);
-        inquiryAdminShowRequestDto.setSearchText(searchText);
+        InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto = new InquiryAdminListShowRequestDto();
+        inquiryAdminListShowRequestDto.setTab(inquiryStatus);
+        inquiryAdminListShowRequestDto.setSearchType(searchType);
+        inquiryAdminListShowRequestDto.setSearchText(searchText);
 
-        long totalCountInquiry = inquiryService.totalCountByStrategyQuestionerTrader(inquiryAdminShowRequestDto); // 전체 데이터 수
-        int totalPageCount; // 전체 페이지 수
-        if (totalCountInquiry % pageSize == 0) {
-            totalPageCount = (int) (totalCountInquiry / pageSize);
-        } else {
-            totalPageCount = (int) (totalCountInquiry / pageSize) + 1;
-        }
-        int pageStart = (page - 1) * pageSize; // 페이지 시작 위치
+        Page<Inquiry> inquiryList = inquiryService.findInquiresAdmin(inquiryAdminListShowRequestDto, page-1);
 
-        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquiryAdminShowRequestDto, pageStart, pageSize);
+        List<InquiryAdminOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+                .map(InquiryController::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
 
-        List<InquiryAdminShowResponseDto> collect = inquiryList.stream()
-                .map(i -> new InquiryAdminShowResponseDto(
-                        i.getId(),
-                        i.getStrategy().getTrader().getNickname(),
-                        i.getStrategy().getName(),
-                        i.getInquiryRegistrationDate(),
-                        i.getMember().getNickname(),
-                        i.getInquiryStatus()))
-                .collect(Collectors.toList());
-
-        PageResponse<InquiryAdminShowResponseDto> adminInquiryPage = PageResponse.<InquiryAdminShowResponseDto>builder()
-                .currentPage(page) // 현재 페이지
-                .pageSize(pageSize) // 한 페이지 크기
-                .totalElement(totalCountInquiry) // 전체 데이터 수
-                .totalPages(totalPageCount) // 전체 페이지 수
-                .content(collect)
+        InquiryAdminListShowResponseDto inquiryListDto = InquiryAdminListShowResponseDto.builder()
+                .inquiryAdminList(inquiryDtoList)
+                .listSize(inquiryDtoList.size())
+                .totalPage(inquiryList.getTotalPages())
+                .totalElements(inquiryList.getTotalElements())
+                .isFirst(inquiryList.isFirst())
+                .isLast(inquiryList.isLast())
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(adminInquiryPage));
+                .body(APIResponse.success(inquiryListDto));
+    }
+
+    public static InquiryAdminOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
+
+        return InquiryAdminOneShowResponseDto.builder()
+                .inquiryId(inquiry.getId())
+                .traderNickname(inquiry.getStrategy().getTrader().getNickname())
+                .strategyName(inquiry.getStrategy().getName())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquiryStatus(inquiry.getInquiryStatus())
+                .build();
     }
 
 
@@ -93,13 +92,12 @@ public class InquiryController implements InquiryControllerDocs {
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findThatInquiryAnswers(inquiryId);
-        InquiryAnswer inquiryAnswer = inquiryAnswerList.get(0);
+        InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
         InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
 
@@ -108,10 +106,13 @@ public class InquiryController implements InquiryControllerDocs {
 
         inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
         inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-        inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getMember().getNickname());
+        inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
         inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
 
+        // 전략 위 아이콘들
         inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+
+        // 트레이더의 아이콘
         inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
 
         inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
@@ -137,10 +138,10 @@ public class InquiryController implements InquiryControllerDocs {
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
 
-        inquiryService.deleteInquiry(deleteInquiryRequestDto.getInquiryId());
+        inquiryService.deleteAdminInquiry(inquiryId);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(deleteInquiryRequestDto.getInquiryId()));
+                .body(APIResponse.success());
     }
 
 
@@ -150,15 +151,18 @@ public class InquiryController implements InquiryControllerDocs {
         2. 문의 목록 삭제에 성공했을 때 : OK
         3. 문의 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
-        5. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
     @DeleteMapping("/admin/inquiry/delete")
-    public ResponseEntity<APIResponse<Long>> deleteAdminInquiryList(
-            @RequestBody @Valid InquiryListDeleteRequestDto noticeListDeleteRequestDto) {
+    public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+            @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
+
+        List<Long> inquiryIdList = noticeListDeleteRequestDto.getInquiryIdList();
+
+        inquiryService.deleteAdminInquiryList(inquiryIdList);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(deleteCount));
+                .body(APIResponse.success(inquiryIdList.size()));
     }
 
 
@@ -169,12 +173,19 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 등록 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/strategy/inquiry")
+    @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
 
+        Strategy strategy = inquiryService.findStrategyForInquiryPage(inquirySavePageShowRequestDto.getStrategyId());
+
+        InquirySavePageShowResponseDto inquirySavePageShowResponseDto = InquirySavePageShowResponseDto.builder()
+                .strategyName(strategy.getName())
+                .traderNickname(strategy.getTrader().getNickname())
+                .build();
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showAdminNoticeDetailResponseDto));
+                .body(APIResponse.success(inquirySavePageShowResponseDto));
     }
 
 
@@ -186,7 +197,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/strategy/inquiry")
+    @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto) {
 
@@ -209,53 +220,44 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryShowResponseDto>>> showInquirerInquiry (
+    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        InquiryShowRequestDto inquiryShowRequestDto = new InquiryShowRequestDto();
-        inquiryShowRequestDto.setInquirerId(123L); // 현재 로그인한 회원의 아이디
-        inquiryShowRequestDto.setSort(sort);
-        inquiryShowRequestDto.setTab(inquiryStatus);
+        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
+        inquiryListShowRequestDto.setInquirerId(123L); // 현재 로그인한 회원의 아이디
+        inquiryListShowRequestDto.setSort(sort);
+        inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        long totalCountInquiry = inquiryService.totalCountByStrategyQuestionerTrader(inquiryAdminShowRequestDto); // 전체 데이터 수
-        int totalPageCount; // 전체 페이지 수
-        if (totalCountInquiry % pageSize == 0) {
-            totalPageCount = (int) (totalCountInquiry / pageSize);
-        } else {
-            totalPageCount = (int) (totalCountInquiry / pageSize) + 1;
-        }
-        int pageStart = (page - 1) * pageSize; // 페이지 시작 위치
+        Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
 
-        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquiryAdminShowRequestDto, pageStart, pageSize);
+        List<InquiryOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+                .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
-        List<InquiryAdminShowResponseDto> collect = inquiryList.stream()
-                .map(i -> new InquiryAdminShowResponseDto(i.getId(),
-                        i.getInquiryAnswer().getId(),
-                        i.getStrategy().getId(),
-                        i.getStrategy().getTrader().getId(),
-                        i.getMember().getId(),
-                        i.getInquiryContent(),
-
-                        i.getStrategy().getName(),
-                        i.getInquiryTitle(),
-                        i.getStrategy().getTrader().getName(),
-                        i.getInquiryRegistrationDate(),
-                        i.getInquiryStatus()))
-                .collect(Collectors.toList());
-
-        PageResponse<InquiryAdminShowResponseDto> memberInquiryPage = PageResponse.<InquiryAdminShowResponseDto>builder()
-                .currentPage(page) // 현재 페이지
-                .pageSize(pageSize) // 한 페이지 크기
-                .totalElement(totalCountInquiry) // 전체 데이터 수
-                .totalPages(totalPageCount) // 전체 페이지 수
-                .content(collect)
+        InquiryListShowResponseDto inquiryListDto = InquiryListShowResponseDto.builder()
+                .inquiryList(inquiryDtoList)
+                .listSize(inquiryDtoList.size())
+                .totalPage(inquiryList.getTotalPages())
+                .totalElements(inquiryList.getTotalElements())
+                .isFirst(inquiryList.isFirst())
+                .isLast(inquiryList.isLast())
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(memberInquiryPage));
+                .body(APIResponse.success(inquiryListDto));
+    }
+
+    public static InquiryOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
+
+        return InquiryOneShowResponseDto.builder()
+                .inquiryId(inquiry.getId())
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .strategyName(inquiry.getStrategy().getName())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquiryStatus(inquiry.getInquiryStatus())
+                .build();
     }
 
 
@@ -272,25 +274,34 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
-        InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
+         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findThatInquiryAnswers(inquiryId);
-        InquiryAnswer inquiryAnswer = inquiryAnswerList.get(0);
+         InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
-        InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
-        inquiryAnswerShowResponseDto.setId(inquiryAnswer.getId());
-        inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-        inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
-        inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-        inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-        inquiryAnswerShowResponseDto.setMemberName(inquiryAnswer.getInquiry().getMember().getName());
-        inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-        inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-        inquiryAnswerShowResponseDto.setTraderName(inquiryAnswer.getInquiry().getStrategy().getTrader().getName());
-        inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
+         InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryAnswerShowResponseDto));
+         inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
+         inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+
+         inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
+         inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
+         inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
+         inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+
+         // 전략 위 아이콘들
+         inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+
+         // 트레이더의 아이콘
+         inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+
+         inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
+
+         inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
+         inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
+         inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
+
+         return ResponseEntity.status(HttpStatus.OK)
+                 .body(APIResponse.success(inquiryAnswerShowResponseDto));
     }
 
 
@@ -302,16 +313,22 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<InquiryShowModifyPageResponseDto>> showInquiryModifyPage (
+    public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
+        Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+        InquiryModifyPageShowResponseDto inquiryModifyPageShowResponseDto = InquiryModifyPageShowResponseDto.builder()
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryContent(inquiry.getInquiryContent())
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryAnswerDto));
+                .body(APIResponse.success(inquiryModifyPageShowResponseDto));
     }
 
 
@@ -329,12 +346,12 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
-        inquiryService.modifyInquiry(inquiryModifyRequestDto.getInquiryId(),
+        inquiryService.modifyInquiry(inquiryId,
                 inquiryModifyRequestDto.getInquiryTitle(),
                 inquiryModifyRequestDto.getInquiryContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryModifyRequestDto.getInquiryId()));
+                .body(APIResponse.success());
     }
 
 
@@ -350,10 +367,10 @@ public class InquiryController implements InquiryControllerDocs {
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
 
-        inquiryService.deleteInquiry(deleteInquiryRequestDto.getInquiryId());
+        inquiryService.deleteInquiry(inquiryId);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(deleteInquiryRequestDto.getInquiryId()));
+                .body(APIResponse.success());
     }
 
 
@@ -370,11 +387,13 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
 
-        Long inquiryAnswerId = inquiryAnswerService.registerInquiryAnswer(inquiryDetailSaveRequestDto.getInquiryId(),
+        Long inquiryAnswerId = inquiryAnswerService.registerInquiryAnswer(
+                inquiryId,
+                inquiryDetailSaveRequestDto.getAnswerTitle(),
                 inquiryDetailSaveRequestDto.getAnswerContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryAnswerId));
+                .body(APIResponse.success());
     }
 
 
@@ -386,54 +405,33 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryShowResponseDto>>> showTraderInquiry (
+    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        InquiryAdminShowRequestDto inquiryAdminShowRequestDto = new InquiryAdminShowRequestDto();
-        inquiryAdminShowRequestDto.setTraderId(1L);
-        inquiryAdminShowRequestDto.setTab(inquiryStatus);
-        inquiryAdminShowRequestDto.setSearchType(searchType);
-        inquiryAdminShowRequestDto.setSearchText(searchText);
+        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
+        inquiryListShowRequestDto.setInquirerId(123L); // 현재 로그인한 회원의 아이디
+        inquiryListShowRequestDto.setSort(sort);
+        inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        long totalCountInquiry = inquiryService.totalCountByStrategyQuestionerTrader(inquiryAdminShowRequestDto); // 전체 데이터 수
-        int totalPageCount; // 전체 페이지 수
-        if (totalCountInquiry % pageSize == 0) {
-            totalPageCount = (int) (totalCountInquiry / pageSize);
-        } else {
-            totalPageCount = (int) (totalCountInquiry / pageSize) + 1;
-        }
-        int pageStart = (page - 1) * pageSize; // 페이지 시작 위치
+        Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
 
-        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquiryAdminShowRequestDto, pageStart, pageSize);
+        List<InquiryOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+                .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
-        List<InquiryAdminShowResponseDto> collect = inquiryList.stream()
-                .map(i -> new InquiryAdminShowResponseDto(i.getId(),
-                        i.getInquiryAnswer().getId(),
-                        i.getStrategy().getId(),
-                        i.getStrategy().getTrader().getId(),
-                        i.getMember().getId(),
-                        i.getInquiryContent(),
-
-                        i.getStrategy().getName(),
-                        i.getInquiryTitle(),
-                        i.getStrategy().getTrader().getName(),
-                        i.getInquiryRegistrationDate(),
-                        i.getInquiryStatus()))
-                .collect(Collectors.toList());
-
-        PageResponse<InquiryAdminShowResponseDto> traderInquiryPage = PageResponse.<InquiryAdminShowResponseDto>builder()
-                .currentPage(page) // 현재 페이지
-                .pageSize(pageSize) // 한 페이지 크기
-                .totalElement(totalCountInquiry) // 전체 데이터 수
-                .totalPages(totalPageCount) // 전체 페이지 수
-                .content(collect)
+        InquiryListShowResponseDto inquiryListDto = InquiryListShowResponseDto.builder()
+                .inquiryList(inquiryDtoList)
+                .listSize(inquiryDtoList.size())
+                .totalPage(inquiryList.getTotalPages())
+                .totalElements(inquiryList.getTotalElements())
+                .isFirst(inquiryList.isFirst())
+                .isLast(inquiryList.isLast())
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(traderInquiryPage));
+                .body(APIResponse.success(inquiryListDto));
     }
 
 
@@ -452,20 +450,29 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestParam(value = "closed") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findThatInquiryAnswers(inquiryId);
-        InquiryAnswer inquiryAnswer = inquiryAnswerList.get(0);
+        InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
         InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
-        inquiryAnswerShowResponseDto.setId(inquiryAnswer.getId());
+
         inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-        inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+        inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+
         inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-        inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-        inquiryAnswerShowResponseDto.setMemberName(inquiryAnswer.getInquiry().getMember().getName());
         inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-        inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-        inquiryAnswerShowResponseDto.setTraderName(inquiryAnswer.getInquiry().getStrategy().getTrader().getName());
+        inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
+        inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+
+        // 전략 위 아이콘들
+        inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+
+        // 트레이더의 아이콘
+        inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+
+        inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
+
+        inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
         inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
+        inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(inquiryAnswerShowResponseDto));

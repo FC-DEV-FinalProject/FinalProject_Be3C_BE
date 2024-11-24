@@ -35,7 +35,7 @@ public class Inquiry extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private Member inquirer;
 
     // enum (ALL, UNCLOSED, CLOSED)
     @Enumerated(EnumType.STRING)
@@ -55,9 +55,9 @@ public class Inquiry extends BaseEntity {
     public static Inquiry createInquiry(Strategy strategy, Member member, String inquiryTitle, String inquiryContent) {
         Inquiry inquiry = new Inquiry();
         inquiry.setStrategy(strategy);
-        inquiry.setMember(member);
+        inquiry.setInquirer(member);
 
-        inquiry.setInquiryStatus(InquiryStatus.UNCLOSED);
+        inquiry.setInquiryStatus(InquiryStatus.unclosed);
         inquiry.setInquiryTitle(inquiryTitle);
         inquiry.setInquiryContent(inquiryContent);
         inquiry.setInquiryRegistrationDate(LocalDateTime.now());

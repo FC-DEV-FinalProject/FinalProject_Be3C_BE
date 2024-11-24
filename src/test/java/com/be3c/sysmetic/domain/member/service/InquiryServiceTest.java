@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.InquiryAdminShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.InquiryAdminListShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.InquiryListShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
@@ -14,10 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -34,189 +37,93 @@ public class InquiryServiceTest {
     @Autowired InquiryRepository inquiryRepository;
 
     @Test
-    public void 전체_조회() throws Exception {
-        //given
-        Strategy strategy = createStrategy();
-        Member member1 = createMember();
-        Member member2 = createMember();
-        Member member3 = createMember();
-        Member member4 = createMember();
-        Member member5 = createMember();
-
-        inquiryService.registerInquiry(member1.getId(), strategy.getId(), "질문1", "내용1");
-        inquiryService.registerInquiry(member2.getId(), strategy.getId(), "질문2", "내용2");
-        inquiryService.registerInquiry(member3.getId(), strategy.getId(), "질문3", "내용3");
-        inquiryService.registerInquiry(member4.getId(), strategy.getId(), "질문4", "내용4");
-        inquiryService.registerInquiry(member5.getId(), strategy.getId(), "질문5", "내용5");
-
-        int offset = 0;
-        int limit = 3;
-
-        //when
-        List<Inquiry> inquiryList = inquiryService.findInquiryAll(offset, limit);
-        long totalCount = inquiryRepository.totalCountAll();
-
-        //then
-        assertEquals(3, inquiryList.size());
-        assertEquals(5, totalCount);
-
-    }
-
-    @Test
-    public void 회원별_조회() throws Exception {
-        //given
-        Strategy strategy1 = createStrategy();
-        Strategy strategy2 = createStrategy();
-        Strategy strategy3 = createStrategy();
-        Strategy strategy4 = createStrategy();
-        Strategy strategy5 = createStrategy();
-        Member member1 = createMember();
-        Member member2 = createMember();
-
-        Long memberId1 = member1.getId();
-
-        inquiryService.registerInquiry(member1.getId(), strategy1.getId(), "질문1", "내용1");
-        inquiryService.registerInquiry(member2.getId(), strategy2.getId(), "질문2", "내용2");
-        inquiryService.registerInquiry(member1.getId(), strategy3.getId(), "질문3", "내용3");
-        inquiryService.registerInquiry(member1.getId(), strategy4.getId(), "질문4", "내용4");
-        inquiryService.registerInquiry(member1.getId(), strategy5.getId(), "질문5", "내용5");
-
-        int offset = 0;
-        int limit = 3;
-
-        //when
-        List<Inquiry> inquiryList = inquiryService.findInquiryByMember(memberId1, offset, limit);
-        long totalCountMemberId = inquiryRepository.totalCountMemberId(memberId1);
-
-        //then
-        assertEquals(3, inquiryList.size());
-        assertEquals(4, totalCountMemberId);
-
-    }
-
-    @Test
-    public void 상태별_조회() throws Exception {
-        //given
-        Strategy strategy1 = createStrategy();
-        Strategy strategy2 = createStrategy();
-        Strategy strategy3 = createStrategy();
-        Strategy strategy4 = createStrategy();
-        Strategy strategy5 = createStrategy();
-        Member member1 = createMember();
-        Member member2 = createMember();
-
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
-        inquiry1.setInquiryStatus(InquiryStatus.CLOSED);
-        inquiryService.saveInquiry(inquiry1);
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
-        inquiry2.setInquiryStatus(InquiryStatus.CLOSED);
-        inquiryService.saveInquiry(inquiry2);
-        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
-        inquiryService.saveInquiry(inquiry3);
-        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member1, "질문4", "내용4");
-        inquiryService.saveInquiry(inquiry4);
-        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
-        inquiryService.saveInquiry(inquiry5);
-
-        int offset = 0;
-        int limit = 3;
-
-        //when
-        List<Inquiry> inquiryListUnclosed = inquiryService.findInquiryByStatus(InquiryStatus.UNCLOSED, offset, limit);
-        List<Inquiry> inquiryListClosed = inquiryService.findInquiryByStatus(InquiryStatus.CLOSED, offset, limit);
-        long totalCountInquiryStatusClosed = inquiryRepository.totalCountInquiryStatus(InquiryStatus.CLOSED);
-        long totalCountInquiryStatusUnclosed = inquiryRepository.totalCountInquiryStatus(InquiryStatus.UNCLOSED);
-
-        //then
-        assertEquals(3, inquiryListUnclosed.size());
-        assertEquals(2, inquiryListClosed.size());
-        assertEquals(3, totalCountInquiryStatusUnclosed);
-        assertEquals(2, totalCountInquiryStatusClosed);
-    }
-
-    @Test
-    public void 회원별_상태별_조회() throws Exception {
-        //given
-        Strategy strategy1 = createStrategy();
-        Strategy strategy2 = createStrategy();
-        Strategy strategy3 = createStrategy();
-        Strategy strategy4 = createStrategy();
-        Strategy strategy5 = createStrategy();
-        Member member1 = createMember();
-        Member member2 = createMember();
-
-        Long memberId1 = member1.getId();
-        Long memberId2 = member2.getId();
-
-        Inquiry inquiry1 = Inquiry.createInquiry(strategy1, member1, "질문1", "내용1");
-        inquiry1.setInquiryStatus(InquiryStatus.CLOSED);
-        inquiryService.saveInquiry(inquiry1);
-        Inquiry inquiry2 = Inquiry.createInquiry(strategy2, member2, "질문2", "내용2");
-        inquiry2.setInquiryStatus(InquiryStatus.CLOSED);
-        inquiryService.saveInquiry(inquiry2);
-        Inquiry inquiry3 = Inquiry.createInquiry(strategy3, member1, "질문3", "내용3");
-        inquiryService.saveInquiry(inquiry3);
-        Inquiry inquiry4 = Inquiry.createInquiry(strategy4, member2, "질문4", "내용4");
-        inquiryService.saveInquiry(inquiry4);
-        Inquiry inquiry5 = Inquiry.createInquiry(strategy5, member1, "질문5", "내용5");
-        inquiryService.saveInquiry(inquiry5);
-
-        int offset = 0;
-        int limit = 3;
-
-        //when
-        List<Inquiry> inquiryListUnclosed1 = inquiryService.findInquiryByMemberAndStatus(memberId1, InquiryStatus.UNCLOSED, offset, limit);
-        List<Inquiry> inquiryListClosed1 = inquiryService.findInquiryByMemberAndStatus(memberId1, InquiryStatus.CLOSED, offset, limit);
-        List<Inquiry> inquiryListUnclosed2 = inquiryService.findInquiryByMemberAndStatus(memberId2, InquiryStatus.UNCLOSED, offset, limit);
-        List<Inquiry> inquiryListClosed2 = inquiryService.findInquiryByMemberAndStatus(memberId2, InquiryStatus.CLOSED, offset, limit);
-
-        //then
-        assertEquals(2, inquiryListUnclosed1.size());
-        assertEquals(1, inquiryListClosed1.size());
-        assertEquals(1, inquiryListUnclosed2.size());
-        assertEquals(1, inquiryListClosed2.size());
-    }
-
-    @Test
     public void 문의_등록() throws Exception {
         //given
         Strategy strategy = createStrategy();
         Member member = createMember();
 
         //when
-        Long savedId = inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문1", "내용1");
+        Long savedId = inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목1", "문의내용1");
 
         //then
-        assertEquals("질문1", inquiryRepository.findOne(savedId).getInquiryTitle());
+        assertEquals("문의제목1", inquiryRepository.findById(savedId).get().getInquiryTitle());
+        assertEquals("문의내용1", inquiryRepository.findById(savedId).get().getInquiryContent());
     }
 
     @Test
     public void 문의_수정() throws Exception {
         //given
+        Strategy strategy = createStrategy();
+        Member member = createMember();
+        Long savedId = inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목1", "문의내용1");
 
         //when
+        inquiryService.modifyInquiry(savedId, "수정문의제목1", "수정문의내용1");
 
         //then
-
+        assertEquals("수정문의제목1", inquiryRepository.findById(savedId).get().getInquiryTitle());
+        assertEquals("수정문의내용1", inquiryRepository.findById(savedId).get().getInquiryContent());
     }
 
     @Test
     public void 문의_삭제() throws Exception {
         //given
+        Strategy strategy = createStrategy();
+        Member member = createMember();
+        Long savedId = inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목1", "문의내용1");
 
         //when
+        inquiryService.deleteInquiry(savedId);
 
         //then
+        assertTrue(inquiryRepository.findById(savedId).isEmpty());
 
     }
 
     @Test
-    public void 문의_검색() throws Exception {
+    public void 문의_목록_삭제() throws Exception {
         //given
-        InquiryAdminShowRequestDto inquirySearch = new InquiryAdminShowRequestDto();
-        inquirySearch.setSearchType("전략명");
-        inquirySearch.setSearchText("삼성");
-        inquirySearch.setTab(InquiryStatus.ALL);
+        Strategy strategy1 = createStrategy();
+        Strategy strategy2 = createStrategy();
+        Member member = createMember();
+
+        inquiryService.registerInquiry(member.getId(), strategy1.getId(), "질문1", "내용1");
+        inquiryService.registerInquiry(member.getId(), strategy2.getId(), "질문2", "내용2");
+        inquiryService.registerInquiry(member.getId(), strategy2.getId(), "질문3", "내용3");
+        inquiryService.registerInquiry(member.getId(), strategy2.getId(), "질문4", "내용4");
+        inquiryService.registerInquiry(member.getId(), strategy1.getId(), "질문5", "내용5");
+        inquiryService.registerInquiry(member.getId(), strategy1.getId(), "질문6", "내용6");
+
+        //when
+        List<Long> idList = new ArrayList<>();
+        idList.add(1L);
+        idList.add(2L);
+        idList.add(3L);
+        idList.add(4L);
+        inquiryService.deleteAdminInquiryList(idList);
+
+        //then
+        assertTrue(inquiryRepository.findById(1L).isEmpty());
+        assertTrue(inquiryRepository.findById(2L).isEmpty());
+        assertTrue(inquiryRepository.findById(3L).isEmpty());
+        assertTrue(inquiryRepository.findById(4L).isEmpty());
+        assertTrue(inquiryRepository.findById(5L).isPresent());
+        assertTrue(inquiryRepository.findById(6L).isPresent());
+
+    }
+
+    @Test
+    public void 관리자_문의_검색() throws Exception {
+        //given
+        InquiryAdminListShowRequestDto inquirySearch1 = new InquiryAdminListShowRequestDto();
+        inquirySearch1.setTab(InquiryStatus.unclosed);
+        inquirySearch1.setSearchType("strategy");
+        inquirySearch1.setSearchText("삼성전");
+
+        InquiryAdminListShowRequestDto inquirySearch2 = new InquiryAdminListShowRequestDto();
+        inquirySearch2.setTab(InquiryStatus.closed);
+        inquirySearch2.setSearchType("strategy");
+        inquirySearch2.setSearchText("");
 
         Strategy strategy = createStrategy();
         Member member = createMember();
@@ -224,16 +131,65 @@ public class InquiryServiceTest {
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문1", "내용1");
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문2", "내용2");
         inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문3", "내용3");
-
-        int offset = 0;
-        int limit = 3;
+        Long inquiryId1 = inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문4", "내용4");
+        Inquiry inquiry1 = inquiryRepository.findById(inquiryId1).get();
+        inquiry1.setInquiryStatus(InquiryStatus.closed);
+        Long inquiryId2 = inquiryService.registerInquiry(member.getId(), strategy.getId(), "질문5", "내용5");
+        Inquiry inquiry2 = inquiryRepository.findById(inquiryId2).get();
+        inquiry2.setInquiryStatus(InquiryStatus.closed);
 
         //when
-        List<Inquiry> inquiryList = inquiryService.findInquiresByStrategyQuestionerTrader(inquirySearch, offset, limit);
+        int page = 1;
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiresAdmin(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiresAdmin(inquirySearch2, page-1);
 
         //then
-        assertEquals(3, inquiryList.size());
+        assertEquals(3, inquiryList1.getNumberOfElements());
+        assertEquals(2, inquiryList2.getNumberOfElements());
     }
+
+    @Test
+    public void 문의_검색() throws Exception {
+        //given
+        Strategy strategy1 = createStrategy();
+        Strategy strategy2 = createStrategy();
+        strategy2.setName("LG전자");
+        Member member1 = createMember();
+        Member member2 = createMember();
+
+        InquiryListShowRequestDto inquirySearch1 = new InquiryListShowRequestDto();
+        inquirySearch1.setSort("registrationDate");
+        inquirySearch1.setTab(InquiryStatus.all);
+
+        InquiryListShowRequestDto inquirySearch2 = new InquiryListShowRequestDto();
+        inquirySearch2.setSort("strategyName");
+        inquirySearch2.setTab(InquiryStatus.all);
+
+        InquiryListShowRequestDto inquirySearch3 = new InquiryListShowRequestDto();
+        inquirySearch3.setInquirerId(member1.getId());
+        inquirySearch3.setSort("strategyName");
+        inquirySearch3.setTab(InquiryStatus.all);
+
+        inquiryService.registerInquiry(member1.getId(), strategy1.getId(), "질문1", "내용1");
+        inquiryService.registerInquiry(member1.getId(), strategy2.getId(), "질문2", "내용2");
+        inquiryService.registerInquiry(member1.getId(), strategy2.getId(), "질문3", "내용3");
+        inquiryService.registerInquiry(member2.getId(), strategy2.getId(), "질문4", "내용4");
+        inquiryService.registerInquiry(member2.getId(), strategy1.getId(), "질문5", "내용5");
+        inquiryService.registerInquiry(member2.getId(), strategy1.getId(), "질문6", "내용6");
+
+        //when
+        int page = 1;
+        Page<Inquiry> inquiryList1 = inquiryService.findInquires(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquires(inquirySearch2, page-1);
+        Page<Inquiry> inquiryList3 = inquiryService.findInquires(inquirySearch3, page-1);
+
+        // then
+        assertEquals(6, inquiryList1.getNumberOfElements());
+        assertEquals("질문6", inquiryList1.getContent().get(0).getInquiryTitle());
+        assertEquals("질문2", inquiryList2.getContent().get(0).getInquiryTitle());
+        assertEquals("질문2", inquiryList3.getContent().get(0).getInquiryTitle());
+    }
+
 
     private Member createMember() {
         Member member = new Member();
@@ -242,8 +198,8 @@ public class InquiryServiceTest {
         member.setEmail("user@gmail.com");
         member.setPassword("123456");
         member.setName("송중기");
-        member.setBirth(LocalDateTime.now());
         member.setNickname("유시진11");
+        member.setBirth(LocalDateTime.now());
         member.setPhoneNumber("01012345678");
         member.setUsingStatusCode("MS002");
         member.setTotalFollow(39);
@@ -252,10 +208,6 @@ public class InquiryServiceTest {
         member.setInfoConsentDate(LocalDateTime.now());
         member.setReceiveMarketingConsent("Y");
         member.setMarketingConsentDate(LocalDateTime.now());
-//        member.setCreatedBy(1L);
-//        member.setCreatedDate(LocalDateTime.now());
-//        member.setModifiedBy(1L);
-//        member.setModifiedDate(LocalDateTime.now());
         em.persist(member);
         return member;
     }
@@ -266,10 +218,6 @@ public class InquiryServiceTest {
         method.setStatusCode("StatusCode");
 //        method.setExplanation("Explanation");
 //        method.setMethodCreatedDate(LocalDateTime.now());
-//        method.setCreatedBy(1L);
-//        method.setCreatedDate(LocalDateTime.now());
-//        method.setModifiedBy(1L);
-//        method.setModifiedDate(LocalDateTime.now());
         em.persist(method);
         return method;
     }
@@ -288,10 +236,6 @@ public class InquiryServiceTest {
         strategy.setSmScore(3.3);
         strategy.setStrategyCreatedDate(LocalDateTime.now());
         strategy.setStrategyModifiedDate(LocalDateTime.now());
-//        strategy.setCreatedBy(1L);
-//        strategy.setCreatedDate(LocalDateTime.now());
-//        strategy.setModifiedBy(1L);
-//        strategy.setModifiedDate(LocalDateTime.now());
         em.persist(strategy);
         return strategy;
     }

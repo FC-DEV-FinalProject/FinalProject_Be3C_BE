@@ -4,12 +4,13 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,9 +40,13 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @Parameters({
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
+            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
+    })
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryAdminShowResponseDto>>> showAdminInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+    public ResponseEntity<APIResponse<InquiryAdminListShowResponseDto>> showAdminInquiry (
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -68,6 +73,10 @@ public interface InquiryControllerDocs {
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
                     content = @Content(mediaType = "application/json")
             )
+    })
+    @Parameters({
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
+            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
@@ -135,16 +144,11 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "해당 문의를 찾지 못함 (NOT_FOUND)",
                     content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "207",
-                    description = "문의 중 일부만 삭제 실패 (MULTI_STATUS)",
-                    content = @Content(mediaType = "application/json")
             )
     })
     @DeleteMapping("/admin/inquiry/delete")
-    public ResponseEntity<APIResponse<Long>> deleteAdminInquiryList(
-            @RequestBody @Valid InquiryListDeleteRequestDto noticeListDeleteRequestDto);
+    public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+            @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
 
     // 질문자 문의 등록 화면 조회 API
@@ -169,7 +173,7 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @GetMapping("/strategy/inquiry")
+    @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
 
@@ -201,7 +205,7 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PostMapping("/strategy/inquiry")
+    @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
@@ -228,8 +232,12 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @Parameters({
+            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
+    })
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryShowResponseDto>>> showInquirerInquiry (
+    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed);
@@ -287,8 +295,12 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @Parameters({
+            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
+    })
     @GetMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<InquiryShowModifyPageResponseDto>> showInquiryModifyPage (
+    public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
@@ -420,8 +432,12 @@ public interface InquiryControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @Parameters({
+            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
+    })
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryShowResponseDto>>> showTraderInquiry (
+    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed);
@@ -448,6 +464,10 @@ public interface InquiryControllerDocs {
                     description = "문의의 상세 데이터 조회에 실패했을 때 (NOT_FOUND)",
                     content = @Content(mediaType = "application/json")
             )
+    })
+    @Parameters({
+            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
+            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (

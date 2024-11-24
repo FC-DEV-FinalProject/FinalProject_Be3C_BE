@@ -2,14 +2,12 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
-import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,28 +35,28 @@ public class InquiryAnswerServiceTest {
     @Test
     public void 문의_답변_등록() throws Exception {
         //given
-        Inquiry inquiry = createInquiry();
+        Inquiry inquiry = createInquiry("문의제목1", "문의내용1");
 
-        InquiryAnswer inquiryAnswer = InquiryAnswer.createInquiryAnswer(inquiry, "답변1");
+        InquiryAnswer inquiryAnswer = InquiryAnswer.createInquiryAnswer(inquiry, "답변제목1", "답변내용1");
 
         //when
         Long savedId = inquiryAnswerService.saveInquiryAnswer(inquiryAnswer);
 
         //then
-        assertEquals(inquiryAnswer, inquiryAnswerRepository.findOne(savedId));
+        assertEquals(inquiryAnswer, inquiryAnswerRepository.findById(savedId).get());
 
     }
 
     @Test
     public void 전체_조회() throws Exception {
         //given
-        Inquiry inquiry1 = createInquiry();
-        Inquiry inquiry2 = createInquiry();
+        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
+        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
 
-        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변1");
+        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변제목1", "답변내용1");
         inquiryAnswerService.saveInquiryAnswer(inquiryAnswer1);
 
-        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변2");
+        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변제목2", "답변내용2");
         inquiryAnswerService.saveInquiryAnswer(inquiryAnswer2);
 
         //when
@@ -72,43 +70,45 @@ public class InquiryAnswerServiceTest {
     @Test
     public void 문의별_조회() throws Exception {
         //given
-        Inquiry inquiry1 = createInquiry();
-        Inquiry inquiry2 = createInquiry();
+        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
+        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
 
         Long inquiryId1 = inquiry1.getId();
         Long inquiryId2 = inquiry2.getId();
 
-        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변1");
+        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변제목1", "답변내용1");
         inquiryAnswerService.saveInquiryAnswer(inquiryAnswer1);
 
-        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변2");
+        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변제목2", "답변내용2");
         inquiryAnswerService.saveInquiryAnswer(inquiryAnswer2);
 
         //when
-        List<InquiryAnswer> inquiryAnswerList1 = inquiryAnswerService.findThatInquiryAnswers(inquiryId1);
-        List<InquiryAnswer> inquiryAnswerList2 = inquiryAnswerService.findThatInquiryAnswers(inquiryId2);
+        InquiryAnswer inquiryAnswerList1 = inquiryAnswerService.findThatInquiryAnswer(inquiryId1);
+        InquiryAnswer inquiryAnswerList2 = inquiryAnswerService.findThatInquiryAnswer(inquiryId2);
 
         //then
-        assertEquals("답변1", inquiryAnswerList1.get(0).getAnswerContent());
-        assertEquals("답변2", inquiryAnswerList2.get(0).getAnswerContent());
+        assertEquals("답변내용1", inquiryAnswerList1.getAnswerContent());
+        assertEquals("답변내용2", inquiryAnswerList2.getAnswerContent());
 
     }
 
     @Test
     public void 답변_등록() throws Exception {
         //given
-        Inquiry inquiry = createInquiry();
+        Inquiry inquiry = createInquiry("문의제목1", "문의내용1");
 
         //when
-        Long savedId = inquiryAnswerService.registerInquiryAnswer(inquiry.getId(), "답변1");
+        Long savedId = inquiryAnswerService.registerInquiryAnswer(inquiry.getId(), "답변제목1", "답변내용1");
 
         //then
-        assertEquals("답변1", inquiryAnswerRepository.findOne(savedId).getAnswerContent());
+        assertEquals("답변제목1", inquiryAnswerRepository.findById(savedId).get().getAnswerTitle());
+        assertEquals("답변내용1", inquiryAnswerRepository.findById(savedId).get().getAnswerContent());
 
     }
 
-    private Inquiry createInquiry() {
-        Inquiry inquiry = Inquiry.createInquiry(createStrategy(), createMember(), "질문1", "내용1");
+
+    private Inquiry createInquiry(String inquiryTitle, String inquiryContent) {
+        Inquiry inquiry = Inquiry.createInquiry(createStrategy(), createMember(), inquiryTitle, inquiryContent);
         em.persist(inquiry);
         return inquiry;
     }
@@ -120,8 +120,8 @@ public class InquiryAnswerServiceTest {
         member.setEmail("user@gmail.com");
         member.setPassword("123456");
         member.setName("송중기");
-        member.setBirth(LocalDateTime.now());
         member.setNickname("유시진11");
+        member.setBirth(LocalDateTime.now());
         member.setPhoneNumber("01012345678");
         member.setUsingStatusCode("MS002");
         member.setTotalFollow(39);
@@ -130,10 +130,6 @@ public class InquiryAnswerServiceTest {
         member.setInfoConsentDate(LocalDateTime.now());
         member.setReceiveMarketingConsent("Y");
         member.setMarketingConsentDate(LocalDateTime.now());
-//        member.setCreatedBy(1L);
-//        member.setCreatedDate(LocalDateTime.now());
-//        member.setModifiedBy(1L);
-//        member.setModifiedDate(LocalDateTime.now());
         em.persist(member);
         return member;
     }
@@ -144,10 +140,6 @@ public class InquiryAnswerServiceTest {
         method.setStatusCode("StatusCode");
 //        method.setExplanation("Explanation");
 //        method.setMethodCreatedDate(LocalDateTime.now());
-//        method.setCreatedBy(1L);
-//        method.setCreatedDate(LocalDateTime.now());
-//        method.setModifiedBy(1L);
-//        method.setModifiedDate(LocalDateTime.now());
         em.persist(method);
         return method;
     }
@@ -166,10 +158,6 @@ public class InquiryAnswerServiceTest {
         strategy.setSmScore(3.3);
         strategy.setStrategyCreatedDate(LocalDateTime.now());
         strategy.setStrategyModifiedDate(LocalDateTime.now());
-//        strategy.setCreatedBy(1L);
-//        strategy.setCreatedDate(LocalDateTime.now());
-//        strategy.setModifiedBy(1L);
-//        strategy.setModifiedDate(LocalDateTime.now());
         em.persist(strategy);
         return strategy;
     }
