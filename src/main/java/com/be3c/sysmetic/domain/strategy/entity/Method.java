@@ -1,7 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "method")
-public class Method {
+public class Method extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,19 +26,8 @@ public class Method {
     @Column(name = "status_code", nullable = false)
     private String statusCode;
 
+    @CreationTimestamp
     @Column(name = "method_created_date", nullable = false)
     private LocalDateTime methodCreatedDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
-
 }
+

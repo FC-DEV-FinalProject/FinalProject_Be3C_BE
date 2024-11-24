@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,12 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "reset_password_log")
-public class ResetPasswordLog {
+public class ResetPasswordLog extends BaseEntity {
     /*
         id : 비밀번호재설정이력 식별번호
         tryIp : 시도한 ip
         member : 시도한 회원 id
-        tryDate : 시도일자
+        tryDate : 시도일시
      */
 
     @Id
@@ -36,15 +37,5 @@ public class ResetPasswordLog {
     @Column(name = "try_date", nullable = false)
     private LocalDateTime tryDate;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 }
+

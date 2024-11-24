@@ -1,8 +1,10 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,11 +12,10 @@ import java.time.LocalDateTime;
 @ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
-//@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
 @Table(name = "member")
-public class Member {
+public class Member extends BaseEntity {
     /*
         id : 회원의 식별번호
         roleCode : 회원등급코드
@@ -22,6 +23,7 @@ public class Member {
         password : 비밀번호
         name : 이름
         nickname : 닉네임
+        birth : 생년월일
         phoneNumber : 휴대폰 번호
         usingStatusCode : 회원상태코드
         totalFollow : 총 팔로워 수
@@ -30,6 +32,12 @@ public class Member {
         receiveMarketingConsent : 마케팅 수신 동의 여부
         marketingConsentDate : 마케팅 수신 동의일
      */
+
+    @PrePersist
+    public void prePersist() {
+        usingStatusCode = "US001";  // 유효: US001, 휴면: US002
+        totalFollow = 0;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +57,9 @@ public class Member {
 
     @Column(name = "nickname", nullable = false)
     private String nickname;
+
+    @Column(name = "birth", nullable = false)
+    private LocalDate birth;
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
@@ -73,16 +84,4 @@ public class Member {
 
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
-
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private Long modifiedBy;
-
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
 }
