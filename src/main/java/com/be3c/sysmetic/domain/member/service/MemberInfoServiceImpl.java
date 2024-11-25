@@ -82,7 +82,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
             member.setNickname(memberPatchInfoRequestDto.getNickname());
         }
 
-        member.setPhoneNumber(memberPatchInfoRequestDto.getPhone_number());
+        member.setPhoneNumber(memberPatchInfoRequestDto.getPhoneNumber());
 
         // 수정 필요. 너무 구리다.
         if(memberPatchInfoRequestDto.getReceiveInfoConsent()) {

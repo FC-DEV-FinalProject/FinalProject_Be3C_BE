@@ -89,8 +89,14 @@ public class Member extends BaseEntity {
     private LocalDateTime marketingConsentDate;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Folder> folders;
+
+    @OneToMany(mappedBy = "trader", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Strategy> strategies;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Reply> replies;
 }

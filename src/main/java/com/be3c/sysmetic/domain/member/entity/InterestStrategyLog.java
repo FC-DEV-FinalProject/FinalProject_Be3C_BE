@@ -20,16 +20,8 @@ public class InterestStrategyLog extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "folder_id", nullable = false)
-    private Folder folder;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "strategy_id", nullable = false)
-    private Strategy strategy;
+    @JoinColumn(name = "interest_strategy_id", nullable = false)
+    private InterestStrategy interestStrategy;
 
     @Column(name = "log_code", nullable = false)
     private String LogCode;
