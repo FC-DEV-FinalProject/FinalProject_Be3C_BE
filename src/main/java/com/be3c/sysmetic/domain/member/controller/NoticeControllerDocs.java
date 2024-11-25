@@ -1,10 +1,12 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,23 +25,19 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 등록 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 등록 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "공지사항 등록 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 등록 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
-                    content = @Content(mediaType = "application/json")
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @PostMapping("/admin/notice/write")
@@ -56,17 +54,16 @@ public interface NoticeControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 데이터 조회 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 데이터 조회 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "페이지 내 공지사항이 없음 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/admin/notice")
@@ -84,23 +81,19 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공개여부 수정 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공개여부 수정 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "공개여부 수정 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공개여부 수정 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             )
     })
     @PutMapping("/admin/notice/{noticeId}/closed")
@@ -116,17 +109,16 @@ public interface NoticeControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 상세 데이터 조회 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 상세 데이터 조회 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "공지사항 상세 데이터 조회 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/admin/notice/{noticeId}/view")
@@ -146,17 +138,16 @@ public interface NoticeControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 수정 화면 데이터 조회 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 수정 화면 데이터 조회 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "공지사항 수정 화면 데이터 조회 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/admin/notice/{noticeId}/modify")
@@ -175,28 +166,23 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 수정 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 수정 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "공지사항 수정 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 수정 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)\n+ +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음",
-                    content = @Content(mediaType = "application/json")
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)\n+ +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음"
             )
     })
     @PutMapping("/admin/notice/{noticeId}/modify")
@@ -213,23 +199,19 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 삭제 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 삭제 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "공지사항 삭제 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 삭제 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             )
     })
     @DeleteMapping("/admin/notice/{noticeId}/delete")
@@ -245,28 +227,23 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 목록 삭제 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 목록 삭제 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "공지사항 목록 삭제 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 목록 삭제 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             ),
             @ApiResponse(
                     responseCode = "207",
-                    description = "공지사항 중 일부만 삭제에 실패 (MULTI_STATUS)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 중 일부만 삭제에 실패 (MULTI_STATUS)"
             )
     })
     @DeleteMapping("/admin/notice/delete")
@@ -282,13 +259,12 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 조회 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 조회 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "공지사항 없음 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/notice")
@@ -305,13 +281,12 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "공지사항 상세 조회 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "공지사항 상세 조회 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "공지사항 상세 조회 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/notice/{noticeId}/view")
