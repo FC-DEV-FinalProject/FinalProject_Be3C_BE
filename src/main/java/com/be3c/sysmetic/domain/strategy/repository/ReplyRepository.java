@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,8 +25,8 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto(" +
-            "r.member.id, r.strategy.id, r.content) " +
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto" +
+            "(r.member.id, r.strategy.id, r.content) " +
             "FROM Reply r " +
             "WHERE r.strategy.id = :strategyId and r.statusCode = :statusCode")
     Page<PageReplyResponseDto> findPageByStrategyIdAndStatusCode(
@@ -34,7 +35,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             Pageable pageable
     );
 
-    Optional<Reply> findByIdAndStatusCode(Long id, String statusCode);
+    List<Reply> findByStrategyIdAndStatusCode(Long strategyId, String statusCode);
 
     Optional<Reply> findByIdAndMemberIdAndStatusCode(
             Long id, Long member_id, String statusCode

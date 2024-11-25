@@ -75,10 +75,8 @@ public class ReplyServiceImpl implements ReplyService{
 
     @Override
     public PageResponse<PageReplyResponseDto> getReplyPage(Long strategyId, Integer page) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
         Pageable pageable = PageRequest.of(
-                page,
+                page - 1,
                 10,
                 Sort.by("createdAt").descending()
         );
@@ -90,7 +88,7 @@ public class ReplyServiceImpl implements ReplyService{
                         pageable
                 );
 
-        if(!findReplyPage.hasContent()) {
+        if(findReplyPage.hasContent()) {
             return PageResponse.<PageReplyResponseDto>builder()
                     .totalElement(findReplyPage.getTotalElements())
                     .currentPage(findReplyPage.getNumber())
@@ -116,7 +114,7 @@ public class ReplyServiceImpl implements ReplyService{
                 .strategy(strategyRepository
                         .findByIdAndStatusCode(
                                 replyPostRequestDto.getStrategyId(),
-                                USING_STATE.getCode()
+                                Code.OPEN_STRATEGY.getCode()
                         ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다.")))
                 .content(replyPostRequestDto.getContent())
                 .statusCode(USING_STATE.getCode())
