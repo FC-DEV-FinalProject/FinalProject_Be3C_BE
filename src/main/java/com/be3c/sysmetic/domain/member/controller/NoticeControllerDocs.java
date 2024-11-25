@@ -70,7 +70,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/admin/notice")
-    ResponseEntity<APIResponse<NoticeAdminListShowResponseDto>> showAdminNotice(
+    ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -292,7 +292,7 @@ public interface NoticeControllerDocs {
             )
     })
     @GetMapping("/notice")
-    ResponseEntity<APIResponse<NoticeListShowResponseDto>> showNotice(
+    ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText);
 

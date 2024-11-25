@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class NoticeContoller implements NoticeControllerDocs {
@@ -41,12 +44,19 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice")
-    public ResponseEntity<APIResponse<NoticeAdminListShowResponseDto>> showAdminNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        NoticeAdminListShowResponseDto adminNoticePage = new NoticeAdminListShowResponseDto();
+        List<NoticeAdminListOneShowResponseDto> noticeAdminList = new ArrayList<>();
+        PageResponse<NoticeAdminListOneShowResponseDto> adminNoticePage = PageResponse.<NoticeAdminListOneShowResponseDto>builder()
+                .currentPage(1)
+                .pageSize(10)
+                .totalElement(100)
+                .totalPages(10)
+                .content(noticeAdminList)
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(adminNoticePage));
@@ -168,11 +178,18 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/notice")
-    public ResponseEntity<APIResponse<NoticeListShowResponseDto>> showNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        NoticeListShowResponseDto noticePage = new NoticeListShowResponseDto();
+        List<NoticeListOneShowResponseDto> noticeList = new ArrayList<>();
+        PageResponse<NoticeListOneShowResponseDto> noticePage = PageResponse.<NoticeListOneShowResponseDto>builder()
+                .currentPage(1)
+                .pageSize(10)
+                .totalElement(100)
+                .totalPages(10)
+                .content(noticeList)
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(noticePage));
