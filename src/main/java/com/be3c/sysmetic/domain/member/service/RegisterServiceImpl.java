@@ -99,7 +99,7 @@ public class RegisterServiceImpl implements RegisterService {
         redisUtils.deleteEmailAuthCode(email);
         return true; // 인증 성공
     }
-    
+
     // 4. 닉네임 중복확인
     @Override
     public boolean checkNicknameDuplication(String nickname) {
@@ -134,5 +134,5 @@ public class RegisterServiceImpl implements RegisterService {
             throw new RuntimeException("회원가입에 실패하였습니다.", e);
         }
     }
-    
+
 }
