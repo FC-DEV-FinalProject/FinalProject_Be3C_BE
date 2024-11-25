@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "문의 상세 조회 응답 DTO")
-public class InquiryOneShowResponseDto {
+public class InquiryListOneShowResponseDto {
 
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
@@ -29,7 +29,7 @@ public class InquiryOneShowResponseDto {
     @Schema(description = "문의 등록 일시", example = "2024-11-22T15:30:00")
     private LocalDateTime inquiryRegistrationDate;
 
-    @Schema(description = "문의 상태", example = "CLOSED")
+    @Schema(description = "문의 상태", example = "closed")
     private InquiryStatus inquiryStatus;
 
 }

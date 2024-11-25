@@ -121,7 +121,7 @@ public class InquiryAnswerServiceTest {
         member.setPassword("123456");
         member.setName("송중기");
         member.setNickname("유시진11");
-        member.setBirth(LocalDateTime.now());
+        member.setBirth(LocalDateTime.now().toLocalDate());
         member.setPhoneNumber("01012345678");
         member.setUsingStatusCode("MS002");
         member.setTotalFollow(39);

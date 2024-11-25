@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "관리자 문의 상세 조회 응답 DTO")
-public class InquiryAdminOneShowResponseDto {
+public class InquiryAdminListOneShowResponseDto {
 
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
@@ -32,6 +32,6 @@ public class InquiryAdminOneShowResponseDto {
     @Schema(description = "질문자 닉네임", example = "InquirerNick")
     private String inquirerNickname;
 
-    @Schema(description = "문의 상태", example = "CLOSED")
+    @Schema(description = "문의 상태", example = "closed")
     private InquiryStatus inquiryStatus;
 }

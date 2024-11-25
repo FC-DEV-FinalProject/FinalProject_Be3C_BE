@@ -29,7 +29,7 @@ public class InquiryAnswerShowResponseDto {
     @Schema(description = "질문자 닉네임", example = "InquirerNick")
     private String inquirerNickname;
 
-    @Schema(description = "문의 상태", example = "CLOSED")
+    @Schema(description = "문의 상태", example = "closed")
     private InquiryStatus inquiryStatus;
 
     // 전략 위 아이콘들
@@ -45,6 +45,7 @@ public class InquiryAnswerShowResponseDto {
     @Schema(description = "문의 내용", example = "What is the strategy?")
     private String inquiryContent;
 
+
     @Schema(description = "답변 제목", example = "Strategy Details")
     private String answerTitle;
 
@@ -53,4 +54,16 @@ public class InquiryAnswerShowResponseDto {
 
     @Schema(description = "답변 내용", example = "Here are the details of the strategy.")
     private String answerContent;
+
+    @Schema(description = "이전 문의 제목", example = "문의 제목 예")
+    private String previousTitle;
+
+    @Schema(description = "이전 문의 작성일시", example = "2023-11-21T10:15:30")
+    private LocalDateTime previousWriteDate;
+
+    @Schema(description = "다음 문의 제목", example = "문의 제목 예")
+    private String nextTitle;
+
+    @Schema(description = "다음 문의 작성일시", example = "2023-11-21T10:15:30")
+    private LocalDateTime nextWriteDate;
 }

@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<InquiryAdminListShowResponseDto>> showAdminInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -51,25 +52,24 @@ public class InquiryController implements InquiryControllerDocs {
 
         Page<Inquiry> inquiryList = inquiryService.findInquiresAdmin(inquiryAdminListShowRequestDto, page-1);
 
-        List<InquiryAdminOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+        List<InquiryAdminListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
 
-        InquiryAdminListShowResponseDto inquiryListDto = InquiryAdminListShowResponseDto.builder()
-                .inquiryAdminList(inquiryDtoList)
-                .listSize(inquiryDtoList.size())
-                .totalPage(inquiryList.getTotalPages())
-                .totalElements(inquiryList.getTotalElements())
-                .isFirst(inquiryList.isFirst())
-                .isLast(inquiryList.isLast())
+        PageResponse<InquiryAdminListOneShowResponseDto> adminInquiryPage = PageResponse.<InquiryAdminListOneShowResponseDto>builder()
+                .currentPage(page)
+                .pageSize(10)
+                .totalElement(inquiryList.getTotalElements())
+                .totalPages(inquiryList.getTotalPages())
+                .content(inquiryDtoList)
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryListDto));
+                .body(APIResponse.success(adminInquiryPage));
     }
 
-    public static InquiryAdminOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
+    public static InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
 
-        return InquiryAdminOneShowResponseDto.builder()
+        return InquiryAdminListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .traderNickname(inquiry.getStrategy().getTrader().getNickname())
                 .strategyName(inquiry.getStrategy().getName())
@@ -219,7 +219,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showInquirerInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
@@ -232,25 +232,24 @@ public class InquiryController implements InquiryControllerDocs {
 
         Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
 
-        List<InquiryOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+        List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
-        InquiryListShowResponseDto inquiryListDto = InquiryListShowResponseDto.builder()
-                .inquiryList(inquiryDtoList)
-                .listSize(inquiryDtoList.size())
-                .totalPage(inquiryList.getTotalPages())
-                .totalElements(inquiryList.getTotalElements())
-                .isFirst(inquiryList.isFirst())
-                .isLast(inquiryList.isLast())
+        PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                .currentPage(page)
+                .pageSize(10)
+                .totalElement(inquiryList.getTotalElements())
+                .totalPages(inquiryList.getTotalPages())
+                .content(inquiryDtoList)
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryListDto));
+                .body(APIResponse.success(inquiryPage));
     }
 
-    public static InquiryOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
+    public static InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
 
-        return InquiryOneShowResponseDto.builder()
+        return InquiryListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .inquiryTitle(inquiry.getInquiryTitle())
                 .strategyName(inquiry.getStrategy().getName())
@@ -404,7 +403,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showTraderInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed) {
@@ -417,20 +416,19 @@ public class InquiryController implements InquiryControllerDocs {
 
         Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
 
-        List<InquiryOneShowResponseDto> inquiryDtoList = inquiryList.stream()
+        List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
-        InquiryListShowResponseDto inquiryListDto = InquiryListShowResponseDto.builder()
-                .inquiryList(inquiryDtoList)
-                .listSize(inquiryDtoList.size())
-                .totalPage(inquiryList.getTotalPages())
-                .totalElements(inquiryList.getTotalElements())
-                .isFirst(inquiryList.isFirst())
-                .isLast(inquiryList.isLast())
+        PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                .currentPage(page)
+                .pageSize(10)
+                .totalElement(inquiryList.getTotalElements())
+                .totalPages(inquiryList.getTotalPages())
+                .content(inquiryDtoList)
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryListDto));
+                .body(APIResponse.success(inquiryPage));
     }
 
 

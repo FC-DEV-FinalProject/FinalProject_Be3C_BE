@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,17 +28,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 데이터 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -45,7 +45,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<InquiryAdminListShowResponseDto>> showAdminInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -61,17 +61,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의의 상세 데이터 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의의 상세 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -95,23 +94,19 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 삭제 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 삭제 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 삭제 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 삭제 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 문의를 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 문의를 찾지 못함 (NOT_FOUND)"
             )
     })
     @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
@@ -127,23 +122,19 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 목록 삭제 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 목록 삭제 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 목록 삭제 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 목록 삭제 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 문의를 찾지 못함 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 문의를 찾지 못함 (NOT_FOUND)"
             )
     })
     @DeleteMapping("/admin/inquiry/delete")
@@ -160,17 +151,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "질문자 문의 등록 화면 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "질문자 문의 등록 화면 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "질문자 문의 등록 화면 조회에 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/strategy/{strategyId}/inquiry")
@@ -186,23 +176,19 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 등록에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 등록에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 등록에 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 등록에 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
-                    content = @Content(mediaType = "application/json")
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @PostMapping("/strategy/{strategyId}/inquiry")
@@ -219,17 +205,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 데이터 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -237,7 +222,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showInquirerInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed);
@@ -252,17 +237,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의의 상세 데이터 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의의 상세 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @GetMapping("/member/inquiry/{inquiryId}/view")
@@ -282,17 +266,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "질문자 문의 수정 화면 조회에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "질문자 문의 수정 화면 조회에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "질문자 문의 수정 화면 조회에 실패 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -315,28 +298,23 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 수정에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 수정에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 수정에 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 수정에 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (BAD_REQUEST)",
-                    content = @Content(mediaType = "application/json")
+                    description = "잘못된 요청 (BAD_REQUEST)"
             )
     })
     @PutMapping("/member/inquiry/{inquiryId}/modify")
@@ -353,23 +331,19 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 삭제에 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 삭제에 성공 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 삭제에 실패 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 삭제에 실패 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)"
             )
     })
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
@@ -385,23 +359,19 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 답변이 등록에 성공했을 때 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 답변이 등록에 성공했을 때 (OK)"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "문의 답변 등록에 실패했을 때 (INTERNAL_SERVER_ERROR)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 답변 등록에 실패했을 때 (INTERNAL_SERVER_ERROR)"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
-                    content = @Content(mediaType = "application/json")
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @PostMapping("/trader/inquiry/{inquiryId}/write")
@@ -419,17 +389,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의 데이터 조회에 성공했을 때 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의 데이터 조회에 성공했을 때 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -437,7 +406,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<InquiryListShowResponseDto>> showTraderInquiry (
+    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "closed") String closed);
@@ -452,17 +421,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "403",
                     description = "사용자 인증 정보가 없음 (FORBIDDEN)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
-                    description = "문의의 상세 데이터 조회에 성공했을 때 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    description = "문의의 상세 데이터 조회에 성공했을 때 (OK)"
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패했을 때 (NOT_FOUND)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
