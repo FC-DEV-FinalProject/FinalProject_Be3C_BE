@@ -12,6 +12,9 @@ import lombok.*;
 @Schema(description = "공지사항 등록 요청 DTO")
 public class NoticeSaveRequestDto {
 
+    @Schema(description = "작성자 ID", example = "1234")
+    private Long writerId;
+
     @Schema(description = "공지사항 제목", example = "공지사항 제목 예시")
     @NotNull
     private String noticeTitle;
