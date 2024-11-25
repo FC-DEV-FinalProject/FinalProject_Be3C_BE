@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class NoticeContoller implements NoticeControllerDocs {
@@ -28,6 +31,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestBody NoticeSaveRequestDto noticeSaveRequestDto) {
 
+        Long noticeId = 1L;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(noticeId));
     }
@@ -40,10 +44,19 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/admin/notice")
-    public ResponseEntity<APIResponse<PageResponse<NoticeAdminShowResponseDto>>> showAdminNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
+
+        List<NoticeAdminListOneShowResponseDto> noticeAdminList = new ArrayList<>();
+        PageResponse<NoticeAdminListOneShowResponseDto> adminNoticePage = PageResponse.<NoticeAdminListOneShowResponseDto>builder()
+                .currentPage(1)
+                .pageSize(10)
+                .totalElement(100)
+                .totalPages(10)
+                .content(noticeAdminList)
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(adminNoticePage));
@@ -61,7 +74,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed() {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeModifyRequestDto.getNoticeId()));
+                .body(APIResponse.success());
     }
 
     /*
@@ -78,8 +91,10 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
+        NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = new NoticeDetailAdminShowResponseDto();
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showAdminNoticeDetailResponseDto));
+                .body(APIResponse.success(noticeDetailAdminShowResponseDto));
     }
 
     /*
@@ -96,8 +111,10 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
+        NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = new NoticeShowModifyPageResponseDto();
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showAdminNoticeDetailResponseDto));
+                .body(APIResponse.success(noticeShowModifyPageResponseDto));
     }
 
     /*
@@ -107,6 +124,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 공지사항 수정에 실패했을 때 : INTERNAL_SERVER_ERROR
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
         5. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
+            +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음
      */
     @Override
     @PutMapping("/admin/notice/{noticeId}/modify")
@@ -115,7 +133,7 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeModifyRequestDto.getNoticeId()));
+                .body(APIResponse.success());
     }
 
     /*
@@ -131,7 +149,7 @@ public class NoticeContoller implements NoticeControllerDocs {
             @PathVariable Long noticeId) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeId));
+                .body(APIResponse.success());
     }
 
     /*
@@ -144,8 +162,10 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @DeleteMapping("/admin/notice/delete")
-    public ResponseEntity<APIResponse<Long>> deleteAdminNoticeList(
+    public ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
+
+        Integer deleteCount = 1;
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(deleteCount));
@@ -158,9 +178,18 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @GetMapping("/notice")
-    public ResponseEntity<APIResponse<PageResponse<NoticeShowResponseDto>>> showNotice(
+    public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {
+
+        List<NoticeListOneShowResponseDto> noticeList = new ArrayList<>();
+        PageResponse<NoticeListOneShowResponseDto> noticePage = PageResponse.<NoticeListOneShowResponseDto>builder()
+                .currentPage(1)
+                .pageSize(10)
+                .totalElement(100)
+                .totalPages(10)
+                .content(noticeList)
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(noticePage));
@@ -178,7 +207,9 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
+        NoticeDetailShowResponseDto noticeDetailShowResponseDto = new NoticeDetailShowResponseDto();
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(showNoticeDetailResponseDto));
+                .body(APIResponse.success(noticeDetailShowResponseDto));
     }
 }
