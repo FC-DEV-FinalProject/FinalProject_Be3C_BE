@@ -6,9 +6,6 @@ import com.be3c.sysmetic.domain.member.service.RegisterService;
 import com.be3c.sysmetic.domain.member.validation.RegisterValidator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
-import com.be3c.sysmetic.global.util.email.dto.Subscriber;
-import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
-import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -21,9 +18,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +25,6 @@ public class RegisterController {
 
     private final RegisterService registerService;
     private final RegisterValidator registerValidator;
-    private final EmailService emailService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -58,9 +51,6 @@ public class RegisterController {
     // 2. 이메일 인증코드 전송
     @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
-
-        emailService.sendAndSaveAuthCode(email);
-
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -97,28 +87,6 @@ public class RegisterController {
 
         try {
             registerService.registerMember(registerResponseDto);
-
-            // 메일링 서비스에 등록하고 가입 이메일 발송
-            SubscriberRequest subscriberRequest = SubscriberRequest.builder()
-                    .subscribers(List.of(
-                            Subscriber.builder()
-                                    .email(registerResponseDto.getEmail())
-                                    .name(registerResponseDto.getNickname())
-                                    .subscribedDate(LocalDateTime.now())
-                                    .isAdConsent(true)
-                                    .build()
-                            ))
-                            .build();
-
-            switch (registerResponseDto.getRoleCode()) {
-                case "RC001":
-                    emailService.addUserSubscriberRequest(subscriberRequest);
-                    break;
-                case "RC002":
-                    emailService.addTraderSubscriberRequest(subscriberRequest);
-                    break;
-            }
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "회원가입에 실패했습니다. 관리자에게 문의해 주세요."));
         }
