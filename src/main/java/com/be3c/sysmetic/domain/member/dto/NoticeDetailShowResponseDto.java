@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Getter
 @Setter
 @ToString
@@ -12,6 +13,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "공지사항 상세 조회 응답 DTO")
 public class NoticeDetailShowResponseDto {
+
+    @Schema(description = "이 공지사항이 있던 페이지", example = "1")
+    private int page;
+
+    @Schema(description = "검색했던 검색 단어", example = "searchText")
+    private String searchText;
 
     @Schema(description = "공지사항 ID", example = "123")
     private Long noticeId;
@@ -36,6 +43,9 @@ public class NoticeDetailShowResponseDto {
 
     @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
     private Integer isAttatchment;
+
+    @Schema(description = "공개 여부 (0: 비공개, 1: 공개)", example = "1")
+    private Integer isOpen;
 
     @Schema(description = "이전글 제목", example = "공지사항 제목 예")
     private String previousTitle;

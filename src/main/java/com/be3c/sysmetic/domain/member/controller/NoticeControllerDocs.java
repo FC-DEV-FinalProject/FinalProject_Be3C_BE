@@ -97,7 +97,8 @@ public interface NoticeControllerDocs {
             )
     })
     @PutMapping("/admin/notice/{noticeId}/closed")
-    ResponseEntity<APIResponse<Long>> modifyNoticeClosed();
+    ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
+            @PathVariable Long noticeId);
 
 
     // 관리자 공지사항 상세 조회 API

@@ -11,8 +11,8 @@ import lombok.*;
 @Schema(description = "문의 등록 요청 DTO")
 public class InquirySaveRequestDto {
 
-    @Schema(description = "회원 ID", example = "12345")
-    private Long memberId;
+    @Schema(description = "질문자 ID", example = "12345")
+    private Long inquirerId;
 
     @Schema(description = "전략 ID", example = "9876")
     private Long strategyId;

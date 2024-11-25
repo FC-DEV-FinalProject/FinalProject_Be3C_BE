@@ -1,14 +1,12 @@
 package com.be3c.sysmetic.domain.member.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Notice;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface NoticeRepositoryCustom {
 
-    List<Notice> adminNoticeSearchWithBooleanBuilder(String searchType, String searchText);
-    Long adminNoticeCountWithBooleanBuilder(String searchType, String searchText);
+    Page<Notice> adminNoticeSearchWithBooleanBuilder(String searchType, String searchText, Pageable pageable);
 
-    List<Notice> noticeSearchWithBooleanBuilder(String searchText);
-    Long noticeCountWithBooleanBuilder(String searchText);
+    Page<Notice> noticeSearchWithBooleanBuilder(String searchText, Pageable pageable);
 }

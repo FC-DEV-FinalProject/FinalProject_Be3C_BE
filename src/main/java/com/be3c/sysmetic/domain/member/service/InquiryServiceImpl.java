@@ -142,9 +142,9 @@ public class InquiryServiceImpl implements InquiryService {
     // 관리자 목록 삭제
     @Override
     @Transactional
-    public void deleteAdminInquiryList(List<Long> inquiryIdList) {
+    public Integer deleteAdminInquiryList(List<Long> inquiryIdList) {
 
-        inquiryRepository.bulkDelete(inquiryIdList);
+        return inquiryRepository.bulkDelete(inquiryIdList);
     }
 
     // 관리자 검색 조회

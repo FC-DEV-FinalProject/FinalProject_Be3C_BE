@@ -24,7 +24,7 @@ public class NoticeModifyRequestDto {
     private String noticeContent;
 
     @Schema(description = "수정자 ID", example = "admin123")
-    private String correctorId;
+    private Long correctorId;
 
     @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
     private Integer isAttatchment;

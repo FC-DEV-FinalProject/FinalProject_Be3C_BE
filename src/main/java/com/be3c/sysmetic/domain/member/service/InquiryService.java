@@ -50,7 +50,7 @@ public interface InquiryService {
     void deleteAdminInquiry(Long inquiryId);
 
     // 관리자 목록 삭제
-    void deleteAdminInquiryList(List<Long> inquiryIdList);
+    Integer deleteAdminInquiryList(List<Long> inquiryIdList);
 
 
     // 관리자 검색 조회

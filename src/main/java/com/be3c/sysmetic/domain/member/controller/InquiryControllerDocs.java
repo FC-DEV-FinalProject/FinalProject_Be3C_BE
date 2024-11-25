@@ -165,6 +165,7 @@ public interface InquiryControllerDocs {
     })
     @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
+            @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
 
 
@@ -193,6 +194,7 @@ public interface InquiryControllerDocs {
     })
     @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
+            @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
 

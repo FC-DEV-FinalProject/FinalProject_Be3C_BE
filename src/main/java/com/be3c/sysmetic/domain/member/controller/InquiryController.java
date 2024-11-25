@@ -9,6 +9,7 @@ import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 public class InquiryController implements InquiryControllerDocs {
+
+    private final SecurityUtils securityUtils;
 
     private final InquiryService inquiryService;
     private final InquiryAnswerService inquiryAnswerService;
@@ -57,7 +60,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         PageResponse<InquiryAdminListOneShowResponseDto> adminInquiryPage = PageResponse.<InquiryAdminListOneShowResponseDto>builder()
                 .currentPage(page)
-                .pageSize(10)
+                .pageSize(pageSize)
                 .totalElement(inquiryList.getTotalElements())
                 .totalPages(inquiryList.getTotalPages())
                 .content(inquiryDtoList)
@@ -97,8 +100,15 @@ public class InquiryController implements InquiryControllerDocs {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
         InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+        InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
+        InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
         InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+
+        inquiryAnswerShowResponseDto.setPage(page);
+        inquiryAnswerShowResponseDto.setClosed(closed);
+        inquiryAnswerShowResponseDto.setSearchType(searchType);
+        inquiryAnswerShowResponseDto.setSearchText(searchText);
 
         inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
         inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
@@ -119,6 +129,11 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
         inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
         inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
+
+        inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
+        inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+        inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
+        inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -158,10 +173,10 @@ public class InquiryController implements InquiryControllerDocs {
 
         List<Long> inquiryIdList = noticeListDeleteRequestDto.getInquiryIdList();
 
-        inquiryService.deleteAdminInquiryList(inquiryIdList);
+        Integer deleteCount = inquiryService.deleteAdminInquiryList(inquiryIdList);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryIdList.size()));
+                .body(APIResponse.success(deleteCount));
     }
 
 
@@ -174,6 +189,7 @@ public class InquiryController implements InquiryControllerDocs {
     @Override
     @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
+            @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
 
         Strategy strategy = inquiryService.findStrategyForInquiryPage(inquirySavePageShowRequestDto.getStrategyId());
@@ -198,10 +214,13 @@ public class InquiryController implements InquiryControllerDocs {
     @Override
     @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
+            @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto) {
 
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         Long inquiryId = inquiryService.registerInquiry(
-                inquirySaveRequestDto.getMemberId(),
+                userId,
                 inquirySaveRequestDto.getStrategyId(),
                 inquirySaveRequestDto.getInquiryTitle(),
                 inquirySaveRequestDto.getInquiryContent());
@@ -237,7 +256,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
                 .currentPage(page)
-                .pageSize(10)
+                .pageSize(pageSize)
                 .totalElement(inquiryList.getTotalElements())
                 .totalPages(inquiryList.getTotalPages())
                 .content(inquiryDtoList)
@@ -275,8 +294,14 @@ public class InquiryController implements InquiryControllerDocs {
          InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
          InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+         InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
+         InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
          InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+
+         inquiryAnswerShowResponseDto.setPage(page);
+         inquiryAnswerShowResponseDto.setSort(sort);
+         inquiryAnswerShowResponseDto.setClosed(closed);
 
          inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
          inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
@@ -297,6 +322,11 @@ public class InquiryController implements InquiryControllerDocs {
          inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
          inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
          inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
+
+         inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
+         inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+         inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
+         inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
 
          return ResponseEntity.status(HttpStatus.OK)
                  .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -321,6 +351,9 @@ public class InquiryController implements InquiryControllerDocs {
         Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
         InquiryModifyPageShowResponseDto inquiryModifyPageShowResponseDto = InquiryModifyPageShowResponseDto.builder()
+                .page(page)
+                .sort(sort)
+                .closed(closed)
                 .inquiryTitle(inquiry.getInquiryTitle())
                 .inquiryContent(inquiry.getInquiryContent())
                 .build();
@@ -344,7 +377,8 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
-        inquiryService.modifyInquiry(inquiryId,
+        inquiryService.modifyInquiry(
+                inquiryId,
                 inquiryModifyRequestDto.getInquiryTitle(),
                 inquiryModifyRequestDto.getInquiryContent());
 
@@ -391,7 +425,7 @@ public class InquiryController implements InquiryControllerDocs {
                 inquiryDetailSaveRequestDto.getAnswerContent());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success());
+                .body(APIResponse.success(inquiryAnswerId));
     }
 
 
@@ -421,7 +455,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
                 .currentPage(page)
-                .pageSize(10)
+                .pageSize(pageSize)
                 .totalElement(inquiryList.getTotalElements())
                 .totalPages(inquiryList.getTotalPages())
                 .content(inquiryDtoList)
@@ -448,8 +482,14 @@ public class InquiryController implements InquiryControllerDocs {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
         InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+        InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
+        InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
         InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+
+        inquiryAnswerShowResponseDto.setPage(page);
+        inquiryAnswerShowResponseDto.setSort(sort);
+        inquiryAnswerShowResponseDto.setClosed(closed);
 
         inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
         inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
@@ -470,6 +510,11 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
         inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
         inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
+
+        inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
+        inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+        inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
+        inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(inquiryAnswerShowResponseDto));
