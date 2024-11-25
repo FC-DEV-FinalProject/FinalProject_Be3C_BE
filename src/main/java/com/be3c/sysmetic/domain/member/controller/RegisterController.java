@@ -6,6 +6,8 @@ import com.be3c.sysmetic.domain.member.service.RegisterService;
 import com.be3c.sysmetic.domain.member.validation.RegisterValidator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.util.email.dto.Subscriber;
+import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -18,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -92,6 +97,28 @@ public class RegisterController {
 
         try {
             registerService.registerMember(registerResponseDto);
+
+            // 메일링 서비스에 등록하고 가입 이메일 발송
+            SubscriberRequest subscriberRequest = SubscriberRequest.builder()
+                    .subscribers(List.of(
+                            Subscriber.builder()
+                                    .email(registerResponseDto.getEmail())
+                                    .name(registerResponseDto.getNickname())
+                                    .subscribedDate(LocalDateTime.now())
+                                    .isAdConsent(true)
+                                    .build()
+                            ))
+                            .build();
+
+            switch (registerResponseDto.getRoleCode()) {
+                case "RC001":
+                    emailService.addUserSubscriberRequest(subscriberRequest);
+                    break;
+                case "RC002":
+                    emailService.addTraderSubscriberRequest(subscriberRequest);
+                    break;
+            }
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "회원가입에 실패했습니다. 관리자에게 문의해 주세요."));
         }
