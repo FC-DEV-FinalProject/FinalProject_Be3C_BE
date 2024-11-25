@@ -11,6 +11,8 @@ import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.email.dto.InterestRequest;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     private final MemberRepository memberRepository;
 
     private final SecurityUtils securityUtils;
+
+    private final EmailService emailService;
 
     /**
      * 추후에 수정 필요 (SELECT가 너무 많이 날아간다.)
@@ -143,6 +147,10 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
             );
             return true;
         }
+
+        // 전략을 등록한 트레이더에게 알림 메일 발송하기
+        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
+        emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
 
         throw new IllegalArgumentException();
     }

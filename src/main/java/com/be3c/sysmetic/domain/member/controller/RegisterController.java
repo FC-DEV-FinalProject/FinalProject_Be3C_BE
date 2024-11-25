@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.service.RegisterService;
 import com.be3c.sysmetic.domain.member.validation.RegisterValidator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ public class RegisterController {
 
     private final RegisterService registerService;
     private final RegisterValidator registerValidator;
+    private final EmailService emailService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -51,8 +53,8 @@ public class RegisterController {
     // 2. 이메일 인증코드 전송
     @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
-        // 이메일 인증코드 발송 내용 추가되면 수정.
-        String authCode = "ABC";
+
+        emailService.sendAndSaveAuthCode(email);
 
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
