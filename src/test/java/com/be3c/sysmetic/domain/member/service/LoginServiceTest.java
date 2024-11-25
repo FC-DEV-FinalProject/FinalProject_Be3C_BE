@@ -3,7 +3,6 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
-import com.be3c.sysmetic.global.config.security.RedisUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -16,12 +15,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-@TestPropertySource(locations = "/application-test.properties")
 @Slf4j
 @SpringBootTest
 class LoginServiceTest {
@@ -49,6 +47,7 @@ class LoginServiceTest {
                 .roleCode("USER")
                 .name("테스트")
                 .nickname("테스트")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("01012341234")
                 .usingStatusCode("사용")
                 .totalFollow(0)
@@ -107,7 +106,7 @@ class LoginServiceTest {
          */
         String email = "test@test.com";
         // 1. 로그인 유지 선택O -> 30일 짜리 refresh 토큰 생성 확인
-        Map<String, String> tokenMap = loginService.generateTokenBasedOnRememberMe(email,"Y");
+        Map<String, String> tokenMap = loginService.generateTokenBasedOnRememberMe(email,true);
 
         String refreshToken = tokenMap.get("refreshToken");
         Claims claims = jwtTokenProvider.parseTokenClaims(refreshToken);
@@ -119,7 +118,7 @@ class LoginServiceTest {
         Assertions.assertTrue(Math.abs(timeDifference - (2592000000L)) < 1000, "The difference should be close to 30 days in milliseconds");
 
         // 2. 로그인 유지 선택X -> 1시간 짜리 refresh 토큰 생성 확인
-        tokenMap = loginService.generateTokenBasedOnRememberMe(email, "N");
+        tokenMap = loginService.generateTokenBasedOnRememberMe(email, false);
 
         refreshToken = tokenMap.get("refreshToken");
         claims = jwtTokenProvider.parseTokenClaims(refreshToken);

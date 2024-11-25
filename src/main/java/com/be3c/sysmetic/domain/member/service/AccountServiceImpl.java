@@ -1,11 +1,13 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -31,7 +33,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public String findEmail(String name, String phoneNumber) {
         // 이름+휴대번호로 DB 조회 후 회원정보가 있으면 이메일 반환
-        return memberRepository.findEmailByNameAndPhoneNumber(name, phoneNumber);
+        List<String> emailList = memberRepository.findEmailByNameAndPhoneNumber(name, phoneNumber);
+        if(emailList == null || emailList.isEmpty()) {
+            throw new EntityNotFoundException("일치하는 회원 정보를 찾을 수 없습니다.");
+        }
+
+        return String.join(", ", emailList);
     }
 
 

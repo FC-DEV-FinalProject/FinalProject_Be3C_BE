@@ -20,6 +20,18 @@ public enum Code {
     // 메일 수신 동의 상태
     RECEIVE_MAIL("RM001"),
     NOT_RECEIVE_MAIL("RM002"),
+
+    //전략 승인 관리 코드
+    APPROVE_WAIT("SA001"),
+    APPROVE_SUCCESS("SA002"),
+    APPROVE_REJECT("SA003"),
+    APPROVE_CANCEL("SA004"),
+
+    // 전략 상태 코드
+    OPEN_STRATEGY("ST001"),
+    CLOSE_STRATEGY("ST002"),
+    WAIT_STRATEGY("ST003"),
+
     // 팔로우 메일 전송 여부 코드
     SEND_FOLLOW_MAIL("SM001"),
     NOT_SEND_FOLLOW_MAIL("SM002"),

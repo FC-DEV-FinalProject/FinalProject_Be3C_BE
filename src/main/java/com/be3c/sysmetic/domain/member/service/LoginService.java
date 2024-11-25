@@ -7,5 +7,5 @@ public interface LoginService {
 
     boolean validatePassword(String email, String password);
 
-    Map<String, String> generateTokenBasedOnRememberMe(String email, String rememberMe);
+    Map<String, String> generateTokenBasedOnRememberMe(String email, Boolean rememberMe);
 }

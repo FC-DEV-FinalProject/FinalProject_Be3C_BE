@@ -8,6 +8,11 @@ import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +30,8 @@ import java.util.NoSuchElementException;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class MethodController {
+@RequestMapping("/api")
+public class MethodController implements MethodControllerDocs {
 
     private final MethodService methodService;
 
@@ -43,10 +49,11 @@ public class MethodController {
         1. 중복된 이름의 매매 유형이 존재하지 않을 때 : OK
         2. 중복된 이름의 매매 유형이 존재할 때 : CONFLICT
      */
+    @Override
     @GetMapping("/admin/method/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
-    ) throws Exception {
+    ) {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success());
@@ -60,11 +67,12 @@ public class MethodController {
         1. 매매 유형 찾기 성공했을 때 : OK
         2. 매매 유형 찾기 실패했을 때 : NOT_FOUND
      */
+    @Override
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(methodService.findById(id)));
@@ -84,10 +92,11 @@ public class MethodController {
         2. 페이지에 아무런 데이터도 존재하지 않을 때 : NOT_FOUND
         3. 잘못된 데이터가 입력됐을 때 : BAD_REQUEST
      */
+    @Override
     @GetMapping("/admin/methodlist")
     public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @NotBlank @RequestParam Integer page
-    ) throws Exception {
+    ) {
         try {
             PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
             return ResponseEntity.status(HttpStatus.OK)
@@ -97,7 +106,7 @@ public class MethodController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
         } catch (EntityNotFoundException |
-                NoSuchElementException e) {
+                 NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
@@ -110,10 +119,11 @@ public class MethodController {
         3. 중복 체크를 진행하지 않은 요청일 때 : BAD_REQUEST
         4. 중복된 매매 유형명이 존재할 때 : CONFLICT
      */
+    @Override
     @PostMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> postMethod(
             @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(methodService.insertMethod(methodPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -140,10 +150,11 @@ public class MethodController {
         4. 수정하려는 매매 유형이 존재하지 않을 때 : NOT_FOUND
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
+    @Override
     @PutMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> putMethod(
             @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(methodService.updateMethod(methodPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -172,10 +183,11 @@ public class MethodController {
         3. 삭제하려는 매매 유형을 찾지 못했을 때 : NOT_FOUND
      */
 //    @DeleteMapping("/admin/method/{id:[0-9]+}")
+    @Override
     @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<String>> deleteMethod(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             if(methodService.deleteMethod(id)) {
                 return ResponseEntity.status(HttpStatus.OK)

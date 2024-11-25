@@ -7,6 +7,11 @@ import com.be3c.sysmetic.domain.strategy.service.StockService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -22,13 +27,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class StockController {
+@RequestMapping("/api")
+public class StockController implements StockControllerDocs {
 
     private final StockService stockService;
 
     /*
         추가 필요 사항
-        1. S3에 아이콘 업로드 / DB 수정 코드
+        1. S3에 아이콘 업로드 / DB 수정 코드 => 완료
         2. Global Exception Handler - AuthorizationException 처리 핸들러 필요.
      */
 
@@ -38,30 +44,31 @@ public class StockController {
         2. 동일한 종목 명이 존재할 떄 : CONFLICT
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     ) {
-       if(stockService.duplCheck(name)) {
-           return ResponseEntity.status(HttpStatus.OK)
-                   .body(APIResponse.success());
-       }
-       return ResponseEntity.status(HttpStatus.CONFLICT)
-               .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+        if(stockService.duplCheck(name)) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success());
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
     }
-
 
     /*
         단일 종목 찾기
         1. 해당 아이디의 종목을 찾는 데 성공했을 때 : OK
         2. 해당 아이디의 종목을 찾는 데 실패했을 떄 : NOT_FOUND
      */
+    @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             StockGetResponseDto findStock = stockService.findItemById(id);
 
@@ -77,17 +84,22 @@ public class StockController {
         종목 관리 - 종목 페이지 표시.
         1. 해당 페이지의 종목을 찾는 데 성공했을 때 : OK
         2. 해당 페이지에 아무런 종목이 존재하지 않을 때 : NOT_FOUND
+        3. 해당 페이지의 종목을 찾는 데 실패했을 때 : INTERNAL_SERVER_ERROR
      */
+    @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
     public ResponseEntity<APIResponse<PageResponse<StockGetResponseDto>>> getStockPage(
             @NotBlank @PathVariable Integer page
-    ) throws Exception {
+    ) {
         try {
             PageResponse<StockGetResponseDto> stockPage = stockService.findItemPage(page);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(APIResponse.success(stockPage));
+            if(!stockPage.getContent().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success(stockPage));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
@@ -102,11 +114,12 @@ public class StockController {
         4. NOT NULL 값에 NULL이 들어왔을 때 : BAD_REQUEST
         5. 중복된 종목명이 존재할 때 : BAD_REQUEST
      */
+    @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> saveitem(
             @Valid @RequestBody StockPostRequestDto stockPostRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(stockService.saveItem(stockPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -128,11 +141,12 @@ public class StockController {
         2. 종목을 수정하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
         3. 수정해야할 종목을 찾지 못했을 때 : NOT_FOUND
      */
+    @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> updateItem(
             @Valid @RequestBody StockPutRequestDto stockPutRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(stockService.updateItem(stockPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -157,11 +171,12 @@ public class StockController {
         2. 종목을 삭제하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
         3. 삭제할 종목을 찾지 못했을 때 : NOT_FOUND
      */
+    @Override
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<String>> deleteItem(
             @NotBlank @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             if(stockService.deleteItem(id)) {
                 return ResponseEntity.status(HttpStatus.OK)

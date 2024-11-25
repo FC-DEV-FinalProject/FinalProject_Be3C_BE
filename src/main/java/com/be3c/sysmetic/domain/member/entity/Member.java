@@ -6,6 +6,7 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,7 +15,6 @@ import java.util.List;
 @ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
-//@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @AllArgsConstructor
 @Entity
 @Table(name = "member")
@@ -62,7 +62,7 @@ public class Member extends BaseEntity {
     private String nickname;
 
     @Column(name = "birth", nullable = false)
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
