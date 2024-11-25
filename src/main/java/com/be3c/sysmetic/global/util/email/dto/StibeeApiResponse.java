@@ -10,13 +10,13 @@ import java.util.List;
  */
 @ToString
 @Setter @Getter
-public class StibeeApiResponseDto {
+public class StibeeApiResponse {
 
     @JsonProperty("Ok")
     private boolean ok;
 
     @JsonProperty("Error")
-    private ApiError erro;
+    private ApiError error;
 
     @JsonProperty("Value")
     private ApiValue value;
@@ -32,6 +32,7 @@ public class StibeeApiResponseDto {
 
     @ToString
     @Getter @Setter
+    @NoArgsConstructor
     public static class ApiValue {
         private List<Subscriber> failDeny;
         private List<Subscriber> failUnknown;
@@ -39,4 +40,5 @@ public class StibeeApiResponseDto {
         private List<Subscriber> success;
         private List<Subscriber> update;
     }
+
 }

@@ -16,8 +16,8 @@ import java.util.List;
  *         Key: AdConsentFactor.KEY("$ad_agreed")
  *         Value: AdConsentFactor.VALUE_TRUE("Y") or AdConsentFactor.VALUE_FALSE("N")
  */
-@Builder @Getter
-public class StibeeSubscriberRequestDto {
+@Builder @Getter @Setter
+public class SubscriberRequest {
 
     @Builder.Default
     private EventOccuredBy eventOccurredBy = EventOccuredBy.SUBSCRIBER;
