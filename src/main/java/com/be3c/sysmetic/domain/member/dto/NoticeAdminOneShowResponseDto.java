@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "관리자 공지사항 목록 조회 응답 DTO")
-public class NoticeAdminShowResponseDto {
+@Schema(description = "관리자 공지사항 목록 조회 한 건 응답 DTO")
+public class NoticeAdminOneShowResponseDto {
 
     @Schema(description = "공지사항 ID", example = "123")
     private Long noticeId;
