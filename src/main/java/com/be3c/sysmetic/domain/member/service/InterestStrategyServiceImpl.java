@@ -181,7 +181,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         Strategy strategy = strategyRepository
                 .findByIdAndStatusCode(
                         strategyId,
-                        USING_STATE.getCode()
+                        OPEN_STRATEGY.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
         interestStrategyRepository.save(
                 InterestStrategy.builder()
@@ -257,7 +257,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_FOLDER.getMessage())))
                         .strategy(strategyRepository.findByIdAndStatusCode(
                                         strategyId,
-                                        USING_STATE.getCode()
+                                        OPEN_STRATEGY.getCode()
                                 ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_STRATEGY.getMessage())))
                         .LogCode(LogCode)
                         .isSendMail(Code.NOT_SEND_FOLLOW_MAIL.getCode())

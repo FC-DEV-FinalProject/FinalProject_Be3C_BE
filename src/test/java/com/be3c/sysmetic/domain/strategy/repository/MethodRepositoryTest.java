@@ -155,7 +155,7 @@ public class MethodRepositoryTest {
 
         // when
         int find_page = (int) ((Math.random() * total_count) / page_size);
-        Pageable pageable = PageRequest.of(find_page, page_size, Sort.by("createdAt"));
+        Pageable pageable = PageRequest.of(find_page, page_size, Sort.by("id"));
 
         Page<MethodGetResponseDto> methodPage = methodRepository.findAllByStatusCode(pageable, Code.USING_STATE.getCode());
         int for_count = 0;

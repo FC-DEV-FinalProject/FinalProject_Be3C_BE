@@ -5,18 +5,19 @@ import com.be3c.sysmetic.domain.member.dto.FollowDeleteRequestDto;
 import com.be3c.sysmetic.domain.member.dto.FollowPostRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.FolderRepository;
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
-import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
+import com.be3c.sysmetic.domain.strategy.repository.*;
+import com.be3c.sysmetic.domain.strategy.service.AdminStrategyService;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.config.security.CustomUserDetails;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,45 +39,51 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "/application-test.properties")
 @Slf4j
 @SpringBootTest
+@RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class InterestStrategyServiceTest {
 
-    @Autowired
-    private FolderRepository folderRepository;
+    private final AdminStrategyService adminStrategyService;
 
-    @Autowired
-    private FolderService folderService;
+    private final StrategyApprovalRepository strategyApprovalRepository;
 
-    @Autowired
-    private InterestStrategyService interestStrategyService;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final FolderRepository folderRepository;
 
-    @Autowired
-    private MethodRepository methodRepository;
+    private final InterestStrategyRepository interestStrategyRepository;
 
-    @Autowired
-    private StrategyRepository strategyRepository;
+    private final MethodRepository methodRepository;
 
-    @Autowired
-    private StrategyStatisticsRepository strategyStatisticsRepository;
+    private final StrategyRepository strategyRepository;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final DailyRepository dailyRepository;
 
-    @Autowired
-    EntityManager entityManager;
-    @Autowired
-    private SecurityUtils securityUtils;
+    private final EntityManager entityManager;
+
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
+
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final StrategyStatisticsRepository strategyStatisticsRepository;
+
+    private final SecurityUtils securityUtils;
+
+    private final FolderService folderService;
+
+    private final InterestStrategyService interestStrategyService;
 
     @BeforeEach
-    void setUp() {
-        memberRepository.deleteAll();
+    public void setUp() {
+        strategyStockReferenceRepository.deleteAll();
+        interestStrategyRepository.deleteAll();
         folderRepository.deleteAll();
-        strategyStatisticsRepository.deleteAll();
         strategyRepository.deleteAll();
         methodRepository.deleteAll();
+        dailyRepository.deleteAll();
+        strategyApprovalRepository.deleteAll();
+        memberRepository.deleteAll();
 
         entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
@@ -89,44 +96,57 @@ public class InterestStrategyServiceTest {
         entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
                 .executeUpdate();
 
+        entityManager.clear();
 
         Member member = Member.builder()
                 .email("test@test.com")
                 .password(bCryptPasswordEncoder.encode("encodedPassword"))
                 // 초기값 설정
-                .id(1L)
-                .roleCode("USER")
+                .roleCode("TRADER")
                 .name("테스트")
                 .nickname("테스트")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("01012341234")
                 .usingStatusCode("US001")
                 .totalFollow(0)
                 .totalStrategyCount(0)
-                .birth(LocalDate.of(2000, 1, 1))
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
                 .marketingConsentDate(LocalDateTime.now())
                 .build();
 
+        memberRepository.save(member);
+
         Method method = Method.builder()
                 .name("테스트매매유형")
                 .statusCode(Code.USING_STATE.getCode())
                 .build();
 
-        Strategy strategy = Strategy.builder()
-                .name("테스트전략")
-                .trader(member)
-                .content("설명")
-                .method(method)
-                .statusCode(Code.USING_STATE.getCode())
-                .kpRatio(0.0)
-                .smScore(0.0)
-                .cycle('D')
-                .build();
+        methodRepository.save(method);
+
+        List<Strategy> strategyList = new ArrayList<>();
+
+        for(int i = 1; i <= 20; i++) {
+            strategyList.add(Strategy.builder()
+                    .name("테스트전략" + i)
+                    .trader(member)
+                    .content("설명" + i)
+                    .method(method)
+                    .statusCode(Code.OPEN_STRATEGY.getCode())
+                    .cycle('D')
+                    .build());
+        }
+
+        for (Strategy strategy : strategyList) {
+            assertNotNull(strategy.getTrader(), "Strategy의 trader가 null입니다.");
+            assertNotNull(strategy.getTrader().getId(), "Strategy의 trader에 저장된 Member의 ID가 null입니다.");
+        }
+
+        strategyRepository.saveAll(strategyList);
 
         StrategyStatistics strategyStatistics = StrategyStatistics.builder()
-                .strategy(strategy)
+                .strategy(strategyList.get(1))
                 .currentBalance(1000000.0)
                 .principal(500000.0)
                 .accumulatedDepositWithdrawalAmount(200000.0)
@@ -154,13 +174,10 @@ public class InterestStrategyServiceTest {
                 .highPointRenewalProgress(30L)
                 .profitFactor(1.5)
                 .roa(0.08)
-                .firstRegistrationDate(LocalDateTime.now().minusMonths(6).toLocalDate())
-                .lastRegistrationDate(LocalDateTime.now().toLocalDate())
+                .firstRegistrationDate(LocalDate.now())
+                .lastRegistrationDate(LocalDate.now())
                 .build();
 
-        methodRepository.save(method);
-        memberRepository.save(member);
-        strategyRepository.save(strategy);
         strategyStatisticsRepository.save(strategyStatistics);
 
         // 권한 설정
@@ -170,7 +187,7 @@ public class InterestStrategyServiceTest {
         CustomUserDetails userDetails = new CustomUserDetails(
                 1L, // memberId
                 "test@example.com", // email
-                "USER", // role
+                "TRADER", // role
                 "",
                 "",
                 authorities // 권한 목록
@@ -227,9 +244,13 @@ public class InterestStrategyServiceTest {
                         Code.USING_STATE.getCode()).size()
         );
 
+        log.info("strategy count : {}", strategyRepository.count());
+        log.info("strategy 1L : {}", strategyRepository.findById(2L));
+        log.info("folder 1L : {}", folderRepository.findById(1L));
+
         assertThrows(EntityNotFoundException.class, () -> {
             interestStrategyService.follow(FollowPostRequestDto.builder()
-                    .strategyId(2L)
+                    .strategyId(22L)
                     .folderId(1L)
                     .build()
             );
