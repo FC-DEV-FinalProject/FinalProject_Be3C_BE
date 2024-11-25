@@ -15,7 +15,6 @@ public class WebClientConfig {
     @Bean
     public WebClient webClientForStibeeApi() {
         return WebClient.builder()
-                .baseUrl("https://api.stibee.com/v1")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .defaultHeader("AccessToken", accessToken)
                 .build();

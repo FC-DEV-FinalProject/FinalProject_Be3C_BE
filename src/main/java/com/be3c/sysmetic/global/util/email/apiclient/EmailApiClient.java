@@ -1,59 +1,82 @@
 package com.be3c.sysmetic.global.util.email.apiclient;
 
-import com.be3c.sysmetic.global.util.email.dto.StibeeApiResponseDto;
-import com.be3c.sysmetic.global.util.email.dto.StibeeSubscriberRequestDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
+import com.be3c.sysmetic.global.util.email.dto.*;
 
-@Component
-@RequiredArgsConstructor
-public class EmailApiClient {
+import java.util.List;
 
-    private final WebClient webClientForAddressBook;
+public interface EmailApiClient {
 
-    @Value("${stibee.address.book.list.id.traider}")
-    private String addressBookListIdTraider;
+    // 1. 주소록 api 사용  ---------------------------------------------------------------------------------
+
+    // 추가
+    /**
+     * 일반회원 주소록에 추가
+     * @param subscriberRequest 추가할 구독자 정보
+     * @return API로부터의 응답
+     */
+    StibeeApiResponse addUserSubscriberRequest(SubscriberRequest subscriberRequest);
 
     /**
-     * 가입한 트레이더 회원을 subscriber로 등록
-     * @param stibeeSubscriberRequestDto subscriber 정보
-     * @return 결과... 추후 비동기식으로 변경
+     * 트레이더 주소록에 추가
+     * @param subscriberRequest 추가할 구독자 정보
+     * @return API로부터의 응답
      */
-    public String addNewSubscriberRequest(StibeeSubscriberRequestDto stibeeSubscriberRequestDto) {
+    StibeeApiResponse addTraderSubscriberRequest(SubscriberRequest subscriberRequest);
 
-        try {
-            String uri = "/lists/" + addressBookListIdTraider + "/subscribers";
+    /**
+     * 임시 주소록에 추가
+     * @param subscriberRequest 추가할 구독자 정보
+     * @return API로부터의 응답
+     */
+    StibeeApiResponse addTempSubscriberRequest(SubscriberRequest subscriberRequest);
 
-            Mono<StibeeApiResponseDto> apiResponseMono = webClientForAddressBook.post()
-                    .uri(uri)
-                    .bodyValue(stibeeSubscriberRequestDto)
-                    .retrieve()
-                    .onStatus(status -> status.isError(), response -> {
-                        System.out.println("Error response: " + response.statusCode());
-                        return Mono.error(new RuntimeException("API call failed"));
-                    })
-                    .bodyToMono(StibeeApiResponseDto.class);
 
-            StibeeApiResponseDto apiResponse = apiResponseMono.block(); // 동기적으로 기다림
+    // 삭제
+    /**
+     * 일반회원 주소록으로부터 삭제
+     * @param emails
+     * @return API로부터의 응답
+     */
 
-            // 응답 처리
-            if (apiResponse != null && apiResponse.isOk()) {
+    StibeeApiResponse deleteUserSubscriberRequest(List<String> emails);
+    /**
+     * 트레이더 주소록으로부터 삭제
+     * @param emails
+     * @return API로부터의 응답
+     */
+    StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails);
 
-                return "성공: "+ apiResponse;
-            } else {
+    /**
+     * 임시 주소록으로부터 삭제
+     * @param emails
+     * @return API로부터의 응답
+     */
+    StibeeApiResponse deleteTempSubscriberRequest(List<String> emails);
 
-                return apiResponse.toString();
-            }
 
-        }catch (WebClientResponseException e) {
-            return "Error: " + e.getMessage() + " | Response body: " + e.getResponseBodyAsString();
-        } catch (Exception e){
-            return "Error: " + e.getMessage();
-        }
-    }
 
+    // 2.자동 메일 api 사용 -------------------------------------------------------------------------------------
+
+
+
+    /**
+     * 이메일 인증 코드 발송
+     * @param authCodeRequestDto
+     * @return 정상 : ok
+     */
+    String sendAuthEmailRequest(AuthCodeRequest authCodeRequestDto);
+
+    /**
+     * 문의 등록 알림 발송
+     * @param inquiryRequestDto
+     * @return 정상 : ok
+     */
+    String sendInquiryRegistrationEmailRequest(InquiryRequest inquiryRequestDto);
+
+    /**
+     * 관심전략 등록 알림 발송
+     * @param interestRequest
+     * @return 정상 : ok
+     */
+    String sendInterestRegistrationEmailRequest(InterestRequest interestRequest);
 }
