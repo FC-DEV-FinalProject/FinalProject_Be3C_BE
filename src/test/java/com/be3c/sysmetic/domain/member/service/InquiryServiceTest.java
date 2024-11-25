@@ -10,22 +10,20 @@ import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.junit.Test;
-//import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
+@TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 @Transactional
 public class InquiryServiceTest {
@@ -33,8 +31,10 @@ public class InquiryServiceTest {
     @PersistenceContext
     EntityManager em;
 
-    @Autowired InquiryService inquiryService;
-    @Autowired InquiryRepository inquiryRepository;
+    @Autowired
+    InquiryService inquiryService;
+    @Autowired
+    InquiryRepository inquiryRepository;
 
     @Test
     public void 문의_등록() throws Exception {

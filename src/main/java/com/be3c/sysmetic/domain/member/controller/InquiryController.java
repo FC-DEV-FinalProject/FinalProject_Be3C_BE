@@ -8,7 +8,6 @@ import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.common.response.APIResponse;
-import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
