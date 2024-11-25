@@ -116,7 +116,7 @@ public class RegisterServiceImpl implements RegisterService {
     public boolean registerMember(RegisterRequestDto dto) {
         try {
             Member member = new Member().toBuilder()
-                    .roleCode(dto.getRoleCode())
+                    .roleCode(dto.getRoleCode().getCode())
                     .email(dto.getEmail())
                     .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                     .name(dto.getName())

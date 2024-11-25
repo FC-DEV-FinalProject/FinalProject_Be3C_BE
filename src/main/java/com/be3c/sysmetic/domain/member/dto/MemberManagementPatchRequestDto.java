@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.List;
@@ -11,10 +12,12 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "MemberManagementPatchResponseDto: 회원등급 변경 DTO")
-public class MemberManagementPatchResponseDto {
+@Schema(description = "MemberManagementPatchRequestDto: 회원등급 변경 DTO")
+public class MemberManagementPatchRequestDto {
 
+    @NotBlank
     private List<Long> memberId;
 
+    @NotBlank
     private Boolean hasManagerRights;
 }

@@ -15,4 +15,28 @@ public enum MemberRole {
     MemberRole(String code) {
         this.code = code;
     }
+
+
+    public MemberRole promoteToManager() {
+        if (this == USER) return USER_MANAGER;
+        if (this == TRADER) return TRADER_MANAGER;
+        return this;
+    }
+
+    public MemberRole demoteFromManager() {
+        if (this == USER_MANAGER) return USER;
+        if (this == TRADER_MANAGER) return TRADER;
+        return this;
+    }
+
+    public static MemberRole getEnumRole(String roleCode) {
+        return switch (roleCode) {
+            case "RC001" -> USER;
+            case "RC002" -> TRADER;
+            case "RC003" -> USER_MANAGER;
+            case "RC004" -> TRADER_MANAGER;
+            case "RC005" -> ADMIN;
+            default -> throw new IllegalArgumentException("회원의 등급코드를 확인할 수 없습니다. 등급코드: " + roleCode);
+        };
+    }
 }
