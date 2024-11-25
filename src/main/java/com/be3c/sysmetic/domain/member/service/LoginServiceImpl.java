@@ -74,7 +74,7 @@ public class LoginServiceImpl implements LoginService {
     public boolean validatePassword(String email, String password) {
         // DB에 저장된 pw 조회
         Member member = memberRepository.findByEmail(email)
-        // 비교
+                // 비교
                 .orElseThrow(() -> {
                     log.info("비밀번호 불일치");
                     return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");

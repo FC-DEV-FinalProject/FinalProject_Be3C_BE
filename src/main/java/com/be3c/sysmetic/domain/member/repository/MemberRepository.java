@@ -37,7 +37,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
 
-
     @Query(value = """
         SELECT new com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto(
             m.id, m.roleCode, m.email, m.name, m.nickname, m.birth, m.phoneNumber
