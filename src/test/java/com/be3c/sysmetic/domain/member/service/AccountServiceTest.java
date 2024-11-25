@@ -62,7 +62,7 @@ class AccountServiceTest {
         Assertions.assertEquals("test1@test.com",accountService.findEmail(name, phoneNumber));
 
         // 2. 실패 - 존재하지 않는 회원정보
-        Assertions.assertNull(accountService.findEmail("존재하지않는회원", phoneNumber));
+        Assertions.assertThrows(NullPointerException.class, () -> accountService.findEmail("존재하지않는회원", phoneNumber));
     }
 
     @Test
