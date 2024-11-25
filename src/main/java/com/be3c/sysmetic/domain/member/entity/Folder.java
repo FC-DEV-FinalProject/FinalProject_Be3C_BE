@@ -16,6 +16,14 @@ import java.util.List;
 @Entity
 @Table(name = "folder")
 public class Folder extends BaseEntity {
+    /*
+        id : PK
+        member_id : 멤버 FK
+        folder_description : 폴더 설명
+        internal_interest_strategy_count : 갖고 있는 관심 전략 수
+        latestInterestStrategyAddedDate : 마지막 관심 전략 추가일
+        status_code : 상태 코드 (사용중 : US001 / 사용 X : US002 )
+     */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;

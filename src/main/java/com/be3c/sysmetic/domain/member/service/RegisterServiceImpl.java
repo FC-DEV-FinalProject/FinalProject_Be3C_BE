@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -115,12 +116,12 @@ public class RegisterServiceImpl implements RegisterService {
     public boolean registerMember(RegisterRequestDto dto) {
         try {
             Member member = new Member().toBuilder()
-                    .roleCode(dto.getRoleCode())
+                    .roleCode(dto.getRoleCode().getCode())
                     .email(dto.getEmail())
                     .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                     .name(dto.getName())
                     .nickname(dto.getNickname())
-                    .birth(LocalDateTime.parse(dto.getBirth()))
+                    .birth(LocalDate.parse(dto.getBirth()))
                     .phoneNumber(dto.getPhoneNumber())
                     .receiveInfoConsent(String.valueOf(dto.getReceiveInfoConsent()))
                     .infoConsentDate(LocalDateTime.parse(dto.getInfoConsentDate()))

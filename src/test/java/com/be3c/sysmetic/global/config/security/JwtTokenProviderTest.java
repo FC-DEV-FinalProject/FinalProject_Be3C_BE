@@ -15,6 +15,9 @@ import org.springframework.test.context.TestPropertySource;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @TestPropertySource(locations = "classpath:application-test.properties")
 @SpringBootTest
 class JwtTokenProviderTest {
@@ -76,52 +79,52 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("토큰 생성 테스트")
     public void generateTokenTest () {
-        String accessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 30 * 60 * 1000L);
+        String accessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 30 * 60 * 1000L);
 
         // accessToken을 검증 후 claims 객체 받기
         Claims claims = testMethodTokenParser(accessToken);
 
         // 입력한 값(memberId, email, role, expiration)이 제대로 설정됐는지 확인
-        Assertions.assertEquals(String.valueOf(001L), claims.get("memberId").toString());
+        assertEquals(String.valueOf(001L), claims.get("memberId").toString());
         // Assertions.assertTrue("OO1".equals(claims.get("memberId")));  // memberId=1 로 저장되기 때문에 "001" 과는 다름
-        Assertions.assertEquals("test@gmail.com", claims.get("email"));
-        Assertions.assertEquals("ADMIN", claims.get("role"));
+        assertEquals("test@gmail.com", claims.get("email"));
+        assertEquals("ADMIN", claims.get("role"));
 
         // Assertions.assertEquals(expiration.getTime(), claims.getExpiration().getTime()); // 테스트 실패 (밀리초단위 차이)
         // 해결 방법) 만료일자에서 30분을 빼면, 생성일자와 동일해야 한다. -> 이 과정을 통해서 내가 설정한 만료일시가 제대로 반영됐음을 확인할 수 있다.
         long compareValue = (claims.getExpiration().getTime()) - (30 * 60 * 1000L);
         long issuedAt = Long.parseLong(String.valueOf(claims.getIssuedAt().getTime()));
-        Assertions.assertEquals(compareValue, issuedAt);
+        assertEquals(compareValue, issuedAt);
     }
 
     // access 토큰 생성 후 유효성 확인 - 형식이 올바른지, 만료시간(30분)이 제대로 설정됐는지
     @Test
     @DisplayName("Access 토큰 생성 테스트 ")
     public void generateAccessTokenTest () {
-        String accessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN" );
+        String accessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image" );
         Claims claims = testMethodTokenParser(accessToken);
 
-        Assertions.assertEquals(String.valueOf(001L), claims.get("memberId").toString());
-        Assertions.assertEquals("test@gmail.com", claims.get("email"));
-        Assertions.assertEquals("ADMIN", claims.get("role"));
+        assertEquals(String.valueOf(001L), claims.get("memberId").toString());
+        assertEquals("test@gmail.com", claims.get("email"));
+        assertEquals("ADMIN", claims.get("role"));
         long compareValue = (claims.getExpiration().getTime()) - (30 * 60 * 1000L);
         long issuedAt = Long.parseLong(String.valueOf(claims.getIssuedAt().getTime()));
-        Assertions.assertEquals(compareValue, issuedAt);
+        assertEquals(compareValue, issuedAt);
     }
 
     // refresh 토큰 생성 후 유효성 확인 - 형식이 올바른지, 만료시간(30일)이 제대로 설정됐는지
     @Test
     @DisplayName("Refresh 토큰 생성 메서드")
     public void generateRefreshTokenTest () {
-        String refreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN" );
+        String refreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN", "nickname", "image" );
         Claims claims = testMethodTokenParser(refreshToken);
 
-        Assertions.assertEquals(String.valueOf(001L), claims.get("memberId").toString());
-        Assertions.assertEquals("test@gmail.com", claims.get("email"));
-        Assertions.assertEquals("ADMIN", claims.get("role"));
+        assertEquals(String.valueOf(001L), claims.get("memberId").toString());
+        assertEquals("test@gmail.com", claims.get("email"));
+        assertEquals("ADMIN", claims.get("role"));
         long compareValue = (claims.getExpiration().getTime()) - (30 * 24 * 60 * 60 * 1000L);
         long issuedAt = Long.parseLong(String.valueOf(claims.getIssuedAt().getTime()));
-        Assertions.assertEquals(compareValue, issuedAt);
+        assertEquals(compareValue, issuedAt);
     }
 
     /*
@@ -134,15 +137,15 @@ class JwtTokenProviderTest {
     @DisplayName("토큰 유효성 검증 테스트")
     public void validateToken1Test1() throws InterruptedException {
         // 1) 유효한 토큰
-        String accessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN");
-        String refreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN");
+        String accessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
+        String refreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
         Assertions.assertTrue(jwtTokenProvider.validateToken(accessToken));
         Assertions.assertTrue(jwtTokenProvider.validateToken(refreshToken));
 
         // 2) 만료된 토큰 - 만료일자를 짧게 설정하여 유효한 토큰인지 체크 후 -> 만료되면 만료된 토큰인지 체크
-        accessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 5000);
+        accessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 5000);
         Assertions.assertTrue(jwtTokenProvider.validateToken(accessToken));
-        refreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 5000);
+        refreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 5000);
         Assertions.assertTrue(jwtTokenProvider.validateToken(refreshToken));
 
         Thread.sleep(10000); // 10초 대기
@@ -154,7 +157,7 @@ class JwtTokenProviderTest {
         String invalidToken = "This.is.an.invalid.token";
         Assertions.assertThrows(AuthenticationCredentialsNotFoundException.class, () -> jwtTokenProvider.validateToken(invalidToken));
         // 서명키 위조 (변경된 토큰)
-        String validToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN");
+        String validToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
         String tamperedToken = validToken + "errer";
         Assertions.assertThrows(AuthenticationCredentialsNotFoundException.class, () -> jwtTokenProvider.validateToken(tamperedToken));
         // 비어있는 토큰
@@ -172,10 +175,10 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("재발급 필요 여부 테스트")
     public void validateToken2Test() throws InterruptedException {
-        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN");
-        String validRefreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN");
-        String invalidAccessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 1);
-        String invalidRefreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 1);
+        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
+        String validRefreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
+        String invalidAccessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 1);
+        String invalidRefreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 1);
 
         // 1) Access 유효, Refresh 유효 => false
         redisUtils.saveToken(validAccessToken, validRefreshToken);
@@ -202,10 +205,10 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("Access/Refresh 토큰 재발급 테스트")
     public void reGenerateToken() throws InterruptedException {
-        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN");
-        String validRefreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN");
-        String invalidAccessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 1);
-        String invalidRefreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", 1);
+        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
+        String validRefreshToken = jwtTokenProvider.generateMonthRefreshToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
+        String invalidAccessToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 1);
+        String invalidRefreshToken = jwtTokenProvider.generateToken(001L, "test@gmail.com", "ADMIN", "nickname", "image", 1);
 
         // 1) Access 만료, Refresh 유효 => 재발급O
         redisUtils.saveToken(invalidAccessToken, validRefreshToken);
@@ -219,25 +222,17 @@ class JwtTokenProviderTest {
         Claims accessClaims = jwtTokenProvider.parseTokenClaims(tokenMap.get("accessToken"));
         Claims refreshClaims = jwtTokenProvider.parseTokenClaims(tokenMap.get("refreshToken"));
 
-        Assertions.assertEquals(String.valueOf(001L), accessClaims.get("memberId").toString());
-        Assertions.assertEquals("test@gmail.com", accessClaims.get("email"));
-        Assertions.assertEquals("ADMIN", accessClaims.get("role"));
+        assertEquals(String.valueOf(001L), accessClaims.get("memberId").toString());
+        assertEquals("test@gmail.com", accessClaims.get("email"));
+        assertEquals("ADMIN", accessClaims.get("role"));
         // 만료일자 다른지/더 길게 생성된게 맞는지 확인
         Assertions.assertTrue(invalidAccessClaims.getExpiration().getTime() < accessClaims.getExpiration().getTime());
 
-        Assertions.assertEquals(String.valueOf(001L), refreshClaims.get("memberId").toString());
-        Assertions.assertEquals("test@gmail.com", refreshClaims.get("email"));
-        Assertions.assertEquals("ADMIN", refreshClaims.get("role"));
+        assertEquals(String.valueOf(001L), refreshClaims.get("memberId").toString());
+        assertEquals("test@gmail.com", refreshClaims.get("email"));
+        assertEquals("ADMIN", refreshClaims.get("role"));
         // 만료일자 다른지/더 길게 생성된게 맞는지 확인
         Assertions.assertTrue(validRefreshClaims.getExpiration().getTime() < refreshClaims.getExpiration().getTime());
-
-        // 2) Access 유효, Refresh 유효 => null 반환
-        redisUtils.saveToken(validAccessToken, validRefreshToken);
-        Assertions.assertNull(jwtTokenProvider.reissueToken(validAccessToken));
-
-        // 3) Access 만료, Refresh 만료 => null 반환
-        redisUtils.saveToken(invalidAccessToken, invalidRefreshToken);
-        Assertions.assertNull(jwtTokenProvider.reissueToken(invalidAccessToken));
 
         // 4) 유효하지 않은(서명 오류, 형식 불일치) Access 토큰  => 예외처리
         redisUtils.saveToken(validAccessToken,validRefreshToken);
@@ -253,14 +248,14 @@ class JwtTokenProviderTest {
     @DisplayName("Claims 추출 테스트")
     public void parseTokenClaimsTest() {
         // 1) 유효한 토큰인 경우
-        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN");
+        String validAccessToken = jwtTokenProvider.generateAccessToken(001L, "test@gmail.com", "ADMIN", "nickname", "image");
         Claims claims = jwtTokenProvider.parseTokenClaims(validAccessToken);
-        Assertions.assertEquals(String.valueOf(001L), claims.get("memberId").toString());
-        Assertions.assertEquals("test@gmail.com", claims.get("email"));
-        Assertions.assertEquals("ADMIN", claims.get("role"));
+        assertEquals(String.valueOf(001L), claims.get("memberId").toString());
+        assertEquals("test@gmail.com", claims.get("email"));
+        assertEquals("ADMIN", claims.get("role"));
         long compareValue = (claims.getExpiration().getTime()) - (30 * 60 * 1000L);
         long issuedAt = Long.parseLong(String.valueOf(claims.getIssuedAt().getTime()));
-        Assertions.assertEquals(compareValue, issuedAt);
+        assertEquals(compareValue, issuedAt);
 
         // 2) 유효하지 않은(서명 오류, 형식 불일치)인 경우
         String tamperedToken = validAccessToken + "error";

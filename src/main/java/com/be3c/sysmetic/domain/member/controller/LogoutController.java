@@ -1,15 +1,39 @@
 package com.be3c.sysmetic.domain.member.controller;
 
-import org.springframework.stereotype.Controller;
+import com.be3c.sysmetic.domain.member.service.LogoutService;
+import com.be3c.sysmetic.global.common.response.APIResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@Tag(name = "로그아웃 API", description = "로그아웃")
+@RestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogoutController {
+
+    private final LogoutService logoutService;
+
     /*
-        [로그아웃시 해야 하는 것]
-        - 만료된 토큰 전달
-        - 기존 토큰 정보 Redis 에서 삭제
-        - SecurityContext에서 회원정보 삭제
-
-
+        로그아웃 api
+        1. 로그아웃 성공했을 때 : OK
      */
+    @Operation(
+            summary = "로그아웃",
+            description = "사용자를 로그아웃 처리하는 API"
+    )
+    @PostMapping("/auth/logout")
+    public ResponseEntity<APIResponse<String>> logout(HttpServletRequest request) {
+        logoutService.logout(request);
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success("로그아웃이 성공적으로 처리되었습니다."));
+    }
+
 }

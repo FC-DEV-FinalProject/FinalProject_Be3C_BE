@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,7 +21,8 @@ import java.util.NoSuchElementException;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class InterestStrategyController {
+@RequestMapping("/api")
+public class InterestStrategyController implements InterestStrategyControllerDocs {
 
     private final InterestStrategyService interestStrategyService;
 
@@ -34,11 +32,12 @@ public class InterestStrategyController {
         2. 해당 페이지에 관심 전략이 존재하지 않을 때 : NOT_FOUND
         3. SecurityContext에 userId가 존재하지 않을 때 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
             InterestStrategyGetRequestDto interestStrategyGetRequestDto
-    ) throws Exception {
+    ) {
         try {
             PageResponse<InterestStrategyGetResponseDto> interestStrategyPage =
                     interestStrategyService.getInterestStrategyPage(
@@ -47,16 +46,13 @@ public class InterestStrategyController {
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(interestStrategyPage));
-        } catch (AuthenticationCredentialsNotFoundException |
-                 UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN));
         } catch (EntityNotFoundException |
                  NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
+
     /*
         관심 전략 등록 api
         1. 관심 전략 등록에 성공했을 때 : OK
@@ -65,11 +61,12 @@ public class InterestStrategyController {
         4. 등록할 전략을 찾지 못했을 때 : NOT_FOUND
         5. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PostMapping("/strategy/follow")
     public ResponseEntity<APIResponse<String>> follow(
         @Valid @RequestBody FollowPostRequestDto followPostRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(interestStrategyService.follow(followPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -91,12 +88,13 @@ public class InterestStrategyController {
         1. 폴더 이동 성공했을 때 : OK
         2. 폴더 이동 실패했을 때 : INTERNAL_SERVER_ERROR
         3. 옮기려는 폴더가 존재하지 않을 때 : NOT_FOUND
-        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
+        4. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     @PutMapping("/strategy/follow")
     public ResponseEntity<APIResponse<String>> MoveFolder(
             @Valid @RequestBody FollowPutRequestDto followPutRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(interestStrategyService.moveFolder(followPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -116,11 +114,12 @@ public class InterestStrategyController {
         2. 선택한 관심 전략 중 일부만 삭제에 성공했을 때 : MULTI_STATUS
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @DeleteMapping("/strategy/follow")
     public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
-    ) throws Exception {
+    ) {
         Map<Long, String> unFollowResult = interestStrategyService.unfollow(
                 followPostRequestDto
         );
