@@ -123,7 +123,7 @@ public class MethodRepositoryTest {
         methodRepository.saveAll(methodList);
 
         // when
-        int find_random = (int) (Math.random() * total_count);
+        int find_random = (int) (Math.random() * total_count) + 1;
 //        log.info("찾는 위치 : {}", find_random);
 
         // then

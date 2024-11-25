@@ -65,7 +65,7 @@ public class MethodServiceImpl implements MethodService {
      */
     @Override
     public PageResponse<MethodGetResponseDto> findMethodPage(Integer page) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createdAt").descending());
 
         Page<MethodGetResponseDto> findPage = methodRepository
                 .findAllByStatusCode(pageable, USING_STATE.getCode());
