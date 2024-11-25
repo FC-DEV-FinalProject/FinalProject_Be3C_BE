@@ -136,7 +136,9 @@ public class EmailServiceImpl implements EmailService {
     private void handleException(Exception e, String message) {
         if (e instanceof WebClientResponseException) {
             WebClientResponseException webClientException = (WebClientResponseException) e;
-            log.error("{} 발생: 상태 코드 = {}, 메시지 = {}", message, webClientException.getRawStatusCode(), webClientException.getResponseBodyAsString());
+            log.error("{} 발생: 상태 코드 = {}, 메시지 = {}", message,
+                    webClientException.getStatusCode().value(),
+                    webClientException.getResponseBodyAsString());
         } else if (e instanceof IllegalArgumentException) {
             log.error("{} 실패: 잘못된 요청 값입니다. 메시지: {}", message, e.getMessage());
         } else if (e instanceof IOException) {

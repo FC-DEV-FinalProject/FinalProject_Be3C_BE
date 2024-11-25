@@ -63,7 +63,7 @@ public class EmailServiceTest {
         // 구독자 추가 요청
         StibeeApiResponse response = emailService.addUserSubscriberRequest(subscriberRequest);
         assertNotNull(response);
-        assertEquals(true, response.isOk(), "응답 상태가 'ok'여야 합니다.");
+        assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
 //        assertEquals(ADD_TEST_EMAIL, response.getValue().getSuccess().get(0).getEmail());
     }
 
@@ -93,7 +93,7 @@ public class EmailServiceTest {
         // 구독자 추가 요청
         StibeeApiResponse response = emailService.addTraderSubscriberRequest(subscriberRequest);
         assertNotNull(response);
-        assertEquals(true, response.isOk(), "응답 상태가 'ok'여야 합니다.");
+        assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
 //        assertEquals(ADD_TEST_EMAIL, response.getValue().getSuccess().get(0).getEmail());
     }
 
