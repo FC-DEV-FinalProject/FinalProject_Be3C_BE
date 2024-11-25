@@ -104,9 +104,6 @@ public class RegisterController {
     })
     @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
-        // 이메일 인증코드 발송 내용 추가되면 수정.
-        String authCode = "ABC";
-
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
