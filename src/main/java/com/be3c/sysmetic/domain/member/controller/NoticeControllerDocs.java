@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @Tag(name = "공지사항 API", description = "관리자, 트레이더, 투자자 공지사항 API")
-@RequestMapping("/v1")
 public interface NoticeControllerDocs {
 
     // 관리자 공지사항 등록 API

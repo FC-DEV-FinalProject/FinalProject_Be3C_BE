@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
-@RequestMapping("/v1")
 public interface InquiryControllerDocs {
 
 
