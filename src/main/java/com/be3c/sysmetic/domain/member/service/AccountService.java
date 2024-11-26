@@ -12,4 +12,7 @@ public interface AccountService {
 
     // 6. 비밀번호 재설정
     boolean resetPassword(String email, String password);
+
+    // 이메일 인증 코드 확인
+    boolean isAuthCodeMatch(String email, String authCode);
 }
