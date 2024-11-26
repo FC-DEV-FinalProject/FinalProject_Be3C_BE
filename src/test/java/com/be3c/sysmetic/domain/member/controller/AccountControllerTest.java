@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -111,7 +112,7 @@ class AccountControllerTest {
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("일치하는 회원 정보를 찾을 수 없습니다."));
     }
 
@@ -127,7 +128,7 @@ class AccountControllerTest {
         mockMvc.perform(get("/auth/reset-password")
                         .param("email", "invalid-email"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("유효한 이메일 형식이 아닙니다."));
+                .andExpect(jsonPath("$.message").value("유효하지 않은 값입니다."));
 
         // 3. 실패 - 존재하지 않는 이메일
         mockMvc.perform(get("/auth/reset-password")

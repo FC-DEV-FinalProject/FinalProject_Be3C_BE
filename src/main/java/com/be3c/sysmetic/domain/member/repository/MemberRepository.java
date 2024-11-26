@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.repository;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,12 +24,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByNickname(String nickname);
 
-    @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phone_number = :phoneNumber", nativeQuery = true)
-    String findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
-
     @Modifying
     @Query("UPDATE Member m SET m.password = :newPassword WHERE m.email = :email")
     int updatePasswordByEmail(@Param("email") String email, @Param("newPassword") String newPassword);
+
+    // 이름과 휴대번호로 이메일 찾기 (이메일이 여러 개 존재할 수 있어서 List로 반환)
+    @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phoneNumber = :phoneNumber")
+    List<String> findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
+
 
     @Modifying
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
@@ -40,28 +43,27 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         )
         FROM Member m
         WHERE (
-            (:role = 'all' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004')) OR
-            (:role = 'user' AND m.roleCode = 'RC001') OR
-            (:role = 'trader' AND m.roleCode = 'RC002') OR
-            (:role = 'manager' AND m.roleCode IN ('RC003', 'RC004'))
+            (:role = 'ALL' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004')) OR
+            (:role = 'USER' AND m.roleCode = 'RC001') OR
+            (:role = 'TRADER' AND m.roleCode = 'RC002') OR
+            (:role = 'MANAGER' AND m.roleCode IN ('RC003', 'RC004'))
         )
         AND (
             :searchType IS NULL OR
-            (:searchType = 'email' AND m.email LIKE %:searchKeyword%) OR
-            (:searchType = 'name' AND m.name LIKE %:searchKeyword%) OR
-            (:searchType = 'nickname' AND m.nickname LIKE %:searchKeyword%) OR
-            (:searchType = 'phoneNumber' AND m.phoneNumber LIKE %:searchKeyword%) OR
-            (:searchType = 'birth' AND FUNCTION('DATE_FORMAT', m.birth, '%Y-%m-%d') LIKE %:searchKeyword%) OR
-            (:searchType = 'all' AND (
+            (:searchType = 'EMAIL' AND m.email LIKE %:searchKeyword%) OR
+            (:searchType = 'NAME' AND m.name LIKE %:searchKeyword%) OR
+            (:searchType = 'NICKNAME' AND m.nickname LIKE %:searchKeyword%) OR
+            (:searchType = 'PHONENUMBER' AND m.phoneNumber LIKE %:searchKeyword%) OR
+            (
                 m.email LIKE %:searchKeyword% OR
                 m.name LIKE %:searchKeyword% OR
                 m.nickname LIKE %:searchKeyword% OR
-                m.phoneNumber LIKE %:searchKeyword% OR
-                FUNCTION('DATE_FORMAT', m.birth, '%Y-%m-%d') LIKE %:searchKeyword%
-            ))
+                m.phoneNumber LIKE %:searchKeyword%
+            )
         )
         ORDER BY m.id DESC
-    """, nativeQuery = true)
+    """
+    )
     Page<MemberGetResponseDto> findMembers(
             @Param("role") String role,
             @Param("searchType") String searchType,
