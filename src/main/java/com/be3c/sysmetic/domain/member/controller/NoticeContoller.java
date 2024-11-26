@@ -41,7 +41,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         5. 등록하는 관리자 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestBody @Valid NoticeSaveRequestDto noticeSaveRequestDto) {
@@ -75,7 +75,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -131,7 +131,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PutMapping("/admin/notice/{noticeId}/closed")
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
             @PathVariable Long noticeId) {
@@ -160,7 +160,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
@@ -222,7 +222,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
@@ -274,7 +274,7 @@ public class NoticeContoller implements NoticeControllerDocs {
             +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
@@ -327,7 +327,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @DeleteMapping("/admin/notice/{noticeId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNotice(
             @PathVariable Long noticeId) {
@@ -355,7 +355,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @DeleteMapping("/admin/notice/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {

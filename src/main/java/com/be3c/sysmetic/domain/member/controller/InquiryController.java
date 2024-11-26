@@ -47,7 +47,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -114,7 +114,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
@@ -194,7 +194,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
@@ -222,7 +222,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @DeleteMapping("/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
