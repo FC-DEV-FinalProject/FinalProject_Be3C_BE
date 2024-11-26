@@ -148,7 +148,7 @@ public class StrategyController {
                     description = "내부 서버 오류",
                     content = @Content(schema = @Schema(implementation = APIResponse.class)))
     })
-    @PatchMapping("/strategy/{id}/visibilaty")
+    @PatchMapping("/strategy/{id}/visibility")
     public ResponseEntity<APIResponse<String>> patchStrategy(
             @NotBlank @PathVariable Long id
     ) {
