@@ -34,8 +34,9 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에 userId가 존재하지 않음",
                     content = @Content)
     })
-    @PatchMapping("/member/info/password")
+    @PatchMapping("/member/info/{id}/password")
     public ResponseEntity<APIResponse<String>> putPassword(
+            @PathVariable Long id,
             @RequestBody MemberPutPasswordRequestDto memberPutPasswordRequestDto,
             HttpServletRequest request
     );
@@ -47,7 +48,6 @@ public interface MemberInfoControllerDocs {
         3. 수정할 회원을 찾지 못했을 때 : NOT_FOUND
         4. Security Context에서 회원 Id를 찾지 못했을 때 : FORBIDDEN
      */
-    @PatchMapping("/member/info")
     @Operation(summary = "회원 정보 업데이트", description = "회원 정보를 업데이트합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",
@@ -59,7 +59,9 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에서 회원 ID를 찾을 수 없음",
                     content = @Content)
     })
+    @PatchMapping("/member/info/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
+            @PathVariable Long id,
             @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
     );
 
@@ -70,19 +72,20 @@ public interface MemberInfoControllerDocs {
         3. 수정할 회원을 찾지 못했을 때 : NOT_FOUND
         4. Security Context에서 회원 Id를 찾지 못했을 때 : FORBIDDEN
      */
-    @Operation(summary = "회원 정보 업데이트", description = "회원 정보를 업데이트합니다.")
+    @Operation(summary = "회원 정보성 수신 동의 업데이트", description = "회원 정보성 수신 동의 정보를 업데이트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",
+            @ApiResponse(responseCode = "200", description = "회원 정보성 수신 동의 수정 성공",
                     content = @Content),
-            @ApiResponse(responseCode = "500", description = "회원 정보 수정 실패 (서버 에러)",
+            @ApiResponse(responseCode = "500", description = "회원 정보성 수신 동의 수정 실패 (서버 에러)",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "수정할 회원을 찾을 수 없음",
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "SecurityContext에서 회원 ID를 찾을 수 없음",
                     content = @Content)
     })
-    @PatchMapping("/member/consent")
+    @PatchMapping("/member/consent/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberConsent(
+            @PathVariable Long id,
             @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
     );
 
@@ -104,6 +107,7 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에서 회원 ID를 찾을 수 없음",
                     content = @Content)
     })
+    @DeleteMapping("/member/{id}")
     public ResponseEntity<APIResponse<String>> deleteMemberInfo(
             @PathVariable(name="id") Long userId,
             HttpServletRequest request

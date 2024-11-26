@@ -109,7 +109,6 @@ public class InquiryServiceTest {
         assertTrue(inquiryRepository.findById(4L).isEmpty());
         assertTrue(inquiryRepository.findById(5L).isPresent());
         assertTrue(inquiryRepository.findById(6L).isPresent());
-
     }
 
     @Test

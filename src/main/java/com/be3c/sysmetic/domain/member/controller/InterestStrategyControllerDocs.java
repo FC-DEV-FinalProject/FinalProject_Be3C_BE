@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@RequestMapping("/api")
 @Tag(name = "관심 전략 API", description = "투자자 관심 전략 관련 API")
 public interface InterestStrategyControllerDocs {
 
