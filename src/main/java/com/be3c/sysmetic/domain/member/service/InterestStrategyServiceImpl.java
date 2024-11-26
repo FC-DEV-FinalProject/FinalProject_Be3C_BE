@@ -134,8 +134,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         followPostRequestDto.getStrategyId()
                 );
 
+        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
+
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, followPostRequestDto.getFolderId(), followPostRequestDto.getStrategyId());
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.UNFOLLOW.getCode())) {
             interestStrategy.get().setStatusCode(FOLLOW.getCode());
@@ -145,12 +148,9 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                     followPostRequestDto.getStrategyId(),
                     FOLLOW.getCode()
             );
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
             return true;
         }
-
-        // 전략을 등록한 트레이더에게 알림 메일 발송하기
-        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
-        emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
 
         throw new IllegalArgumentException();
     }
