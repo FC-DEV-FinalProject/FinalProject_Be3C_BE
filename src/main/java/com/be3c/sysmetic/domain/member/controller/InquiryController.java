@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v1")
