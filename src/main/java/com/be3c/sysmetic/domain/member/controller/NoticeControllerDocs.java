@@ -38,7 +38,11 @@ public interface NoticeControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
-            )
+            ),
+            @ApiResponse(
+            responseCode = "404",
+            description = "등록하는 관리자 정보를 찾지 못함 (NOT_FOUND)"
+    )
     })
     @PostMapping("/admin/notice/write")
     ResponseEntity<APIResponse<Long>> saveAdminNotice(
@@ -61,14 +65,13 @@ public interface NoticeControllerDocs {
                     description = "공지사항 데이터 조회 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내 공지사항이 없음 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/admin/notice")
     ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
@@ -118,14 +121,18 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "공지사항 상세 데이터 조회 실패 (NOT_FOUND)",
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/admin/notice/{noticeId}/view")
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
@@ -149,12 +156,16 @@ public interface NoticeControllerDocs {
                     responseCode = "404",
                     description = "공지사항 수정 화면 데이터 조회 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/admin/notice/{noticeId}/modify")
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
@@ -235,10 +246,6 @@ public interface NoticeControllerDocs {
                     description = "공지사항 목록 삭제 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "500",
-                    description = "공지사항 목록 삭제 실패 (INTERNAL_SERVER_ERROR)"
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             ),
@@ -263,14 +270,13 @@ public interface NoticeControllerDocs {
                     description = "공지사항 조회 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "공지사항 없음 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/notice")
     ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -288,11 +294,15 @@ public interface NoticeControllerDocs {
                     responseCode = "404",
                     description = "공지사항 상세 조회 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/notice/{noticeId}/view")
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
 }

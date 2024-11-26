@@ -1,17 +1,13 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
-import com.be3c.sysmetic.domain.member.entity.Inquiry;
-import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.service.NoticeService;
-import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
-import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +30,6 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final NoticeService noticeService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
-    private final MemberRepository memberRepository;
 
     /*
         관리자 공지사항 등록 API
@@ -41,24 +37,33 @@ public class NoticeContoller implements NoticeControllerDocs {
         2. 공지사항이 등록에 성공했을 때 : OK
         3. 공지사항이 등록에 실패했을 때 : INTERNAL_SERVER_ERROR
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
+        5. 등록하는 관리자 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
     @PostMapping("/v1/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody NoticeSaveRequestDto noticeSaveRequestDto) {
+            @RequestBody @Valid NoticeSaveRequestDto noticeSaveRequestDto) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Long noticeId = noticeService.registerNotice(
-                userId,
-                noticeSaveRequestDto.getNoticeTitle(),
-                noticeSaveRequestDto.getNoticeContent(),
-                noticeSaveRequestDto.getIsAttatchment(),
-                noticeSaveRequestDto.getIsOpen());
+        try {
+            if (noticeService.registerNotice(
+                    userId,
+                    noticeSaveRequestDto.getNoticeTitle(),
+                    noticeSaveRequestDto.getNoticeContent(),
+                    noticeSaveRequestDto.getIsAttatchment(),
+                    noticeSaveRequestDto.getIsOpen())) {
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeId));
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -66,15 +71,27 @@ public class NoticeContoller implements NoticeControllerDocs {
         관리자 공지사항 조회 / 검색 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항 데이터 조회에 성공했을 때 : OK
-        3. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
+        3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
     @GetMapping("/v1/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
+
+        if (page <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+        }
+
+        if (searchType != null) {
+            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+            }
+        }
 
         Page<Notice> noticeList = noticeService.findNoticeAdmin(searchType, searchText, page-1);
 
@@ -120,10 +137,19 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
             @PathVariable Long noticeId) {
 
-        noticeService.modifyNoticeClosed(noticeId);
+        try {
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success());
+            if (noticeService.modifyNoticeClosed(noticeId)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -131,44 +157,63 @@ public class NoticeContoller implements NoticeControllerDocs {
         관리자 공지사항 상세 조회 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
-        3. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
+        3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
     @GetMapping("/v1/admin/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        noticeService.upHits(noticeId);
+        if (page <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+        }
 
-        Notice notice = noticeService.findNoticeById(noticeId);
-        Notice previousNotice = noticeService.findNoticeById(noticeId-1);
-        Notice nextNotice = noticeService.findNoticeById(noticeId+1);
+        if (searchType != null) {
+            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+            }
+        }
 
-        NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
-                .page(page)
-                .searchType(searchType)
-                .searchText(searchText)
-                .noticeId(notice.getId())
-                .noticeTitle(notice.getNoticeTitle())
-                .noticeContent(notice.getNoticeContent())
-                .writeDate(notice.getWriteDate())
-                .correctDate(notice.getCorrectDate())
-                .writerNickname(notice.getWriter().getNickname())
-                .hits(notice.getHits())
-                .isAttatchment(notice.getIsAttatchment())
-                .isOpen(notice.getIsOpen())
-                .previousTitle(previousNotice.getNoticeTitle())
-                .previousWriteDate(previousNotice.getWriteDate())
-                .nextTitle(nextNotice.getNoticeTitle())
-                .nextWriteDate(nextNotice.getWriteDate())
-                .build();
+        try {
+            noticeService.upHits(noticeId);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeDetailAdminShowResponseDto));
+            Notice notice = noticeService.findNoticeById(noticeId);
+            Notice previousNotice = noticeService.findNoticeById(noticeId-1);
+            Notice nextNotice = noticeService.findNoticeById(noticeId+1);
+
+            NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
+                    .page(page)
+                    .searchType(searchType)
+                    .searchText(searchText)
+                    .noticeId(notice.getId())
+                    .noticeTitle(notice.getNoticeTitle())
+                    .noticeContent(notice.getNoticeContent())
+                    .writeDate(notice.getWriteDate())
+                    .correctDate(notice.getCorrectDate())
+                    .writerNickname(notice.getWriter().getNickname())
+                    .hits(notice.getHits())
+                    .isAttatchment(notice.getIsAttatchment())
+                    .isOpen(notice.getIsOpen())
+                    .previousTitle(previousNotice.getNoticeTitle())
+                    .previousWriteDate(previousNotice.getWriteDate())
+                    .nextTitle(nextNotice.getNoticeTitle())
+                    .nextWriteDate(nextNotice.getWriteDate())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(noticeDetailAdminShowResponseDto));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -177,31 +222,50 @@ public class NoticeContoller implements NoticeControllerDocs {
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항 수정 화면 조회에 성공했을 때 : OK
         3. 공지사항 수정 화면 조회에 실패했을 때 : NOT_FOUND
+        4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
     @GetMapping("/v1/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false) String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        Notice notice = noticeService.findNoticeById(noticeId);
+        if (page <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+        }
 
-        NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
-                .page(page)
-                .searchType(searchType)
-                .searchText(searchText)
-                .noticeId(notice.getId())
-                .noticeTitle(notice.getNoticeTitle())
-                .noticeContent(notice.getNoticeContent())
-                .isAttatchment(notice.getIsAttatchment())
-                .isOpen(notice.getIsOpen())
-                .build();
+        if (searchType != null) {
+            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+            }
+        }
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeShowModifyPageResponseDto));
+        try {
+            Notice notice = noticeService.findNoticeById(noticeId);
+
+            NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
+                    .page(page)
+                    .searchType(searchType)
+                    .searchText(searchText)
+                    .noticeId(notice.getId())
+                    .noticeTitle(notice.getNoticeTitle())
+                    .noticeContent(notice.getNoticeContent())
+                    .isAttatchment(notice.getIsAttatchment())
+                    .isOpen(notice.getIsOpen())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(noticeShowModifyPageResponseDto));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -221,25 +285,42 @@ public class NoticeContoller implements NoticeControllerDocs {
             @PathVariable Long noticeId,
             @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
-        Notice notice = noticeService.findNoticeById(noticeId);
-
-        if (noticeModifyRequestDto.getModifyInModifyPageTime().isAfter(notice.getCorrectDate())) {
-            noticeService.modifyNotice(
-                    noticeId,
-                    noticeModifyRequestDto.getNoticeTitle(),
-                    noticeModifyRequestDto.getNoticeContent(),
-                    userId,
-                    noticeModifyRequestDto.getIsAttatchment(),
-                    noticeModifyRequestDto.getIsOpen());
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작습니다."));
+        LocalDateTime modifyInModifyPageTime = noticeModifyRequestDto.getModifyInModifyPageTime();
+        if (modifyInModifyPageTime == null) {
+            String str = "3000-11-05 13:47:13.248";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+            LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+            modifyInModifyPageTime = dateTime;
         }
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success());
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        try {
+            Notice notice = noticeService.findNoticeById(noticeId);
+
+            if (modifyInModifyPageTime.isBefore(notice.getCorrectDate())) {
+
+                if (noticeService.modifyNotice(
+                        noticeId,
+                        noticeModifyRequestDto.getNoticeTitle(),
+                        noticeModifyRequestDto.getNoticeContent(),
+                        userId,
+                        noticeModifyRequestDto.getIsAttatchment(),
+                        noticeModifyRequestDto.getIsOpen())) {
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(APIResponse.success());
+                }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작습니다."));
+            }
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -256,10 +337,18 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<Long>> deleteAdminNotice(
             @PathVariable Long noticeId) {
 
-        noticeService.deleteAdminNotice(noticeId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success());
+        try {
+            if (noticeService.deleteAdminNotice(noticeId)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
@@ -267,9 +356,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         관리자 공지사항 목록 삭제 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항 목록 삭제에 성공했을 때 : OK
-        3. 공지사항 목록 삭제에 실패했을 때 : INTERNAL_SERVER_ERROR
-        4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
-        5. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
+        3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
+        4. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
@@ -279,23 +367,38 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         List<Long> noticeIdList = noticeListDeleteRequestDto.getNoticeIds();
 
-        Integer deleteCount = noticeService.deleteAdminNoticeList(noticeIdList);
+        try {
+            Integer deleteCount = noticeService.deleteAdminNoticeList(noticeIdList);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(deleteCount));
+            if (deleteCount == noticeIdList.size()) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success(deleteCount));
+            }
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                    .body(APIResponse.fail(ErrorCode.MULTI_STATUS));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 
     /*
         공지사항 조회 / 검색 API
         1. 공지사항 데이터 조회에 성공했을 때 : OK
-        2. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
+        2. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @GetMapping("/v1/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
+
+        if (page <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+        }
 
         Page<Notice> noticeList = noticeService.findNotice(searchText, page-1);
 
@@ -329,37 +432,49 @@ public class NoticeContoller implements NoticeControllerDocs {
         공지사항 상세 조회 API
         1. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
         2. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
+        3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @GetMapping("/v1/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        Notice notice = noticeService.findNoticeById(noticeId);
-        Notice previousNotice = noticeService.findNoticeById(noticeId-1);
-        Notice nextNotice = noticeService.findNoticeById(noticeId+1);
+        if (page <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+        }
 
-        NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
-                .page(page)
-                .searchText(searchText)
-                .noticeId(notice.getId())
-                .noticeTitle(notice.getNoticeTitle())
-                .noticeContent(notice.getNoticeContent())
-                .writeDate(notice.getWriteDate())
-                .correctDate(notice.getCorrectDate())
-                .writerNickname(notice.getWriter().getNickname())
-                .hits(notice.getHits())
-                .isAttatchment(notice.getIsAttatchment())
-                .isOpen(notice.getIsOpen())
-                .previousTitle(previousNotice.getNoticeTitle())
-                .previousWriteDate(previousNotice.getWriteDate())
-                .nextTitle(nextNotice.getNoticeTitle())
-                .nextWriteDate(nextNotice.getWriteDate())
-                .build();
+        try {
+            Notice notice = noticeService.findNoticeById(noticeId);
+            Notice previousNotice = noticeService.findNoticeById(noticeId-1);
+            Notice nextNotice = noticeService.findNoticeById(noticeId+1);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(noticeDetailShowResponseDto));
+            NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
+                    .page(page)
+                    .searchText(searchText)
+                    .noticeId(notice.getId())
+                    .noticeTitle(notice.getNoticeTitle())
+                    .noticeContent(notice.getNoticeContent())
+                    .writeDate(notice.getWriteDate())
+                    .correctDate(notice.getCorrectDate())
+                    .writerNickname(notice.getWriter().getNickname())
+                    .hits(notice.getHits())
+                    .isAttatchment(notice.getIsAttatchment())
+                    .isOpen(notice.getIsOpen())
+                    .previousTitle(previousNotice.getNoticeTitle())
+                    .previousWriteDate(previousNotice.getWriteDate())
+                    .nextTitle(nextNotice.getNoticeTitle())
+                    .nextWriteDate(nextNotice.getWriteDate())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(noticeDetailShowResponseDto));
+        }
+        catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 }

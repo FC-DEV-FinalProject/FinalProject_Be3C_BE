@@ -25,15 +25,15 @@ public class NoticeServiceImpl implements NoticeService {
     // 등록
     @Override
     @Transactional
-    public Long registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen) {
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen) {
 
-        Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
 
-        noticeRepository.save(notice);
+        Notice noticeSave = noticeRepository.save(notice);
 
-        return notice.getId();
+        return true;
     }
 
 
@@ -49,15 +49,17 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 목록 공개여부 수정
     @Override
     @Transactional
-    public void modifyNoticeClosed(Long noticeId) {
+    public boolean modifyNoticeClosed(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
         if (notice.getIsOpen() == 0) {
             notice.setIsOpen(1);
         } else {
             notice.setIsOpen(0);
         }
+
+        return true;
     }
 
 
@@ -66,7 +68,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public void upHits(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
         notice.setHits(notice.getHits() + 1);
     }
@@ -82,7 +84,7 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public void modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen) {
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
@@ -91,17 +93,21 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setCorrectorId(correctorId);
         notice.setIsAttatchment(isAttatchment);
         notice.setIsOpen(isOpen);
+
+        return true;
     }
 
 
     // 관리자 문의 삭제
     @Override
     @Transactional
-    public void deleteAdminNotice(Long noticeId) {
+    public boolean deleteAdminNotice(Long noticeId) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
         noticeRepository.delete(notice);
+
+        return true;
     }
 
 
@@ -109,6 +115,10 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public Integer deleteAdminNoticeList(List<Long> noticeIdList) {
+
+        for (Long noticeId : noticeIdList) {
+            noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        }
 
         return noticeRepository.bulkDelete(noticeIdList);
     }
