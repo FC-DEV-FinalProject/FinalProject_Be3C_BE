@@ -2,11 +2,13 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
@@ -62,7 +64,7 @@ class AccountServiceTest {
         Assertions.assertEquals("test1@test.com",accountService.findEmail(name, phoneNumber));
 
         // 2. 실패 - 존재하지 않는 회원정보
-        Assertions.assertThrows(NullPointerException.class, () -> accountService.findEmail("존재하지않는회원", phoneNumber));
+        Assertions.assertThrows(EntityNotFoundException.class, () -> accountService.findEmail("존재하지않는회원", phoneNumber));
     }
 
     @Test

@@ -36,4 +36,16 @@ public class NoticeDetailShowResponseDto {
 
     @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
     private Integer isAttatchment;
+
+    @Schema(description = "이전글 제목", example = "공지사항 제목 예")
+    private String previousTitle;
+
+    @Schema(description = "이전글 작성일시", example = "2023-11-21T10:15:30")
+    private LocalDateTime previousWriteDate;
+
+    @Schema(description = "다음글 제목", example = "공지사항 제목 예")
+    private String nextTitle;
+
+    @Schema(description = "다음글 작성일시", example = "2023-11-21T10:15:30")
+    private LocalDateTime nextWriteDate;
 }

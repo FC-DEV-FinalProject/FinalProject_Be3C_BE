@@ -112,8 +112,8 @@ class AccountControllerTest {
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("일치하는 이메일 정보가 없습니다."));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("일치하는 회원 정보를 찾을 수 없습니다."));
     }
 
     @Test

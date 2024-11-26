@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.dto;
 
+import com.be3c.sysmetic.domain.member.entity.MemberRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,7 +18,7 @@ public class RegisterRequestDto {
 
     @NotNull
     @JsonProperty("roleCode")
-    private String roleCode; // 회원 등급 코드
+    private MemberRole roleCode; // 회원 등급 코드
 
     @NotNull
     @JsonProperty("email")

@@ -40,13 +40,9 @@ public class AccountController {
     @PostMapping("/auth/find-email")
     public ResponseEntity<APIResponse<String>> findEmail(@Valid @RequestBody FindEmailRequestDto findEmailRequestDto, HttpServletRequest request) {
         String result = accountService.findEmail(findEmailRequestDto.getName(), findEmailRequestDto.getPhoneNumber());
-        if(result == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "일치하는 회원 정보를 찾을 수 없습니다."));
-        }
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(result));
         // todo: 2차 개발 고려(request는 FindEmailLog 구현 시 사용될 예정)
     }
-
 
     /*
         이메일 확인 및 인증코드 발송 api

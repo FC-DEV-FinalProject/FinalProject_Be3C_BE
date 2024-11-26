@@ -57,7 +57,7 @@ public class RegisterValidator implements Validator {
         }
 
         // 2. 회원 등급 코드 NotNull/NotBlank 확인
-        if (isNullOrBlank(dto.getRoleCode())) {
+        if (isNullOrBlank(dto.getRoleCode().getCode())) {
             errors.rejectValue("roleCode", "NotEmpty.roleCode", "회원 유형 선택은 필수입니다. 가입하려는 회원 유형을 선택해 주세요.");
         }
 
