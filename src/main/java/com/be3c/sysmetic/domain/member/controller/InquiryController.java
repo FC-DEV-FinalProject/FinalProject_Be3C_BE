@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/v1")
 public class InquiryController implements InquiryControllerDocs {
 
     private final SecurityUtils securityUtils;
@@ -47,7 +48,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @GetMapping("/v1/admin/inquiry")
+    @GetMapping("/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -114,7 +115,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @GetMapping("/v1/admin/inquiry/{inquiryId}/view")
+    @GetMapping("/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -194,7 +195,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @DeleteMapping("/v1/admin/inquiry/{inquiryId}/delete")
+    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
 
@@ -222,7 +223,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @DeleteMapping("/v1/admin/inquiry/delete")
+    @DeleteMapping("/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
 
@@ -253,7 +254,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/v1/strategy/{strategyId}/inquiry")
+    @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
@@ -286,7 +287,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/v1/strategy/{strategyId}/inquiry")
+    @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @PathVariable Long strategyId,
             @RequestBody @Valid InquirySaveRequestDto inquirySaveRequestDto) {
@@ -320,7 +321,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/v1/member/inquiry")
+    @GetMapping("/member/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
@@ -385,7 +386,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
      @Override
      @PreAuthorize("hasRole('ROLE_USER')")
-     @GetMapping("/v1/member/inquiry/{inquiryId}/view")
+     @GetMapping("/member/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -463,7 +464,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/v1/member/inquiry/{inquiryId}/modify")
+    @GetMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -523,7 +524,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
      @Override
      @PreAuthorize("hasRole('ROLE_USER')")
-     @PutMapping("/v1/member/inquiry/{inquiryId}/modify")
+     @PutMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
@@ -567,7 +568,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_USER')")
-    @DeleteMapping("/v1/member/inquiry/{inquiryId}/delete")
+    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
 
@@ -607,7 +608,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_TRADER')")
-    @PostMapping("/v1/trader/inquiry/{inquiryId}/write")
+    @PostMapping("/trader/inquiry/{inquiryId}/write")
     public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
@@ -638,7 +639,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_TRADER')")
-    @GetMapping("/v1/trader/inquiry")
+    @GetMapping("/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
@@ -691,7 +692,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_TRADER')")
-    @GetMapping("/v1/trader/inquiry/{inquiryId}/view")
+    @GetMapping("/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,

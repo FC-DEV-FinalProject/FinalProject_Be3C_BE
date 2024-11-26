@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/v1")
 public class NoticeContoller implements NoticeControllerDocs {
 
     private final SecurityUtils securityUtils;
@@ -41,7 +42,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @PostMapping("/v1/admin/notice/write")
+    @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestBody @Valid NoticeSaveRequestDto noticeSaveRequestDto) {
 
@@ -75,7 +76,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @GetMapping("/v1/admin/notice")
+    @GetMapping("/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
@@ -131,7 +132,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @PutMapping("/v1/admin/notice/{noticeId}/closed")
+    @PutMapping("/admin/notice/{noticeId}/closed")
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
             @PathVariable Long noticeId) {
 
@@ -160,7 +161,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @GetMapping("/v1/admin/notice/{noticeId}/view")
+    @GetMapping("/admin/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -222,7 +223,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @GetMapping("/v1/admin/notice/{noticeId}/modify")
+    @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -274,7 +275,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @PutMapping("/v1/admin/notice/{noticeId}/modify")
+    @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
@@ -327,7 +328,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @DeleteMapping("/v1/admin/notice/{noticeId}/delete")
+    @DeleteMapping("/admin/notice/{noticeId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNotice(
             @PathVariable Long noticeId) {
 
@@ -355,7 +356,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
-    @DeleteMapping("/v1/admin/notice/delete")
+    @DeleteMapping("/admin/notice/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
 
@@ -384,7 +385,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         2. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @GetMapping("/v1/notice")
+    @GetMapping("/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -429,7 +430,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @GetMapping("/v1/notice/{noticeId}/view")
+    @GetMapping("/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,

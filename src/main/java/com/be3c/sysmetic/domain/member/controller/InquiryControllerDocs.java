@@ -44,10 +44,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
+            @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -81,11 +81,11 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
+            @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -113,7 +113,7 @@ public interface InquiryControllerDocs {
             )
     })
     @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
-    public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
+    ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId);
 
 
@@ -141,7 +141,7 @@ public interface InquiryControllerDocs {
             )
     })
     @DeleteMapping("/admin/inquiry/delete")
-    public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+    ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
 
@@ -167,7 +167,7 @@ public interface InquiryControllerDocs {
             )
     })
     @GetMapping("/strategy/{strategyId}/inquiry")
-    public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
+    ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
 
@@ -201,7 +201,7 @@ public interface InquiryControllerDocs {
             )
     })
     @PostMapping("/strategy/{strategyId}/inquiry")
-    public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
+    ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
@@ -231,10 +231,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 상세 조회 API
@@ -263,11 +263,11 @@ public interface InquiryControllerDocs {
             )
     })
     @GetMapping("/member/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 수정 화면 조회 API
@@ -300,11 +300,11 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
+    ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 수정 API
@@ -335,7 +335,7 @@ public interface InquiryControllerDocs {
             )
     })
     @PutMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
+    ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto);
 
@@ -368,7 +368,7 @@ public interface InquiryControllerDocs {
             )
     })
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
-    public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
+    ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId);
 
 
@@ -401,7 +401,7 @@ public interface InquiryControllerDocs {
             )
     })
     @PostMapping("/trader/inquiry/{inquiryId}/write")
-    public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
+    ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto);
 
@@ -431,10 +431,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 트레이더 문의 상세 조회 API
@@ -463,9 +463,9 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 }
