@@ -38,7 +38,6 @@ public interface StrategyReplyControllerDocs {
             @ApiResponse(responseCode = "400", description = "요청한 페이지에 댓글 없음",
                     content = @Content)
     })
-    @GetMapping("/strategy/reply")
     public ResponseEntity<APIResponse<PageResponse<PageReplyResponseDto>>> getReplyPage(
             ReplyGetPageRequestDto replyGetPageRequestDto
     );
@@ -59,7 +58,6 @@ public interface StrategyReplyControllerDocs {
             @ApiResponse(responseCode = "404", description = "댓글을 달 전략을 찾을 수 없음",
                     content = @Content)
     })
-    @PostMapping("/strategy/reply")
     public ResponseEntity<APIResponse<String>> postReply(
             @RequestBody ReplyPostRequestDto replyPostRequestDto
     );
@@ -80,7 +78,6 @@ public interface StrategyReplyControllerDocs {
                     content = @Content)
     })
     // @PreAuthorize("hasRole='ROLE_USER and !ROLE_TRADER'")
-    @DeleteMapping("/strategy/reply")
     public ResponseEntity<APIResponse<String>> deleteReply(
             @RequestBody ReplyDeleteRequestDto replyDeleteRequestDto
     );

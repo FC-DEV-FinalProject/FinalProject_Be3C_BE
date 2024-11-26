@@ -45,7 +45,6 @@ public interface StockControllerDocs {
             }
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     );
@@ -71,7 +70,6 @@ public interface StockControllerDocs {
             }
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
             @NotBlank @PathVariable Long id
     );

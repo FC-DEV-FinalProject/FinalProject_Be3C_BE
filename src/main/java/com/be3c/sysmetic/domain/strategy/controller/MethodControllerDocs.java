@@ -39,7 +39,6 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @GetMapping("/admin/method/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     );
@@ -71,7 +70,6 @@ public interface MethodControllerDocs {
             )
     })
 //    @GetMapping("/admin/method/{id:[0-9]+}")
-    @GetMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
             @NotBlank @PathVariable Long id
     );
@@ -103,7 +101,6 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @GetMapping("/admin/methodlist")
     public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
             @NotBlank @RequestParam Integer page
     );
@@ -141,7 +138,6 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PostMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> postMethod(
             @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
     );
@@ -185,7 +181,6 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PutMapping("/admin/method")
     public ResponseEntity<APIResponse<String>> putMethod(
             @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
     );
@@ -218,7 +213,6 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<String>> deleteMethod(
             @NotBlank @PathVariable Long id
     );

@@ -49,7 +49,6 @@ public interface AdminStrategyAllowControllerDocs {
             )
     })
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @GetMapping("/admin/strategy")
     public ResponseEntity<APIResponse<PageResponse<AdminStrategyGetResponseDto>>> getAdminStrategy(
             AdminStrategySearchGetDto adminStrategySearchGetDto
     );
@@ -76,7 +75,6 @@ public interface AdminStrategyAllowControllerDocs {
             )
     })
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @PatchMapping("/admin/strategy/allow")
     public ResponseEntity<APIResponse<Map<Long, String>>> strategyAllow(
             @Valid @RequestBody AllowApprovalRequestDto allowApprovalRequestDto
     );
@@ -109,7 +107,6 @@ public interface AdminStrategyAllowControllerDocs {
             )
     })
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @PatchMapping("/admin/strategy/reject")
     public ResponseEntity<APIResponse<String>> strategyReject(
             @Valid RejectStrategyApprovalDto rejectStrategyApprovalDto
     );

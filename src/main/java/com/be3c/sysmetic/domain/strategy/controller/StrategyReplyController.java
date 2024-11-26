@@ -43,6 +43,9 @@ public class StrategyReplyController {
 //        }
 //    }
 
+    /*
+        댓글 페이징 api
+     */
     @GetMapping("/strategy/{strategyId}/replies")
     public ResponseEntity<APIResponse<PageResponse<PageReplyResponseDto>>> getReplyPage(
             @PathVariable Long strategyId,
@@ -58,6 +61,9 @@ public class StrategyReplyController {
         }
     }
 
+    /*
+        댓글 등록 api
+     */
     @PostMapping("/strategy/reply")
     public ResponseEntity<APIResponse<String>> postReply(
             @RequestBody ReplyPostRequestDto replyPostRequestDto

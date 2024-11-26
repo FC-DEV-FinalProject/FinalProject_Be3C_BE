@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotBlank;
@@ -134,6 +135,19 @@ public class StrategyController {
     }
 
     // 비공개 전환
+    @Operation(summary = "비공개 전환",
+            description = "전략 ID를 기반으로 해당 전략을 비공개 상태로 전환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "성공적으로 전략이 비공개 상태로 전환됨",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "전략 ID를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "내부 서버 오류",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class)))
+    })
     @PatchMapping("/strategy/{id}/visibilaty")
     public ResponseEntity<APIResponse<String>> patchStrategy(
             @NotBlank @PathVariable Long id

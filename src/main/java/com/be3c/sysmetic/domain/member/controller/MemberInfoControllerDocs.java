@@ -31,7 +31,6 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에 userId가 존재하지 않음",
                     content = @Content)
     })
-    @PutMapping("/member/info/password")
     public ResponseEntity<APIResponse<String>> putPassword(
             @RequestBody MemberPutPasswordRequestDto memberPutPasswordRequestDto,
             HttpServletRequest request
@@ -55,7 +54,6 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에서 회원 ID를 찾을 수 없음",
                     content = @Content)
     })
-    @PatchMapping("/member/info")
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
     );
@@ -78,7 +76,6 @@ public interface MemberInfoControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에서 회원 ID를 찾을 수 없음",
                     content = @Content)
     })
-    @DeleteMapping("/member/{id}")
     public ResponseEntity<APIResponse<String>> deleteMemberInfo(
             @PathVariable(name="id") Long userId,
             HttpServletRequest request

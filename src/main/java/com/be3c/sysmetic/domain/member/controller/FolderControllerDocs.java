@@ -40,7 +40,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @GetMapping("/member/folder/availability")
     ResponseEntity<APIResponse<String>> getDuplCheck(
             @RequestParam String folderName
     );
@@ -73,7 +72,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @GetMapping("/member/folder")
     ResponseEntity<APIResponse<List<FolderListResponseDto>>> getAllFolder(
     );
 
@@ -122,7 +120,6 @@ public interface FolderControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PostMapping("/member/folder/")
     ResponseEntity<APIResponse<String>> postFolder(
             @Valid @RequestBody FolderPostRequestDto folderPostRequestDto
     );
@@ -173,7 +170,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @PutMapping("/member/folder")
     ResponseEntity<APIResponse<String>> putFolder(
             @Valid @RequestBody FolderPutRequestDto folderPutRequestDto
     );
@@ -217,7 +213,6 @@ public interface FolderControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @DeleteMapping("/member/folder/{id}")
     ResponseEntity<APIResponse<String>> deleteFolder(
             @PathVariable Long id
     );
