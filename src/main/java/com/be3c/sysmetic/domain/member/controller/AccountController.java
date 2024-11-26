@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @Tag(name = "이메일 찾기 및 비밀번호 재설정 API", description = "이메일 찾기 및 비밀번호 재설정")
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/v1")
 public class AccountController {
 
     private final AccountService accountService;
