@@ -19,7 +19,7 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     List<Daily> findAllByStrategyIdOrderByDateDesc(Long strategyId);
 
     // 모든 일간분석데이터 목록 조회 - 오래된순 정렬
-    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
+//    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
 
     // 일간분석데이터 목록 조회 - 기간 검색
     @Query("""
