@@ -70,5 +70,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     );
 
 
+    Optional<Member> findDistinctByNickname(String nickname);
 
 }

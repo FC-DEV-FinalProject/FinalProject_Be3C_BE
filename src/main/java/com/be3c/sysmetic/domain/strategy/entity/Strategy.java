@@ -20,13 +20,6 @@ import java.time.LocalDateTime;
 @Table(name = "strategy")
 public class Strategy extends BaseEntity {
 
-    @PrePersist
-    public void prePersist() {
-        followerCount = 0L;
-        kpRatio = 0.0;
-        smScore = 0.0;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,18 +45,21 @@ public class Strategy extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "follower_count")
+    @Column(name = "follower_count", nullable = false)
     private Long followerCount;
 
-    @Column(name = "kp_ratio")
+    @Column(name = "mdd", nullable = false)
+    private Double mdd;
+
+    @Column(name = "kp_ratio", nullable = false)
     private Double kpRatio;
 
-    @Column(name = "sm_score")
+    @Column(name = "sm_score", nullable = false)
     private Double smScore;
 
     // 누적수익률 추가
-    @Column(name = "accum_profit_loss_rate", nullable = false)
-    private Double accumProfitLossRate;
+    @Column(name = "accumulated_profit_loss_rate", nullable = false)
+    private Double accumulatedProfitLossRate;
 
     @CreatedDate
     @Column(name = "strategy_created_date", nullable = false)
