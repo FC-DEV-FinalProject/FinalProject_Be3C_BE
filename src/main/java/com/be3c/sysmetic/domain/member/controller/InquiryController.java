@@ -37,7 +37,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/inquiry")
+    @GetMapping("/v1/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -87,7 +87,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/inquiry/{inquiryId}/view")
+    @GetMapping("/v1/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -133,7 +133,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
+    @DeleteMapping("/v1/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
 
@@ -152,7 +152,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/admin/inquiry/delete")
+    @DeleteMapping("/v1/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
 
@@ -172,7 +172,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 등록 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/strategy/{strategyId}/inquiry")
+    @GetMapping("/v1/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
 
@@ -196,7 +196,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/strategy/{strategyId}/inquiry")
+    @PostMapping("/v1/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto) {
 
@@ -218,7 +218,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/member/inquiry")
+    @GetMapping("/v1/member/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
@@ -266,7 +266,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
      @Override
-     @GetMapping("/member/inquiry/{inquiryId}/view")
+     @GetMapping("/v1/member/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -310,7 +310,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 수정 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/member/inquiry/{inquiryId}/modify")
+    @GetMapping("/v1/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -339,7 +339,7 @@ public class InquiryController implements InquiryControllerDocs {
         5. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
      @Override
-     @PutMapping("/member/inquiry/{inquiryId}/modify")
+     @PutMapping("/v1/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
@@ -361,7 +361,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
+    @DeleteMapping("/v1/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
 
@@ -380,7 +380,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/trader/inquiry/{inquiryId}/write")
+    @PostMapping("/v1/trader/inquiry/{inquiryId}/write")
     public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
@@ -402,7 +402,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/trader/inquiry")
+    @GetMapping("/v1/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
@@ -439,7 +439,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/trader/inquiry/{inquiryId}/view")
+    @GetMapping("/v1/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
