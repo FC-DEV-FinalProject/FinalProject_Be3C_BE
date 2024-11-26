@@ -152,10 +152,6 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
             return true;
         }
 
-        // 전략을 등록한 트레이더에게 알림 메일 발송하기
-        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
-        emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
-
         throw new IllegalArgumentException();
     }
 
