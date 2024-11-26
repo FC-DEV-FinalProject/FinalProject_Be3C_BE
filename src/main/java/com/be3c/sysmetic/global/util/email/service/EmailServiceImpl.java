@@ -67,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public StibeeApiResponse deleteUserSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails) {
         try {
             return emailApiClient.deleteUserSubscriberRequest(emails);
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails) {
         try {
             return emailApiClient.deleteTraderSubscriberRequest(emails);
         } catch (Exception e) {

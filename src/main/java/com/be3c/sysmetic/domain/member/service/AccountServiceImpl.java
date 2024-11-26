@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.global.config.security.RedisUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class AccountServiceImpl implements AccountService {
      */
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final RedisUtils redisUtils;
 
     // 1. 이메일 반환 메서드
     @Override
@@ -50,6 +52,14 @@ public class AccountServiceImpl implements AccountService {
     // 5. 비밀번호 일치 여부 확인
     public boolean isPasswordMatch(String password, String rewritePassword) {
         return Objects.equals(password, rewritePassword);
+    }
+
+    // 이메일 인증 코드 발송 : RegisterService 이용 중
+    // 이메일 인증 코드 일치 여부 확인
+    @Override
+    public boolean isAuthCodeMatch(String email, String authCode){
+
+        return redisUtils.getEmailAuthCode(email).equals(authCode);
     }
 
     // 6. 비밀번호 재설정
