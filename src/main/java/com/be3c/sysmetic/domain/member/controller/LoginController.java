@@ -2,9 +2,14 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.LoginRequestDto;
 import com.be3c.sysmetic.domain.member.service.LoginService;
-import com.be3c.sysmetic.global.common.response.ApiResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +19,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 import java.util.Map;
 
-
+@Tag(name = "로그인 API", description = "로그인")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/v1")
 public class LoginController {
     /*
         [순서]
@@ -47,12 +54,21 @@ public class LoginController {
     private final RedisUtils redisUtils;
 
 
+    /*
+        로그인 api
+        1. 로그인 성공했을 때 : OK
+        2. 이메일 또는 비밀번호 불일치 : BAD_REQUEST
+     */
+    @Operation(
+            summary = "로그인",
+            description = "사용자가 이메일과 비밀번호를 통해 로그인하는 API"
+    )
     @PostMapping("/auth/login")
-        public ResponseEntity<ApiResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
+    public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
 
         String email = requestDto.getEmail();
         String password = requestDto.getPassword();
-        String rememberMe = requestDto.getRememberMe();
+        Boolean rememberMe = requestDto.getRememberMe();
 
         try {
             // 1. 이메일 확인
@@ -61,7 +77,7 @@ public class LoginController {
             // 2. 비밀번호 비교
             if(!loginService.validatePassword(memberEmail, password)) {
                 // 로그인 실패(비밀번호 불일치)
-                return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "controller/pw- 이메일 또는 비밀번호가 일치하지 않습니다"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "이메일 또는 비밀번호가 일치하지 않습니다"));
             }
 
             // 3. rememberMe에 따른 Jwt 토큰 생성
@@ -73,11 +89,9 @@ public class LoginController {
             // 5. 생성된 토큰 Redis에 저장
             redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
 
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+            return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST,"controller/catch - 이메일 또는 비밀번호가 일치하지 않습니다"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "로그인 문제 발생"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST,"이메일 또는 비밀번호가 일치하지 않습니다"));
         }
     }
 

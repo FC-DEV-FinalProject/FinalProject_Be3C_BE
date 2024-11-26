@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class DailyResponseDto {
     private Long dailyId; // 일간분석 데이터 식별번호
-    private LocalDateTime date; // 날짜
+    private LocalDate date; // 날짜
     private Double principal; // 원금
     private Double depositWithdrawalAmount; // 입출금
     private Double profitLossAmount; // 일 손익

@@ -2,6 +2,7 @@ package com.be3c.sysmetic.global.config.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,8 @@ public class JwtTokenProvider {
         5. 재발급 필요 여부 확인 메서드
         6. Access 와 Refresh Token 재발급 메서드
         7. Access 토큰에서 사용자 정보 추출 메서드
+        8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
+        9. roleCode 를 role 로 명칭 변환 메서드
     */
 
     @Autowired
@@ -46,13 +49,23 @@ public class JwtTokenProvider {
     private long HOUR_REFRESH_TOKEN_EXPIRE_TIME;     // 1시간
 
     // 1. Token 생성 메서드
-    public String generateToken(Long memberId, String email, String role, long expiration) {
+    public String generateToken(Long memberId, String email, String roleCode, String nickname, String profileImage, long expiration) {
+        String role = null;
+        if (roleCode.startsWith("RC")) {
+            // "RC"로 시작하는 경우, roleCode를 role로 변경
+            role = roleCodeChangeRole(roleCode);
+        } else {
+            role = roleCode;
+        }
+
         Date now = new Date();
         Date tokenExpires = new Date(now.getTime() + expiration);
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .claim("email", email)
                 .claim("role", role)
+                .claim("nickname", nickname)
+                .claim("profileImage", profileImage)
                 .issuedAt(now)
                 .expiration(tokenExpires)
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
@@ -60,18 +73,18 @@ public class JwtTokenProvider {
     }
 
     // 2. Access Token 생성 메서드
-    public String generateAccessToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
+        return generateToken(memberId, email, roleCode, nickname, profileImage, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     // 3. Refresh Token (Month) 생성 메서드
-    public String generateMonthRefreshToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateMonthRefreshToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
+        return generateToken(memberId, email, roleCode, nickname, profileImage, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 0. Refresh Token (Hour) 생성 메서드
-    public String generateHourRefreshToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateHourRefreshToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
+        return generateToken(memberId, email, roleCode, nickname, profileImage, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 4. 토큰 유효성 검증 메서드
@@ -165,36 +178,30 @@ public class JwtTokenProvider {
             새롭게 만든 토큰을 반환한다.
          */
         Map<String, String> tokenMap = new HashMap<>();
-        if(needsReissueToken(token)) {
-            Claims claims = parseTokenClaims(token);
-            Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
-            String email = (String) claims.get("email");
-            String role = (String) claims.get("role");
 
-            String accessToken = generateAccessToken(memberId, email, role);
-            String refreshToken = generateMonthRefreshToken(memberId, email, role);
-            tokenMap.put("accessToken", accessToken);
-            tokenMap.put("refreshToken", refreshToken);
+        Claims claims = parseTokenClaims(token);
+        Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
+        String email = (String) claims.get("email");
+        String role = (String) claims.get("role");
+        String nickname = (String) claims.get("nickname");
+        String profileImage = (String) claims.get("profileImage");
 
-            return tokenMap;
-        }
-        return null;
+        String accessToken = generateAccessToken(memberId, email, role, nickname, profileImage);
+        String refreshToken = generateMonthRefreshToken(memberId, email, role, nickname, profileImage);
+        tokenMap.put("accessToken", accessToken);
+        tokenMap.put("refreshToken", refreshToken);
+
+        return tokenMap;
     }
 
     // 7. Access 토큰에서 사용자 정보 추출 메서드
     public Claims parseTokenClaims(String token) {
-//        return Jwts.parser()
-//                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
         try {
-            Claims claims = Jwts.parser()
+            return Jwts.parser()
                    .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                    .build()
                    .parseSignedClaims(token)
                    .getPayload();
-            return claims;
         } catch (ExpiredJwtException e) {
             log.info("만료된 토큰");
             return e.getClaims();
@@ -213,4 +220,36 @@ public class JwtTokenProvider {
         }
     }
 
+    // 8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
+    public String extractToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.split(" ")[1]; // "Bearer "를 제외한 순수 토큰만 추출
+        }
+        return null;
+    }
+
+    // 9. roleCode 를 role 로 명칭 변환 메서드
+    /*
+        RC001 (일반회원)(USER) <-> RC003 (일반회원 관리자)(MANAGER)
+        RC002 (트레이더)(TRADER) <-> RC004 (트레이더 관리자)(MANAGER)
+        RC005 (수퍼관리자)(ADMIN)
+     */
+    public String roleCodeChangeRole(String roleCode) {
+        if (roleCode == null || roleCode.isEmpty()) {
+            log.info("roleCode가 null이거나 빈 값입니다.");
+            throw new IllegalArgumentException("roleCode가 올바르지 않습니다.");
+        }
+
+        return switch (roleCode) {
+            case "RC001" -> "USER";
+            case "RC002" -> "TRADER";
+            case "RC003", "RC004" -> "MANAGER";
+            case "RC005" -> "ADMIN";
+            default -> {
+                log.info("올바르지 않은 roleCode값이 입력됐습니다.");
+                throw new IllegalArgumentException("Invalid roleCode: " + roleCode);
+            }
+        };
+    }
 }

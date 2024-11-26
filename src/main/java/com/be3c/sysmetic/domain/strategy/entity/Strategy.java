@@ -68,4 +68,11 @@ public class Strategy extends BaseEntity {
     @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
 
+    public void increaseFollowerCount() {
+        followerCount++;
+    }
+
+    public void decreaseFollowerCount() {
+        followerCount--;
+    }
 }
