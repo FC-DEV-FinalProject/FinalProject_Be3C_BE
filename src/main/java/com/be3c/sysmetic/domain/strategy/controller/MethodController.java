@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-@RequestMapping("/api")
+@RequestMapping("/v1")
 public class MethodController implements MethodControllerDocs {
 
     private final MethodService methodService;

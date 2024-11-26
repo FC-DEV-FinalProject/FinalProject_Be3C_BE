@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.strategy.service.StrategyAllowApprovalService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
+@Tag(name = "관리자 - 전략 관리 API", description = "전략 관리 페이지 기능")
 public interface TraderStrategyAllowControllerDocs {
 
     @Operation(summary = "전략 공개 승인", description = "전략 ID를 통해 전략 공개를 승인합니다.")

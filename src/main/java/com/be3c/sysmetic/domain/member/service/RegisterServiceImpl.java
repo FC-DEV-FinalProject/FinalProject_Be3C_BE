@@ -139,7 +139,7 @@ public class RegisterServiceImpl implements RegisterService {
                     ))
                     .build();
 
-            switch (dto.getRoleCode()) {
+            switch (dto.getRoleCode().getCode()) {
                 case "RC001":
                     emailService.addUserSubscriberRequest(subscriberRequest);
                     break;

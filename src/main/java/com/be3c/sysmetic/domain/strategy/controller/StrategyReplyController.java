@@ -22,8 +22,9 @@ import java.util.NoSuchElementException;
 
 @RestController
 @Slf4j
+@RequestMapping("/v1")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class StrategyReplyController {
+public class StrategyReplyController implements StrategyReplyControllerDocs {
 
     private final ReplyService replyService;
 
@@ -46,6 +47,7 @@ public class StrategyReplyController {
     /*
         댓글 페이징 api
      */
+    @Override
     @GetMapping("/strategy/{strategyId}/replies")
     public ResponseEntity<APIResponse<PageResponse<PageReplyResponseDto>>> getReplyPage(
             @PathVariable Long strategyId,
@@ -64,6 +66,7 @@ public class StrategyReplyController {
     /*
         댓글 등록 api
      */
+    @Override
     @PostMapping("/strategy/reply")
     public ResponseEntity<APIResponse<String>> postReply(
             @RequestBody ReplyPostRequestDto replyPostRequestDto
@@ -86,6 +89,7 @@ public class StrategyReplyController {
     }
 
     // @PreAuthorize("hasRole='ROLE_USER and !ROLE_TRADER'")
+    @Override
     @DeleteMapping("/strategy/reply")
     public ResponseEntity<APIResponse<String>> deleteReply(
             @RequestBody ReplyDeleteRequestDto replyDeleteRequestDto

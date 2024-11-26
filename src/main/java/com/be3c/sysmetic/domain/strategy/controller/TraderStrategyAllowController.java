@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,18 +20,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
 @Slf4j
+@RequestMapping("/v1")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class TraderStrategyAllowController {
+public class TraderStrategyAllowController implements TraderStrategyAllowControllerDocs {
 
     private final StrategyAllowApprovalService strategyAllowApprovalService;
 
-    @Operation(summary = "전략 공개 승인", description = "전략 ID를 통해 전략 공개를 승인합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "전략 공개 승인 성공", content = @Content(schema = @Schema(implementation = APIResponse.class))),
-            @ApiResponse(responseCode = "404", description = "전략을 찾을 수 없음", content = @Content(schema = @Schema(implementation = APIResponse.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = APIResponse.class))),
-            @ApiResponse(responseCode = "409", description = "중복된 리소스 충돌", content = @Content(schema = @Schema(implementation = APIResponse.class)))
-    })
+    @Override
     @PostMapping("/strategy/approve-open/{id}")
     public ResponseEntity<APIResponse<String>> postApproveOpenStrategy(
             @NotBlank @PathVariable Long id
@@ -56,11 +48,7 @@ public class TraderStrategyAllowController {
         }
     }
 
-    @Operation(summary = "전략 공개 취소 승인", description = "전략 ID를 통해 전략 공개 취소를 승인합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "전략 공개 취소 승인 성공", content = @Content(schema = @Schema(implementation = APIResponse.class))),
-            @ApiResponse(responseCode = "404", description = "전략을 찾을 수 없음", content = @Content(schema = @Schema(implementation = APIResponse.class)))
-    })
+    @Override
     @PatchMapping("/strategy/approve-cancel/{id}")
     public ResponseEntity<APIResponse<String>> postApproveCancelStrategy(
             @NotBlank @PathVariable Long id

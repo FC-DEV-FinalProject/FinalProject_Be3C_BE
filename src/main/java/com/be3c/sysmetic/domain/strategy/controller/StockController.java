@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@RequestMapping("/api")
+@RequestMapping("/v1")
 public class StockController implements StockControllerDocs {
 
     private final StockService stockService;
