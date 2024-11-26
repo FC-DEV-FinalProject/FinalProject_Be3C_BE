@@ -12,4 +12,5 @@ public interface MonthlyService {
     void updateMonthly(Long strategyId, List<LocalDate> updatedDateList);
     PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth);
     Monthly calculateMonthlyData(Long strategyId, int year, int month);
+    PageResponse<MonthlyGetResponseDto> findTraderMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth);
 }

@@ -5,11 +5,9 @@ import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
 import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.global.common.response.PageResponse;
- import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +44,7 @@ public class StrategyController {
     // 일간데이터 조회
     @Operation(
             summary = "일간분석 조회",
-            description = "일간분석 목록 조회"
+            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 일간분석 데이터 조회"
     )
     @GetMapping("/strategy/daily")
     public ResponseEntity<APIResponse<PageResponse<DailyGetResponseDto>>> findDaily(
@@ -62,7 +60,7 @@ public class StrategyController {
     // 월간데이터 조회
     @Operation(
             summary = "월간분석 조회",
-            description = "월간분석 목록 조회"
+            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 월간분석 데이터 조회"
     )
     @GetMapping("/strategy/monthly")
     public ResponseEntity<APIResponse<PageResponse<MonthlyGetResponseDto>>> findMonthly(
@@ -78,7 +76,7 @@ public class StrategyController {
     // 실계좌이미지 조회
     @Operation(
             summary = "실계좌이미지 조회",
-            description = "실계좌이미지 목록 조회"
+            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 실계좌이미지 조회"
     )
     @GetMapping("/strategy/account-image")
     public ResponseEntity<APIResponse<PageResponse<AccountImageResponseDto>>> getAccountImage(
@@ -118,10 +116,7 @@ public class StrategyController {
     // 통계 조회
     @Operation(
             summary = "통계 조회",
-            description = "특정 전략의 통계 조회",
-            responses = {
-                    @ApiResponse(content = @Content(schema = @Schema(implementation = StrategyStatisticsGetResponseDto.class)))
-            }
+            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 통계 조회"
     )
     @GetMapping("/strategy/statistics/{strategyId}")
     public ResponseEntity<APIResponse<StrategyStatisticsGetResponseDto>> findStatistics(@PathVariable Long strategyId) {
