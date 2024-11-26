@@ -38,16 +38,16 @@ public interface InquiryService {
     Strategy findStrategyForInquiryPage(Long strategyId);
 
     // 등록
-    Long registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent);
+    boolean registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent);
 
     // 수정
-    void modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent);
+    boolean modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent);
 
     // 질문자 삭제
-    void deleteInquiry(Long inquiryId);
+    boolean deleteInquiry(Long inquiryId);
 
     // 관리자 삭제
-    void deleteAdminInquiry(Long inquiryId);
+    boolean deleteAdminInquiry(Long inquiryId);
 
     // 관리자 목록 삭제
     Integer deleteAdminInquiryList(List<Long> inquiryIdList);

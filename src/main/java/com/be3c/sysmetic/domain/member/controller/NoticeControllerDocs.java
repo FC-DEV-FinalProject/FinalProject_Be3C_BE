@@ -72,7 +72,7 @@ public interface NoticeControllerDocs {
     @GetMapping("/admin/notice")
     ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -133,7 +133,7 @@ public interface NoticeControllerDocs {
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -166,7 +166,7 @@ public interface NoticeControllerDocs {
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 

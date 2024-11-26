@@ -35,9 +35,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -71,6 +70,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -129,12 +132,12 @@ public interface InquiryControllerDocs {
                     description = "문의 목록 삭제 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "500",
-                    description = "문의 목록 삭제 실패 (INTERNAL_SERVER_ERROR)"
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "해당 문의를 찾지 못함 (NOT_FOUND)"
+            ),
+            @ApiResponse(
+                    responseCode = "207",
+                    description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
             )
     })
     @DeleteMapping("/admin/inquiry/delete")
@@ -190,6 +193,11 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "등록하는 질문자나 해당 전략의 정보를 찾지 못함 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @PostMapping("/strategy/{strategyId}/inquiry")
@@ -214,9 +222,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -249,6 +256,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/member/inquiry/{inquiryId}/view")
@@ -278,6 +289,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "질문자 문의 수정 화면 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -316,7 +331,7 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (BAD_REQUEST)"
+                    description = "데이터의 형식이 올바르지 않았을 때 (BAD_REQUEST)\n+ +) 답변이 등록된 문의를 수정 시도했을 때"
             )
     })
     @PutMapping("/member/inquiry/{inquiryId}/modify")
@@ -346,6 +361,10 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "404",
                     description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "답변이 등록된 문의를 수정 시도했을 때 (BAD_REQUEST)"
             )
     })
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
@@ -374,6 +393,11 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "등록하는 문의 정보를 찾지 못했을 때 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @PostMapping("/trader/inquiry/{inquiryId}/write")
@@ -398,9 +422,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공했을 때 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({

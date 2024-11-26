@@ -26,7 +26,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         BooleanBuilder predicate = new BooleanBuilder();
 
         // 검색 (제목, 내용, 제목+내용, 작성자)
-        if (searchType != null) {
+        if (searchText != null) {
             if (searchType.equals("title")) {
                 if (StringUtils.hasText(searchText)) {
                     predicate.and(notice.noticeTitle.contains(searchText));

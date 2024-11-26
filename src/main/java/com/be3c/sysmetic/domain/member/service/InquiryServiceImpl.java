@@ -80,31 +80,30 @@ public class InquiryServiceImpl implements InquiryService {
     // 전략 문의 등록 화면 조회
     @Override
     public Strategy findStrategyForInquiryPage(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new);
+        return strategyRepository.findById(strategyId).orElseThrow(() -> new EntityNotFoundException("전략이 없습니다."));
     }
 
     // 등록
     @Override
     @Transactional
-    public Long registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent) {
+    public boolean registerInquiry(Long memberId, Long strategyId, String inquiryTitle, String inquiryContent) {
 
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new);
-        Member member = memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new EntityNotFoundException("전략이 없습니다."));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
 
         Inquiry inquiry = Inquiry.createInquiry(strategy, member, inquiryTitle, inquiryContent);
 
         inquiryRepository.save(inquiry);
 
-        return inquiry.getId();
+        return true;
     }
 
     // 수정
     @Override
     @Transactional
-    public void modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent) {
+    public boolean modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent) {
 
-        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
-
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
             inquiry.setInquiryTitle(inquiryTitle);
             inquiry.setInquiryContent(inquiryContent);
@@ -112,30 +111,36 @@ public class InquiryServiceImpl implements InquiryService {
         } else {
             throw new IllegalStateException("답변이 등록된 문의는 수정할 수 없습니다.");
         }
+
+        return true;
     }
 
     // 질문자 삭제
     @Override
     @Transactional
-    public void deleteInquiry(Long inquiryId) {
+    public boolean deleteInquiry(Long inquiryId) {
 
-        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
 
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
             inquiryRepository.delete(inquiry);
         } else {
-            throw new IllegalStateException("답변이 등록된 문의는 삭제할 수 없습니다."); // 이미 관심 전략에 등록된 전략일 때 : BAD_REQUEST
+            throw new IllegalStateException("답변이 등록된 문의는 삭제할 수 없습니다.");
         }
+
+        return true;
     }
 
     // 관리자 삭제
     @Override
     @Transactional
-    public void deleteAdminInquiry(Long inquiryId) {
+    public boolean deleteAdminInquiry(Long inquiryId) {
 
-        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new); // 등록할 전략을 찾지 못했을 때 : NOT_FOUND
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
 
         inquiryRepository.delete(inquiry);
+
+        return true;
     }
 
 

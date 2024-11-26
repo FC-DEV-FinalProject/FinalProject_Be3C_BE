@@ -17,4 +17,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> , NoticeRe
     @Modifying(clearAutomatically = true)
     @Query("delete Notice n where n.id in :idList")
     int bulkDelete(@Param("idList") List<Long> idList);
+
+    // 제목으로 찾기
+    List<Notice> findByNoticeTitle(String noticeTitle);
 }

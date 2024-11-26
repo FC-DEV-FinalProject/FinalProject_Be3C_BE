@@ -78,7 +78,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     @GetMapping("/v1/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
         if (page <= 0) {
@@ -86,11 +86,9 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
         }
 
-        if (searchType != null) {
-            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
-            }
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
 
         Page<Notice> noticeList = noticeService.findNoticeAdmin(searchType, searchText, page-1);
@@ -166,7 +164,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
         if (page <= 0) {
@@ -174,11 +172,9 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
         }
 
-        if (searchType != null) {
-            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
-            }
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
 
         try {
@@ -230,7 +226,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
         if (page <= 0) {
@@ -238,11 +234,9 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
         }
 
-        if (searchType != null) {
-            if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
-            }
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
 
         try {

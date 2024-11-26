@@ -31,7 +31,7 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
 
-        Notice noticeSave = noticeRepository.save(notice);
+        noticeRepository.save(notice);
 
         return true;
     }
