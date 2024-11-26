@@ -4,10 +4,14 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +35,7 @@ public class InquiryController implements InquiryControllerDocs {
 
     private final InquiryService inquiryService;
     private final InquiryAnswerService inquiryAnswerService;
+    private final MemberRepository memberRepository;
 
     private final Integer pageSize = 10; // 한 페이지 크기
 
@@ -40,7 +46,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/inquiry")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @GetMapping("/v1/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -90,7 +97,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/inquiry/{inquiryId}/view")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @GetMapping("/v1/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -148,7 +156,8 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @DeleteMapping("/v1/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
 
@@ -167,7 +176,8 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/admin/inquiry/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @DeleteMapping("/v1/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
 
@@ -187,7 +197,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 등록 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/strategy/{strategyId}/inquiry")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/v1/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
@@ -212,7 +223,8 @@ public class InquiryController implements InquiryControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/strategy/{strategyId}/inquiry")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/v1/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto) {
@@ -237,7 +249,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/member/inquiry")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/v1/member/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
@@ -285,7 +298,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
      @Override
-     @GetMapping("/member/inquiry/{inquiryId}/view")
+     @PreAuthorize("hasRole('ROLE_USER')")
+     @GetMapping("/v1/member/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -340,7 +354,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 수정 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/member/inquiry/{inquiryId}/modify")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/v1/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -349,6 +364,11 @@ public class InquiryController implements InquiryControllerDocs {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
         Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+        if(securityUtils.getUserIdInSecurityContext() != inquiry.getInquirer().getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+        }
 
         InquiryModifyPageShowResponseDto inquiryModifyPageShowResponseDto = InquiryModifyPageShowResponseDto.builder()
                 .page(page)
@@ -372,10 +392,18 @@ public class InquiryController implements InquiryControllerDocs {
         5. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
      @Override
-     @PutMapping("/member/inquiry/{inquiryId}/modify")
+     @PreAuthorize("hasRole('ROLE_USER')")
+     @PutMapping("/v1/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
+
+         Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+         if(securityUtils.getUserIdInSecurityContext() != inquiry.getInquirer().getId()) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+         }
 
         inquiryService.modifyInquiry(
                 inquiryId,
@@ -395,9 +423,17 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @DeleteMapping("/v1/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
+
+        Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+        if(securityUtils.getUserIdInSecurityContext() != inquiry.getInquirer().getId()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+        }
 
         inquiryService.deleteInquiry(inquiryId);
 
@@ -414,7 +450,8 @@ public class InquiryController implements InquiryControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/trader/inquiry/{inquiryId}/write")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PostMapping("/v1/trader/inquiry/{inquiryId}/write")
     public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
@@ -436,7 +473,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 페이지 내에 한 개의 문의도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/trader/inquiry")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @GetMapping("/v1/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort") String sort,
@@ -473,7 +511,8 @@ public class InquiryController implements InquiryControllerDocs {
         3. 문의의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/trader/inquiry/{inquiryId}/view")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @GetMapping("/v1/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,

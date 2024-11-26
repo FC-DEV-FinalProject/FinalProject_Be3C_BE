@@ -2,8 +2,12 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
+import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
+import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.service.NoticeService;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -13,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -28,6 +33,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final NoticeService noticeService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
+    private final MemberRepository memberRepository;
 
     /*
         관리자 공지사항 등록 API
@@ -37,7 +43,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-    @PostMapping("/admin/notice/write")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PostMapping("/v1/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestBody NoticeSaveRequestDto noticeSaveRequestDto) {
 
@@ -62,7 +69,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/notice")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @GetMapping("/v1/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchType", required = false) String searchType,
@@ -107,7 +115,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @PutMapping("/admin/notice/{noticeId}/closed")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PutMapping("/v1/admin/notice/{noticeId}/closed")
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
             @PathVariable Long noticeId) {
 
@@ -125,7 +134,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/notice/{noticeId}/view")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @GetMapping("/v1/admin/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -169,7 +179,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 공지사항 수정 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/admin/notice/{noticeId}/modify")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @GetMapping("/v1/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -204,7 +215,8 @@ public class NoticeContoller implements NoticeControllerDocs {
             +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음
      */
     @Override
-    @PutMapping("/admin/notice/{noticeId}/modify")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @PutMapping("/v1/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
             @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
@@ -239,7 +251,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-    @DeleteMapping("/admin/notice/{noticeId}/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @DeleteMapping("/v1/admin/notice/{noticeId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNotice(
             @PathVariable Long noticeId) {
 
@@ -259,7 +272,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         5. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-    @DeleteMapping("/admin/notice/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasRole('ROLE_SUPER_ADMIN')")
+    @DeleteMapping("/v1/admin/notice/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
 
@@ -278,7 +292,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         2. 페이지 내에 한 개의 공지사항도 존재하지 않을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/notice")
+    @GetMapping("/v1/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -317,7 +331,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         2. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-    @GetMapping("/notice/{noticeId}/view")
+    @GetMapping("/v1/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
