@@ -6,12 +6,13 @@ import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -56,6 +57,7 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .password("1234")
                     .name("홍길동" + i)
                     .nickname("트레이더" + (i+1))
+                    .birth(LocalDate.now())
                     .phoneNumber("0101234" + String.format("%04d", i))
                     .usingStatusCode("US001")
                     .totalFollow(0)
