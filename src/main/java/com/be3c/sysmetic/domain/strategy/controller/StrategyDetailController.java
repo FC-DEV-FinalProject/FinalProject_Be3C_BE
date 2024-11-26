@@ -21,12 +21,12 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
         getDetailPage : 전략 상세 보기 페이지 요청
     */
     @Override
-    @GetMapping("v1/strategy/detail")
+    @GetMapping("/v1/strategy/detail")
     public APIResponse<StrategyDetailDto> getDetailPage(
             @RequestParam("id") Long id) {
 
-        StrategyDetailDto s = strategyDetailService.getDetail(id);
+        StrategyDetailDto strategyDetailDto = strategyDetailService.getDetail(id);
 
-        return APIResponse.success(s);
+        return APIResponse.success(strategyDetailDto);
     }
 }
