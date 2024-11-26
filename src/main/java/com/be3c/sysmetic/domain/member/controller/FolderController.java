@@ -8,6 +8,11 @@ import com.be3c.sysmetic.domain.member.service.FolderService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +30,8 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class FolderController {
+@RequestMapping("/api")
+public class FolderController implements FolderControllerDocs {
 
     private final FolderService folderService;
 
@@ -33,13 +39,13 @@ public class FolderController {
         폴더명 중복 체크
         1. 중복된 폴더명이 없을 떄 : OK
         2. 중복된 폴더명이 존재할 때 : CONFLICT
-        3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder/availability")
     public ResponseEntity<APIResponse<String>> getDuplCheck(
             @RequestParam String folderName
-    ) throws Exception {
+    ) {
         if(folderService.duplCheck(folderName)) {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success());
@@ -54,10 +60,11 @@ public class FolderController {
         2. 해당 유저의 폴더 개수가 0개라면 : NOT_FOUND
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/folder")
     public ResponseEntity<APIResponse<List<FolderListResponseDto>>> getAllFolder(
-    ) throws Exception {
+    ) {
         try {
             List<FolderListResponseDto> folderList = folderService.getUserFolders();
 
@@ -78,10 +85,11 @@ public class FolderController {
         5. 현재 폴더 개수가 5개일 때 : TOO_MANY_REQUESTS
         6. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
-    @PostMapping("/member/folder/")
+    @Override
+    @PostMapping("/member/folder")
     public ResponseEntity<APIResponse<String>> postFolder(
             @Valid @RequestBody FolderPostRequestDto folderPostRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(folderService.insertFolder(folderPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -111,11 +119,12 @@ public class FolderController {
         5. 중복된 이름의 폴더가 존재할 때 : CONFLICT
         6. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @PutMapping("/member/folder")
     public ResponseEntity<APIResponse<String>> putFolder(
             @Valid @RequestBody FolderPutRequestDto folderPutRequestDto
-    ) throws Exception {
+    ) {
         try {
             if(folderService.updateFolder(folderPutRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -141,10 +150,11 @@ public class FolderController {
         4. 삭제하려는 폴더를 찾지 못했을 때 : NOT_FOUND
         5. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
+    @Override
     @DeleteMapping("/member/folder/{id}")
     public ResponseEntity<APIResponse<String>> deleteFolder(
             @PathVariable Long id
-    ) throws Exception {
+    ) {
         try {
             if(folderService.deleteFolder(id)) {
                 return ResponseEntity.status(HttpStatus.OK)

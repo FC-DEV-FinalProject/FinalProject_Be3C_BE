@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @Tag(name = "전략 API", description = "사용자 전략")
+@RequestMapping("/v1/strategy")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @RestController
 public class StrategyController {
@@ -35,8 +36,8 @@ public class StrategyController {
     public ResponseEntity<APIResponse<PageResponse<DailyGetResponseDto>>> findDaily(
             @PathVariable Long strategyId,
             @RequestParam("page") Integer page,
-            @RequestParam(value = "startDate", required = false) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) LocalDate endDate
+            @RequestParam(value = "startDate", required = false) @Schema(description = "조회 시작 년월일", example = "2024-11-01") LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @Schema(description = "조회 종료 년월일", example = "2024-11-26") LocalDate endDate
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(dailyService.findDaily(strategyId, page, startDate, endDate)));

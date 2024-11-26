@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.util;
 
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +124,34 @@ public class StrategyCalculator {
         if(sumDrawDownValue == 0 || sumDrawDownPeriod == 0 || totalTradingDays == 0) return 0.0;
         if(Math.sqrt((double) sumDrawDownPeriod / totalTradingDays) == 0) return 0.0;
         return doubleHandler.cutDouble(accumulatedProfitLossRate / (sumDrawDownValue * Math.sqrt((double) sumDrawDownPeriod / totalTradingDays)));
+    }
+
+    /**
+     * 누적 손익 계산
+     * @param profitLossAmount 새로 추가되는 손익 값
+     * @param formerAccumulatedProfitAmount 직전 누적 손익 값
+     * @return 누적 손익 값 (직전 누적 손익 값 + 새로 추가되는 손익 값)
+     */
+    public Double getAccumulatedProfitLossAmount(Double profitLossAmount, Double formerAccumulatedProfitAmount) {
+
+        if(formerAccumulatedProfitAmount == null)
+            return doubleHandler.cutDouble(profitLossAmount);
+
+        return doubleHandler.cutDouble(profitLossAmount + formerAccumulatedProfitAmount);
+    }
+
+    /**
+     * 누적 손익률 계산
+     * @param profitLossRate 새로 추가되는 손익률
+     * @param formerProfitRate 직전 누적 손익률
+     * @return 누적 손익률 (직전 누적 손익률 + 새로 추가되는 손익률)
+     */
+    public Double getAccumulatedProfitLossRate(Double profitLossRate, Double formerProfitRate) {
+
+        if(formerProfitRate == null)
+            return doubleHandler.cutDouble(profitLossRate);
+
+        return doubleHandler.cutDouble(profitLossRate + formerProfitRate);
     }
 
 }

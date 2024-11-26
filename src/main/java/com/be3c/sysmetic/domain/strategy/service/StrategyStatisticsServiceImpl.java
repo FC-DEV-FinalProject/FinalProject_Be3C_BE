@@ -11,7 +11,7 @@ import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.global.util.SecurityUtils;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

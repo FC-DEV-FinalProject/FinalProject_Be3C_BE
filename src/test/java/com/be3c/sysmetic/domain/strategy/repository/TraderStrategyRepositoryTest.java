@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -174,7 +175,7 @@ public class TraderStrategyRepositoryTest {
                 .password("sys1234!")
                 .name("한감자")
                 .nickname("감자")
-                .birth(LocalDateTime.now())
+                .birth(LocalDate.of(2000, 01, 01))
                 .phoneNumber("01022223333")
                 .usingStatusCode("")
                 .totalFollow(160)

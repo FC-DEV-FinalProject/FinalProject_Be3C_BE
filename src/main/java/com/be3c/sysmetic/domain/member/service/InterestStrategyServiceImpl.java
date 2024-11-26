@@ -11,6 +11,8 @@ import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.email.dto.InterestRequest;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final SecurityUtils securityUtils;
 
+    private final EmailService emailService;
+
     /**
      * 추후에 수정 필요 (SELECT가 너무 많이 날아간다.)
      */
@@ -61,7 +65,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         Pageable pageable = PageRequest.of(
-                interestStrategyGetRequestDto.getPage(),
+                interestStrategyGetRequestDto.getPage() - 1,
                 10,
                 Sort.by("modifiedAt").descending());
 
@@ -130,8 +134,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         followPostRequestDto.getStrategyId()
                 );
 
+        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
+
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, followPostRequestDto.getFolderId(), followPostRequestDto.getStrategyId());
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.UNFOLLOW.getCode())) {
             interestStrategy.get().setStatusCode(FOLLOW.getCode());
@@ -141,6 +148,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                     followPostRequestDto.getStrategyId(),
                     FOLLOW.getCode()
             );
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
             return true;
         }
 

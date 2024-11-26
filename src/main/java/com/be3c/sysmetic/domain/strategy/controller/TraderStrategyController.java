@@ -1,6 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.*;
+import com.be3c.sysmetic.domain.strategy.dto.AccountImageRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -14,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

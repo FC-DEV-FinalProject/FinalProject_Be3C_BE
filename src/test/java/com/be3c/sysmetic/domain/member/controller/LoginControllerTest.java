@@ -17,13 +17,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestPropertySource(locations = "/application-test.properties")
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,13 +60,14 @@ class LoginControllerTest {
                 .roleCode("USER")
                 .name("테스트")
                 .nickname("테스트")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("01012341234")
                 .usingStatusCode("사용")
                 .totalFollow(0)
                 .totalStrategyCount(0)
-                .receiveInfoConsent("Y")
+                .receiveInfoConsent("true")
                 .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("Y")
+                .receiveMarketingConsent("true")
                 .marketingConsentDate(LocalDateTime.now())
 //                .createdBy(1L)
 //                .createdDate(LocalDateTime.now())
@@ -81,7 +82,7 @@ class LoginControllerTest {
     void successLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
 
         String requestBody = String.format(
                 "{\"email\":\"%s\", \"password\":\"%s\", \"rememberMe\":%b}",
@@ -115,7 +116,7 @@ class LoginControllerTest {
     void failLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
         // 1. 로그인 형식 불일치
         // 1-1. 이메일 형식 불일치
         String invalidEmailRequestBody = String.format(

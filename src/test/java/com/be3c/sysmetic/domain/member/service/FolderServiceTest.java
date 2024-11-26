@@ -24,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class FolderServiceTest {
         memberRepository.deleteAll();
         folderRepository.deleteAll();
 
-        entityManager.createNativeQuery("ALTER TABLE Member AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE folder AUTO_INCREMENT = 1")
                 .executeUpdate();
@@ -75,6 +76,7 @@ public class FolderServiceTest {
                 .usingStatusCode("US001")
                 .totalFollow(0)
                 .totalStrategyCount(0)
+                .birth(LocalDate.of(2000, 1, 1))
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
@@ -91,7 +93,9 @@ public class FolderServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "USER", // role
-                authorities // 권한 목록
+                "",
+                "",
+                authorities // 권한 목록,
         );
 
         // Authentication 객체 생성
