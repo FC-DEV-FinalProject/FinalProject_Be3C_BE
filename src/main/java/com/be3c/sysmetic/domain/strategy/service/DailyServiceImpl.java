@@ -10,7 +10,6 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -42,8 +41,10 @@ public class DailyServiceImpl implements DailyService {
     @Transactional
     @Override
     public void saveDaily(Long strategyId, List<DailyRequestDto> requestDtoList) {
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         // user 검증
-        validUser(strategyId);
+        validUser(exitingStrategy.getTrader().getId());
 
         // 요청 객체 검증 및 entity 변환
         List<Daily> dailyList = requestDtoListToEntity(strategyId, null, requestDtoList);
@@ -64,9 +65,15 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 수정
     @Transactional
     @Override
-    public void updateDaily(Long strategyId, Long dailyId, DailyRequestDto requestDto) {
+    public void updateDaily(Long dailyId, DailyRequestDto requestDto) {
+        Daily exitingDaily = dailyRepository.findById(dailyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        Long strategyId = exitingDaily.getStrategy().getId();
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         // user 검증
-        validUser(strategyId);
+        validUser(exitingStrategy.getTrader().getId());
 
         // 요청 객체 검증 및 entity 변환
         Daily daily = requestDtoListToEntity(strategyId, dailyId, List.of(requestDto))
@@ -87,12 +94,15 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 삭제
     @Transactional
     @Override
-    public void deleteDaily(Long strategyId, Long dailyId) {
-        // user 검증
-        validUser(strategyId);
-
-        Daily daily = dailyRepository.findById(dailyId).orElseThrow(() ->
+    public void deleteDaily(Long dailyId) {
+        Daily exitingDaily = dailyRepository.findById(dailyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        Long strategyId = exitingDaily.getStrategy().getId();
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        // user 검증
+        validUser(exitingStrategy.getTrader().getId());
 
         // DB 삭제
         dailyRepository.deleteById(dailyId);
@@ -101,10 +111,10 @@ public class DailyServiceImpl implements DailyService {
         Long countDaily = countDaily(strategyId);
 
         // 누적금액 갱신
-        recalculateAccumulatedData(strategyId, daily.getDate());
+        recalculateAccumulatedData(strategyId, exitingDaily.getDate());
 
         // 월간분석 갱신
-        List<LocalDate> updatedDateList = List.of(daily.getDate());
+        List<LocalDate> updatedDateList = List.of(exitingDaily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
 
         if(countDaily < 3) {
@@ -229,11 +239,8 @@ public class DailyServiceImpl implements DailyService {
     }
 
     // 현재 로그인한 유저와 전략 업로드한 유저가 일치하는지 검증
-    private void validUser(Long strategyId) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
-        Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
-
-        if(!uploadedTraderId.equals(userId)) {
+    private void validUser(Long traderId) {
+        if(!securityUtils.getUserIdInSecurityContext().equals(traderId)) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
         }
     }

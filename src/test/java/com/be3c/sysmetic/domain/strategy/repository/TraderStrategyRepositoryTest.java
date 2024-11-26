@@ -48,7 +48,7 @@ public class TraderStrategyRepositoryTest {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
         Strategy requestSaveStrategy = Strategy.builder()
-                .trader(memberRepository.findById(requestDto.getTraderId()).orElse(null)) // todo. security 적용 후 제거 필요
+                .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
                 .statusCode("PRIVATE")
                 .name(requestDto.getName())
@@ -80,7 +80,7 @@ public class TraderStrategyRepositoryTest {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
         Strategy requestSaveStrategy = Strategy.builder()
-                .trader(memberRepository.findById(requestDto.getTraderId()).orElse(null)) // todo. security 적용 후 제거 필요
+                .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
                 .statusCode("PRIVATE")
                 .name(requestDto.getName())
@@ -134,7 +134,7 @@ public class TraderStrategyRepositoryTest {
         StrategyPostRequestDto requestDto = getStrategyPostRequestDto();
 
         Strategy requestSaveStrategy = Strategy.builder()
-                .trader(memberRepository.findById(requestDto.getTraderId()).orElse(null)) // todo. security 적용 후 제거 필요
+                .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
                 .statusCode("PRIVATE")
                 .name(requestDto.getName())
@@ -220,7 +220,6 @@ public class TraderStrategyRepositoryTest {
     // get insert strategy request dto
     private StrategyPostRequestDto getStrategyPostRequestDto() {
         return StrategyPostRequestDto.builder()
-                .traderId(findMember().getId()) // todo. security 적용 후 제거 필요
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStock().getId()))
                 .name("테스트 전략")

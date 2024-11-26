@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface DailyService {
     void saveDaily(Long strategyId, List<DailyRequestDto> requestDtoList);
-    void updateDaily(Long strategyId, Long dailyId, DailyRequestDto requestDto);
-    void deleteDaily(Long strategyId, Long dailyId);
+    void updateDaily(Long dailyId, DailyRequestDto requestDto);
+    void deleteDaily(Long dailyId);
     DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyRequestDto> requestDtoList);
     PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate);
     PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate);

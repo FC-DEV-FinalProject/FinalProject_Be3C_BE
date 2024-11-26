@@ -126,7 +126,6 @@ public class KPRatioCalculateTest {
 
     private StrategyPostRequestDto getStrategy() {
         return StrategyPostRequestDto.builder()
-                .traderId(findMember().getId())
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStrategy().getId()))
                 .name("test")
@@ -155,7 +154,6 @@ public class KPRatioCalculateTest {
     // get insert strategy request dto
     private StrategyPostRequestDto getStrategyPostRequestDto() {
         return StrategyPostRequestDto.builder()
-                .traderId(findMember().getId()) // todo. security 적용 후 제거 필요
                 .methodId(findMethod().getId())
                 .stockIdList(List.of(findStock().getId()))
                 .name("테스트 전략")
