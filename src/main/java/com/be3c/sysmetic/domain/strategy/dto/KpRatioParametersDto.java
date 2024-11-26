@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class KpRatioParametersDto {
 
     /*
-        KpRatioParameterDto : KP Ratio DB 조회용 Dto
+        KpRatioParameterDto : KP Ratio 계산 시 필요한 인자들 - DB 조회용 Dto
     */
 
     private LocalDate date;

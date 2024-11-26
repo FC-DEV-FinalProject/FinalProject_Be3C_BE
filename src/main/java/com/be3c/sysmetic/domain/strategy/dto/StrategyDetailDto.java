@@ -1,11 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
-import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -45,20 +42,14 @@ public class StrategyDetailDto {
     private Character cycle;
     private String content;
     private Long followerCount;
-
-    // TODO : 계산
-    private Double mdd;     // MaximumDrawDown 전고점 대비 하락률
+    private Double mdd;
     private Double kpRatio;
     private Double smScore;
     private Double accumulatedProfitLossRate;
-
-    // TODO : 통계에서 가져오기
     private Double maximumCapitalReductionAmount;
     private Double averageProfitLossRate;
     private Double profitFactor;
     private Double winningRate;
-
-
     // TODO : 월간 수익률 데이터 추가
-    // TODO : 분석 지표 데이터 추가
+    // TODO : 분석 지표 데이터 추가 - QueryDSL 필요
 }
