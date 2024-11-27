@@ -9,7 +9,9 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -31,7 +33,9 @@ import java.util.stream.Collectors;
 @Service
 public class DailyServiceImpl implements DailyService {
     private final DailyRepository dailyRepository;
+    private final MonthlyRepository monthlyRepository;
     private final StrategyRepository strategyRepository;
+    private final StrategyStatisticsRepository statisticsRepository;
 
     private final StrategyCalculator strategyCalculator;
     private final MonthlyServiceImpl monthlyService;
@@ -41,7 +45,8 @@ public class DailyServiceImpl implements DailyService {
     @Transactional
     @Override
     public void saveDaily(Long strategyId, List<DailyRequestDto> requestDtoList) {
-        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         // user 검증
         validUser(exitingStrategy.getTrader().getId());
@@ -70,7 +75,9 @@ public class DailyServiceImpl implements DailyService {
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         Long strategyId = exitingDaily.getStrategy().getId();
-        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         // user 검증
         validUser(exitingStrategy.getTrader().getId());
@@ -99,7 +106,9 @@ public class DailyServiceImpl implements DailyService {
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         Long strategyId = exitingDaily.getStrategy().getId();
-        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
         // user 검증
         validUser(exitingStrategy.getTrader().getId());
@@ -123,7 +132,9 @@ public class DailyServiceImpl implements DailyService {
         }
 
         if(countDaily == 0) {
-            // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제 fixme
+            // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제
+            monthlyRepository.deleteAllByStrategyId(strategyId);
+            statisticsRepository.deleteByStrategyId(strategyId);
         }
     }
 
@@ -133,12 +144,16 @@ public class DailyServiceImpl implements DailyService {
         Pageable pageable = PageRequest.of(page, 10);
 
         // 전략 상태 PUBLIC 여부 검증
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
 
-        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
+                .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
+                .map(this::entityToDto);
 
         return PageResponse.<DailyGetResponseDto>builder()
                 .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
@@ -173,12 +188,16 @@ public class DailyServiceImpl implements DailyService {
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
 
-        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
+                .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
+                .map(this::entityToDto);
 
         return PageResponse.<DailyGetResponseDto>builder()
                 .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
@@ -263,7 +282,8 @@ public class DailyServiceImpl implements DailyService {
 
         return Daily.builder()
                 .id(dailyId) // 등록일 경우 null
-                .strategy(strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())))
+                .strategy(strategyRepository.findById(strategyId).orElseThrow(() ->
+                        new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())))
                 .date(requestDto.getDate())
                 .principal(strategyCalculator.getPrincipal(isFirst, requestDto.getDepositWithdrawalAmount(), beforePrincipal, beforeBalance)) // 원금
                 .depositWithdrawalAmount(requestDto.getDepositWithdrawalAmount()) // 입출금

@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "트레이더 전략 API", description = "트레이더 전략 관리 및 조회")
-@RequestMapping("/trader")
+@RequestMapping("/v1/trader")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @RestController
 public class TraderStrategyController {
