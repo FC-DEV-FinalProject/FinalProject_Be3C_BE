@@ -66,7 +66,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getName(),
                         strategy.getCycle(),
                         stockGetter.getStocks(strategy.getId()),
-                        doubleHandler.cutDouble(strategy.getAccumProfitLossRate()),
+                        doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
                         doubleHandler.cutDouble(strategy.getMdd()),
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));
@@ -130,7 +130,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getCycle(),
                         strategy.getFollowerCount(),
                         strategyRepository.countTotalPublicStrategyCount(strategy.getTrader().getId(), statusCode),
-                        doubleHandler.cutDouble(strategy.getAccumProfitLossRate()),
+                        doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
                         doubleHandler.cutDouble(strategy.getMdd()),
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));

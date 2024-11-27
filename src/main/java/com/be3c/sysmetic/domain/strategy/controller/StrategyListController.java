@@ -11,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
+@RequestMapping("/v1/strategy/list")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyListController implements StrategyListControllerDocs {
 
@@ -27,7 +29,7 @@ public class StrategyListController implements StrategyListControllerDocs {
         요청 경로 : http://localhost:8080/strategy/list?pageNum=0
     */
     @Override
-    @GetMapping("/strategy/list")
+    @GetMapping()
     public APIResponse<PageResponse<StrategyListDto>> getStrategies(
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum){
         PageResponse<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
@@ -47,7 +49,7 @@ public class StrategyListController implements StrategyListControllerDocs {
         요청 경로 : localhost:8080/strategy/trader?nickname=트레이더1  -> 트레이더119가 21개 전략을 가져서 첫 번째여야 함
     */
     @Override
-    @GetMapping("/strategy/trader")
+    @GetMapping("/trader")
     public APIResponse<PageResponse<TraderNicknameListDto>> searchByTraderNickname(
             @RequestParam("nickname") String nickname,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
@@ -69,7 +71,7 @@ public class StrategyListController implements StrategyListControllerDocs {
         요청 경로 : localhost:8080/strategy/choose-trader?traderId=195
     */
     @Override
-    @GetMapping("/strategy/choose-trader")
+    @GetMapping("/choose-trader")
     public APIResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTraderId(
             @RequestParam("traderId") Long traderId,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {

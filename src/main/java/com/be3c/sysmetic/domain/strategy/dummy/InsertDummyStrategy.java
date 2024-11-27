@@ -97,7 +97,7 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .cycle('P')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
+                    .accumulatedProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
                     .mdd(doubleHandler.cutDouble(Math.random() * 100))
                     .kpRatio(doubleHandler.cutDouble(Math.random() * 100))
                     .build();
@@ -114,7 +114,7 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .cycle('P')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
+                    .accumulatedProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
                     .mdd(doubleHandler.cutDouble(Math.random() * 100))
                     .kpRatio(doubleHandler.cutDouble(Math.random() * 100))
                     .build();
@@ -131,7 +131,7 @@ public class InsertDummyStrategy implements CommandLineRunner {
                     .cycle('P')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
-                    .accumProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
+                    .accumulatedProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
                     .mdd(doubleHandler.cutDouble(Math.random() * 100))
                     .kpRatio(doubleHandler.cutDouble(Math.random() * 100))
                     .build();
