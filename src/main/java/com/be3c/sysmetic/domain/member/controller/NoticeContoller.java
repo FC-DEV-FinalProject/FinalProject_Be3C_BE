@@ -111,10 +111,15 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     public static NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice) {
 
+        String writerNickname = notice.getWriter().getNickname();
+        if (writerNickname == null) {
+            writerNickname = "삭제된 회원입니다.";
+        }
+
         return NoticeAdminListOneShowResponseDto.builder()
                 .noticeId(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
-                .writerNickname(notice.getWriter().getNickname())
+                .writerNickname(writerNickname)
                 .writeDate(notice.getWriteDate())
                 .hits(notice.getHits())
                 .isAttatchment(notice.getIsAttatchment())
@@ -185,6 +190,11 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice previousNotice = noticeService.findNoticeById(noticeId-1);
             Notice nextNotice = noticeService.findNoticeById(noticeId+1);
 
+            String writerNickname = notice.getWriter().getNickname();
+            if (writerNickname == null) {
+                writerNickname = "삭제된 회원입니다.";
+            }
+
             NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
                     .page(page)
                     .searchType(searchType)
@@ -194,7 +204,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeContent(notice.getNoticeContent())
                     .writeDate(notice.getWriteDate())
                     .correctDate(notice.getCorrectDate())
-                    .writerNickname(notice.getWriter().getNickname())
+                    .writerNickname(writerNickname)
                     .hits(notice.getHits())
                     .isAttatchment(notice.getIsAttatchment())
                     .isOpen(notice.getIsOpen())
@@ -446,6 +456,11 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice previousNotice = noticeService.findNoticeById(noticeId-1);
             Notice nextNotice = noticeService.findNoticeById(noticeId+1);
 
+            String writerNickname = notice.getWriter().getNickname();
+            if (writerNickname == null) {
+                writerNickname = "삭제된 회원입니다.";
+            }
+
             NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
                     .page(page)
                     .searchText(searchText)
@@ -454,7 +469,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeContent(notice.getNoticeContent())
                     .writeDate(notice.getWriteDate())
                     .correctDate(notice.getCorrectDate())
-                    .writerNickname(notice.getWriter().getNickname())
+                    .writerNickname(writerNickname)
                     .hits(notice.getHits())
                     .isAttatchment(notice.getIsAttatchment())
                     .isOpen(notice.getIsOpen())

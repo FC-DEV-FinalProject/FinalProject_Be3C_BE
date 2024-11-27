@@ -18,5 +18,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
             "WHERE f.referenceId = :#{#fileRequestDto.referenceId} " +
             "AND f.referenceType = :#{#fileRequestDto.referenceType} " +
             "ORDER BY f.referenceId")
+
     List<File> findFilesByFileReference(@Param("fileRequestDto") FileRequestDto fileRequestDto);
 }
