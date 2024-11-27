@@ -6,7 +6,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,7 +59,7 @@ public class TokenController {
         // 프로필 이미지 경로 추출
         String profileImage = null;
         try {
-            profileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, memberId));
+            profileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
         } catch (EntityNotFoundException e) {
             log.info("프로필 이미지 추출 실패");
         }
