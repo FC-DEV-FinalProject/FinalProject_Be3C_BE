@@ -33,7 +33,7 @@ public class KPRatioCalculateTest {
     private final StrategyRepository strategyRepository;
     private final TraderStrategyServiceImpl traderStrategyService;
     private final DailyRepository dailyRepository;
-    private final MonthRepository monthRepository;
+    private final MonthlyRepository monthlyRepository;
     private final DailyServiceImpl dailyServiceImpl;
     private final StrategyStatisticsRepository statisticsRepository;
     private final StrategyStatisticsServiceImpl statisticsService;
@@ -50,7 +50,7 @@ public class KPRatioCalculateTest {
         // delete
         statisticsRepository.deleteAll();
         dailyRepository.deleteAll();
-        monthRepository.deleteAll();
+        monthlyRepository.deleteAll();
         strategyStockReferenceRepository.deleteAll();
         strategyRepository.deleteAll();
     }
@@ -96,7 +96,7 @@ public class KPRatioCalculateTest {
                 .password("sys1234!")
                 .name("한감자")
                 .nickname("감자")
-                .birth(LocalDateTime.now())
+                .birth(LocalDateTime.now().toLocalDate())
                 .phoneNumber("01022223333")
                 .usingStatusCode("")
                 .totalFollow(160)
