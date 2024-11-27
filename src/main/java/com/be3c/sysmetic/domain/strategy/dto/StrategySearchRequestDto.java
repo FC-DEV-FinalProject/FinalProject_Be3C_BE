@@ -22,24 +22,24 @@ public class StrategySearchRequestDto {
     */
 
     private List<String> methods;
-    private List<Character> cycle;
+    private List<String> cycle;
     private List<String> stockNames;
     // TODO private List<String> periods;
-    private String accumProfitLossRateRangeStart;
-    private String accumProfitLossRateRangeEnd;
+    private String accumulatedProfitLossRateRangeStart;
+    private String accumulatedProfitLossRateRangeEnd;
 
 
     @JsonCreator
     public StrategySearchRequestDto(
             @JsonProperty("methods") List<String> methods,
-            @JsonProperty("cycle") List<Character> cycle,
+            @JsonProperty("cycle") List<String> cycle,
             @JsonProperty("stockNames") List<String> stockNames,
-            @JsonProperty("accumProfitLossRateRangeStart") String accumProfitLossRateRangeStart,
-            @JsonProperty("accumProfitLossRateRangeEnd") String accumProfitLossRateRangeEnd) {
+            @JsonProperty("accumulatedProfitLossRateRangeStart") String accumulatedProfitLossRateRangeStart,
+            @JsonProperty("accumulatedProfitLossRateRangeEnd") String accumulatedProfitLossRateRangeEnd) {
         this.methods = methods;
         this.cycle = cycle;
         this.stockNames = stockNames;
-        this.accumProfitLossRateRangeStart = accumProfitLossRateRangeStart;
-        this.accumProfitLossRateRangeEnd = accumProfitLossRateRangeEnd;
+        this.accumulatedProfitLossRateRangeStart = accumulatedProfitLossRateRangeStart;
+        this.accumulatedProfitLossRateRangeEnd = accumulatedProfitLossRateRangeEnd;
     }
 }

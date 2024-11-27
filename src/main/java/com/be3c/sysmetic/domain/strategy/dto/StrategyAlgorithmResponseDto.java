@@ -18,11 +18,11 @@ public class StrategyAlgorithmResponseDto {
         stockListDto : 종목 리스트
         name : 전략명
         cycle : 주기
-        accumProfitLossRate : 누적수익률
+        accumulatedProfitLossRate : 누적수익률
         mdd : MDD
         smScore : SM Score
     */
-    private String algorithmType;
+    private StrategyAlgorithmOption algorithm;
     private Long id;
     private Long traderId;
     private String traderNickname;
@@ -31,7 +31,7 @@ public class StrategyAlgorithmResponseDto {
     private StockListDto stockList;
     private String name;
     private Character cycle;
-    private Double accumProfitLossRate;
+    private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
 }

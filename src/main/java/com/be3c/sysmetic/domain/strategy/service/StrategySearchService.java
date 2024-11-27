@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAlgorithmOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAlgorithmResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchResponseDto;
@@ -15,5 +16,5 @@ public interface StrategySearchService {
     // searchAlgorithm : 알고리즘별 검색
     PageResponse<StrategyAlgorithmResponseDto> searchAlgorithm(
             Integer pageNum,
-            String type);
+            StrategyAlgorithmOption algorithm);
 }

@@ -1,15 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAlgorithmResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategySearchResponseDto;
-import com.be3c.sysmetic.domain.strategy.entity.Stock;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
-import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -29,8 +21,7 @@ import java.util.NoSuchElementException;
 public class StrategySearchServiceImpl implements StrategySearchService {
 
     private final StrategyRepository strategyRepository;
-    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
-    private final DoubleHandler doubleHandler;
+    private final StockGetter stockGetter;
 
     /*
         searchConditions : 상세 조건 검색 결과로 나온 전략을 StrategySearchResponseDto로 변환해서 PageReposne에 담아 반환
@@ -45,8 +36,8 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
         Page<Strategy> sPage = strategyRepository.searchByConditions(pageable, strategySearchRequestDto);
 
-        if (sPage.getContent().isEmpty())
-            throw new NoSuchElementException("상세 조건에 해당하는 검색 결과가 존재하지 않습니다.");
+        // if (sPage.getContent().isEmpty())
+        //     throw new NoSuchElementException("상세 조건에 해당하는 검색 결과가 존재하지 않습니다.");
 
         List<StrategySearchResponseDto> strategyList = sPage.getContent()
                 .stream()
@@ -58,10 +49,10 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                         .methodName(s.getMethod().getName())
                         .name(s.getName())
                         .cycle(s.getCycle())
-                        .stockList(getStocks(s.getId()))
-                        .accumProfitLossRate(doubleHandler.cutDouble(s.getAccumProfitLossRate()))
-                        .mdd(doubleHandler.cutDouble(s.getMdd()))
-                        .smScore(doubleHandler.cutDouble(s.getSmScore()))
+                        .stockList(stockGetter.getStocks(s.getId()))
+                        .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
+                        .mdd(s.getMdd())
+                        .smScore(s.getSmScore())
                         .build()
                 )
                 .toList();
@@ -80,30 +71,27 @@ public class StrategySearchServiceImpl implements StrategySearchService {
         searchAlgorithm : 알고리즘별 전략 검색
     */
     @Override
-    public PageResponse<StrategyAlgorithmResponseDto> searchAlgorithm(Integer pageNum, String type) {
+    public PageResponse<StrategyAlgorithmResponseDto> searchAlgorithm(Integer pageNum, StrategyAlgorithmOption algorithm) {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize);
 
-        Page<Strategy> sPage = strategyRepository.searchByAlgorithm(pageable, type);
-
-        if (sPage.getContent().isEmpty())
-            throw new NoSuchElementException(type + "알고리즘에 해당하는 전략이 없습니다.");
+        Page<Strategy> sPage = strategyRepository.searchByAlgorithm(pageable, String.valueOf(algorithm));
 
         List<StrategyAlgorithmResponseDto> strategyList = sPage.getContent()
                 .stream()
                 .map(s -> StrategyAlgorithmResponseDto.builder()
-                        .algorithmType(type)
+                        .algorithm(algorithm)
                         .id(s.getId())
                         .traderId(s.getTrader().getId())
                         .traderNickname(s.getTrader().getNickname())
                         .methodId(s.getMethod().getId())
                         .methodName(s.getMethod().getName())
-                        .stockList(getStocks(s.getId()))
+                        .stockList(stockGetter.getStocks(s.getId()))
                         .name(s.getName())
                         .cycle(s.getCycle())
-                        .accumProfitLossRate(doubleHandler.cutDouble(s.getAccumProfitLossRate()))
-                        .mdd(doubleHandler.cutDouble(s.getMdd()))
-                        .smScore(doubleHandler.cutDouble(s.getSmScore()))
+                        .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
+                        .mdd(s.getMdd())
+                        .smScore(s.getSmScore())
                         .build()
                 )
                 .toList();
@@ -117,23 +105,4 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                 .content(strategyList)
                 .build();
     }
-
-    // getMethods : 전략에 포함된 종목 가져오기
-    private StockListDto getStocks(Long id) {
-        HashSet<Long> idSet = new HashSet<>();
-        HashSet<String> nameSet = new HashSet<>();
-
-        List<StrategyStockReference> references = strategyStockReferenceRepository.findByStrategyId(id);
-
-        for (StrategyStockReference ref : references) {
-            Stock stock = ref.getStock();
-            idSet.add(stock.getId());
-            nameSet.add(stock.getName());
-        }
-        return StockListDto.builder()
-                .stockIds(idSet)
-                .stockNames(nameSet)
-                .build();
-    }
-
 }

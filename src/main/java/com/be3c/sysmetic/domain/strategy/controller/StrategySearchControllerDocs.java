@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAlgorithmOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAlgorithmResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchResponseDto;
@@ -42,18 +43,18 @@ public interface StrategySearchControllerDocs {
     @PostMapping("/strategy/search-conditions")
     APIResponse<PageResponse<StrategySearchResponseDto>> conditionSearch(
             @RequestHeader(value = "pageNum", defaultValue = "0") Integer pageNum,
-            @RequestBody StrategySearchRequestDto strategySearchRequestDto) throws Exception;
+            @RequestBody StrategySearchRequestDto strategySearchRequestDto);
 
 
     /*
         algorithmSearch : 알고리즘별 전략 검색
     */
     @Operation(
-            summary = "알고리즘별 전략 검색 - 아직 조회 안됩니다!!",
+            summary = "알고리즘별 전략 - DEFENSIVE는 아직 조회 못합니다",
             description = "전략 목록에서 항목ㅋ별 상세 조건을 검색합니다.<br><br>" +
-                    "Request Parma 설명 :<br><br>" +
+                    "Request Param 설명 :<br><br>" +
                     "pageNum : defaultValue = 0, 페이지 이동 시 값 입력 <br><br>" +
-                    "type : Algorithm 선택 - Efficiency, Offensive, Defensive"
+                    "algorithm : defaultValue = EFFICIENCY -> Algorithm 선택 - EFFICIENCY, OFFENSIVE, DEFENSIVE"
             ,
             responses = {
                     @ApiResponse(
@@ -67,5 +68,5 @@ public interface StrategySearchControllerDocs {
     @GetMapping("/strategy/search-algorithm")
     APIResponse<PageResponse<StrategyAlgorithmResponseDto>> algorithmSearch(
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum,
-            @RequestParam(name = "type") String type) throws Exception;
+            @RequestParam(name = "algorithm", defaultValue = "EFFICIENCY") StrategyAlgorithmOption algorithm);
 }

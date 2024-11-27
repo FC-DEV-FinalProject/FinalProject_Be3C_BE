@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.dummy;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
@@ -76,7 +77,7 @@ public class InsertStrategyDummy implements CommandLineRunner {
             Strategy s = Strategy.builder()
                     .trader(getTrader((long) i+1))
                     .method(getMethod())
-                    .statusCode("PUBLIC")       // TODO ST001, PUBLIC 중 통일
+                    .statusCode(String.valueOf(StrategyStatusCode.PUBLIC))
                     .name("전략" + (i + 1))
                     .cycle('D')
                     .content("전략" + (i + 1) + " 소개 내용")
@@ -84,7 +85,7 @@ public class InsertStrategyDummy implements CommandLineRunner {
                     .smScore(doubleHandler.cutDouble(Math.random() * 100))
                     .kpRatio(doubleHandler.cutDouble(Math.random() * 100))
                     .mdd(doubleHandler.cutDouble(Math.random() * 100))
-                    .accumProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
+                    .accumulatedProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
                     .build();
             strategyRepository.saveAndFlush(s);
         }
@@ -94,19 +95,18 @@ public class InsertStrategyDummy implements CommandLineRunner {
             Strategy s = Strategy.builder()
                     .trader(getTrader(1L))
                     .method(getMethod())
-                    .statusCode("PRIVATE")      // TODO ST001, PRIVATE 중 통일
+                    .statusCode(String.valueOf(StrategyStatusCode.PRIVATE))
                     .name("비공개 전략" + (i + 1))
-                    .cycle('P')
+                    .cycle('D')
                     .content("전략" + (i + 1) + " 소개 내용")
                     .followerCount((long) ((Math.random() * 100) + 1))
                     .smScore(doubleHandler.cutDouble(Math.random() * 100))
                     .kpRatio(doubleHandler.cutDouble(Math.random() * 100))
-                    .accumProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
+                    .accumulatedProfitLossRate(doubleHandler.cutDouble(Math.random() * 100))
                     .mdd(doubleHandler.cutDouble(Math.random() * 100))
                     .build();
             strategyRepository.saveAndFlush(s);
         }
-
     }
 
     private Member getTrader(Long id) {

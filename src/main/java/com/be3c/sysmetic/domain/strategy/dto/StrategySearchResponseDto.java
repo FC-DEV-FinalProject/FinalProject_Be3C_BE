@@ -21,7 +21,7 @@ public class StrategySearchResponseDto {
         name : 전략 명
         cycle : 주기
         List<Stock> : 전략에 포함된 종목 리스트
-        accumProfitLossRate : 누적수익률
+        accumulatedProfitLossRate : 누적수익률
         mdd : MDD
         smScore : SM Score
     */
@@ -33,8 +33,8 @@ public class StrategySearchResponseDto {
     private String methodName;
     private String name;
     private Character cycle;
-    private StockListDto stockList;     // TODO StockListDto vs. List<StockListDto
-    private Double accumProfitLossRate;
+    private StockListDto stockList;
+    private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
 }

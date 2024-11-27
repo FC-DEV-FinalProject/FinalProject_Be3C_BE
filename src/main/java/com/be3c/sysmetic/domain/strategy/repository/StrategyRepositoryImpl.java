@@ -1,10 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.QStrategy;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+
+import static com.be3c.sysmetic.domain.strategy.entity.QStrategy.strategy;
 
 @RequiredArgsConstructor
 public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
@@ -24,21 +28,19 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     // searchByConditions : 전략 상세 조건으로 검색
     @Override
     public Page<Strategy> searchByConditions(Pageable pageable, StrategySearchRequestDto strategySearchRequestDto) {
-        QStrategy strategy = QStrategy.strategy;
-
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
         booleanBuilder.and(getMethodCond(strategy, strategySearchRequestDto));
         booleanBuilder.and(getCycleCond(strategy, strategySearchRequestDto));
         booleanBuilder.and(getStockCond(strategySearchRequestDto));
-        // TODO booleanBuilder.and(getPeriodCond(strategy, strategySearchRequestDto));
+        // TODO 운용기간 추가 booleanBuilder.and(getPeriodCond(strategy, strategySearchRequestDto));
         booleanBuilder.and(getAccumProfitLossRateRange(strategy, strategySearchRequestDto));
-        booleanBuilder.and(strategy.statusCode.eq("PUBLIC"));
+        booleanBuilder.and(strategy.statusCode.eq(String.valueOf(StrategyStatusCode.PUBLIC)));
 
         // 필터링된 결과 쿼리 실행
         List<Strategy> results = jpaQueryFactory.selectFrom(strategy)
                 .where(booleanBuilder)
-                .orderBy(strategy.accumProfitLossRate.desc())
+                .orderBy(strategy.accumulatedProfitLossRate.desc())
                 .offset(pageable.getOffset())  // 페이지 오프셋 적용
                 .limit(pageable.getPageSize()) // 페이지 크기 적용
                 .fetch();
@@ -50,10 +52,52 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         return new PageImpl<>(results, pageable, total);
     }
 
-    // TODO 알고리즘별 전략 검색
+
+    // searchByAlgorithm : 알고리즘별 전략 정렬
     @Override
-    public Page<Strategy> searchByAlgorithm(Pageable pageable, String type) {
-        return null;
+    public Page<Strategy> searchByAlgorithm(Pageable pageable, String algorithm) {
+
+        // PUBLIC 상태인 전략만 검색
+        BooleanBuilder booleanBuilder = new BooleanBuilder(strategy.statusCode.eq(String.valueOf(StrategyStatusCode.PUBLIC)));
+
+        OrderSpecifier<?>[] orderSpecifiers = null;
+
+        switch (algorithm) {
+            case "EFFICIENCY":
+                orderSpecifiers = new OrderSpecifier[] {
+                        strategy.accumulatedProfitLossRate
+                                .divide(strategy.mdd)
+                                .desc()
+                };
+                break;
+
+            case "OFFENSIVE":
+                orderSpecifiers = new OrderSpecifier[] {
+                        strategy.accumulatedProfitLossRate
+                                .divide(
+                                        strategy.winningRate.multiply(0.01).subtract(1)
+                                )
+                                .desc()
+                };
+                break;
+
+            // TODO 방어형 DEFENSIVE
+            // case "DEFENSIVE":
+            //     // 누적 수익률 데이터 가져오기
+            //     NumberExpression<Double> averageProfitLossRate = strategyStatistics.averageProfitLossRate.doubleValue();
+            //
+            //
+        }
+
+        List<Strategy> result = jpaQueryFactory
+                .selectFrom(strategy)
+                .where(booleanBuilder)
+                .orderBy(orderSpecifiers)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(result, pageable, result.size());
     }
 
 
@@ -69,12 +113,16 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
 
     // 주기 조건
     private BooleanBuilder getCycleCond(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
-        List<Character> cycleCond = strategySearchRequestDto.getCycle();
+        List<String> cycleCond = strategySearchRequestDto.getCycle();
 
         if (cycleCond == null || cycleCond.isEmpty())
             return new BooleanBuilder();
 
-        return new BooleanBuilder(strategy.cycle.in(cycleCond));
+        List<Character> cycleChars = cycleCond.stream()
+                .map(s -> s.charAt(0))
+                .toList();
+
+        return new BooleanBuilder(strategy.cycle.in(cycleChars));
     }
 
     // 종목 조건
@@ -97,7 +145,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
 
         // 각 참조를 통해 Strategy 조건 추가
         for (StrategyStockReference ref : references)
-            booleanBuilder.or(QStrategy.strategy.id.eq(ref.getStrategy().getId()));
+            booleanBuilder.or(strategy.id.eq(ref.getStrategy().getId()));
 
         return booleanBuilder;
     }
@@ -132,18 +180,18 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         if (!checkAccumProfitLossRateRange(strategySearchRequestDto))
             return booleanBuilder;
 
-        Double start = Double.parseDouble(strategySearchRequestDto.getAccumProfitLossRateRangeStart());
-        Double end = Double.parseDouble(strategySearchRequestDto.getAccumProfitLossRateRangeEnd());
+        Double start = Double.parseDouble(strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart());
+        Double end = Double.parseDouble(strategySearchRequestDto.getAccumulatedProfitLossRateRangeEnd());
 
-        booleanBuilder.and(strategy.accumProfitLossRate.between(start, end));
+        booleanBuilder.and(strategy.accumulatedProfitLossRate.between(start, end));
 
         return booleanBuilder;
     }
 
     // 누적수익률 조건 범위 null & 크기 올바른지 확인
     private Boolean checkAccumProfitLossRateRange(StrategySearchRequestDto strategySearchRequestDto) {
-        String accumProfitLossRateRangeStartCond = strategySearchRequestDto.getAccumProfitLossRateRangeStart();
-        String accumProfitLossRateRangeEndCond = strategySearchRequestDto.getAccumProfitLossRateRangeEnd();
+        String accumProfitLossRateRangeStartCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart();
+        String accumProfitLossRateRangeEndCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeEnd();
 
         // 조건이 없거나 비어있으면 false 반환
         if (accumProfitLossRateRangeStartCond == null || accumProfitLossRateRangeEndCond == null ||
