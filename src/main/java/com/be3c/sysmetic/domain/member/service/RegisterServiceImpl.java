@@ -4,6 +4,9 @@ import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
+import com.be3c.sysmetic.global.util.email.dto.Subscriber;
+import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,8 +60,7 @@ public class RegisterServiceImpl implements RegisterService {
     private final MemberRepository memberRepository;
     private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-
-    private static final Long EXPIRE_TIME = 60 * 60 * 1000L; // 1시간(인증코드 만료시간)
+    private final EmailService emailService;
 
     // 1. 이메일 중복확인
     @Override
@@ -73,16 +76,8 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     @Transactional
     public boolean sendVerifyEmailCode(String email) {
-        // 이메일 발송 - 예슬님이 만들어주실 예정! 했다치고! (추가필요)
-        // 예슬메서드 리턴값 = 인증코드(있/없)
-        // 발송 안됐을 때 return null;
-        // Optional<String> authCode = 예슬서비스.예슬메서드(email)
 
-        Optional<String> authCode = Optional.of("abc");
-        String savedAuthCode = authCode.get();
-
-        // Redis에 토큰 전송 이력(email, authCode, expireTime(1시간 유효)) 저장
-        redisUtils.saveEmailAuthCodeWithExpireTime(email, savedAuthCode, EXPIRE_TIME);
+        emailService.sendAndSaveAuthCode(email);
         return true;
     }
 
@@ -99,7 +94,7 @@ public class RegisterServiceImpl implements RegisterService {
         redisUtils.deleteEmailAuthCode(email);
         return true; // 인증 성공
     }
-    
+
     // 4. 닉네임 중복확인
     @Override
     public boolean checkNicknameDuplication(String nickname) {
@@ -129,10 +124,32 @@ public class RegisterServiceImpl implements RegisterService {
                     .marketingConsentDate(LocalDateTime.parse(dto.getMarketingConsentDate()))
                     .build();
             memberRepository.save(member);
+
+            // 메일링 서비스에 등록하고 가입 이메일 발송
+            SubscriberRequest subscriberRequest = SubscriberRequest.builder()
+                    .subscribers(List.of(
+                            Subscriber.builder()
+                                    .email(dto.getEmail())
+                                    .name(dto.getNickname())
+                                    .subscribedDate(LocalDateTime.now())
+                                    .isAdConsent(true)
+                                    .build()
+                    ))
+                    .build();
+
+            switch (dto.getRoleCode()) {
+                case USER:
+                    emailService.addUserSubscriberRequest(subscriberRequest);
+                    break;
+                case TRADER:
+                    emailService.addTraderSubscriberRequest(subscriberRequest);
+                    break;
+            }
+
             return true;
         } catch (Exception e) {
             throw new RuntimeException("회원가입에 실패하였습니다.", e);
         }
     }
-    
+
 }

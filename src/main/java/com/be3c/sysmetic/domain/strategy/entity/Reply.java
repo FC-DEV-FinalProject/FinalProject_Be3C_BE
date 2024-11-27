@@ -30,6 +30,6 @@ public class Reply extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "statusCode", nullable = false)
+    @Column(name = "status_code", nullable = false)
     private String statusCode;
 }

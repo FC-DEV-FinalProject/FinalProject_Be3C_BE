@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/v1")
 public class RegisterController {
 
     private final RegisterService registerService;
@@ -47,26 +48,9 @@ public class RegisterController {
         2. 중복된 이메일일 때 : CONFLICT
      */
     @Operation(
-            summary = "이메일 중복 확인",
+            summary = "이메일 중복확인",
             description = "이메일 중복 여부를 확인하는 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "이메일 중복 확인 성공 (중복되지 않은 이메일)",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "중복된 이메일",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "유효하지 않은 이메일 형식",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
     @GetMapping("/auth/check-duplicate-email")
     public ResponseEntity<APIResponse<String>> checkDuplicateEmail(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
         if(registerService.checkEmailDuplication(email)) {
@@ -82,31 +66,11 @@ public class RegisterController {
         1. 인증코드 전송 성공했을 때 : OK
      */
     @Operation(
-            summary = "이메일 인증 코드 전송",
-            description = "사용자에게 이메일 인증 코드를 전송하는 API"
+            summary = "이메일 인증코드 전송",
+            description = "사용자에게 이메일 인증코드를 전송하는 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "인증 코드 전송 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "유효하지 않은 이메일 형식",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "서버 오류로 인해 인증 코드 전송 실패",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
     @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
-        // 이메일 인증코드 발송 내용 추가되면 수정.
-        String authCode = "ABC";
-
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -117,26 +81,9 @@ public class RegisterController {
         2. 인증코드가 불일치할 때 : BAD_REQUEST
      */
     @Operation(
-            summary = "이메일 인증 코드 확인",
-            description = "사용자가 입력한 이메일 인증 코드를 검증하는 API"
+            summary = "이메일 인증코드 확인",
+            description = "사용자가 입력한 이메일 인증코드를 검증하는 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "인증 코드 확인 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "인증 코드가 불일치하거나 잘못된 요청 데이터",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "서버 오류로 인해 인증 코드 확인 실패",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
     @PostMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> verifyCode(@Valid @RequestBody EmailResponseDto emailResponseDto) {
         if (registerService.checkVerifyEmailCode(emailResponseDto.getEmail(), emailResponseDto.getAuthCode())) {
@@ -152,26 +99,9 @@ public class RegisterController {
         2. 중복된 닉네임일 때 : CONFLICT
      */
     @Operation(
-            summary = "닉네임 중복 확인",
+            summary = "닉네임 중복확인",
             description = "닉네임 중복 여부를 확인하는 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "닉네임 중복 확인 성공 (중복되지 않은 닉네임)",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "중복된 닉네임",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "잘못된 닉네임 형식",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
     @GetMapping("/auth/check-nickname")
     public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@NotNull @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "닉네임은 한글 또는 숫자로 3자 이상 10자 이내로 입력해야 합니다.") @RequestParam String nickname) {
         if(registerService.checkNicknameDuplication(nickname)) {
@@ -192,23 +122,6 @@ public class RegisterController {
             summary = "회원가입",
             description = "사용자 회원가입을 처리하는 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "회원가입 성공",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "요청 데이터 검증 실패",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "서버 오류로 인한 회원가입 실패",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
     @PostMapping("/auth/register")
     public ResponseEntity<APIResponse<String>> register(@Valid @RequestBody RegisterRequestDto registerResponseDto, Errors errors) {
         // Valid 에러 처리
