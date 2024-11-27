@@ -251,7 +251,7 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "207",
-                    description = "공지사항 중 일부만 삭제에 실패 (MULTI_STATUS)"
+                    description = "공지사항 중 삭제에 실패 (MULTI_STATUS)"
             )
     })
     @DeleteMapping("/admin/notice/delete")

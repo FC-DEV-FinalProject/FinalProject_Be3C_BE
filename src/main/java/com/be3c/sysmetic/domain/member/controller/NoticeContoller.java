@@ -352,7 +352,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 공지사항 목록 삭제에 성공했을 때 : OK
         3. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
-        4. 공지사항 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
+        4. 공지사항 중 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
     @PreAuthorize("hasRole('ROLE_MANAGER')")
