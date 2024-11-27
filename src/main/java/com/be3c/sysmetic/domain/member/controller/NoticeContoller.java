@@ -8,17 +8,22 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.SuccessCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +36,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final SecurityUtils securityUtils;
 
     private final NoticeService noticeService;
+    private final FileService fileService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
 
@@ -46,9 +52,21 @@ public class NoticeContoller implements NoticeControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody @Valid NoticeSaveRequestDto noticeSaveRequestDto) {
+            @RequestPart @Valid NoticeSaveRequestDto noticeSaveRequestDto,
+            @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
+            @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
+
+        if(fileList.size() > 3) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 파일이 3개 초과입니다."));
+        }
+
+        if(imageList.size() > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 이미지가 3개 초과입니다."));
+        }
 
         try {
             if (noticeService.registerNotice(
@@ -56,7 +74,9 @@ public class NoticeContoller implements NoticeControllerDocs {
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
                     noticeSaveRequestDto.getIsAttatchment(),
-                    noticeSaveRequestDto.getIsOpen())) {
+                    noticeSaveRequestDto.getIsOpen(),
+                    fileList,
+                    imageList)) {
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
@@ -115,7 +135,7 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         String writerNickname = notice.getWriter().getNickname();
         if (writerNickname == null) {
-            writerNickname = "삭제된 회원입니다.";
+            writerNickname = "탈퇴한 회원입니다.";
         }
 
         return NoticeAdminListOneShowResponseDto.builder()
@@ -194,7 +214,30 @@ public class NoticeContoller implements NoticeControllerDocs {
 
             String writerNickname = notice.getWriter().getNickname();
             if (writerNickname == null) {
-                writerNickname = "삭제된 회원입니다.";
+                writerNickname = "탈퇴한 회원입니다.";
+            }
+
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
             }
 
             NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
@@ -210,6 +253,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .hits(notice.getHits())
                     .isAttatchment(notice.getIsAttatchment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .previousTitle(previousNotice.getNoticeTitle())
                     .previousWriteDate(previousNotice.getWriteDate())
                     .nextTitle(nextNotice.getNoticeTitle())
@@ -255,6 +300,29 @@ public class NoticeContoller implements NoticeControllerDocs {
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
 
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
+            }
+
             NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
                     .page(page)
                     .searchType(searchType)
@@ -264,6 +332,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeContent(notice.getNoticeContent())
                     .isAttatchment(notice.getIsAttatchment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -290,7 +360,9 @@ public class NoticeContoller implements NoticeControllerDocs {
     @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable Long noticeId,
-            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
+            @RequestPart @Valid NoticeModifyRequestDto noticeModifyRequestDto,
+            @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
+            @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList) {
 
         LocalDateTime modifyInModifyPageTime = noticeModifyRequestDto.getModifyInModifyPageTime();
         if (modifyInModifyPageTime == null) {
@@ -313,7 +385,11 @@ public class NoticeContoller implements NoticeControllerDocs {
                         noticeModifyRequestDto.getNoticeContent(),
                         userId,
                         noticeModifyRequestDto.getIsAttatchment(),
-                        noticeModifyRequestDto.getIsOpen())) {
+                        noticeModifyRequestDto.getIsOpen(),
+                        noticeModifyRequestDto.getExistFileDtoList(),
+                        noticeModifyRequestDto.getExistImageDtoList(),
+                        newFileList,
+                        newImageList)) {
                     return ResponseEntity.status(HttpStatus.OK)
                             .body(APIResponse.success());
                 }
@@ -460,7 +536,30 @@ public class NoticeContoller implements NoticeControllerDocs {
 
             String writerNickname = notice.getWriter().getNickname();
             if (writerNickname == null) {
-                writerNickname = "삭제된 회원입니다.";
+                writerNickname = "탈퇴한 회원입니다.";
+            }
+
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
             }
 
             NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
@@ -475,6 +574,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .hits(notice.getHits())
                     .isAttatchment(notice.getIsAttatchment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .previousTitle(previousNotice.getNoticeTitle())
                     .previousWriteDate(previousNotice.getWriteDate())
                     .nextTitle(nextNotice.getNoticeTitle())

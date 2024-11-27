@@ -43,7 +43,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
-    @GetMapping("/admin/inquiry")
     ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -80,7 +79,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
-    @GetMapping("/admin/inquiry/{inquiryId}/view")
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -112,7 +110,6 @@ public interface InquiryControllerDocs {
                     description = "해당 문의를 찾지 못함 (NOT_FOUND)"
             )
     })
-    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
     ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId);
 
@@ -140,7 +137,6 @@ public interface InquiryControllerDocs {
                     description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
             )
     })
-    @DeleteMapping("/admin/inquiry/delete")
     ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
@@ -166,7 +162,6 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @GetMapping("/strategy/{strategyId}/inquiry")
     ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
@@ -200,7 +195,6 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @PostMapping("/strategy/{strategyId}/inquiry")
     ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
@@ -230,7 +224,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
-    @GetMapping("/member/inquiry")
     ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
@@ -262,7 +255,6 @@ public interface InquiryControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/member/inquiry/{inquiryId}/view")
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -299,7 +291,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
-    @GetMapping("/member/inquiry/{inquiryId}/modify")
     ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -334,7 +325,6 @@ public interface InquiryControllerDocs {
                     description = "데이터의 형식이 올바르지 않았을 때 (BAD_REQUEST)\n+ +) 답변이 등록된 문의를 수정 시도했을 때"
             )
     })
-    @PutMapping("/member/inquiry/{inquiryId}/modify")
     ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto);
@@ -367,7 +357,6 @@ public interface InquiryControllerDocs {
                     description = "답변이 등록된 문의를 수정 시도했을 때 (BAD_REQUEST)"
             )
     })
-    @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId);
 
@@ -400,7 +389,6 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @PostMapping("/trader/inquiry/{inquiryId}/write")
     ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto);
@@ -430,7 +418,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
-    @GetMapping("/trader/inquiry")
     ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
@@ -462,7 +449,6 @@ public interface InquiryControllerDocs {
             @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
-    @GetMapping("/trader/inquiry/{inquiryId}/view")
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,

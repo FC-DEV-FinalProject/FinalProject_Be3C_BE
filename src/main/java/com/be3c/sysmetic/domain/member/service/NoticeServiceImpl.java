@@ -1,15 +1,20 @@
 package com.be3c.sysmetic.domain.member.service;
 
+import com.be3c.sysmetic.domain.member.dto.NoticeExistFileImageRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,17 +29,32 @@ public class NoticeServiceImpl implements NoticeService {
 
     private final MemberRepository memberRepository;
     private final NoticeRepository noticeRepository;
+    private final FileService fileService;
 
     // 등록
     @Override
     @Transactional
-    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen) {
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen,
+                                    List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
 
         noticeRepository.save(notice);
+
+
+        if(!fileList.isEmpty()) {
+            for (MultipartFile file : fileList) {
+                fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            }
+        }
+
+        if(!imageList.isEmpty()) {
+            for (MultipartFile image : imageList) {
+                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+            }
+        }
 
         return true;
     }
@@ -87,7 +107,8 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen) {
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen,
+                                List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
@@ -96,6 +117,36 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setCorrectorId(correctorId);
         notice.setIsAttatchment(isAttatchment);
         notice.setIsOpen(isOpen);
+
+        boolean deleteAllFile = true;
+        for (NoticeExistFileImageRequestDto n : existFileDtoList) {
+            if (!n.getExist()) {
+                fileService.deleteFileById(n.getFileId());
+                deleteAllFile = false;
+            }
+        }
+        if (deleteAllFile && newFileList.isEmpty()) {
+            notice.setIsAttatchment(0);
+        }
+
+        for (NoticeExistFileImageRequestDto n : existImageDtoList) {
+            if (!n.getExist()) {
+                fileService.deleteFileById(n.getFileId());
+            }
+        }
+
+
+        if(!newFileList.isEmpty()) {
+            for (MultipartFile file : newFileList) {
+                fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            }
+        }
+
+        if(!newImageList.isEmpty()) {
+            for (MultipartFile image : newImageList) {
+                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+            }
+        }
 
         return true;
     }
