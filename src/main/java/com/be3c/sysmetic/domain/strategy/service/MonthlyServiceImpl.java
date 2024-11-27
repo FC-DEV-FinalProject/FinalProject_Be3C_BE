@@ -74,12 +74,16 @@ public class MonthlyServiceImpl implements MonthlyService {
         YearMonth end = parseYearMonth(endYearMonth);
 
         // 전략 상태 PUBLIC 여부 검증
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
 
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
+                .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
+                .map(this::entityToDto);
 
         return PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
@@ -116,12 +120,16 @@ public class MonthlyServiceImpl implements MonthlyService {
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
 
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository.findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable).map(this::entityToDto);
+        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
+                .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
+                .map(this::entityToDto);
 
         return PageResponse.<MonthlyGetResponseDto>builder()
                 .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
@@ -178,7 +186,8 @@ public class MonthlyServiceImpl implements MonthlyService {
     }
 
     private Strategy findStrategy(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     private YearMonth parseYearMonth(String yearMonth) {

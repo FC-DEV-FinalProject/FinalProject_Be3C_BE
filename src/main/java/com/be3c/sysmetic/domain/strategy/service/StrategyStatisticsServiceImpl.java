@@ -23,13 +23,6 @@ import java.time.Period;
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyStatisticsServiceImpl implements StrategyStatisticsService {
 
-    /*
-    공개 상태인 전략만 계산
-
-    일간분석 데이터 없는 경우 고려 -> 예외 처리할지, 모두 0으로 저장할지 고민 todo 리팩토링
-    일간분석 데이터 존재하는 경우 - date로 정렬
-     */
-
     private final DailyRepository dailyRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
     private final StrategyRepository strategyRepository;
@@ -108,7 +101,9 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
 
         // 전략 상태 PUBLIC 여부 검증
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
@@ -168,7 +163,9 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
         }
@@ -221,7 +218,8 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
     // find strategy by id
     private Strategy findStrategyById(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     // 잔고 -> 가장 최근 일간분석 데이터의 잔고

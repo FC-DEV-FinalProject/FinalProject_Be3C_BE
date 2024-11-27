@@ -31,6 +31,9 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
             Pageable pageable
     );
 
+    // 특정 전략의 월간분석 데이터 삭제
+    void deleteAllByStrategyId(@Param("strategyId") Long strategyId);
+
     /* 엑셀을 위한 메서드 */
     List<Monthly> findAllByStrategyIdOrderByYearNumberAscMonthNumberAsc(Long strategyId);
 
