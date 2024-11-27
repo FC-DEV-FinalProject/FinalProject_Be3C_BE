@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.global.util.file.repository;
 
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.entity.File;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,5 +18,5 @@ public interface FileRepository extends JpaRepository<File, Long> {
             "WHERE f.referenceId = :#{#fileRequestDto.referenceId} " +
             "AND f.referenceType = :#{#fileRequestDto.referenceType} " +
             "ORDER BY f.referenceId")
-    List<File> findFilesByFileReference(@Param("fileRequestDto") FileRequestDto fileRequestDto);
+    List<File> findFilesByFileReference(@Param("fileRequestDto") FileRequest fileRequest);
 }
