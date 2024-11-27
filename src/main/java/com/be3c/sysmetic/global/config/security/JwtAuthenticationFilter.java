@@ -84,14 +84,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long memberId = claims.get("memberId", Long.class);
             String role = claims.get("role", String.class);
             String email = claims.get("email", String.class);
-            String nickname = claims.get("nickname", String.class);
-            String profileImage = claims.get("profileImage", String.class);
 
             // 4-1. role을 GrantedAuthority로 변환하여 authorities 리스트 생성
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
             // 4-2. UserDetails 객체 생성
-            UserDetails userDetails = new CustomUserDetails(memberId, role, email, nickname, profileImage, authorities);
+            UserDetails userDetails = new CustomUserDetails(memberId, role, email, authorities);
 
             // 5. SecurityContext에 authentication 저장
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -102,7 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Access 토큰이 만료된 경우
+        // 2.2 Access 토큰이 만료된 경우
         // true-재발급 필요O (재발급 메서드 진행) , false - 재발급 필요X (다음 필터로 전달)
         if(jwtTokenProvider.needsReissueToken(accessToken)) {
             Map<String,String> tokenMap = jwtTokenProvider.reissueToken(accessToken); // 재발급 메서드
@@ -128,14 +126,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long memberId = claims.get("memberId", Long.class);
             String role = claims.get("role", String.class);
             String email = claims.get("email", String.class);
-            String nickname = claims.get("nickname", String.class);
-            String profileImage = claims.get("profileImage", String.class);
 
             // 4-1. role을 GrantedAuthority로 변환하여 authorities 리스트 생성
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
             // 4-2. UserDetails 객체 생성
-            UserDetails userDetails = new CustomUserDetails(memberId, role, email, nickname, profileImage, authorities);
+            UserDetails userDetails = new CustomUserDetails(memberId, role, email, authorities);
 
             // 5. SecurityContext에 authentication 저장
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
