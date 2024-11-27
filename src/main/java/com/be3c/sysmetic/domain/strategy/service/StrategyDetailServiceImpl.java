@@ -36,10 +36,11 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
 
         String statusCode = "PUBLIC";
 
-        StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
-
-        // if (optionOne == optionTwo) strategyRepository.
-        // else strategyRepository.
+        // TODO 아래 메서드 사용
+        // StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
+        // TODO Optional 적용; 추후에 DB에 초기값 추가하면 삭제
+        StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id)
+                .orElseGet(this::createDefaultStatistics);
 
         return strategyDetailRepository.findByIdAndStatusCode(id, statusCode)
                 .map(strategy -> StrategyDetailDto.builder()
@@ -57,7 +58,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .kpRatio(strategy.getKpRatio())
                         .smScore(strategy.getSmScore())
                         .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
-                        .maximumCapitalReductionAmount(doubleHandler.cutDouble(statistics.getMaximumCapitalReductionAmount()))
+                        .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
                         .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
                         .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
                         .winningRate(doubleHandler.cutDouble(statistics.getWinningRate()))
@@ -65,6 +66,17 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         // TODO analysis 추가
                         .build())
                 .orElseThrow(() -> new NoSuchElementException("상세 페이지 존재하지 않음"));
+    }
+
+
+    // TODO 추후 DB에 초기값 추가하면 삭제
+    private StrategyDetailStatistics createDefaultStatistics() {
+        return new StrategyDetailStatistics(
+                0.0,
+                0.0,
+                0.0,
+                0.0
+        );
     }
 
     // getMonthlyRecords : 월간 분석 데이터 가져오기

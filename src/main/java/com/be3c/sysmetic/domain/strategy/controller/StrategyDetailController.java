@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-@RequestMapping("v1/strategy/detail")
+@RequestMapping("/v1/strategy/detail")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyDetailController implements StrategyDetailControllerDocs {
 
@@ -27,7 +27,7 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
     @GetMapping
     public APIResponse<StrategyDetailDto> getDetailPage(
             @RequestParam("id") Long id,
-            @RequestParam(value = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_RATE") StrategyAnalysisOption optionOne,
+            @RequestParam(value = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_AMOUNT") StrategyAnalysisOption optionOne,
             @RequestParam(value = "optionTwo", defaultValue = "PRINCIPAL") StrategyAnalysisOption optionTwo)  {
 
         StrategyDetailDto strategyDetailDto = strategyDetailService.getDetail(id, optionOne, optionTwo);
