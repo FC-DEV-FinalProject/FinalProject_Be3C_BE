@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "공지사항 API", description = "관리자, 트레이더, 투자자 공지사항 API")
 public interface NoticeControllerDocs {
 
@@ -255,7 +257,7 @@ public interface NoticeControllerDocs {
             )
     })
     @DeleteMapping("/admin/notice/delete")
-    ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
+    ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto);
 
 

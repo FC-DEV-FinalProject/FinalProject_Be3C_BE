@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.NoticeAdminListShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
@@ -12,7 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_NOTICE;
 
 @Service
 @RequiredArgsConstructor
@@ -114,13 +117,22 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 목록 삭제
     @Override
     @Transactional
-    public Integer deleteAdminNoticeList(List<Long> noticeIdList) {
+    public Map<Long, String> deleteAdminNoticeList(List<Long> noticeIdList) {
+
+        Map<Long, String> failDelete = new HashMap<>();
 
         for (Long noticeId : noticeIdList) {
-            noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+            try {
+                noticeRepository.findById(noticeId);
+            }
+            catch (EntityNotFoundException e) {
+                failDelete.put(noticeId, NOT_FOUND_NOTICE.getMessage());
+            }
         }
 
-        return noticeRepository.bulkDelete(noticeIdList);
+        noticeRepository.bulkDelete(noticeIdList);
+
+        return failDelete;
     }
 
 

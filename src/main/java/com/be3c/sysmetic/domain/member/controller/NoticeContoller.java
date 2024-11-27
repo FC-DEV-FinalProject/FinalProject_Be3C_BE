@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.service.NoticeService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.common.response.SuccessCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -367,20 +369,20 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @DeleteMapping("/admin/notice/delete")
-    public ResponseEntity<APIResponse<Integer>> deleteAdminNoticeList(
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
 
         List<Long> noticeIdList = noticeListDeleteRequestDto.getNoticeIds();
 
         try {
-            Integer deleteCount = noticeService.deleteAdminNoticeList(noticeIdList);
+            Map<Long, String> deleteResult = noticeService.deleteAdminNoticeList(noticeIdList);
 
-            if (deleteCount == noticeIdList.size()) {
+            if (deleteResult.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(APIResponse.success(deleteCount));
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-                    .body(APIResponse.fail(ErrorCode.MULTI_STATUS));
+                    .body(APIResponse.success(SuccessCode.OK, deleteResult));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

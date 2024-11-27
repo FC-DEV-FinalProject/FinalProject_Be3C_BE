@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.member.entity.Notice;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface NoticeService {
 
@@ -31,7 +32,7 @@ public interface NoticeService {
     boolean deleteAdminNotice(Long noticeId);
 
     // 관리자 문의 목록 삭제
-    Integer deleteAdminNoticeList(List<Long> noticeIdList);
+    Map<Long, String> deleteAdminNoticeList(List<Long> noticeIdList);
 
     // 회원 검색 조회
     // 검색 (조건: 제목+내용)
