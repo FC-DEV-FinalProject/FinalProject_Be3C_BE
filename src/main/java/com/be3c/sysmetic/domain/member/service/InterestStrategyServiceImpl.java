@@ -183,10 +183,6 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 ).orElseThrow(EntityNotFoundException::new);
 
         InterestStrategy interestStrategy = InterestStrategy.builder()
-                .member(memberRepository.findByIdAndUsingStatusCode(
-                        userId,
-                        USING_STATE.getCode()
-                ).orElseThrow(EntityNotFoundException::new))
                 .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
                         userId,
                         folderId,
@@ -214,7 +210,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
      */
     private void unFollowStrategy(Long userId, Long strategyId) {
         InterestStrategy interestStrategy = interestStrategyRepository
-                .findByMemberIdAndAndStrategyIdAndStatusCode(
+                .findByMemberIdAndStrategyIdAndStatusCode(
                         userId,
                         strategyId,
                         FOLLOW.getCode()
