@@ -1,6 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.member.entity.InterestStrategy;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.FolderRepository;
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.AdminStrategySearchGetDto;
@@ -35,8 +38,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Slf4j
@@ -50,6 +52,10 @@ public class StrategyApprovalServiceTest {
 
     private final MemberRepository memberRepository;
 
+    private final FolderRepository folderRepository;
+
+    private final InterestStrategyRepository interestStrategyRepository;
+
     private final MethodRepository methodRepository;
 
     private final StrategyRepository strategyRepository;
@@ -57,6 +63,8 @@ public class StrategyApprovalServiceTest {
     private final DailyRepository dailyRepository;
 
     private final EntityManager entityManager;
+
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -66,13 +74,16 @@ public class StrategyApprovalServiceTest {
 
     @BeforeEach
     public void setUp() {
-        memberRepository.deleteAll();
+        strategyStockReferenceRepository.deleteAll();
+        interestStrategyRepository.deleteAll();
+        folderRepository.deleteAll();
         strategyRepository.deleteAll();
         methodRepository.deleteAll();
         dailyRepository.deleteAll();
         strategyApprovalRepository.deleteAll();
+        memberRepository.deleteAll();
 
-        entityManager.createNativeQuery("ALTER TABLE Member AUTO_INCREMENT = 1")
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1")
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE folder AUTO_INCREMENT = 1")
                 .executeUpdate();
@@ -82,15 +93,13 @@ public class StrategyApprovalServiceTest {
                 .executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
                 .executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE method AUTO_INCREMENT = 1")
-                .executeUpdate();
 
+        entityManager.clear();
 
         Member member = Member.builder()
                 .email("test@test.com")
                 .password(bCryptPasswordEncoder.encode("encodedPassword"))
                 // 초기값 설정
-                .id(1L)
                 .roleCode("TRADER")
                 .name("테스트")
                 .nickname("테스트")
@@ -105,10 +114,14 @@ public class StrategyApprovalServiceTest {
                 .marketingConsentDate(LocalDateTime.now())
                 .build();
 
+        memberRepository.save(member);
+
         Method method = Method.builder()
                 .name("테스트매매유형")
                 .statusCode(Code.USING_STATE.getCode())
                 .build();
+
+        methodRepository.save(method);
 
         List<Strategy> strategyList = new ArrayList<>();
 
@@ -122,6 +135,13 @@ public class StrategyApprovalServiceTest {
                     .cycle('D')
                     .build());
         }
+
+        for (Strategy strategy : strategyList) {
+            assertNotNull(strategy.getTrader(), "Strategy의 trader가 null입니다.");
+            assertNotNull(strategy.getTrader().getId(), "Strategy의 trader에 저장된 Member의 ID가 null입니다.");
+        }
+
+        strategyRepository.saveAll(strategyList);
 
         StrategyStatistics strategyStatistics = StrategyStatistics.builder()
                 .strategy(strategyList.get(1))
@@ -156,9 +176,6 @@ public class StrategyApprovalServiceTest {
                 .lastRegistrationDate(LocalDate.now())
                 .build();
 
-        methodRepository.save(method);
-        memberRepository.save(member);
-        strategyRepository.saveAll(strategyList);
         strategyStatisticsRepository.save(strategyStatistics);
 
         // 권한 설정
@@ -169,8 +186,6 @@ public class StrategyApprovalServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "TRADER", // role
-                "",
-                "",
                 authorities // 권한 목록
         );
 
@@ -183,7 +198,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 졸리다.")
+    @DisplayName("전략 관리 페이징 : 성공 - 페이징 테스트")
     @Order(1)
     public void imsleepy() {
         PageResponse<AdminStrategyGetResponseDto> pageResponse =
@@ -201,7 +216,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 졸렸다.")
+    @DisplayName("전략 관리 페이징 : 실패 - 빈 페이지 호출")
     @Order(2)
     public void iwassleepy() {
         assertThrows(NoSuchElementException.class, () ->
@@ -214,7 +229,7 @@ public class StrategyApprovalServiceTest {
     }
 
     @Test
-    @DisplayName("나는 피곤하다")
+    @DisplayName("전략 관리 페이징 : 성공 - 여러 개의 관심 전략 승인 목록")
     @Order(3)
     public void imtired() {
         Long userId = securityUtils.getUserIdInSecurityContext();

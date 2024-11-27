@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@RequestMapping("/api")
 @Tag(name = "관심 전략 API", description = "투자자 관심 전략 관련 API")
 public interface InterestStrategyControllerDocs {
 
@@ -39,9 +38,7 @@ public interface InterestStrategyControllerDocs {
             @ApiResponse(responseCode = "403", description = "SecurityContext에 userId가 존재하지 않음",
                     content = @Content)
     })
-
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @GetMapping("/member/interestStrategy")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
             InterestStrategyGetRequestDto interestStrategyGetRequestDto
     );
@@ -86,7 +83,6 @@ public interface InterestStrategyControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @PostMapping("/strategy/follow")
     public ResponseEntity<APIResponse<String>> follow(
             @Valid @RequestBody FollowPostRequestDto followPostRequestDto
     );
@@ -124,7 +120,6 @@ public interface InterestStrategyControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PutMapping("/strategy/follow")
     public ResponseEntity<APIResponse<String>> MoveFolder(
             @Valid @RequestBody FollowPutRequestDto followPutRequestDto
     );
@@ -157,7 +152,6 @@ public interface InterestStrategyControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @DeleteMapping("/strategy/follow")
     public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
     );

@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.dto;
 
+import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -15,7 +16,7 @@ public class MemberGetResponseDto {
 
     private Long id;
 
-    @Schema(description = "역할코드", example = "RC001")
+    @Schema(description = "역할코드", example = "ALL")
     private String roleCode;
 
     private String email;

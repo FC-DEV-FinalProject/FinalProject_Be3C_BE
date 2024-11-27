@@ -15,11 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StrategyPostRequestDto {
-
-    // todo. security 적용 후 제거 필요
-    @Schema(description = "트레이더 식별번호", example = "1")
-    private Long traderId;
-
     @Schema(description = "매매방식 식별번호", example = "1")
     @NotNull
     private Long methodId;

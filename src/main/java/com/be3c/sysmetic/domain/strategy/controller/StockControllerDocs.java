@@ -7,6 +7,7 @@ import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "종목 API", description = "관리자 종목 API")
 public interface StockControllerDocs {
@@ -45,7 +47,6 @@ public interface StockControllerDocs {
             }
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
             @NotBlank @RequestParam String name
     );
@@ -61,7 +62,10 @@ public interface StockControllerDocs {
                     @ApiResponse(
                             responseCode = "200",
                             description = "조회 성공: 해당 아이디의 종목을 찾는 데 성공했을 때 'OK' 반환",
-                            content = @Content(mediaType = "application/json")
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = APIResponse.class)
+                            )
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -71,7 +75,6 @@ public interface StockControllerDocs {
             }
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @GetMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
             @NotBlank @PathVariable Long id
     );
@@ -88,7 +91,10 @@ public interface StockControllerDocs {
                     @ApiResponse(
                             responseCode = "200",
                             description = "조회 성공: 해당 페이지의 종목을 찾는 데 성공했을 때 'OK' 반환",
-                            content = @Content(mediaType = "application/json")
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = APIResponse.class)
+                            )
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -141,10 +147,11 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> saveitem(
-            @Valid @RequestBody StockPostRequestDto stockPostRequestDto
+            @Valid @RequestBody StockPostRequestDto stockPostRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
     );
 
-    /*
+    /*f
         종목 수정하기
         1. 종목을 수정하는 데 성공했을 때 : OK
         2. 종목을 수정하는 데 실패했을 때 : INTERNAL_SERVER_ERROR
@@ -173,7 +180,8 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> updateItem(
-            @Valid @RequestBody StockPutRequestDto stockPutRequestDto
+            @Valid @RequestBody StockPutRequestDto stockPutRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
     );
 
     /*

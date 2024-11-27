@@ -30,7 +30,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@RequestMapping("/api")
+@RequestMapping("/v1")
 public class FolderController implements FolderControllerDocs {
 
     private final FolderService folderService;
