@@ -28,6 +28,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +102,7 @@ public class InterestStrategyServiceTest {
                 .usingStatusCode("US001")
                 .totalFollow(0)
                 .totalStrategyCount(0)
+                .birth(LocalDate.of(2000, 1, 1))
                 .receiveInfoConsent("Y")
                 .infoConsentDate(LocalDateTime.now())
                 .receiveMarketingConsent("Y")
@@ -118,6 +120,8 @@ public class InterestStrategyServiceTest {
                 .content("설명")
                 .method(method)
                 .statusCode(Code.USING_STATE.getCode())
+                .kpRatio(0.0)
+                .smScore(0.0)
                 .cycle('D')
                 .build();
 
@@ -167,8 +171,6 @@ public class InterestStrategyServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "USER", // role
-                "",
-                "",
                 authorities // 권한 목록
         );
 

@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface AccountImageService {
     PageResponse<AccountImageResponseDto> findAccountImages(Long strategyId, Integer page);
+    PageResponse<AccountImageResponseDto> findTraderAccountImages(Long strategyId, Integer page);
     void deleteAccountImage(Long accountImageId);
     void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtos);
 }

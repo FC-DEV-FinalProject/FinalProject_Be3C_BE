@@ -25,7 +25,4 @@ public class StockPostRequestDto {
     @JsonProperty("checkDuplicate")
     @Schema(description = "중복 체크 여부", example = "true", required = true)
     private Boolean checkDuplicate;
-
-    @NotNull
-    private MultipartFile stockImage;
 }

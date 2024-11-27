@@ -4,7 +4,7 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ public class LoginServiceImpl implements LoginService {
     public boolean validatePassword(String email, String password) {
         // DB에 저장된 pw 조회
         Member member = memberRepository.findByEmail(email)
-        // 비교
+                // 비교
                 .orElseThrow(() -> {
                     log.info("비밀번호 불일치");
                     return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
@@ -91,14 +91,21 @@ public class LoginServiceImpl implements LoginService {
                     log.info("입력한 이메일로 저장된 회원정보가 존재하지 않습니다.");
                     return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
                 });
-        String memberProfileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, member.getId()));
+
+        String memberProfileImage = null;
+        try {
+            memberProfileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, member.getId()));
+        } catch (Exception e) {
+            log.info("파일 이미지 가져오기 에러 발생");
+        }
+
         // 토큰 생성
-        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode());
         String refreshToken = null;
         if(rememberMe) {
-            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         } else {
-            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         }
 
         Map<String, String> tokenMap = new HashMap<>();

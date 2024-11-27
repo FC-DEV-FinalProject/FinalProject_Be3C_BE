@@ -20,7 +20,4 @@ public class MethodPostRequestDto {
     @Schema(description = "매매 유형명 중복 체크 여부", example = "true")
     @NotNull
     private Boolean checkDuplicate;
-
-//    @Schema(description = "매매 유형 아이콘 파일")
-//    private MultipartFile filePath;
 }

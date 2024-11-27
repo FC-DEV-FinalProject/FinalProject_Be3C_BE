@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -30,5 +31,11 @@ public class StrategyExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<APIResponse> badRequest(MissingServletRequestParameterException exception) {
         return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST, StrategyExceptionMessage.INVALID_PARAMETER.getMessage()));
+    }
+
+    // entity not found
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<APIResponse> badRequest(EntityNotFoundException exception) {
+        return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST, StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 }

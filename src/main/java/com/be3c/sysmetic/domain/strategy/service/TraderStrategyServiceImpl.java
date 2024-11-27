@@ -13,11 +13,11 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
-import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.util.SecurityUtils;
-import jakarta.persistence.EntityNotFoundException;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +37,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     private final MethodRepository methodRepository;
     private final StockRepository stockRepository;
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
+    private final FileServiceImpl fileService;
     private final SecurityUtils securityUtils;
 
     // 전략 등록
@@ -44,10 +45,9 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     @Transactional
     public void insertStrategy(StrategyPostRequestDto requestDto, MultipartFile file) {
         checkDuplName(requestDto.getName());
-        // todo. Long traderId = securityUtils.getUserIdInSecurityContext();
 
         Strategy saveStrategy = Strategy.builder()
-                .trader(findMember(requestDto.getTraderId())) // todo. security 적용 후 제거 필요
+                .trader(findMember(securityUtils.getUserIdInSecurityContext()))
                 .method(findMethod(requestDto.getMethodId()))
                 .statusCode(StrategyStatusCode.PRIVATE.name())
                 .name(requestDto.getName())
@@ -57,7 +57,11 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         strategyRepository.save(saveStrategy);
 
-        // todo. 전략 제안서 파일 등록 로직 필요
+        // 파일 존재할 경우 제안서 등록
+        if(file != null) {
+            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, saveStrategy.getId());
+            fileService.uploadPdf(file, fileRequest);
+        }
 
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
     }
@@ -66,9 +70,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     @Override
     public void updateStrategy(Long strategyId, StrategyPostRequestDto requestDto, MultipartFile file) {
         Strategy existingStrategy = findStrategy(strategyId);
-
         checkStatus(existingStrategy.getStatusCode());
-        // todo. checkTrader(existingStrategy.getCreatedBy());
+        checkTrader(existingStrategy.getTrader().getId());
 
         // update
         if(!requestDto.getName().equals(existingStrategy.getName())) {
@@ -90,7 +93,11 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         updateStrategyStockReferences(existingStrategy, requestDto.getStockIdList());
 
-        // todo. 전략 제안서 파일 수정 로직 필요
+        // 파일 존재할 경우 제안서 수정
+        if(file != null) {
+            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+            fileService.updatePdf(file, fileRequest);
+        }
 
         strategyRepository.save(existingStrategy);
     }
@@ -99,17 +106,23 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     @Override
     @Transactional
     public void deleteStrategy(Long strategyId) {
-        findStrategy(strategyId);
-        // todo. checkTrader(existingStrategy.getCreatedBy());
-        // todo. 전략 제안서 파일 삭제 로직 필요
+        Strategy existingStrategy = findStrategy(strategyId);
+        checkTrader(existingStrategy.getTrader().getId());
 
-        // DB 삭제가 아닌 미사용 상태로 변경
-        // strategyStockReferenceRepository.deleteByStrategyId(strategyId);
-        // strategyRepository.deleteById(strategyId);
+        // 미사용 상태로 변경
+        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
-        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
         savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
+
         strategyRepository.save(savedStrategy);
+
+        // 파일 존재할 경우 제안서 삭제
+        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+
+        if(!fileService.getFilePath(fileRequest).isEmpty()) {
+            fileService.deleteFile(fileRequest);
+        }
     }
 
     // 전략명 중복 여부 검증
@@ -128,30 +141,34 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
     // member 검증
     private void checkTrader(Long traderId) {
-        if(securityUtils.getUserIdInSecurityContext() != traderId) {
+        if(!securityUtils.getUserIdInSecurityContext().equals(traderId)) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
         }
     }
 
     // find member
     private Member findMember(Long traderId) {
-        return memberRepository.findById(traderId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return memberRepository.findById(traderId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     // find method
     private Method findMethod(Long methodId) {
-        return methodRepository.findById(methodId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return methodRepository.findById(methodId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     // find strategy
     private Strategy findStrategy(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     // 전략종목 교차테이블 저장
     private void insertStrategyStockReference(List<Long> stockIdList, Strategy strategy) {
         stockIdList.forEach((id) -> {
-            Stock stock = stockRepository.findById(id).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+            Stock stock = stockRepository.findById(id).orElseThrow(() ->
+                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
             StrategyStockReference strategyStockReference = StrategyStockReference.builder()
                     .strategy(strategy)
@@ -178,7 +195,9 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         if(!toAddIdList.isEmpty()) {
             List<StrategyStockReference> addList = toAddIdList.stream().map(stockId -> {
-                Stock stock = stockRepository.findById(stockId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                Stock stock = stockRepository.findById(stockId).orElseThrow(() ->
+                        new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                
                 return StrategyStockReference.builder()
                         .strategy(strategy)
                         .stock(stock)
