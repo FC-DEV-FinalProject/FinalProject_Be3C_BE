@@ -12,13 +12,23 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice(basePackageClasses = StrategyDetailController.class)
 public class StrategyDetailExceptionHandler {
 
-    @ExceptionHandler({ MethodArgumentNotValidException.class})
-    protected APIResponse<?> methodArgumentNotValid(MethodArgumentNotValidException e) {
-        return APIResponse.fail(ErrorCode.BAD_REQUEST, "해당 전략 상세보기 페이지 요청이 잘못되었습니다.");
-    }
-
     @ExceptionHandler({ NoSuchElementException.class})
     protected APIResponse<?> noSuchElement(NoSuchElementException e) {
-        return APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
+        return APIResponse.fail(ErrorCode.NOT_FOUND, "전략 상세 페이지가 존재하지 않습니다." + e.getMessage());
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    protected APIResponse<?> nullPointerException(NullPointerException e) {
+        return APIResponse.fail(ErrorCode.NOT_FOUND, "전략 상세 페이지가 존재하지 않습니다." + e.getMessage());
+    }
+
+    @ExceptionHandler({ MethodArgumentNotValidException.class})
+    protected APIResponse<?> methodArgumentNotValid(MethodArgumentNotValidException e) {
+        return APIResponse.fail(ErrorCode.BAD_REQUEST, "전략 상세 페이지 요청이 잘못되었습니다.");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public APIResponse<?> handleAllExceptions(Exception ex) {
+        return APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 }

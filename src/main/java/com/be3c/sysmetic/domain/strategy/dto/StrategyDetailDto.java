@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @Builder
@@ -13,7 +15,6 @@ public class StrategyDetailDto {
         StrategyDetailDto : 전략 상세 페이지 응답 Dto
 
         id : 전략 id
-        traderId : 트레이더 id
         traderNickname : 트레이더 닉네임
         methodId : 매매방식(운영방법) id
         methodName : 매매방식 명
@@ -30,9 +31,10 @@ public class StrategyDetailDto {
         averageProfitLossRate : 평균 손익률
         profitFactor : Profit Factor
         winningRate : 승률
+        monthlyRecord : 월간 손익률
+        analysis : 분석 지표
     */
     private Long id;
-    private Long traderId;
     private String traderNickname;
     private Long methodId;
     private String methodName;
@@ -50,6 +52,6 @@ public class StrategyDetailDto {
     private Double averageProfitLossRate;
     private Double profitFactor;
     private Double winningRate;
-    // TODO : 월간 수익률 데이터 추가
-    // TODO : 분석 지표 데이터 추가 - QueryDSL 필요
+    private List<MonthlyRecord> monthlyRecord;
+    private StrategyAnalysisResponseDto analysis;
 }

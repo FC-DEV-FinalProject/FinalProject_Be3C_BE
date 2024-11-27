@@ -20,6 +20,7 @@ public class StrategyIndicatorsCalculator {
 
     /*
         StrategyIndicators : MDD, KP Ratio, SM Score, AccumProfitLossRate 업데이트
+        DoubleHandler - cutDouble 메서드로 소수점 잘라서 저장
     */
     private final StrategyRepository strategyRepository;
     private final DailyRepository dailyRepository;
@@ -39,7 +40,7 @@ public class StrategyIndicatorsCalculator {
         Double smScore = calculateSmScore(strategyId);
         strategyRepository.updateSmScore(strategyId, smScore);
 
-        Double accumulatedProfitLossRate = dailyRepository.findLatestAccumulatedProfitLossRate(strategyId);
+        Double accumulatedProfitLossRate = doubleHandler.cutDouble(dailyRepository.findLatestAccumulatedProfitLossRate(strategyId));
         strategyRepository.updateAccumulatedLProfitLossRate(strategyId, accumulatedProfitLossRate);
     }
 
@@ -52,7 +53,7 @@ public class StrategyIndicatorsCalculator {
         Double peak = (Double) result[0];
         Double trough = (Double) result[1];
 
-        return (peak - trough) / peak * 100;
+        return doubleHandler.cutDouble((peak - trough) / peak * 100);
     }
 
 
@@ -118,8 +119,8 @@ public class StrategyIndicatorsCalculator {
 
         // CDF (표준정규 누적분포값)
         NormalDistribution normalDistribution = new NormalDistribution();
-        Double cdfValue = normalDistribution.cumulativeProbability(zScore);
+        Double cdfValuePercentage = normalDistribution.cumulativeProbability(zScore) * 100;
 
-        return cdfValue * 100;
+        return doubleHandler.cutDouble(cdfValuePercentage);
     }
 }
