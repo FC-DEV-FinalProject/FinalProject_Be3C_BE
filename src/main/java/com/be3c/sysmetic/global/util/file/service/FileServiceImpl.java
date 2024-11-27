@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.util.file.mapper.FileMapper;
 import com.be3c.sysmetic.global.util.file.repository.FileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FileServiceImpl implements FileService {
 
     final FileRepository fileRepository;
@@ -93,6 +95,7 @@ public class FileServiceImpl implements FileService {
             fileRepository.save(fileEntity);
         } catch (Exception e) {
             s3Service.deleteObject(s3KeyName);
+            log.error("파일 정보 업로드에 실패하였습니다. S3 키: {}. 파일 이름: {}.", s3KeyName, file.getOriginalFilename(), e);
             throw new RuntimeException("파일 정보 업로드에 실패하였습니다", e);
         }
     }
@@ -111,6 +114,7 @@ public class FileServiceImpl implements FileService {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
+            log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
             throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
         }
 
@@ -125,6 +129,7 @@ public class FileServiceImpl implements FileService {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
+            log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
             throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
         }
 
@@ -141,6 +146,7 @@ public class FileServiceImpl implements FileService {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
+            log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
             throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
         }
 
@@ -227,10 +233,10 @@ public class FileServiceImpl implements FileService {
     private void updateFile(MultipartFile file, Long targetId) {
 
         Optional<File> existing = fileRepository.findById(targetId);
-        if (existing.isEmpty())
+        if (existing.isEmpty()) {
+            log.error("파일을 찾을 수 없습니다. 업데이트하려는 파일 ID: {}", targetId);
             throw new EntityNotFoundException("파일을 찾을 수 없습니다.");
-
-        s3Service.updateObject(file, existing.get().getPath());
+        }
 
         fileRepository.save(File.builder()
                 .id(targetId)
@@ -238,6 +244,11 @@ public class FileServiceImpl implements FileService {
                 .originalName(file.getOriginalFilename())
                 .type(file.getContentType())
                 .build());
+        try {
+            s3Service.updateObject(file, existing.get().getPath());
+        }catch (Exception e){
+            fileRepository.save(existing.get());
+        }
     }
 
 
@@ -251,9 +262,19 @@ public class FileServiceImpl implements FileService {
     public boolean deleteFile(FileRequest fileRequest) {
 
         List<File> file = fileRepository.findFilesByFileReference(fileRequest);
+        if (file.isEmpty()) {
+            log.error("삭제하려는 파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
+            throw new IllegalArgumentException("삭제할 파일을 찾을 수 없습니다.");
+        }
         fileRepository.delete(file.get(0));
 
-        return s3Service.deleteObject(file.get(0).getPath());
+        try {
+            fileRepository.delete(file.get(0));
+            return s3Service.deleteObject(file.get(0).getPath());
+        } catch (Exception e) {
+            log.error("파일 삭제 실패. 파일 ID: {}, 파일 경로: {}", file.get(0).getId(), file.get(0).getPath(), e);
+            throw new RuntimeException("파일 삭제 실패");
+        }
     }
 
     @Override
@@ -261,12 +282,19 @@ public class FileServiceImpl implements FileService {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
 
-        if (files.isEmpty())
-            throw new IllegalArgumentException();
+        if (files.isEmpty()) {
+            log.error("삭제하려는 파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
+            throw new IllegalArgumentException("삭제할 파일을 찾을 수 없습니다.");
+        }
 
-        for (int i = 0; i < files.size(); i++) {
-            s3Service.deleteObject(files.get(i).getPath());
-            fileRepository.delete(files.get(i));
+        try {
+            for (File file : files) {
+                s3Service.deleteObject(file.getPath());
+                fileRepository.delete(file);
+            }
+        } catch (Exception e){
+            log.error("파일 삭제 실패. 파일 참조 정보: {}", fileRequest, e);
+            throw new RuntimeException("파일 삭제 실패");
         }
 
         return true;
@@ -280,14 +308,18 @@ public class FileServiceImpl implements FileService {
 
     /**
      * 파일 존재, 크기 체크
+     *
      * @param file 체크할 파일
      */
     private void checkFileSize(MultipartFile file) {
         if (file.isEmpty()) {
+            log.error("업로드된 파일이 비어있습니다. 파일 이름: {}", file.getOriginalFilename());
             throw new InvalidFileFormatException("파일이 비어있습니다.");
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
+            log.error("파일 크기가 너무 큽니다. 파일 이름: {}, 크기: {}MB, 최대 크기: {}MB",
+                    file.getOriginalFilename(), file.getSize() / 1024 / 1024, MAX_FILE_SIZE / 1024 / 1024);
             throw new InvalidFileFormatException("파일 크기가 너무 큽니다. 최대 크기는 " + MAX_FILE_SIZE / 1024 / 1024 + "MB입니다.");
         }
     }
@@ -307,6 +339,7 @@ public class FileServiceImpl implements FileService {
                 return allowedContentType;
             }
         }
+        log.error("올바르지 않은 파일 형식입니다. 파일 이름: {}, 파일 타입: {}", file.getOriginalFilename(), file.getContentType());
         throw new InvalidFileFormatException("파일 업로드 실패: 올바르지 않은 파일 형식입니다.");
     }
 
