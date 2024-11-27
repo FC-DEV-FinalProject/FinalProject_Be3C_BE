@@ -123,7 +123,7 @@ public class StockController implements StockControllerDocs {
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
-            if(stockService.saveItem(stockPostRequestDto)) {
+            if(stockService.saveItem(stockPostRequestDto, file)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }
@@ -151,7 +151,7 @@ public class StockController implements StockControllerDocs {
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
-            if(stockService.updateItem(stockPutRequestDto)) {
+            if(stockService.updateItem(stockPutRequestDto, file)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }

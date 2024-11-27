@@ -128,7 +128,7 @@ public class MethodController implements MethodControllerDocs {
             @RequestPart(value = "file", required = false) MultipartFile file
             ) {
         try {
-            if(methodService.insertMethod(methodPostRequestDto)) {
+            if(methodService.insertMethod(methodPostRequestDto, file)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }
@@ -160,7 +160,7 @@ public class MethodController implements MethodControllerDocs {
             @RequestPart(value = "file") MultipartFile file
     ) {
         try {
-            if(methodService.updateMethod(methodPutRequestDto)) {
+            if(methodService.updateMethod(methodPutRequestDto, file)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }
