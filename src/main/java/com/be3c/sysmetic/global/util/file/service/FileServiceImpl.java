@@ -244,7 +244,7 @@ public class FileServiceImpl implements FileService {
                 .build());
         try {
             s3Service.updateObject(file, existing.get().getPath());
-        }catch (Exception e){
+        } catch (Exception e) {
             fileRepository.save(existing.get());
         }
     }
@@ -290,11 +290,29 @@ public class FileServiceImpl implements FileService {
                 s3Service.deleteObject(file.getPath());
                 fileRepository.delete(file);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("파일 삭제 실패. 파일 참조 정보: {}", fileRequest, e);
             throw new RuntimeException("파일 삭제 실패");
         }
 
+        return true;
+    }
+
+    @Override
+    public boolean deleteFileById(Long fileId) {
+        Optional<File> file = fileRepository.findById(fileId);
+        if (file.isEmpty()) {
+            log.error("삭제하려는 파일을 찾을 수 없습니다. 파일 id: {}", fileId);
+            throw new IllegalArgumentException("삭제할 파일을 찾을 수 없습니다.");
+        }
+
+        try {
+            s3Service.deleteObject(file.get().getPath());
+            fileRepository.delete(file.get());
+        } catch (Exception e) {
+            log.error("파일 삭제 실패. 파일 id: {}", fileId, e);
+            throw new RuntimeException("파일 삭제 실패");
+        }
         return true;
     }
 
