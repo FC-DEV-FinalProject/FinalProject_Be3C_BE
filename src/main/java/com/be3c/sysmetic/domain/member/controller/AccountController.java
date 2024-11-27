@@ -76,9 +76,6 @@ public class AccountController {
     )
     @PostMapping("/auth/reset-password")
     public ResponseEntity<APIResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto, HttpServletRequest request) {
-        if(!accountService.isAuthCodeMatch(requestDto.getEmail(), requestDto.getEmailAuthCode())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "이메일 인증코드 불일치"));
-        }
         if(!accountService.isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "비밀번호 불일치"));
         }

@@ -89,7 +89,7 @@ class LoginControllerTest {
                 email, password, rememberMe
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(requestBody)   // JSON 데이터를 요청 본문에 추가
                         .contentType(MediaType.APPLICATION_JSON)// 요청 Content-Type을 JSON으로 설정
                         .accept(MediaType.APPLICATION_JSON))    // 응답의 Accept 타입 설정
@@ -124,7 +124,7 @@ class LoginControllerTest {
                 "formatMismatch", password, rememberMe
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(invalidEmailRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -136,7 +136,7 @@ class LoginControllerTest {
                 email, "formatMismatch", rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(invalidPasswordRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -148,7 +148,7 @@ class LoginControllerTest {
                 "unregister@test.com", password, rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(unregisterEmailRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -160,7 +160,7 @@ class LoginControllerTest {
                 email, "unMatch123@", rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(unMatchPasswordRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
