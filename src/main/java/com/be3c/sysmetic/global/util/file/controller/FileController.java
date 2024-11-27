@@ -4,6 +4,7 @@ import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
 import com.be3c.sysmetic.global.util.file.dto.FileResponseDto;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Map;
  * 테스트용
  */
 
+@Hidden
 @RestController
 @RequestMapping("/api/file")
 public class FileController {
