@@ -154,9 +154,10 @@ public class MethodController implements MethodControllerDocs {
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
     @Override
-    @PutMapping("/admin/method")
+    @PutMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto
+            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto,
+            @RequestPart(value = "file") MultipartFile file
     ) {
         try {
             if(methodService.updateMethod(methodPutRequestDto)) {

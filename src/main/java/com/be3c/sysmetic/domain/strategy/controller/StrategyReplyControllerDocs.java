@@ -33,7 +33,7 @@ public interface StrategyReplyControllerDocs {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "댓글 목록 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PageReplyResponseDto.class))),
+                            schema = @Schema(implementation = APIResponse.class))),
             @ApiResponse(responseCode = "404", description = "해당 전략을 찾을 수 없음",
                     content = @Content),
             @ApiResponse(responseCode = "400", description = "요청한 페이지에 댓글 없음",
@@ -54,7 +54,7 @@ public interface StrategyReplyControllerDocs {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "댓글 등록 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ReplyPostRequestDto.class))),
+                            schema = @Schema(implementation = APIResponse.class))),
             @ApiResponse(responseCode = "500", description = "댓글 등록 실패 (서버 에러)",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "댓글을 달 전략을 찾을 수 없음",

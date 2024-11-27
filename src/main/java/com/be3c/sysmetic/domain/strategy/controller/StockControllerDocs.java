@@ -64,7 +64,7 @@ public interface StockControllerDocs {
                             description = "조회 성공: 해당 아이디의 종목을 찾는 데 성공했을 때 'OK' 반환",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = StockGetResponseDto.class)
+                                    schema = @Schema(implementation = APIResponse.class)
                             )
                     ),
                     @ApiResponse(
@@ -93,7 +93,7 @@ public interface StockControllerDocs {
                             description = "조회 성공: 해당 페이지의 종목을 찾는 데 성공했을 때 'OK' 반환",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = StockGetResponseDto.class)
+                                    schema = @Schema(implementation = APIResponse.class)
                             )
                     ),
                     @ApiResponse(
