@@ -4,7 +4,6 @@ import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import com.be3c.sysmetic.global.util.file.entity.File;
 import com.be3c.sysmetic.global.util.file.exception.InvalidFileFormatException;
-import com.be3c.sysmetic.global.util.file.mapper.FileMapper;
 import com.be3c.sysmetic.global.util.file.repository.FileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import java.util.*;
 public class FileServiceImpl implements FileService {
 
     final FileRepository fileRepository;
-    final FileMapper fileMapper;
     final S3Service s3Service;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 최대 파일 크기 : 5MB => 프로퍼티스로 옮기기?
