@@ -27,9 +27,4 @@ public class Subscriber {
     @JsonSerialize(using = BooleanToYesNoSerializer.class)
     @JsonDeserialize(using = YesNoToBooleanDeserializer.class)
     private Boolean isAdConsent;    // null일 시 true:Y
-
-    public Subscriber(String email) {   // Jackson 역직렬화 시 필요한 생성자
-        this.email = email;
-    }
-
 }

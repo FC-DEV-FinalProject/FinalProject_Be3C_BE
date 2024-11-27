@@ -62,8 +62,6 @@ public class RegisterServiceImpl implements RegisterService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final EmailService emailService;
 
-    private static final Long EXPIRE_TIME = 60 * 60 * 1000L; // 1시간(인증코드 만료시간)
-
     // 1. 이메일 중복확인
     @Override
     public boolean checkEmailDuplication(String email) {
@@ -139,11 +137,11 @@ public class RegisterServiceImpl implements RegisterService {
                     ))
                     .build();
 
-            switch (dto.getRoleCode().getCode()) {
-                case "RC001":
+            switch (dto.getRoleCode()) {
+                case USER:
                     emailService.addUserSubscriberRequest(subscriberRequest);
                     break;
-                case "RC002":
+                case TRADER:
                     emailService.addTraderSubscriberRequest(subscriberRequest);
                     break;
             }

@@ -26,6 +26,7 @@ import java.util.List;
 @Tag(name = "회원관리 API", description = "관리자의 회원관리")
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/v1")
 public class MemberManagementController {
 
     private final MemberManagementService memberManagementService;
