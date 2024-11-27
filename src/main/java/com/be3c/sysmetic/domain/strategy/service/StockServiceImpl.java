@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -106,7 +107,7 @@ public class StockServiceImpl implements StockService {
         4. true를 반환해, 성공 여부를 알린다.
      */
     @Override
-    public boolean saveItem(StockPostRequestDto stockPostRequestDto) {
+    public boolean saveItem(StockPostRequestDto stockPostRequestDto, MultipartFile file) {
         if(!stockPostRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
@@ -120,7 +121,7 @@ public class StockServiceImpl implements StockService {
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        fileService.uploadImage(stockPostRequestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+        fileService.uploadImage(file, new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
 
         return true;
     }
@@ -135,7 +136,7 @@ public class StockServiceImpl implements StockService {
         5. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean updateItem(StockPutRequestDto stockPutRequestDto) {
+    public boolean updateItem(StockPutRequestDto stockPutRequestDto, MultipartFile file) {
         if(!stockPutRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
@@ -151,7 +152,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
-        fileService.updateImage(stockPutRequestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+        fileService.updateImage(file, new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
@@ -178,5 +179,4 @@ public class StockServiceImpl implements StockService {
 
         return true;
     }
-
 }

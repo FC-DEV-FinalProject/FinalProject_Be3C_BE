@@ -28,4 +28,8 @@ public class ResetPasswordRequestDto {
     @JsonProperty("rewritePassword")
     private String rewritePassword; // 새로운 비밀번호 재입력
 
+    @NotNull
+    @Pattern(regexp = "^\\d{6}$", message = "인증 코드는 6자리의 숫자입니다.")
+    private String emailAuthCode;
+
 }

@@ -1,17 +1,18 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.DailyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.DailyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,84 +22,71 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Service
 public class DailyServiceImpl implements DailyService {
-    /*
-    일간분석 데이터 등록
-
-        1. 날짜, 입출금, 일손익을 리스트 형태로 받는다.
-        2. 입력한 날짜 중 이미 존재하는 날짜가 있을 경우 해당 데이터는 추가 또는 수정하지 않고 응답 데이터에 중복임을 보낸다.
-        3. 미래의 날짜인지 검증 필요
-        4. 나머지 데이터는 등록한다.
-        5. 모든 데이터가 중복일 경우 예외 처리
-        6. 월간분석 데이터 업데이트
-
-    일간분석 데이터 수정
-
-        1. 날짜, 입출금, 일손익과 일간분석 식별번호를 받는다.
-        2. 일간분석 식별번호를 검증한다.
-        3. 미래의 날짜인지 검증 필요
-        4. 날짜 변경시 변경한 날짜 데이터가 기존에 존재하는지 검증
-            존재할 경우 기존에 존재하던 데이터 삭제 및 변경한 데이터 업데이트 처리
-            미존재할 경우 DB 업데이트
-        5. 수정 이후의 날짜부터 누적손익 다시 계산
-        6. 월간분석 데이터 업데이트
-
-    일간분석 데이터 삭제
-
-        1. 일간분석 식별번호를 받는다.
-        2. 일간분석 식별번호를 검증한다.
-        3. DB 삭제
-        4. 삭제 이후의 날짜부터 누적손익 다시 계산
-        5. 월간분석 데이터 업데이트
-
-    일간분석 데이터 조회
-
-        1. 전략 식별번호, 기간, 페이지를 받는다.
-        2. 전략 식별번호를 검증한다.
-        3. 해당 기간의 일간분석 데이터를 한 페이지에 10개 노출한다.
-    */
-
     private final DailyRepository dailyRepository;
     private final StrategyRepository strategyRepository;
+
     private final StrategyCalculator strategyCalculator;
     private final MonthlyServiceImpl monthlyService;
-    private final StrategyStatisticsRepository statisticsRepository;
+    private final SecurityUtils securityUtils;
 
     // 일간분석 등록
     @Transactional
     @Override
-    public void saveDaily(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
-        List<Daily> dailyList = processingDaily(strategyId, null, requestDtoList);
+    public void saveDaily(Long strategyId, List<DailyRequestDto> requestDtoList) {
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        // user 검증
+        validUser(exitingStrategy.getTrader().getId());
+
+        // 요청 객체 검증 및 entity 변환
+        List<Daily> dailyList = requestDtoListToEntity(strategyId, null, requestDtoList);
+
+        // 일간분석 등록
         dailyRepository.saveAll(dailyList);
 
-        // 월간분석 계산
-        List<LocalDate> updatedDateList = dailyList.stream().map(Daily::getDate).collect(Collectors.toList());
+        // 누적금액 갱신
+        dailyList.forEach(daily -> recalculateAccumulatedData(strategyId, daily.getDate()));
+
+        // 월간분석 갱신
+        List<LocalDate> updatedDateList = dailyList
+                .stream().map(Daily::getDate).collect(Collectors.toList());
+
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
 
     // 일간분석 수정
     @Transactional
     @Override
-    public void updateDaily(Long strategyId, Long dailyId, DailyPostRequestDto requestDto) {
-        // 등록시 사용하는 메서드 사용하기 위해 List로 변환
-        List<DailyPostRequestDto> requestDtoList = new ArrayList<>();
-        requestDtoList.add(requestDto);
-        Daily daily = processingDaily(strategyId, dailyId, requestDtoList).stream().findFirst().orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+    public void updateDaily(Long dailyId, DailyRequestDto requestDto) {
+        Daily exitingDaily = dailyRepository.findById(dailyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
 
-        // DB 저장
+        Long strategyId = exitingDaily.getStrategy().getId();
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        // user 검증
+        validUser(exitingStrategy.getTrader().getId());
+
+        // 요청 객체 검증 및 entity 변환
+        Daily daily = requestDtoListToEntity(strategyId, dailyId, List.of(requestDto))
+                .stream().findFirst().orElseThrow(() ->
+                        new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        // 일간분석 수정
         dailyRepository.save(daily);
 
-        // 누적금액 계산
+        // 누적금액 갱신
         recalculateAccumulatedData(strategyId, daily.getDate());
 
-        // 월간분석 계산
+        // 월간분석 갱신
         List<LocalDate> updatedDateList = List.of(daily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
     }
@@ -106,38 +94,107 @@ public class DailyServiceImpl implements DailyService {
     // 일간분석 삭제
     @Transactional
     @Override
-    public void deleteDaily(Long strategyId, Long dailyId) {
-        Daily daily = dailyRepository.findById(dailyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-        LocalDate date = daily.getDate();
-        Long countDaily = countDaily(strategyId);
+    public void deleteDaily(Long dailyId) {
+        Daily exitingDaily = dailyRepository.findById(dailyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        Long strategyId = exitingDaily.getStrategy().getId();
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        // user 검증
+        validUser(exitingStrategy.getTrader().getId());
 
         // DB 삭제
         dailyRepository.deleteById(dailyId);
 
-        // 누적금액 다시 계산
-        recalculateAccumulatedData(strategyId, daily.getDate());
+        // 삭제 후 일간분석 데이터 수
+        Long countDaily = countDaily(strategyId);
 
-        // 월간분석 계산
-        List<LocalDate> updatedDateList = List.of(date);
+        // 누적금액 갱신
+        recalculateAccumulatedData(strategyId, exitingDaily.getDate());
+
+        // 월간분석 갱신
+        List<LocalDate> updatedDateList = List.of(exitingDaily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
 
-        if(countDaily < 4) {
-            // 삭제 전 일간분석 데이터 수가 3 이하일 경우, 삭제 후 비공개 전환 필요
+        if(countDaily < 3) {
+            // 일간분석 데이터 수가 3 미만일 경우 비공개 전환
             strategyRepository.updateStatusToPrivate(strategyId);
         }
 
         if(countDaily == 0) {
-            // 일간분석 2개 이하일 경우 전략 비공개 상태로, 즉 현재 구현상으로는 계산 X
-            statisticsRepository.deleteByStrategyId(strategyId);
+            // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제 fixme
         }
-
     }
 
+    // 일간분석 조회 - PUBLIC 상태인 전략의 일간분석 데이터 조회
     @Override
-    public DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyPostRequestDto> requestDtoList) {
-        for (DailyPostRequestDto requestDto : requestDtoList) {
+    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        // 전략 상태 PUBLIC 여부 검증
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+        }
+
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+
+        return PageResponse.<DailyGetResponseDto>builder()
+                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
+                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
+                .totalElement(dailyResponseDtoPage.getTotalElements())
+                .totalPages(dailyResponseDtoPage.getTotalPages())
+                .content(dailyResponseDtoPage.getContent())
+                .build();
+    }
+
+    /*
+    일간분석 조회 - 트레이더 또는 관리자의 일간분석 데이터 조회
+    1) 트레이더
+    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
+    2) 관리자
+    모든 상태의 전략 조회 가능
+     */
+    @Override
+    public PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        String userRole = securityUtils.getUserRoleInSecurityContext();
+
+        // trader일 경우, 본인의 전략인지 검증
+        if(userRole.equals("TRADER")) {
+           validUser(strategyId);
+        }
+
+        // member일 경우, 권한 없음 처리
+        if(userRole.equals("MEMBER")) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+
+        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+        }
+
+        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
+
+        return PageResponse.<DailyGetResponseDto>builder()
+                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
+                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
+                .totalElement(dailyResponseDtoPage.getTotalElements())
+                .totalPages(dailyResponseDtoPage.getTotalPages())
+                .content(dailyResponseDtoPage.getContent())
+                .build();
+    }
+
+    // 중복 여부 조회
+    @Override
+    public DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyRequestDto> requestDtoList) {
+        for (DailyRequestDto requestDto : requestDtoList) {
             // 이미 등록한 날짜가 하나라도 존재할 경우 true 반환
-            if(findDuplicateDate(strategyId, requestDto.getDate()) != null) {
+            if(dailyRepository.findByStrategyIdAndDate(strategyId, requestDto.getDate()) != null) {
                 return DailyPostResponseDto.builder()
                         .isDuplicate(true)
                         .build();
@@ -148,53 +205,44 @@ public class DailyServiceImpl implements DailyService {
                 .build();
     }
 
-    // 일간분석 조회
-    public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
-        Pageable pageable = PageRequest.of(page, 10);
-        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository.findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable).map(this::entityToDto);
-
-        PageResponse<DailyGetResponseDto> responseDto = PageResponse.<DailyGetResponseDto>builder()
-                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(dailyResponseDtoPage.getTotalElements())
-                .totalPages(dailyResponseDtoPage.getTotalPages())
-                .content(dailyResponseDtoPage.getContent())
-                .build();
-
-        return responseDto;
-    }
-
-    // TODO 시큐리티 완료 후 수정 필요
-    private List<Daily> processingDaily(Long strategyId, Long dailyId, List<DailyPostRequestDto> requestDtoList) {
-
-        final Daily beforeDaily = getBeforeDaily(strategyId);
+    private List<Daily> requestDtoListToEntity(Long strategyId, Long dailyId, List<DailyRequestDto> requestDtoList) {
+        final Daily beforeDaily = dailyRepository.findTopByStrategyIdOrderByDateDesc(strategyId);
         List<Daily> dailyList = new ArrayList<>();
-        final Long createdBy = 1L;
 
-        for(DailyPostRequestDto requestDto : requestDtoList) {
-            Daily duplicatedDaily = findDuplicateDate(strategyId, requestDto.getDate());
+        // 요청 데이터가 여러 개일 경우, date 기준 최신순으로 정렬
+        if(requestDtoList.size() > 1) {
+            requestDtoList.sort(Comparator.comparing(DailyRequestDto::getDate).reversed());
+        }
 
-            if(dailyId == null && duplicatedDaily != null) {
-                // 일간분석 등록이면서 중복인 경우 미저장
-                continue;
-            }
+        for(DailyRequestDto requestDto : requestDtoList) {
+            Daily existingDaily = dailyRepository.findByStrategyIdAndDate(strategyId, requestDto.getDate());
+
+            // 일간분석 등록이면서 이미 존재하는 일자일 경우 미저장
+            if(dailyId == null && existingDaily != null) continue;
 
             if(dailyList.isEmpty()) {
                 if(beforeDaily == null) {
                     // DB 데이터 미존재
-                    dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, true, requestDto, 0.0, 0.0, 0.0));
+                    dailyList.add(dtoToEntity(dailyId, strategyId, true, requestDto, 0.0, 0.0, 0.0));
                 } else {
                     // DB 데이터 존재
-                    dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, beforeDaily.getPrincipal(), beforeDaily.getCurrentBalance(), beforeDaily.getStandardAmount()));
+                    dailyList.add(dtoToEntity(dailyId, strategyId, false, requestDto, beforeDaily.getPrincipal(), beforeDaily.getCurrentBalance(), beforeDaily.getStandardAmount()));
                 }
             } else {
-                Daily addedBeforeData = dailyList.get(dailyList.size()-1);
-                dailyList.add(dtoToEntity(dailyId, strategyId, createdBy, false, requestDto, addedBeforeData.getPrincipal(), addedBeforeData.getCurrentBalance(), addedBeforeData.getStandardAmount()));
+                // 요청 데이터가 여러 개일 경우, 이전 요청 데이터
+                Daily beforeRequestDaily = dailyList.get(dailyList.size()-1);
+                dailyList.add(dtoToEntity(dailyId, strategyId, false, requestDto, beforeRequestDaily.getPrincipal(), beforeRequestDaily.getCurrentBalance(), beforeRequestDaily.getStandardAmount()));
             }
-
         }
 
         return dailyList;
+    }
+
+    // 현재 로그인한 유저와 전략 업로드한 유저가 일치하는지 검증
+    private void validUser(Long traderId) {
+        if(!securityUtils.getUserIdInSecurityContext().equals(traderId)) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        }
     }
 
     // 일간분석 총 개수 조회
@@ -202,7 +250,8 @@ public class DailyServiceImpl implements DailyService {
         return dailyRepository.countByStrategyId(strategyId);
     }
 
-    private Daily dtoToEntity(Long dailyId, Long strategyId, Long createdBy, boolean isFirst, DailyPostRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
+    private Daily dtoToEntity(Long dailyId, Long strategyId, boolean isFirst, DailyRequestDto requestDto, Double beforePrincipal, Double beforeBalance, Double beforeStandardAmount) {
+        // 일손익률
         Double dailyProfitLossRate = strategyCalculator.getDailyProfitLossRate(
                 isFirst,
                 requestDto.getDepositWithdrawalAmount(),
@@ -214,7 +263,7 @@ public class DailyServiceImpl implements DailyService {
 
         return Daily.builder()
                 .id(dailyId) // 등록일 경우 null
-                .strategy(getStrategy(strategyId))
+                .strategy(strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage())))
                 .date(requestDto.getDate())
                 .principal(strategyCalculator.getPrincipal(isFirst, requestDto.getDepositWithdrawalAmount(), beforePrincipal, beforeBalance)) // 원금
                 .depositWithdrawalAmount(requestDto.getDepositWithdrawalAmount()) // 입출금
@@ -240,46 +289,22 @@ public class DailyServiceImpl implements DailyService {
                 .build();
     }
 
-    private Strategy getStrategy(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-    }
-
-    // 이전 일자 데이터 조회
-    private Daily getBeforeDaily(Long strategyId) {
-        return dailyRepository.findTopByStrategyIdOrderByDateDesc(strategyId);
-    }
-
-    // 날짜 중복 데이터 조회
-    private Daily findDuplicateDate(Long strategyId, LocalDate date) {
-        return dailyRepository.findByStrategyIdAndDate(strategyId, date);
-    }
-
-    /*
-    TODO :
-    2차 개발 때 누적손익금액, 누적손익률 계산 성능 개선 필요
-    현재 모든 일간분석 데이터 조회하여 계산
-    중간 데이터 삭제시 어떻게 처리할지 고민
-    추후 등록일시로부터 7일이 지난 데이터의 가장 마지막 누적손익금액과 나머지 데이터의 손익금액을 합산하여 계산하는 방식으로 진행 생각중
-     */
     private Double getAccumulatedProfitLossAmount(Long strategyId, Double profitLossAmount) {
-        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateDesc(strategyId);
-        Double cumulativeProfitLossAmount = dailyList.stream().mapToDouble(Daily::getProfitLossAmount).sum();
-        cumulativeProfitLossAmount += profitLossAmount;
-        return cumulativeProfitLossAmount;
+        Double accumulatedProfitLossAmount = dailyRepository.findTotalProfitLossAmountByStrategyId(strategyId);
+        accumulatedProfitLossAmount += profitLossAmount; // 현재 손익금 추가
+        return accumulatedProfitLossAmount;
     }
 
     private Double getAccumulatedProfitLossRate(Long strategyId, Double profitLossRate) {
-        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateDesc(strategyId);
-        Double cumulativeProfitLossRate = dailyList.stream().mapToDouble(Daily::getProfitLossRate).sum();
-        cumulativeProfitLossRate += profitLossRate;
-        return cumulativeProfitLossRate;
+        Double accumulativeProfitLossRate = dailyRepository.findTotalProfitLossRateByStrategyId(strategyId);
+        accumulativeProfitLossRate += profitLossRate; // 현재 손익률 추가
+        return accumulativeProfitLossRate;
     }
 
-    // TODO 일간데이터 전체 삭제시 로직 추가 필요 - 통계 진행하면서 하겠습니다.
-    // 수정 또는 삭제시 누적 데이터 다시 계산
+    // 누적 데이터 갱신
     public void recalculateAccumulatedData(Long strategyId, LocalDate startDate) {
-        Double cumulativeProfitLossAmount = 0.0;
-        Double cumulativeProfitLossRate = 0.0;
+        Double accumulativeProfitLossAmount = 0.0;
+        Double accumulativeProfitLossRate = 0.0;
 
         // 수정 또는 삭제 이후의 데이터 조회
         List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndDateAfterOrderByDateAsc(strategyId, startDate);
@@ -287,22 +312,71 @@ public class DailyServiceImpl implements DailyService {
         // 수정 또는 삭제 이전 데이터의 누적손익금액, 누적손익률 조회
         Daily beforeDaily = dailyRepository.findFirstByStrategyIdAndDateBeforeOrderByDateDesc(strategyId, startDate);
         if (beforeDaily != null) {
-            cumulativeProfitLossAmount = beforeDaily.getAccumulatedProfitLossAmount();
-            cumulativeProfitLossRate = beforeDaily.getAccumulatedProfitLossRate();
+            accumulativeProfitLossAmount = beforeDaily.getAccumulatedProfitLossAmount();
+            accumulativeProfitLossRate = beforeDaily.getAccumulatedProfitLossRate();
         }
 
         // 누적손익금액, 누적손익률 다시 계산
         for (Daily daily : dailyList) {
-            cumulativeProfitLossAmount += daily.getProfitLossAmount();
-            cumulativeProfitLossRate += daily.getProfitLossRate();
+            accumulativeProfitLossAmount += daily.getProfitLossAmount();
+            accumulativeProfitLossRate += daily.getProfitLossRate();
 
             // 누적손익금액 및 누적손익률 업데이트
-            daily.setAccumulatedProfitLossAmount(cumulativeProfitLossAmount);
-            daily.setAccumulatedProfitLossRate(cumulativeProfitLossRate);
+            daily.setAccumulatedProfitLossAmount(accumulativeProfitLossAmount);
+            daily.setAccumulatedProfitLossRate(accumulativeProfitLossRate);
         }
 
         // DB 업데이트
         dailyRepository.saveAll(dailyList);
     }
 
+// kp ratio, sm score 갱신
+//    public void updateKpRatioAndSmScore(Long strategyId) {
+//        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+//        savedStrategy.setKpRatio(getKpRatio(strategyId));
+//        savedStrategy.setSmScore(getSmScore(strategyId, savedStrategy.getKpRatio()));
+//        strategyRepository.save(savedStrategy);
+//    }
+//    private Double getKpRatio(Long strategyId) {
+//        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
+//
+//        Double highProfitLossRate = 0.0;
+//        Double minDrawDown = 0.0;
+//        Double sumDrawDown = 0.0;
+//        Long sumDrawDownPeriod = 0L;
+//
+//        for(int i=0; i<dailyList.size(); i++) {
+//            Double currentProfitLossRate = dailyList.get(i).getAccumulatedProfitLossRate();
+//
+//            if(highProfitLossRate > currentProfitLossRate) {
+//                // 손익률 인하되는 시점
+//                sumDrawDownPeriod++;
+//                if(currentProfitLossRate - highProfitLossRate < minDrawDown) {
+//                    // DD 갱신
+//                    minDrawDown = currentProfitLossRate - highProfitLossRate;
+//                }
+//            } else {
+//                highProfitLossRate = currentProfitLossRate;
+//                sumDrawDown += minDrawDown;
+//                minDrawDown = 0.0;
+//            }
+//        }
+//
+//        return strategyCalculator.getKpRatio(dailyList.stream().findFirst().get().getAccumulatedProfitLossRate(), sumDrawDown, sumDrawDownPeriod, Long.valueOf(dailyList.stream().toList().size()));
+//    }
+//
+//    private Double getSmScore(Long strategyId, Double kpRatio) {
+//        List<Strategy> strategyList = strategyRepository.findAllUsingState();
+//
+//        List<Double> kpRatioList = strategyList.stream()
+//                .map(Strategy::getKpRatio)
+//                .collect(Collectors.toList());
+//
+//        // kp ratio 평균
+//        Double averageKpRatio = strategyCalculator.calculateAverage(kpRatioList);
+//        // kp ratio 표준편차
+//        Double standardDeviationKpRatio = strategyCalculator.calculateStandardDeviation(kpRatioList, averageKpRatio);
+//
+//        return StrategyCalculator.getSmScore(kpRatio, averageKpRatio, standardDeviationKpRatio);
+//    }
 }
