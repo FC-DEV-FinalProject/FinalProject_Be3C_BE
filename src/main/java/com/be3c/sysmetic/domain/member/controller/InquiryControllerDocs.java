@@ -35,9 +35,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -45,10 +44,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
+            @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -71,6 +70,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -78,11 +81,11 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     @GetMapping("/admin/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "closed", required = false, defaultValue = "ALL") String closed,
-            @RequestParam(value = "searchType", required = false) String searchType,
+            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
+            @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
 
 
@@ -110,7 +113,7 @@ public interface InquiryControllerDocs {
             )
     })
     @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
-    public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
+    ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId);
 
 
@@ -129,16 +132,16 @@ public interface InquiryControllerDocs {
                     description = "문의 목록 삭제 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "500",
-                    description = "문의 목록 삭제 실패 (INTERNAL_SERVER_ERROR)"
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "해당 문의를 찾지 못함 (NOT_FOUND)"
+            ),
+            @ApiResponse(
+                    responseCode = "207",
+                    description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
             )
     })
     @DeleteMapping("/admin/inquiry/delete")
-    public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+    ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
 
@@ -164,7 +167,8 @@ public interface InquiryControllerDocs {
             )
     })
     @GetMapping("/strategy/{strategyId}/inquiry")
-    public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
+    ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
+            @PathVariable Long strategyId,
             @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
 
 
@@ -189,10 +193,16 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "등록하는 질문자나 해당 전략의 정보를 찾지 못함 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @PostMapping("/strategy/{strategyId}/inquiry")
-    public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
+    ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
+            @PathVariable Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
 
@@ -212,9 +222,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -222,10 +231,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/member/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 상세 조회 API
@@ -247,14 +256,18 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @GetMapping("/member/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 수정 화면 조회 API
@@ -276,6 +289,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "질문자 문의 수정 화면 조회에 실패 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -283,11 +300,11 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
+    ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 질문자 문의 수정 API
@@ -314,11 +331,11 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (BAD_REQUEST)"
+                    description = "데이터의 형식이 올바르지 않았을 때 (BAD_REQUEST)\n+ +) 답변이 등록된 문의를 수정 시도했을 때"
             )
     })
     @PutMapping("/member/inquiry/{inquiryId}/modify")
-    public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
+    ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto);
 
@@ -344,10 +361,14 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "404",
                     description = "해당 문의를 찾지 못했을 때 (NOT_FOUND)"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "답변이 등록된 문의를 수정 시도했을 때 (BAD_REQUEST)"
             )
     })
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
-    public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
+    ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId);
 
 
@@ -372,10 +393,15 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "등록하는 문의 정보를 찾지 못했을 때 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @PostMapping("/trader/inquiry/{inquiryId}/write")
-    public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
+    ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto);
 
@@ -396,9 +422,8 @@ public interface InquiryControllerDocs {
                     description = "문의 데이터 조회에 성공했을 때 (OK)"
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "페이지 내에 한 개의 문의도 존재하지 않을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    responseCode = "400",
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({
@@ -406,10 +431,10 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry")
-    public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
+    ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 
 
     // 트레이더 문의 상세 조회 API
@@ -438,9 +463,9 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     @GetMapping("/trader/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "closed") String closed);
+            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
+            @RequestParam(value = "closed", defaultValue = "all") String closed);
 }

@@ -100,12 +100,12 @@ public class LoginServiceImpl implements LoginService {
         }
 
         // 토큰 생성
-        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode());
         String refreshToken = null;
         if(rememberMe) {
-            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         } else {
-            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         }
 
         Map<String, String> tokenMap = new HashMap<>();

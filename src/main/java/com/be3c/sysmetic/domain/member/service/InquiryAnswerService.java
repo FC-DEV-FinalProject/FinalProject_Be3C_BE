@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface InquiryAnswerService {
 
-    Long saveInquiryAnswer(InquiryAnswer inquiryAnswer);
-
     // 문의답변 단건 조회
     InquiryAnswer findOneInquiryAnswer(Long inquiryAnswerId);
 
@@ -20,5 +18,5 @@ public interface InquiryAnswerService {
 
     //등록
     @Transactional
-    Long registerInquiryAnswer(Long inquiryId, String answerTitle, String answerContent);
+    boolean registerInquiryAnswer(Long inquiryId, String answerTitle, String answerContent);
 }

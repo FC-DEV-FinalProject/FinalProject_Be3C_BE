@@ -7,6 +7,13 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+
+
+    /*
+        207 Multi Status
+     */
+    MULTI_STATUS(HttpStatus.MULTI_STATUS, "일부만 실패했습니다."),
+
     /*
         400 Bad Request
      */

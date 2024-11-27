@@ -1,10 +1,9 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
-import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
-import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
+import com.be3c.sysmetic.domain.member.entity.Notice;
+import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import jakarta.persistence.EntityManager;
@@ -12,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,73 +23,83 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "/application-test.properties")
 @SpringBootTest
 @Transactional
-public class InquiryAnswerServiceTest {
+class NoticeServiceTest {
 
     @PersistenceContext
     EntityManager em;
 
     @Autowired
-    InquiryAnswerService inquiryAnswerService;
+    NoticeService noticeService;
     @Autowired
-    private InquiryAnswerRepository inquiryAnswerRepository;
+    NoticeRepository noticeRepository;
 
     @Test
-    public void 전체_조회() throws Exception {
+    public void 공지사항_등록() throws Exception {
         //given
-        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
-        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
-
-        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
-        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
+        Member member = createMember();
 
         //when
-        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findAllInquiryAnswers();
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, 1);
+        List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
+        Notice notice = noticeList.get(0);
 
         //then
-        assertEquals(2, inquiryAnswerList.size());
-
+        assertEquals("공지내용1", notice.getNoticeContent());
     }
 
     @Test
-    public void 문의별_조회() throws Exception {
+    public void 공지사항_수정() throws Exception {
         //given
-        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
-        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
-
-        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
-        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
+        Member member = createMember();
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, 1);
 
         //when
-        InquiryAnswer inquiryAnswerList1 = inquiryAnswerService.findThatInquiryAnswer(inquiry1.getId());
-        InquiryAnswer inquiryAnswerList2 = inquiryAnswerService.findThatInquiryAnswer(inquiry2.getId());
+        List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
+        Notice notice = noticeList.get(0);
+        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, 0, 1);
 
         //then
-        assertEquals("답변내용1", inquiryAnswerList1.getAnswerContent());
-        assertEquals("답변내용2", inquiryAnswerList2.getAnswerContent());
-
+        assertEquals("수정공지제목1", notice.getNoticeTitle());
+        assertEquals("수정공지내용1", notice.getNoticeContent());
+        assertEquals(10L, notice.getCorrectorId());
     }
 
     @Test
-    public void 답변_등록() throws Exception {
+    public void 공지사항_공개여부_수정() throws Exception {
         //given
-        Inquiry inquiry = createInquiry("문의제목1", "문의내용1");
+        Member member = createMember();
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, 1);
 
         //when
-        inquiryAnswerService.registerInquiryAnswer(inquiry.getId(), "답변제목1", "답변내용1");
-        InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByAnswerTitle("답변제목1").get(0);
+        List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
+        Notice notice = noticeList.get(0);
+        noticeService.modifyNoticeClosed(notice.getId());
 
         //then
-        assertEquals("답변제목1", inquiryAnswer.getAnswerTitle());
-        assertEquals("답변내용1", inquiryAnswer.getAnswerContent());
-
+        assertEquals(0, notice.getIsOpen());
     }
 
+    @Test
+    public void 공지사항_검색() throws Exception {
+        //given
+        Member member = createMember();
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, 1);
+        noticeService.registerNotice(member.getId(), "공지제목2", "공지내용2", 0, 1);
+        noticeService.registerNotice(member.getId(), "공지제목3", "공지내용3", 0, 1);
+        noticeService.registerNotice(member.getId(), "공지제목4", "공지내용4", 0, 1);
+        noticeService.registerNotice(member.getId(), "공지제목5", "공지내용5", 0, 1);
 
-    private Inquiry createInquiry(String inquiryTitle, String inquiryContent) {
-        Inquiry inquiry = Inquiry.createInquiry(createStrategy(), createMember(), inquiryTitle, inquiryContent);
-        em.persist(inquiry);
-        return inquiry;
+        //when
+        int page = 1;
+        Page<Notice> noticeList1 = noticeService.findNotice("내용", page-1);
+        Page<Notice> noticeList2 = noticeService.findNotice("3", page-1);
+
+        //then
+        assertEquals(5, noticeList1.getNumberOfElements());
+        assertEquals("공지제목5", noticeList1.getContent().get(0).getNoticeTitle());
+        assertEquals(1, noticeList2.getNumberOfElements());
     }
+
 
     private Member createMember() {
         Member member = new Member();

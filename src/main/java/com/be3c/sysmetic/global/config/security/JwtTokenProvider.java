@@ -49,7 +49,7 @@ public class JwtTokenProvider {
     private long HOUR_REFRESH_TOKEN_EXPIRE_TIME;     // 1시간
 
     // 1. Token 생성 메서드
-    public String generateToken(Long memberId, String email, String roleCode, String nickname, String profileImage, long expiration) {
+    public String generateToken(Long memberId, String email, String roleCode, long expiration) {
         String role = null;
         if (roleCode.startsWith("RC")) {
             // "RC"로 시작하는 경우, roleCode를 role로 변경
@@ -64,8 +64,6 @@ public class JwtTokenProvider {
                 .claim("memberId", memberId)
                 .claim("email", email)
                 .claim("role", role)
-                .claim("nickname", nickname)
-                .claim("profileImage", profileImage)
                 .issuedAt(now)
                 .expiration(tokenExpires)
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
@@ -73,18 +71,18 @@ public class JwtTokenProvider {
     }
 
     // 2. Access Token 생성 메서드
-    public String generateAccessToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
-        return generateToken(memberId, email, roleCode, nickname, profileImage, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     // 3. Refresh Token (Month) 생성 메서드
-    public String generateMonthRefreshToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
-        return generateToken(memberId, email, roleCode, nickname, profileImage, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateMonthRefreshToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 0. Refresh Token (Hour) 생성 메서드
-    public String generateHourRefreshToken(Long memberId, String email, String roleCode, String nickname, String profileImage) {
-        return generateToken(memberId, email, roleCode, nickname, profileImage, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateHourRefreshToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 4. 토큰 유효성 검증 메서드
@@ -183,11 +181,9 @@ public class JwtTokenProvider {
         Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
         String email = (String) claims.get("email");
         String role = (String) claims.get("role");
-        String nickname = (String) claims.get("nickname");
-        String profileImage = (String) claims.get("profileImage");
 
-        String accessToken = generateAccessToken(memberId, email, role, nickname, profileImage);
-        String refreshToken = generateMonthRefreshToken(memberId, email, role, nickname, profileImage);
+        String accessToken = generateAccessToken(memberId, email, role);
+        String refreshToken = generateMonthRefreshToken(memberId, email, role);
         tokenMap.put("accessToken", accessToken);
         tokenMap.put("refreshToken", refreshToken);
 
