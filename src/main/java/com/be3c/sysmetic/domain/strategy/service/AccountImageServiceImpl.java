@@ -12,7 +12,7 @@ import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +120,7 @@ public class AccountImageServiceImpl implements AccountImageService {
         validUser(accountImage.getStrategy().getTrader().getId());
 
         // 파일 삭제
-        fileServiceImpl.deleteFile(new FileRequestDto(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
+        fileServiceImpl.deleteFile(new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
 
         accountImageRepository.deleteById(accountImageId);
     }
@@ -143,8 +143,8 @@ public class AccountImageServiceImpl implements AccountImageService {
 
         // 파일 등록
         for(int i=0; i<accountImageList.size(); i++) {
-            FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.ACCOUNT_IMAGE, accountImageList.get(i).getId());
-            fileServiceImpl.uploadImage(requestDtoList.get(i).getImage(), fileRequestDto);
+            FileRequest fileRequest = new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageList.get(i).getId());
+            fileServiceImpl.uploadImage(requestDtoList.get(i).getImage(), fileRequest);
         }
     }
 
@@ -160,7 +160,7 @@ public class AccountImageServiceImpl implements AccountImageService {
                 .accountImageId(accountImage.getId())
                 .title(accountImage.getTitle())
                 .imageUrl(fileServiceImpl.getFilePath(
-                        new FileRequestDto(FileReferenceType.ACCOUNT_IMAGE, accountImage.getId()))) // 파일 조회
+                        new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImage.getId()))) // 파일 조회
                 .build();
     }
 

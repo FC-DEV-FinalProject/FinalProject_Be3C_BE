@@ -15,7 +15,7 @@ import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +59,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         // 파일 존재할 경우 제안서 등록
         if(file != null) {
-            FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.STRATEGY, saveStrategy.getId());
-            fileService.uploadPdf(file, fileRequestDto);
+            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, saveStrategy.getId());
+            fileService.uploadPdf(file, fileRequest);
         }
 
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
@@ -95,8 +95,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         // 파일 존재할 경우 제안서 수정
         if(file != null) {
-            FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.STRATEGY, existingStrategy.getId());
-            fileService.updatePdf(file, fileRequestDto);
+            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+            fileService.updatePdf(file, fileRequest);
         }
 
         strategyRepository.save(existingStrategy);
@@ -118,10 +118,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         strategyRepository.save(savedStrategy);
 
         // 파일 존재할 경우 제안서 삭제
-        FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.STRATEGY, existingStrategy.getId());
+        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
 
-        if(!fileService.getFilePath(fileRequestDto).isEmpty()) {
-            fileService.deleteFile(fileRequestDto);
+        if(!fileService.getFilePath(fileRequest).isEmpty()) {
+            fileService.deleteFile(fileRequest);
         }
     }
 
