@@ -169,7 +169,7 @@ public class EmailServiceTest {
 
 
     @Test
-    void testSendAndSaveAuthCode() throws InterruptedException {
+    void testSendAndSaveAuthCode() {
         // 실제 이메일 API로 인증 코드 발송
         emailService.sendAndSaveAuthCode(ADD_TEST_EMAIL);
 

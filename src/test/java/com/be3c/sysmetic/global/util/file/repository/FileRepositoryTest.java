@@ -1,7 +1,7 @@
 package com.be3c.sysmetic.global.util.file.repository;
 
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.entity.File;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,8 @@ public class FileRepositoryTest {
     @Test
     public void  findTest() {
         List<File> saveList = fileEntityBuilderAndSaver(3);
-        FileRequestDto fileRequestDto = new FileRequestDto(FileReferenceType.STRATEGY, 1L);
-        List<File> findList = fileRepository.findFilesByFileReference(fileRequestDto);
+        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, 1L);
+        List<File> findList = fileRepository.findFilesByFileReference(fileRequest);
 
         System.out.println("saveList = " + saveList);
         System.out.println("findList = " + findList);
