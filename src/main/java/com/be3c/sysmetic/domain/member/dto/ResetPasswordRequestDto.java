@@ -27,9 +27,4 @@ public class ResetPasswordRequestDto {
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$", message = "비밀번호는 영문자(대, 소문자), 숫자, 특수문자를 포함하여 6~20자로 입력해야 합니다.")
     @JsonProperty("rewritePassword")
     private String rewritePassword; // 새로운 비밀번호 재입력
-
-    @NotNull
-    @Pattern(regexp = "^\\d{6}$", message = "인증 코드는 6자리의 숫자입니다.")
-    private String emailAuthCode;
-
 }

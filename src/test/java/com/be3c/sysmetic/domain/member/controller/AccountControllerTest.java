@@ -71,7 +71,7 @@ class AccountControllerTest {
         );
 
         // 1. 성공
-        mockMvc.perform(post("/auth/find-email")
+        mockMvc.perform(post("/v1/auth/find-email")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -84,7 +84,7 @@ class AccountControllerTest {
         requestBody = String.format(
                 "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
         );
-        mockMvc.perform(post("/auth/find-email")
+        mockMvc.perform(post("/v1/auth/find-email")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -96,7 +96,7 @@ class AccountControllerTest {
         requestBody = String.format(
                 "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
         );
-        mockMvc.perform(post("/auth/find-email")
+        mockMvc.perform(post("/v1/auth/find-email")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -108,7 +108,7 @@ class AccountControllerTest {
         requestBody = String.format(
                 "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
         );
-        mockMvc.perform(post("/auth/find-email")
+        mockMvc.perform(post("/v1/auth/find-email")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -120,18 +120,18 @@ class AccountControllerTest {
     @DisplayName("이메일 확인 및 인증코드 발송 테스트")
     void checkEmailAndSendCodeTest() throws Exception {
         // 1. 성공
-        mockMvc.perform(get("/auth/reset-password")
+        mockMvc.perform(get("/v1/auth/reset-password")
                         .param("email", "test1@test.com"))
                 .andExpect(status().isOk());
 
         // 2. 실패 - 이메일 형식 불일치
-        mockMvc.perform(get("/auth/reset-password")
+        mockMvc.perform(get("/v1/auth/reset-password")
                         .param("email", "invalid-email"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("유효하지 않은 값입니다."));
 
         // 3. 실패 - 존재하지 않는 이메일
-        mockMvc.perform(get("/auth/reset-password")
+        mockMvc.perform(get("/v1/auth/reset-password")
                         .param("email", "nonexist@example.com"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 형식 또는 누락된 데이터가 있습니다."));
@@ -150,7 +150,7 @@ class AccountControllerTest {
                 , email, password, rewritePassword
         );
 
-        mockMvc.perform(post("/auth/reset-password")
+        mockMvc.perform(post("/v1/auth/reset-password")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -164,7 +164,7 @@ class AccountControllerTest {
                 , email, wrongPassword, rewritePassword
         );
 
-        mockMvc.perform(post("/auth/reset-password")
+        mockMvc.perform(post("/v1/auth/reset-password")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -179,7 +179,7 @@ class AccountControllerTest {
                 , email, unMatchedPassword, rewritePassword
         );
 
-        mockMvc.perform(post("/auth/reset-password")
+        mockMvc.perform(post("/v1/auth/reset-password")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -194,7 +194,7 @@ class AccountControllerTest {
                 , nonExistEmail, password, rewritePassword
         );
 
-        mockMvc.perform(post("/auth/reset-password")
+        mockMvc.perform(post("/v1/auth/reset-password")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
