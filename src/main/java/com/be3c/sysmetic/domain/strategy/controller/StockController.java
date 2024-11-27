@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -118,7 +119,8 @@ public class StockController implements StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> saveitem(
-            @Valid @RequestBody StockPostRequestDto stockPostRequestDto
+            @Valid @RequestPart StockPostRequestDto stockPostRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
             if(stockService.saveItem(stockPostRequestDto)) {
@@ -145,7 +147,8 @@ public class StockController implements StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> updateItem(
-            @Valid @RequestBody StockPutRequestDto stockPutRequestDto
+            @Valid @RequestBody StockPutRequestDto stockPutRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
             if(stockService.updateItem(stockPutRequestDto)) {

@@ -10,6 +10,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,7 +41,10 @@ public interface AdminStrategyAllowControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "데이터를 찾는 데 성공 (OK)",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PageResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",

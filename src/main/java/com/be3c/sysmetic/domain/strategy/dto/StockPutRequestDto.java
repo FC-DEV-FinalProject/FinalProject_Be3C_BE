@@ -25,8 +25,4 @@ public class StockPutRequestDto {
     @Schema(description = "종목 이름 중복 체크 여부", example = "true")
     @NotBlank
     private Boolean checkDuplicate;
-
-    @Schema(description = "종목 아이콘 파일")
-    @NotNull
-    private MultipartFile file;
 }

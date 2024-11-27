@@ -21,9 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.NoSuchElementException;
 
@@ -120,10 +122,11 @@ public class MethodController implements MethodControllerDocs {
         4. 중복된 매매 유형명이 존재할 때 : CONFLICT
      */
     @Override
-    @PostMapping("/admin/method")
+    @PostMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse<String>> postMethod(
-            @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
-    ) {
+            @Valid @RequestPart MethodPostRequestDto methodPostRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
+            ) {
         try {
             if(methodService.insertMethod(methodPostRequestDto)) {
                 return ResponseEntity.status(HttpStatus.OK)

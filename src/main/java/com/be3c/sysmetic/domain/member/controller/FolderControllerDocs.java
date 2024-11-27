@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +27,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "중복된 폴더명이 없음",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -58,7 +62,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "해당 유저의 폴더 목록 반환 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -92,7 +99,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "폴더 추가 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",

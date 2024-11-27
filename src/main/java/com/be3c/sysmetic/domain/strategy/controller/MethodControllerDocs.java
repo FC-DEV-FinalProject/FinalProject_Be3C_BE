@@ -7,6 +7,7 @@ import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "매매 방식 API", description = "관리자 매매 방식 API")
 public interface MethodControllerDocs {
@@ -56,7 +58,10 @@ public interface MethodControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "매매 유형 찾기 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = MethodGetResponseDto.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -88,7 +93,10 @@ public interface MethodControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "매매 유형 페이지 찾기 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PageResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -139,7 +147,8 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> postMethod(
-            @Valid @RequestBody MethodPostRequestDto methodPostRequestDto
+            @Valid @RequestBody MethodPostRequestDto methodPostRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
     );
 
     /*
