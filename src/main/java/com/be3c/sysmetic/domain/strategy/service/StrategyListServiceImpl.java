@@ -2,10 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
@@ -36,14 +33,14 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final DoubleHandler doubleHandler;
     private final StrategyRepository strategyRepository;
 
-    /*
-    getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
-    */
-    @Override
-    public int getTotalPageNumber(String statusCode, int pageSize) {
-        long totalStrategyCount = strategyListRepository.countByStatusCode(statusCode);
-        return (int) Math.ceil((double) totalStrategyCount / pageSize);
-    }
+    // /*
+    //     getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
+    // */
+    // @Override
+    // public int getTotalPageNumber(String statusCode, int pageSize) {
+    //     long totalStrategyCount = strategyListRepository.countByStatusCode(statusCode);
+    //     return (int) Math.ceil((double) totalStrategyCount / pageSize);
+    // }
 
     /*
         findStrategyPage : 메인 전략 목록 페이지 (수익률순 조회)
@@ -52,11 +49,12 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
 
-        int pageSize = 10;
-        String statusCode = "PUBLIC";
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
+        log.info("StrategyListServiceImpl findStrategyPage requested, pageNum = {}", pageNum);
 
-         Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(statusCode, pageable)
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+
+        Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(String.valueOf(StrategyStatusCode.PUBLIC), pageable)
                 .map(strategy -> new StrategyListDto(
                         strategy.getId(),
                         strategy.getTrader().getId(),
@@ -71,9 +69,9 @@ public class StrategyListServiceImpl implements StrategyListService {
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));
 
-         log.info("service ={}", strategies.hasContent());
+        log.info("StrategyListServiceImpl strategies has content true / false = {}", strategies.hasContent());
 
-         return PageResponse.<StrategyListDto>builder()
+        return PageResponse.<StrategyListDto>builder()
                  .currentPage(strategies.getNumber())
                  .pageSize(strategies.getSize())
                  .totalElement(strategies.getTotalElements())
@@ -89,10 +87,14 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
+        log.info("StrategyListServiceImpl findTraderNickname requested, nickname = {} , pageNum = {}", nickname, pageNum);
+
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
 
         Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
+
+        log.info("StrategyListServiceImpl traders has content true / false = {} ", traders.hasContent());
 
         return PageResponse.<TraderNicknameListDto>builder()
                 .currentPage(traders.getNumber())
@@ -110,15 +112,15 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
 
-        int pageSize = 10;
-        String statusCode = "PUBLIC";
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumProfitLossRate")));
+        log.info("StrategyListServiceImpl findStrategiesByTrader requested traderId = {}, pageNum = {}", traderId, pageNum);
 
-        // traderId로 Member 가져오기
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+
         Member trader = memberRepository.findById(traderId)
                 .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
 
-        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findAllByTraderAndStatusCode(trader, statusCode, pageable)
+        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findAllByTraderAndStatusCode(trader, String.valueOf(StrategyStatusCode.PUBLIC), pageable)
                 .map(strategy -> new StrategyListByTraderDto(
                         strategy.getTrader().getId(),
                         strategy.getTrader().getNickname(),
@@ -129,11 +131,13 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getName(),
                         strategy.getCycle(),
                         strategy.getFollowerCount(),
-                        strategyRepository.countTotalPublicStrategyCount(strategy.getTrader().getId(), statusCode),
+                        strategyRepository.countTotalPublicStrategyCount(strategy.getTrader().getId(), String.valueOf(StrategyStatusCode.PUBLIC)),
                         doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
                         doubleHandler.cutDouble(strategy.getMdd()),
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));
+
+        log.info("StrategyListServiceImpl strategiesByTrader has content true / false = {} ", strategiesByTrader.hasContent());
 
         return PageResponse.<StrategyListByTraderDto>builder()
                 .currentPage(strategiesByTrader.getNumber())

@@ -19,10 +19,6 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
     Page<Strategy> findAllByStatusCode(String statusCode, Pageable pageable);
 
 
-    // 특정 statusCode에 따른 전체 전략 수 조회
-    Long countByStatusCode(String statusCode);
-
-
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto(" +
             "t.id, t.nickname, t.roleCode, t.totalFollow, " +
             "COUNT(CASE WHEN s.statusCode = 'PUBLIC' THEN 1 END)) " +
@@ -35,11 +31,4 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
 
     // 닉네임으로 트레이더 조회 -> 트레이더 별 전략 목록
     Page<Strategy> findAllByTraderAndStatusCode(Member trader, String statusCode, Pageable pageable);
-
-
-    // Pageable 반환 메서드
-    default Pageable getPageable(Integer pageNum, String property) {
-        int pageSize = 10;
-        return PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc(property)));
-    }
 }

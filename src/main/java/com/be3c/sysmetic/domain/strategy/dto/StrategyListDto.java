@@ -1,7 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,7 +18,7 @@ public class StrategyListDto {
         name : 전략 명
         cycle : 주기
         stockList : 종목 리스트
-        accumProfitLossRate : 누적수익률
+        accumulatedProfitLossRate : 누적수익률
         mdd : MDD
         smScore : SM Score
     */
@@ -32,7 +30,7 @@ public class StrategyListDto {
     private String name;
     private Character cycle;
     private StockListDto stockList;
-    private Double accumProfitLossRate;
+    private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
 }

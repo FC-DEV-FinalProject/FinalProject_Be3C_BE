@@ -22,7 +22,7 @@ public class StrategyListByTraderDto {
         cycle : 주기
         followerCount : 팔로우 수
         strategyCount : 등록한 전략 개수
-        accumProfitLossRate : 누적손익률
+        accumulatedProfitLossRate : 누적손익률
         mdd : MDD
         smScore : SM Score
      */
@@ -38,7 +38,7 @@ public class StrategyListByTraderDto {
     private Character cycle;
     private Long followerCount;
     private Long strategyCount;
-    private Double accumProfitLossRate;
+    private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
 }

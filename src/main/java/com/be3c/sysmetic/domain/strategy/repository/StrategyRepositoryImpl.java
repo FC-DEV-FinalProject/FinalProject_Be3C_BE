@@ -34,7 +34,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         booleanBuilder.and(getCycleCond(strategy, strategySearchRequestDto));
         booleanBuilder.and(getStockCond(strategySearchRequestDto));
         // TODO 운용기간 추가 booleanBuilder.and(getPeriodCond(strategy, strategySearchRequestDto));
-        booleanBuilder.and(getAccumProfitLossRateRange(strategy, strategySearchRequestDto));
+        booleanBuilder.and(getAccumulatedProfitLossRateRange(strategy, strategySearchRequestDto));
         booleanBuilder.and(strategy.statusCode.eq(String.valueOf(StrategyStatusCode.PUBLIC)));
 
         // 필터링된 결과 쿼리 실행
@@ -174,10 +174,10 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     // }
 
     // 누적수익률 조건
-    private BooleanBuilder getAccumProfitLossRateRange(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
+    private BooleanBuilder getAccumulatedProfitLossRateRange(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
-        if (!checkAccumProfitLossRateRange(strategySearchRequestDto))
+        if (!checkAccumulatedProfitLossRateRange(strategySearchRequestDto))
             return booleanBuilder;
 
         Double start = Double.parseDouble(strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart());
@@ -189,17 +189,17 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     }
 
     // 누적수익률 조건 범위 null & 크기 올바른지 확인
-    private Boolean checkAccumProfitLossRateRange(StrategySearchRequestDto strategySearchRequestDto) {
-        String accumProfitLossRateRangeStartCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart();
-        String accumProfitLossRateRangeEndCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeEnd();
+    private Boolean checkAccumulatedProfitLossRateRange(StrategySearchRequestDto strategySearchRequestDto) {
+        String accumulatedProfitLossRateRangeStartCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart();
+        String accumulatedProfitLossRateRangeEndCond = strategySearchRequestDto.getAccumulatedProfitLossRateRangeEnd();
 
         // 조건이 없거나 비어있으면 false 반환
-        if (accumProfitLossRateRangeStartCond == null || accumProfitLossRateRangeEndCond == null ||
-                accumProfitLossRateRangeStartCond.isEmpty() || accumProfitLossRateRangeEndCond.isEmpty())
+        if (accumulatedProfitLossRateRangeStartCond == null || accumulatedProfitLossRateRangeEndCond == null ||
+                accumulatedProfitLossRateRangeStartCond.isEmpty() || accumulatedProfitLossRateRangeEndCond.isEmpty())
             return false;
 
         // 시작 범위가 끝 범위보다 큰 경우 false 반환
-        if (Double.parseDouble(accumProfitLossRateRangeStartCond) > Double.parseDouble(accumProfitLossRateRangeEndCond)) {
+        if (Double.parseDouble(accumulatedProfitLossRateRangeStartCond) > Double.parseDouble(accumulatedProfitLossRateRangeEndCond)) {
             return false;
         }
 

@@ -7,7 +7,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 
 public interface StrategyListService {
 
-    int getTotalPageNumber(String statusCode, int pageSize);
+    // int getTotalPageNumber(String statusCode, int pageSize);
 
     // findStrategyPage : 매개변수로 넘어온 page에 해당하는 Strategy를 모두 찾음;
     PageResponse<StrategyListDto> findStrategyPage(Integer pageNum);
