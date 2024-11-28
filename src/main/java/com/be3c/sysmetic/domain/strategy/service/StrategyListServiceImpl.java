@@ -131,7 +131,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                         strategy.getName(),
                         strategy.getCycle(),
                         strategy.getFollowerCount(),
-                        strategyRepository.countTotalPublicStrategyCount(strategy.getTrader().getId(), String.valueOf(StrategyStatusCode.PUBLIC)),
+                        strategyRepository.countStrategyByOneTrader(strategy.getTrader().getId()),
                         doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
                         doubleHandler.cutDouble(strategy.getMdd()),
                         doubleHandler.cutDouble(strategy.getSmScore())
