@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,5 +38,11 @@ public class StrategyExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<APIResponse> badRequest(EntityNotFoundException exception) {
         return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.BAD_REQUEST, StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+    }
+
+    // conflict
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<APIResponse> conflict(ConflictException exception) {
+        return ResponseEntity.badRequest().body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE, exception.getMessage()));
     }
 }

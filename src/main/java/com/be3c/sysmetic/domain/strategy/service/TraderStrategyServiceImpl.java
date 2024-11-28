@@ -13,12 +13,14 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +45,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     // 전략 등록
     @Override
     @Transactional
-    public void insertStrategy(StrategyPostRequestDto requestDto, MultipartFile file) {
+    public StrategyPostResponseDto insertStrategy(StrategyPostRequestDto requestDto, MultipartFile file) {
         checkDuplName(requestDto.getName());
 
         Strategy saveStrategy = Strategy.builder()
@@ -70,6 +72,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         }
 
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
+
+        return StrategyPostResponseDto.builder().strategyId(saveStrategy.getId()).build();
     }
 
     // 전략 수정
@@ -134,7 +138,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     // 전략명 중복 여부 검증
     private void checkDuplName(String name) {
         if(strategyRepository.existsByName(name)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.DUPLICATE_STRATEGY_NAME.getMessage());
+            throw new ConflictException(StrategyExceptionMessage.DUPLICATE_STRATEGY_NAME.getMessage());
         }
     }
 
