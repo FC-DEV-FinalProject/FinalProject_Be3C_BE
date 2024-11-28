@@ -107,7 +107,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 USING_STATE.getCode()
         ).orElseThrow(EntityNotFoundException::new));
 
-        return false;
+        return true;
     }
 
     /*
