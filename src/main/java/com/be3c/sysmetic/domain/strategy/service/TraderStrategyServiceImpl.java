@@ -53,6 +53,11 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
                 .content(requestDto.getContent())
+                .followerCount(0L)
+                .kpRatio(0.0)
+                .smScore(0.0)
+                .mdd(0.0)
+                .accumulatedProfitLossRate(0.0)
                 .build();
 
         strategyRepository.save(saveStrategy);
