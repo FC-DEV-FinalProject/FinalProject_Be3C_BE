@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.MonthlyRecord;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailStatistics;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyDetailRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
@@ -32,9 +29,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
 
     @Override
     @Transactional
-    public StrategyDetailDto getDetail(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo) {
-
-        String statusCode = "PUBLIC";
+    public StrategyDetailDto getDetail(Long id) {
 
         // TODO 아래 메서드 사용
         // StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
@@ -42,7 +37,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id)
                 .orElseGet(this::createDefaultStatistics);
 
-        return strategyDetailRepository.findByIdAndStatusCode(id, statusCode)
+        return strategyDetailRepository.findPublicStrategy(id)
                 .map(strategy -> StrategyDetailDto.builder()
                         .id(strategy.getId())
                         .traderNickname(strategy.getTrader().getNickname())
@@ -61,11 +56,10 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
                         .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
                         .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
-                        .winningRate(doubleHandler.cutDouble(statistics.getWinningRate()))
+                        .winningRate(strategy.getWinningRate())
                         .monthlyRecord(getMonthlyRecords(strategy.getId()))
-                        // TODO analysis 추가
                         .build())
-                .orElseThrow(() -> new NoSuchElementException("상세 페이지 존재하지 않음"));
+                .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
 
 

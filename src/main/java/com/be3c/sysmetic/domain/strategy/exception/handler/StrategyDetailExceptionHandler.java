@@ -14,7 +14,7 @@ public class StrategyDetailExceptionHandler {
 
     @ExceptionHandler({ NoSuchElementException.class})
     protected APIResponse<?> noSuchElement(NoSuchElementException e) {
-        return APIResponse.fail(ErrorCode.NOT_FOUND, "전략 상세 페이지가 존재하지 않습니다." + e.getMessage());
+        return APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(NullPointerException.class)
