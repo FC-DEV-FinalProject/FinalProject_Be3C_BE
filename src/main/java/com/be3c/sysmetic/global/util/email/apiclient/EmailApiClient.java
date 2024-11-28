@@ -38,20 +38,20 @@ public interface EmailApiClient {
      * @return API로부터의 응답
      */
 
-    StibeeApiResponse deleteUserSubscriberRequest(List<String> emails);
+    StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails);
     /**
      * 트레이더 주소록으로부터 삭제
      * @param emails
      * @return API로부터의 응답
      */
-    StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails);
+    StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails);
 
     /**
      * 임시 주소록으로부터 삭제
      * @param emails
      * @return API로부터의 응답
      */
-    StibeeApiResponse deleteTempSubscriberRequest(List<String> emails);
+    StibeeSimpleResponse deleteTempSubscriberRequest(List<String> emails);
 
 
 

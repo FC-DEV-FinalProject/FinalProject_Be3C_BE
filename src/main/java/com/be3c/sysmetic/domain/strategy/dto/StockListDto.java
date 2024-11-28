@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.HashSet;
-import java.util.List;
 
 @Getter
 @Builder
@@ -17,6 +16,6 @@ public class StockListDto {
         stockNames : 종목명
     */
 
-    private HashSet<Long> id;
+    private HashSet<Long> stockIds;
     private HashSet<String> stockNames;
 }

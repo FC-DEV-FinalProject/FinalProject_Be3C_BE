@@ -91,7 +91,7 @@ public class EmailApiClientImpl implements EmailApiClient {
 
 
     @Override
-    public StibeeApiResponse deleteUserSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + userListId + "/subscribers";
 
@@ -99,7 +99,7 @@ public class EmailApiClientImpl implements EmailApiClient {
     }
 
     @Override
-    public StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + traderListId + "/subscribers";
 
@@ -107,29 +107,25 @@ public class EmailApiClientImpl implements EmailApiClient {
     }
 
     @Override
-    public StibeeApiResponse deleteTempSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteTempSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + tempListId + "/subscribers";
 
         return deleteSubscriberRequest(emails, uri);
     }
 
-    private StibeeApiResponse deleteSubscriberRequest(List<String> emails, String uri){
+    private StibeeSimpleResponse deleteSubscriberRequest(List<String> emails, String uri){
 
-        Mono<StibeeApiResponse> apiResponseMono = webClient
+        Mono<StibeeSimpleResponse> apiResponseMono = webClient
                 .method(HttpMethod.DELETE)
                 .uri(uri)
                 .bodyValue(emails)
                 .retrieve()
-//                    .toBodilessEntity() // 응답 본문을 받지 않으면, Mono<Void>로 변환
                 .onStatus(status -> status.isError(), response -> {
                     System.out.println("Error response: " + response.statusCode());
                     return Mono.error(new RuntimeException("API call failed"));
                 })
-                .bodyToMono(StibeeApiResponse.class);
-
-        StibeeApiResponse apiResponse = apiResponseMono.block();
-        System.out.println("apiResponse = " + apiResponse);
+                .bodyToMono(StibeeSimpleResponse.class);
 
         return apiResponseMono.block();
     }

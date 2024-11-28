@@ -13,6 +13,8 @@ import java.util.List;
 
 public interface InquiryRepository extends JpaRepository<Inquiry, Long>, InquiryRepositoryCustom {
 
+    List<Inquiry> findByInquiryTitle(String inquiryTitle);
+
     // 상태별 문의 조회
     Page<Inquiry> findByInquiryStatus(InquiryStatus inquiryStatus, Pageable pageable);
 

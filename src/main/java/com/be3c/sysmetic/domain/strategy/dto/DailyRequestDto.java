@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyPostRequestDto {
+public class DailyRequestDto {
 
     @Schema(description = "일간분석 일자", example = "2024-11-18")
     @ValidDailyDate

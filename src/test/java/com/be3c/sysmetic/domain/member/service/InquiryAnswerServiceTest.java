@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
+import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import jakarta.persistence.EntityManager;
@@ -30,22 +31,7 @@ public class InquiryAnswerServiceTest {
     @Autowired
     InquiryAnswerService inquiryAnswerService;
     @Autowired
-    InquiryAnswerRepository inquiryAnswerRepository;
-
-    @Test
-    public void 문의_답변_등록() throws Exception {
-        //given
-        Inquiry inquiry = createInquiry("문의제목1", "문의내용1");
-
-        InquiryAnswer inquiryAnswer = InquiryAnswer.createInquiryAnswer(inquiry, "답변제목1", "답변내용1");
-
-        //when
-        Long savedId = inquiryAnswerService.saveInquiryAnswer(inquiryAnswer);
-
-        //then
-        assertEquals(inquiryAnswer, inquiryAnswerRepository.findById(savedId).get());
-
-    }
+    private InquiryAnswerRepository inquiryAnswerRepository;
 
     @Test
     public void 전체_조회() throws Exception {
@@ -53,11 +39,8 @@ public class InquiryAnswerServiceTest {
         Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
         Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
 
-        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변제목1", "답변내용1");
-        inquiryAnswerService.saveInquiryAnswer(inquiryAnswer1);
-
-        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변제목2", "답변내용2");
-        inquiryAnswerService.saveInquiryAnswer(inquiryAnswer2);
+        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
+        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
 
         //when
         List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findAllInquiryAnswers();
@@ -73,18 +56,12 @@ public class InquiryAnswerServiceTest {
         Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
         Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
 
-        Long inquiryId1 = inquiry1.getId();
-        Long inquiryId2 = inquiry2.getId();
-
-        InquiryAnswer inquiryAnswer1 = InquiryAnswer.createInquiryAnswer(inquiry1, "답변제목1", "답변내용1");
-        inquiryAnswerService.saveInquiryAnswer(inquiryAnswer1);
-
-        InquiryAnswer inquiryAnswer2 = InquiryAnswer.createInquiryAnswer(inquiry2, "답변제목2", "답변내용2");
-        inquiryAnswerService.saveInquiryAnswer(inquiryAnswer2);
+        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
+        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
 
         //when
-        InquiryAnswer inquiryAnswerList1 = inquiryAnswerService.findThatInquiryAnswer(inquiryId1);
-        InquiryAnswer inquiryAnswerList2 = inquiryAnswerService.findThatInquiryAnswer(inquiryId2);
+        InquiryAnswer inquiryAnswerList1 = inquiryAnswerService.findThatInquiryAnswer(inquiry1.getId());
+        InquiryAnswer inquiryAnswerList2 = inquiryAnswerService.findThatInquiryAnswer(inquiry2.getId());
 
         //then
         assertEquals("답변내용1", inquiryAnswerList1.getAnswerContent());
@@ -98,11 +75,12 @@ public class InquiryAnswerServiceTest {
         Inquiry inquiry = createInquiry("문의제목1", "문의내용1");
 
         //when
-        Long savedId = inquiryAnswerService.registerInquiryAnswer(inquiry.getId(), "답변제목1", "답변내용1");
+        inquiryAnswerService.registerInquiryAnswer(inquiry.getId(), "답변제목1", "답변내용1");
+        InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByAnswerTitle("답변제목1").get(0);
 
         //then
-        assertEquals("답변제목1", inquiryAnswerRepository.findById(savedId).get().getAnswerTitle());
-        assertEquals("답변내용1", inquiryAnswerRepository.findById(savedId).get().getAnswerContent());
+        assertEquals("답변제목1", inquiryAnswer.getAnswerTitle());
+        assertEquals("답변내용1", inquiryAnswer.getAnswerContent());
 
     }
 

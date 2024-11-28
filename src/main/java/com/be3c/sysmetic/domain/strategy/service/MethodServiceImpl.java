@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,8 +95,8 @@ public class MethodServiceImpl implements MethodService {
         5. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean insertMethod(MethodPostRequestDto methodPostRequestDto) {
-        if(!methodPostRequestDto.getCheckDuplicate()) {
+    public boolean insertMethod(MethodPostRequestDto methodPostRequestDto, MultipartFile file) {
+        if(!methodPostRequestDto.getCheckDupl()) {
             throw new IllegalStateException();
         }
 
@@ -121,7 +122,7 @@ public class MethodServiceImpl implements MethodService {
         5. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean updateMethod(MethodPutRequestDto methodPutRequestDto) {
+    public boolean updateMethod(MethodPutRequestDto methodPutRequestDto, MultipartFile file) {
         if(!methodPutRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }

@@ -171,8 +171,6 @@ public class InterestStrategyServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "USER", // role
-                "",
-                "",
                 authorities // 권한 목록
         );
 
@@ -192,7 +190,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(
@@ -217,7 +215,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(
@@ -244,7 +242,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(
@@ -277,7 +275,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(
@@ -304,7 +302,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(
@@ -339,7 +337,7 @@ public class InterestStrategyServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertEquals(

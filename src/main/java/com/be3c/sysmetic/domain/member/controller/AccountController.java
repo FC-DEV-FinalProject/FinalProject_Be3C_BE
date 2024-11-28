@@ -2,7 +2,6 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.FindEmailRequestDto;
 import com.be3c.sysmetic.domain.member.dto.ResetPasswordRequestDto;
-import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.service.AccountService;
 import com.be3c.sysmetic.domain.member.service.RegisterService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
@@ -16,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @Tag(name = "이메일 찾기 및 비밀번호 재설정 API", description = "이메일 찾기 및 비밀번호 재설정")
 @RestController
