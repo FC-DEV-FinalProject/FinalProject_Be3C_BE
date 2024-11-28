@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.List;
 
 @Repository
-public interface StrategyRepository extends JpaRepository<Strategy, Long> {
+public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
+
     // 닉네임으로 트레이더 조회, 일치한 닉네임, 전략 수 내림차순 정렬
     @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
             "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")

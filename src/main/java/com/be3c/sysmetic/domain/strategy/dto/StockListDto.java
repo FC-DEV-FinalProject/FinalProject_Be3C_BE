@@ -9,7 +9,7 @@ import java.util.HashSet;
 @Builder
 public class StockListDto {
 
-     /*
+    /*
         StockListDto : 종목 리스트 응답용 Dto
 
         id : StrategyStockReference id

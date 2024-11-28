@@ -28,6 +28,13 @@ public interface StrategyStockReferenceRepository extends JpaRepository<Strategy
     """)
     void deleteByStrategyIdAndStockIds(Long strategyId, Set<Long> stockIds);
 
+    // MainPage에서 사용! - 11/19
+    List<StrategyStockReference> findByStrategyId(Long id);
+
+    // 상세 검색에서 사용!
+    @Query("SELECT s FROM StrategyStockReference s WHERE s.stock.id IN :ids")
+    List<StrategyStockReference> findAllByStockIds(@Param("ids") List<Long> ids);
+
     // StockGetter에서 사용
     @Query("SELECT s FROM StrategyStockReference s WHERE s.strategy.id = :strategyId")
     List<StrategyStockReference> findAllByStrategyId(@Param("strategyId") Long strategyId);
