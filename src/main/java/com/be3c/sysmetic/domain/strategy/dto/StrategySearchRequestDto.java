@@ -18,7 +18,7 @@ public class StrategySearchRequestDto {
        cycle : 주기
        stockNames : 종목
        TODO periods : 기간
-       accumProfitLossRate : 누적수익률
+       accumulatedProfitLossRate : 누적수익률
     */
 
     private List<String> methods;

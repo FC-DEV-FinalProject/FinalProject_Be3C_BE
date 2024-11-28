@@ -22,15 +22,15 @@ public interface StrategySearchControllerDocs {
              "methods": ["Manual"],
              "cycle": ["D"],
              "stockNames": [],
-             "accumProfitLossRateRangeStart": ["90"],
-             "accumProfitLossRateRangeEnd": ["100"]
+             "accumulatedProfitLossRateRangeStart": ["90"],
+             "accumulatedProfitLossRateRangeEnd": ["100"]
         }
     */
     @Operation(
             summary = "전략 상세 조건 검색",
             description = "전략 목록에서 항목별 상세 조건을 검색합니다.<br><br>" +
                     "Request Body 예시:<br><br>" +
-                    "{ \"methods\": [\"Manual\"], \"cycle\": [\"D\"], \"stockNames\": [], \"accumProfitLossRateRangeStart\": \"90\",  \"accumProfitLossRateRangeEnd\": \"100\" }",
+                    "{ \"methods\": [\"Manual\"], \"cycle\": [\"D\"], \"stockNames\": [], \"accumulatedProfitLossRateRangeStart\": \"90\",  \"accumulatedProfitLossRateRangeEnd\": \"100\" }",
             responses = {
                     @ApiResponse(
                             responseCode = "200"
@@ -53,8 +53,8 @@ public interface StrategySearchControllerDocs {
             summary = "알고리즘별 전략 - DEFENSIVE는 아직 조회 못합니다",
             description = "전략 목록에서 항목ㅋ별 상세 조건을 검색합니다.<br><br>" +
                     "Request Param 설명 :<br><br>" +
-                    "pageNum : defaultValue = 0, 페이지 이동 시 값 입력 <br><br>" +
-                    "algorithm : defaultValue = EFFICIENCY -> Algorithm 선택 - EFFICIENCY, OFFENSIVE, DEFENSIVE"
+                    "pageNum - defaultValue 0, 페이지 이동 시 값 입력 <br><br>" +
+                    "algorithm - defaultValue EFFICIENCY -> Algorithm 선택 - EFFICIENCY, OFFENSIVE, DEFENSIVE"
             ,
             responses = {
                     @ApiResponse(
