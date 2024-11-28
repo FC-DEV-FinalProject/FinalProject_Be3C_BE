@@ -58,6 +58,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
                 .smScore(0.0)
                 .mdd(0.0)
                 .accumulatedProfitLossRate(0.0)
+                .winningRate(0.0)
                 .build();
 
         strategyRepository.save(saveStrategy);
