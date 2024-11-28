@@ -4,7 +4,7 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,18 +94,18 @@ public class LoginServiceImpl implements LoginService {
 
         String memberProfileImage = null;
         try {
-            memberProfileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, member.getId()));
+            memberProfileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, member.getId()));
         } catch (Exception e) {
             log.info("파일 이미지 가져오기 에러 발생");
         }
 
         // 토큰 생성
-        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode());
         String refreshToken = null;
         if(rememberMe) {
-            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateMonthRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         } else {
-            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode(), member.getNickname(), memberProfileImage);
+            refreshToken = jwtTokenProvider.generateHourRefreshToken(member.getId(), member.getEmail(), member.getRoleCode());
         }
 
         Map<String, String> tokenMap = new HashMap<>();

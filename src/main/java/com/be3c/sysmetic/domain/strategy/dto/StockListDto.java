@@ -5,7 +5,6 @@ import lombok.Getter;
 
 import java.util.HashSet;
 
-
 @Getter
 @Builder
 public class StockListDto {

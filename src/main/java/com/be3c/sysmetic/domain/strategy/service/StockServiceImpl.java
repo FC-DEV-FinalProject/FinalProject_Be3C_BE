@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
@@ -10,7 +9,7 @@ import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 
@@ -64,7 +62,7 @@ public class StockServiceImpl implements StockService {
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
-        String filePath = fileService.getFilePath(new FileRequestDto(FileReferenceType.STOCK, id));
+        String filePath = fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, id));
 
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
@@ -106,7 +104,7 @@ public class StockServiceImpl implements StockService {
         4. true를 반환해, 성공 여부를 알린다.
      */
     @Override
-    public boolean saveItem(StockPostRequestDto stockPostRequestDto) {
+    public boolean saveItem(StockPostRequestDto stockPostRequestDto, MultipartFile file) {
         if(!stockPostRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
@@ -120,7 +118,7 @@ public class StockServiceImpl implements StockService {
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        fileService.uploadImage(stockPostRequestDto.getStockImage(), new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+        fileService.uploadImage(file, new FileRequest(FileReferenceType.STOCK, savedStock.getId()));
 
         return true;
     }
@@ -135,7 +133,7 @@ public class StockServiceImpl implements StockService {
         5. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean updateItem(StockPutRequestDto stockPutRequestDto) {
+    public boolean updateItem(StockPutRequestDto stockPutRequestDto, MultipartFile file) {
         if(!stockPutRequestDto.getCheckDuplicate()) {
             throw new IllegalStateException();
         }
@@ -151,7 +149,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
-        fileService.updateImage(stockPutRequestDto.getFile(), new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+        fileService.updateImage(file, new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
@@ -174,9 +172,8 @@ public class StockServiceImpl implements StockService {
         findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(findStock);
 
-        fileService.deleteFile(new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+        fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
-
 }

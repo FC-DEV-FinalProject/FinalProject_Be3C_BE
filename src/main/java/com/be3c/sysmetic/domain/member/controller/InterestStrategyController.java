@@ -21,7 +21,7 @@ import java.util.NoSuchElementException;
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@RequestMapping("/api")
+@RequestMapping("/v1")
 public class InterestStrategyController implements InterestStrategyControllerDocs {
 
     private final InterestStrategyService interestStrategyService;

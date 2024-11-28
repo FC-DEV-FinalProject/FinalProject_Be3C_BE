@@ -57,6 +57,9 @@ public class Strategy extends BaseEntity {
     @Column(name = "sm_score", nullable = false)
     private Double smScore;
 
+    @Column(name = "winning_rate")
+    private Double winningRate;
+
     // 누적수익률 추가
     @Column(name = "accumulated_profit_loss_rate", nullable = false)
     private Double accumulatedProfitLossRate;
