@@ -187,6 +187,6 @@ public class FolderServiceImpl implements FolderService {
 
         folderRepository.save(find_folder);
 
-        return false;
+        return true;
     }
 }
