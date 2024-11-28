@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
+import com.be3c.sysmetic.domain.strategy.dto.KpRatioParametersDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -266,7 +267,22 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
 
 
     /* 엑셀을 위한 메서드 */
-    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
+    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);         // 전략에서도 사용!
     List<Daily> findByDateGreaterThanEqualOrderByDateAsc(LocalDate date);
     Optional<Daily> findTop1ByDateBeforeOrderByDateDesc(LocalDate date);
+
+
+    // 전략 지표 값 업데이트
+    @Query("SELECT MAX(d.profitLossAmount), MIN(d.profitLossAmount) FROM Daily d WHERE d.strategy.id = :strategyId")
+    Object[] findMaxAndMinProfitLossAmount(@Param("strategyId") Long strategyId);
+
+    // 누적손익률 조회
+    @Query("SELECT d.accumulatedProfitLossRate FROM Daily d WHERE d.strategy.id = :strategyId ORDER BY d.date DESC")
+    Double findLatestAccumulatedProfitLossRate(@Param("strategyId") Long strategyId);
+
+
+    // KP Ratio 계산에서 사용
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.KpRatioParametersDto(d.date, d.profitLossRate, d.accumulatedProfitLossRate) "
+            + "FROM Daily d WHERE d.strategy.id = :strategyId ORDER BY d.date DESC")
+    List<KpRatioParametersDto> findKpRatioParameters(@Param("strategyId") Long strategyId);
 }
