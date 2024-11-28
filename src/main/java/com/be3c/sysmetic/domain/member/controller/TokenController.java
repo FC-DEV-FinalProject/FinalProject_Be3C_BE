@@ -61,7 +61,7 @@ public class TokenController {
         String profileImage = null;
         try {
             profileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IllegalArgumentException e) {
             log.info("프로필 이미지 추출 실패");
         }
 
