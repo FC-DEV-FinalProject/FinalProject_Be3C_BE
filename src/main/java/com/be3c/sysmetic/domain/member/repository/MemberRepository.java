@@ -15,6 +15,16 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'RC001'")
+    Long countUser();
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'RC002'")
+    Long countTrader();
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode IN ('RC003', 'RC004')")
+    Long countManager();
+
     boolean existsByEmail(String email);
 
     Optional<Member> findByEmail(String email);
@@ -69,7 +79,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             @Param("searchKeyword") String searchKeyword,
             Pageable pageable
     );
-
-
-
 }

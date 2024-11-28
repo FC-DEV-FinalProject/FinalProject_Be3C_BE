@@ -2,6 +2,8 @@ package com.be3c.sysmetic.domain.member.repository;
 
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import com.be3c.sysmetic.global.util.admin.dto.AdminInquiryResponseDto;
+import com.be3c.sysmetic.global.util.admin.dto.AdminNoticeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +38,12 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
     @Modifying(clearAutomatically = true)
     @Query("delete Inquiry i where i.id in :idList")
     int bulkDelete(@Param("idList") List<Long> idList);
+
+    @Query("""
+        SELECT 
+            count(i)
+        FROM Inquiry i
+        JOIN InquiryAnswer a ON a.inquiry.id = i.id
+    """)
+    Long findAnsweredInquiry();
 }

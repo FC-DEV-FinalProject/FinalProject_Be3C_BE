@@ -1,5 +1,12 @@
 package com.be3c.sysmetic.global.util.admin.service;
 
-public interface AdminMainService {
+import com.be3c.sysmetic.global.util.admin.dto.AdminMainResponseDto;
+import com.be3c.sysmetic.global.util.admin.dto.MemberCountResponseDto;
+import com.google.analytics.data.v1beta.RunReportResponse;
 
+import java.time.LocalDate;
+import java.util.Map;
+
+public interface AdminMainService {
+    AdminMainResponseDto getAdminMain();
 }

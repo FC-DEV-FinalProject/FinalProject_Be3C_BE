@@ -26,6 +26,7 @@ ext {
 
 repositories {
 	mavenCentral()
+	google()
 }
 
 dependencies {
@@ -110,6 +111,7 @@ dependencies {
 
 	// google analytics
 	implementation 'com.google.analytics:google-analytics-data:0.64.0'
+
 }
 
 tasks.named('test') {

@@ -133,4 +133,12 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
             @Param("strategyName") String strategyName,
             Pageable pageable
     );
+
+    @Query("""
+    SELECT
+    count(*)
+    FROM StrategyApprovalHistory s
+    WHERE s.statusCode = 'SA001'
+    """)
+    Long countWaitingStrategyCount();
 }
