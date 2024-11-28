@@ -65,12 +65,13 @@ public class TokenController {
             log.info("프로필 이미지 추출 실패");
         }
 
-        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, nickname, profileImage)
+        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, nickname, phoneNumber, profileImage)
         TokenApiResponseDto dto = TokenApiResponseDto.builder()
                 .memberId(memberId)
                 .roleCode(role)
                 .email(member.getEmail())
                 .nickname(member.getNickname())
+                .phoneNumber(member.getPhoneNumber())
                 .profileImage(profileImage)
                 .build();
 
