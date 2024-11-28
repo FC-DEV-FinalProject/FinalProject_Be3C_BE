@@ -20,7 +20,6 @@ public class StockGetter {
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
     private final StockRepository stockRepository;
 
-    // getMethods : 전략에 포함된 종목 가져오기
     public StockListDto getStocks(Long strategyId) {
         HashSet<Long> idSet = new HashSet<>();
         HashSet<String> nameSet = new HashSet<>();
