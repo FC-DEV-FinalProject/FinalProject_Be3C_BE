@@ -19,7 +19,7 @@ import java.util.List;
 public class StrategyIndicatorsCalculator {
 
     /*
-        StrategyIndicators : MDD, KP Ratio, SM Score, AccumProfitLossRate 업데이트
+        StrategyIndicators : MDD, KP Ratio, SM Score, AccumulatedProfitLossRate 업데이트
         DoubleHandler - cutDouble 메서드로 소수점 잘라서 저장
     */
     private final StrategyRepository strategyRepository;
