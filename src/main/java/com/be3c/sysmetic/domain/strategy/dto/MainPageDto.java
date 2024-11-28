@@ -15,13 +15,11 @@ public class MainPageDto {
         rankedTrader : 트레이더 랭킹
         totalTraderCount : 총 트레이더 수
         totalStrategyCount : 총 전략 수(공개, 비공개 전부 포함)
-       // TODO mainPageAverageIndicator : 대표전략 평균 지표
         smScoreTopFives : SM Score Top 5개`
      */
 
     private List<TraderRankingDto> rankedTrader;
     private Long totalTraderCount;
     private Long totalStrategyCount;
-    // TODO private MainPageAverageIndicator mainPageAverageIndicator;
     private List<SmScoreTopFive> smScoreTopFives;
 }

@@ -14,11 +14,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @Service
@@ -29,6 +29,7 @@ public class MainPageServiceImpl implements MainPageService {
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
 
     @Override
+    @Transactional
     public MainPageDto getMain() throws Exception {
 
         MainPageDto m = MainPageDto.builder()
@@ -51,38 +52,24 @@ public class MainPageServiceImpl implements MainPageService {
         Page<Strategy> strategyPage = mainPageRepository.findTop3ByFollowerCount(pageable);
 
         if (strategyPage.isEmpty())
-            throw new NoSuchElementException("팔로우 상위 트레이더 3명의 데이터를 찾을 수 없습니다.");
+            // 데이터가 없어도 메인 페이지 접속은 가능해야 함
+            return new ArrayList<>();
 
         for (Strategy s : strategyPage.getContent()) {
 
-            if (s.getContent() == null || s.getContent().isEmpty()) {
-                throw new NoSuchElementException("팔로우 상위 트레이더 정보가 누락되었습니다.");
-            }
+            if (s.getContent() == null || s.getContent().isEmpty())
+                return new ArrayList<>();
 
             traders.add(TraderRankingDto.builder()
                     .id(s.getId())
                     .nickname((s.getTrader().getNickname()))
                     .followerCount(s.getFollowerCount())
-                    .accumProfitLossRate(s.getAccumProfitLossRate())
+                    .accumProfitLossRate(s.getAccumulatedProfitLossRate())
                     .build()
             );
         }
         return traders;
     }
-
-
-    // TODO setMainPageAverageIndicator : 대표전략 평균 지표
-    // private MainPageAverageIndicator setMainPageAverageIndicator(){
-    //     StrategyStatusCode statusCode = StrategyStatusCode.valueOf("PUBLIC");
-    //     List<Strategy> strategies = mainPageRepository.findAllByStatusCode(statusCode.toString());
-    //
-    //     MainPageAverageIndicator m;
-    //
-    //     for (Strategy s : strategies) {
-    //
-    //     }
-    // }
-
 
     // setTop5SmScore : SM Score Top 5 전략
     private List<SmScoreTopFive> setTop5SmScore(){
@@ -93,7 +80,8 @@ public class MainPageServiceImpl implements MainPageService {
         Page<Strategy> strategyPage = mainPageRepository.findTop5SmScore(pageable);
 
         if (strategyPage.isEmpty())
-            throw new NoSuchElementException("SM Score Top 5 전략을 찾지 못했습니다.");
+            // 데이터가 없어도 메인 페이지 접속은 가능해야 함
+            return new ArrayList<>();
 
         for (Strategy s : strategyPage) {
             HashSet<Long> idSet = new HashSet<>();
@@ -108,7 +96,7 @@ public class MainPageServiceImpl implements MainPageService {
             }
 
             StockListDto stockListDto = StockListDto.builder()
-                    .id(idSet)
+                    .stockIds(idSet)
                     .stockNames(nameSet)
                     .build();
 
@@ -126,4 +114,15 @@ public class MainPageServiceImpl implements MainPageService {
         return topFives;
     }
 
+    // TODO setMainPageAverageIndicator : 대표전략 평균 지표
+    // private MainPageAverageIndicator setMainPageAverageIndicator(){
+    //     StrategyStatusCode statusCode = StrategyStatusCode.valueOf("PUBLIC");
+    //     List<Strategy> strategies = mainPageRepository.findAllByStatusCode(statusCode.toString());
+    //
+    //     MainPageAverageIndicator m;
+    //
+    //     for (Strategy s : strategies) {
+    //
+    //     }
+    // }
 }
