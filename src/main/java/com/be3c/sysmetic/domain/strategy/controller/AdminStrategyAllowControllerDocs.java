@@ -25,18 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-<<<<<<<< HEAD:src/main/java/com/be3c/sysmetic/domain/strategy/controller/AdminStrategyAllowControllerDocs.java
 @Tag(name = "관리자 전략 관리 API", description = "관리자 전략 관리")
 public interface AdminStrategyAllowControllerDocs {
-========
-@RestController
-@Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AdminStrategyAllowController {
-
-    private final AdminStrategyService adminStrategyService;
->>>>>>>> cf5bc71 (feat: 전략 공개 승인 요청 및 비공개 전환 api 작성):src/main/java/com/be3c/sysmetic/domain/strategy/controller/AdminStrategyAllowController.java
-
     /*
         관리자 전략 관리 페이지 api
         1. 데이터를 찾는 데 성공했을 때 : OK
