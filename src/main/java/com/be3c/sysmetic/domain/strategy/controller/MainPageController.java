@@ -28,7 +28,7 @@ public class MainPageController {
         if (m == null) {
             return APIResponse.fail(ErrorCode.BAD_REQUEST, "메인 페이지 데이터를 가져올 수 없습니다.");
         }
-        if (m.getRankedTrader().isEmpty()) {
+        if (m.getRankedTrader() == null) {
             return APIResponse.fail(ErrorCode.BAD_REQUEST, "트레이더 랭킹 정보가 없습니다.");
         }
         if (m.getTotalTraderCount() == null) {
@@ -37,7 +37,7 @@ public class MainPageController {
         if (m.getTotalStrategyCount() == null) {
             return APIResponse.fail(ErrorCode.BAD_REQUEST, "총 전략 수 정보가 없습니다.");
         }
-        if (m.getSmScoreTopFives().isEmpty()) {
+        if (m.getSmScoreTopFives() == null) {
             return APIResponse.fail(ErrorCode.BAD_REQUEST, "SM Score 랭킹 정보가 없습니다.");
         }
         return APIResponse.success(m);
