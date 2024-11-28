@@ -30,11 +30,11 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     public Page<Strategy> searchByConditions(Pageable pageable, StrategySearchRequestDto strategySearchRequestDto) {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
-        booleanBuilder.and(getMethodCond(strategy, strategySearchRequestDto));
-        booleanBuilder.and(getCycleCond(strategy, strategySearchRequestDto));
+        booleanBuilder.and(getMethodCond(strategySearchRequestDto));
+        booleanBuilder.and(getCycleCond(strategySearchRequestDto));
         booleanBuilder.and(getStockCond(strategySearchRequestDto));
         // TODO 운용기간 추가 booleanBuilder.and(getPeriodCond(strategy, strategySearchRequestDto));
-        booleanBuilder.and(getAccumProfitLossRateRange(strategy, strategySearchRequestDto));
+        booleanBuilder.and(getAccumProfitLossRateRange(strategySearchRequestDto));
         booleanBuilder.and(strategy.statusCode.eq(String.valueOf(StrategyStatusCode.PUBLIC)));
 
         // 필터링된 결과 쿼리 실행
@@ -102,17 +102,17 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
 
 
     // 매매방식 조건
-    private BooleanBuilder getMethodCond(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
+    private BooleanBuilder getMethodCond(StrategySearchRequestDto strategySearchRequestDto) {
         List<String> methodCond = strategySearchRequestDto.getMethods();
 
         if (methodCond == null || methodCond.isEmpty())
             return new BooleanBuilder();
 
-        return new BooleanBuilder(strategy.method.name.in(methodCond));
+        return new BooleanBuilder(QStrategy.strategy.method.name.in(methodCond));
     }
 
     // 주기 조건
-    private BooleanBuilder getCycleCond(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
+    private BooleanBuilder getCycleCond(StrategySearchRequestDto strategySearchRequestDto) {
         List<String> cycleCond = strategySearchRequestDto.getCycle();
 
         if (cycleCond == null || cycleCond.isEmpty())
@@ -122,7 +122,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
                 .map(s -> s.charAt(0))
                 .toList();
 
-        return new BooleanBuilder(strategy.cycle.in(cycleChars));
+        return new BooleanBuilder(QStrategy.strategy.cycle.in(cycleChars));
     }
 
     // 종목 조건
@@ -174,7 +174,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     // }
 
     // 누적수익률 조건
-    private BooleanBuilder getAccumProfitLossRateRange(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
+    private BooleanBuilder getAccumProfitLossRateRange(StrategySearchRequestDto strategySearchRequestDto) {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
         if (!checkAccumProfitLossRateRange(strategySearchRequestDto))
@@ -183,7 +183,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         Double start = Double.parseDouble(strategySearchRequestDto.getAccumulatedProfitLossRateRangeStart());
         Double end = Double.parseDouble(strategySearchRequestDto.getAccumulatedProfitLossRateRangeEnd());
 
-        booleanBuilder.and(strategy.accumulatedProfitLossRate.between(start, end));
+        booleanBuilder.and(QStrategy.strategy.accumulatedProfitLossRate.between(start, end));
 
         return booleanBuilder;
     }
