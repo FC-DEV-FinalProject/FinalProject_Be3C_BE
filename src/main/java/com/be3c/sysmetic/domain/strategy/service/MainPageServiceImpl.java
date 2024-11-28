@@ -30,16 +30,16 @@ public class MainPageServiceImpl implements MainPageService {
 
     @Override
     @Transactional
-    public MainPageDto getMain() throws Exception {
+    public MainPageDto getMain() {
 
-        MainPageDto m = MainPageDto.builder()
+        MainPageDto mainPageDto = MainPageDto.builder()
                 .rankedTrader(setTop3FollowerTrader())
                 .totalTraderCount(memberRepository.countAllByRoleCode("trader"))
                 .totalStrategyCount(mainPageRepository.count())
                 // TODO  .mainPageAverageIndicator(setMainPageAverageIndicator())
                 .smScoreTopFives(setTop5SmScore())
                 .build();
-        return m;
+        return mainPageDto;
     }
 
 

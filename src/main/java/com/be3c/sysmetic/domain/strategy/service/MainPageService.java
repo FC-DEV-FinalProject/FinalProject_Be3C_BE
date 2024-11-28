@@ -4,5 +4,5 @@ import com.be3c.sysmetic.domain.strategy.dto.MainPageDto;
 
 public interface MainPageService {
 
-    MainPageDto getMain() throws Exception;
+    MainPageDto getMain();
 }
