@@ -12,7 +12,7 @@ import java.util.Map;
 public interface NoticeService {
 
     // 등록
-    boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen,
+    boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isOpen,
                            List<MultipartFile> fileList, List<MultipartFile> imageList);
 
     // 관리자 검색 조회
@@ -29,7 +29,7 @@ public interface NoticeService {
     Notice findNoticeById(Long noticeId);
 
     // 관리자 문의 수정
-    boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen,
+    boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isOpen,
                          List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList);
 
     // 관리자 문의 삭제

@@ -34,15 +34,21 @@ public class NoticeServiceImpl implements NoticeService {
     // 등록
     @Override
     @Transactional
-    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isAttachment, Integer isOpen,
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isOpen,
                                     List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
 
+        Integer isAttachment;
+        if (fileList.isEmpty()) {
+            isAttachment = 0;
+        } else {
+            isAttachment = 1;
+        }
+
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
 
         noticeRepository.save(notice);
-
 
         if(!fileList.isEmpty()) {
             for (MultipartFile file : fileList) {
@@ -107,7 +113,7 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isAttatchment, Integer isOpen,
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isOpen,
                                 List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
@@ -115,7 +121,6 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
         notice.setCorrectorId(correctorId);
-        notice.setIsAttatchment(isAttatchment);
         notice.setIsOpen(isOpen);
 
         boolean deleteAllFile = true;
@@ -126,7 +131,7 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
         if (deleteAllFile && newFileList.isEmpty()) {
-            notice.setIsAttatchment(0);
+            notice.setIsAttachment(0);
         }
 
         for (NoticeExistFileImageRequestDto n : existImageDtoList) {

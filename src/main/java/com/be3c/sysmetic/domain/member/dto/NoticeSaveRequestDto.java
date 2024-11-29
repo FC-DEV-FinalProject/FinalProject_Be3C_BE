@@ -12,6 +12,8 @@ import lombok.*;
 @Schema(description = "공지사항 등록 요청 DTO")
 public class NoticeSaveRequestDto {
 
+    private Long userId;
+
     @Schema(description = "공지사항 제목", example = "공지사항 제목 예시")
     @NotNull
     private String noticeTitle;
@@ -20,9 +22,9 @@ public class NoticeSaveRequestDto {
     @NotNull
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
-    @NotNull
-    private Integer isAttatchment;
+//    @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
+//    @NotNull
+//    private Integer isAttachment;
 
     @Schema(description = "공개 여부 (0: 비공개, 1: 공개)", example = "1")
     @NotNull

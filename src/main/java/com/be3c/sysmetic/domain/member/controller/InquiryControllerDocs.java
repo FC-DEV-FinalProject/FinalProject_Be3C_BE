@@ -163,8 +163,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
-            @PathVariable Long strategyId,
-            @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto);
+            @PathVariable Long strategyId);
 
 
     // 질문자 문의 등록 API

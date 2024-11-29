@@ -62,7 +62,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(searchType.equals("strategy") || searchType.equals("trader") || searchType.equals("inquirer"))) {
@@ -130,7 +130,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(searchType.equals("strategy") || searchType.equals("trader") || searchType.equals("inquirer"))) {
@@ -139,41 +139,42 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-            InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-            InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                    .page(page)
+                    .closed(closed)
+                    .searchType(searchType)
+                    .searchText(searchText)
 
-            inquiryAnswerShowResponseDto.setPage(page);
-            inquiryAnswerShowResponseDto.setClosed(closed);
-            inquiryAnswerShowResponseDto.setSearchType(searchType);
-            inquiryAnswerShowResponseDto.setSearchText(searchText);
+                    .inquiryId(inquiryId)
+                    .inquiryAnswerId(inquiryAnswer.getId())
 
-            inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-            inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                    .inquiryTitle(inquiry.getInquiryTitle())
+                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                    .inquirerNickname(inquiry.getInquirer().getNickname())
+                    .inquiryStatus(inquiry.getInquiryStatus())
 
-            inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-            inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                    // 전략 위 아이콘들
+                    .strategyName(inquiry.getStrategy().getName())
+                    // 트레이더의 프로필 사진
+                    .traderNickname(inquiry.getStrategy().getTrader().getNickname())
 
-            // 전략 위 아이콘들
-            inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                    .inquiryContent(inquiry.getInquiryContent())
 
-            // 트레이더의 아이콘
-            inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                    .answerTitle(inquiryAnswer.getAnswerTitle())
+                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                    .answerContent(inquiryAnswer.getAnswerContent())
 
-            inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-            inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-            inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-            inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-            inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                    .previousTitle(previousInquiry.getInquiryTitle())
+                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                    .nextTitle(nextInquiry.getInquiryTitle())
+                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .build();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -255,11 +256,10 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
-            @PathVariable Long strategyId,
-            @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
+            @PathVariable Long strategyId) {
 
         try {
-            Strategy strategy = inquiryService.findStrategyForInquiryPage(inquirySavePageShowRequestDto.getStrategyId());
+            Strategy strategy = inquiryService.findStrategyForInquiryPage(strategyId);
 
             InquirySavePageShowResponseDto inquirySavePageShowResponseDto = InquirySavePageShowResponseDto.builder()
                     .strategyName(strategy.getName())
@@ -334,12 +334,12 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
@@ -400,49 +400,50 @@ public class InquiryController implements InquiryControllerDocs {
 
          if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
          }
 
          if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
          }
 
          try {
+             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+             Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+             Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
              InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-             InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-             InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                     .page(page)
+                     .sort(sort)
+                     .closed(closed)
 
-             inquiryAnswerShowResponseDto.setPage(page);
-             inquiryAnswerShowResponseDto.setSort(sort);
-             inquiryAnswerShowResponseDto.setClosed(closed);
+                     .inquiryId(inquiryId)
+                     .inquiryAnswerId(inquiryAnswer.getId())
 
-             inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-             inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                     .inquiryTitle(inquiry.getInquiryTitle())
+                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                     .inquirerNickname(inquiry.getInquirer().getNickname())
+                     .inquiryStatus(inquiry.getInquiryStatus())
 
-             inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-             inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-             inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                     // 전략 위 아이콘들
+                     .strategyName(inquiry.getStrategy().getName())
+                     // 트레이더의 프로필 사진
+                     .traderNickname(inquiry.getStrategy().getTrader().getNickname())
 
-             // 전략 위 아이콘들
-             inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                     .inquiryContent(inquiry.getInquiryContent())
 
-             // 트레이더의 아이콘
-             inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                     .answerTitle(inquiryAnswer.getAnswerTitle())
+                     .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                     .answerContent(inquiryAnswer.getAnswerContent())
 
-             inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-             inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-             inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-             inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-             inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-             inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                     .previousTitle(previousInquiry.getInquiryTitle())
+                     .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                     .nextTitle(nextInquiry.getInquiryTitle())
+                     .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                     .build();
 
              return ResponseEntity.status(HttpStatus.OK)
                      .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -479,12 +480,12 @@ public class InquiryController implements InquiryControllerDocs {
 
             if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
             }
 
             if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
             }
 
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
@@ -652,12 +653,12 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
@@ -706,49 +707,50 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         try {
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-            InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-            InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                    .page(page)
+                    .sort(sort)
+                    .closed(closed)
 
-            inquiryAnswerShowResponseDto.setPage(page);
-            inquiryAnswerShowResponseDto.setSort(sort);
-            inquiryAnswerShowResponseDto.setClosed(closed);
+                    .inquiryId(inquiryId)
+                    .inquiryAnswerId(inquiryAnswer.getId())
 
-            inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-            inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                    .inquiryTitle(inquiry.getInquiryTitle())
+                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                    .inquirerNickname(inquiry.getInquirer().getNickname())
+                    .inquiryStatus(inquiry.getInquiryStatus())
 
-            inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-            inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                    // 전략 위 아이콘들
+                    .strategyName(inquiry.getStrategy().getName())
+                    // 트레이더의 프로필 사진
+                    .traderNickname(inquiry.getStrategy().getTrader().getNickname())
 
-            // 전략 위 아이콘들
-            inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                    .inquiryContent(inquiry.getInquiryContent())
 
-            // 트레이더의 아이콘
-            inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                    .answerTitle(inquiryAnswer.getAnswerTitle())
+                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                    .answerContent(inquiryAnswer.getAnswerContent())
 
-            inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-            inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-            inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-            inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-            inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                    .previousTitle(previousInquiry.getInquiryTitle())
+                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                    .nextTitle(nextInquiry.getInquiryTitle())
+                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .build();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquiryAnswerShowResponseDto));

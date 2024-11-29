@@ -52,11 +52,11 @@ public class NoticeContoller implements NoticeControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestPart @Valid NoticeSaveRequestDto noticeSaveRequestDto,
+            @RequestPart(value = "NoticeSaveRequestDto") NoticeSaveRequestDto noticeSaveRequestDto,
             @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
             @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList) {
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
+//        Long userId = securityUtils.getUserIdInSecurityContext();
 
         if(fileList.size() > 3) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -70,10 +70,11 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         try {
             if (noticeService.registerNotice(
-                    userId,
+                    noticeSaveRequestDto.getUserId(),
+//                    userId,
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
-                    noticeSaveRequestDto.getIsAttatchment(),
+//                    noticeSaveRequestDto.getIsAttachment(),
                     noticeSaveRequestDto.getIsOpen(),
                     fileList,
                     imageList)) {
@@ -144,7 +145,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                 .writerNickname(writerNickname)
                 .writeDate(notice.getWriteDate())
                 .hits(notice.getHits())
-                .isAttatchment(notice.getIsAttatchment())
+                .isAttachment(notice.getIsAttachment())
                 .isOpen(notice.getIsOpen())
                 .build();
     }
@@ -251,7 +252,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .correctDate(notice.getCorrectDate())
                     .writerNickname(writerNickname)
                     .hits(notice.getHits())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
@@ -330,7 +331,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeId(notice.getId())
                     .noticeTitle(notice.getNoticeTitle())
                     .noticeContent(notice.getNoticeContent())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
@@ -368,8 +369,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         if (modifyInModifyPageTime == null) {
             String str = "3000-11-05 13:47:13.248";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-            LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
-            modifyInModifyPageTime = dateTime;
+            modifyInModifyPageTime = LocalDateTime.parse(str, formatter);
         }
 
         Long userId = securityUtils.getUserIdInSecurityContext();
@@ -384,7 +384,6 @@ public class NoticeContoller implements NoticeControllerDocs {
                         noticeModifyRequestDto.getNoticeTitle(),
                         noticeModifyRequestDto.getNoticeContent(),
                         userId,
-                        noticeModifyRequestDto.getIsAttatchment(),
                         noticeModifyRequestDto.getIsOpen(),
                         noticeModifyRequestDto.getExistFileDtoList(),
                         noticeModifyRequestDto.getExistImageDtoList(),
@@ -506,7 +505,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                 .noticeId(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
                 .writeDate(notice.getWriteDate())
-                .isAttatchment(notice.getIsAttatchment())
+                .isAttachment(notice.getIsAttachment())
                 .build();
     }
 
@@ -572,7 +571,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .correctDate(notice.getCorrectDate())
                     .writerNickname(writerNickname)
                     .hits(notice.getHits())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)

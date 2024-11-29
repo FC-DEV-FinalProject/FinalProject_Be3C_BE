@@ -27,7 +27,7 @@ public class Notice extends BaseEntity {
     private String noticeContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(referencedColumnName = "id", name = "writer_id", nullable = false)
     private Member writer;
 
 //    @Column(name = "writer", nullable = false)
@@ -37,7 +37,7 @@ public class Notice extends BaseEntity {
     private LocalDateTime writeDate;
 
     // 화면엔 안 보임 : id or 닉네임
-    @Column(name = "corrector")
+    @Column(name = "corrector_id")
     private Long correctorId;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -51,7 +51,7 @@ public class Notice extends BaseEntity {
     private Long hits;
 
     @Column(name = "is_attachment", nullable = false)
-    private Integer isAttatchment; // enum or long
+    private Integer isAttachment; // enum or long
 
     @Column(name = "is_open", nullable = false)
     private Integer isOpen; // enum or long
@@ -59,7 +59,7 @@ public class Notice extends BaseEntity {
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
-                                      Integer isAttatchment,
+                                      Integer isAttachment,
                                       Integer isOpen) {
         Notice notice = new Notice();
 
@@ -70,7 +70,7 @@ public class Notice extends BaseEntity {
         notice.setWriteDate(LocalDateTime.now());
         notice.setCorrectorId(writer.getId());
         notice.setHits(0L);
-        notice.setIsAttatchment(isAttatchment);
+        notice.setIsAttachment(isAttachment);
         notice.setIsOpen(isOpen);
 
         return notice;
