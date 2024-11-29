@@ -73,4 +73,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findDistinctByNickname(String nickname);
 
+    Optional<Member> findByPassword(String email);
+
+    // 메인 페이지에서 사용!
+    Long countAllByRoleCode(String roleCode);
 }
