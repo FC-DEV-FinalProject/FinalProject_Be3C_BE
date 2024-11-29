@@ -79,4 +79,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             @Param("searchKeyword") String searchKeyword,
             Pageable pageable
     );
+
+    Optional<Member> findDistinctByNickname(String nickname);
+
 }

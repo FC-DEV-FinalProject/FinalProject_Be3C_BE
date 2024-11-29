@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +27,15 @@ public interface StrategyStockReferenceRepository extends JpaRepository<Strategy
         AND sr.stock.id IN :stockIds
     """)
     void deleteByStrategyIdAndStockIds(Long strategyId, Set<Long> stockIds);
+
+    // MainPage에서 사용! - 11/19
+    List<StrategyStockReference> findByStrategyId(Long id);
+
+    // 상세 검색에서 사용!
+    @Query("SELECT s FROM StrategyStockReference s WHERE s.stock.id IN :ids")
+    List<StrategyStockReference> findAllByStockIds(@Param("ids") List<Long> ids);
+
+    // StockGetter에서 사용
+    @Query("SELECT s FROM StrategyStockReference s WHERE s.strategy.id = :strategyId")
+    List<StrategyStockReference> findAllByStrategyId(@Param("strategyId") Long strategyId);
 }
