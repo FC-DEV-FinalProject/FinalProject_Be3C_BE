@@ -16,6 +16,9 @@ import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.email.dto.Subscriber;
 import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -40,6 +44,8 @@ import java.util.stream.Collectors;
 public class MemberInfoServiceImpl implements MemberInfoService {
 
     private final SecurityUtils securityUtils;
+
+    private final FileService fileService;
 
     private final EmailService emailService;
 
@@ -112,7 +118,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     }
 
     @Override
-    public boolean changeMemberInfo(Long userId, MemberPatchInfoRequestDto memberPatchInfoRequestDto) {
+    public boolean changeMemberInfo(Long userId, MemberPatchInfoRequestDto memberPatchInfoRequestDto, MultipartFile file) {
         Long requestId = securityUtils.getUserIdInSecurityContext();
 
         if(!(memberPatchInfoRequestDto.getUserId().equals(userId) || userId.equals(requestId))) {
@@ -120,6 +126,10 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         }
 
         Member member = findMemberById(userId);
+
+        if(file != null) {
+            fileService.uploadImage(file, new FileRequest(FileReferenceType.MEMBER, member.getId()));
+        }
 
         if(memberPatchInfoRequestDto.getNicknameDuplCheck() &&
             memberPatchInfoRequestDto.getNickname() != null &&

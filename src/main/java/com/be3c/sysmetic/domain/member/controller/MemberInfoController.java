@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @Slf4j
@@ -73,13 +74,15 @@ public class MemberInfoController implements MemberInfoControllerDocs {
     @PatchMapping("/member/info/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @PathVariable Long id,
-            @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
+            @RequestPart MemberPatchInfoRequestDto memberPatchInfoRequestDto,
+            @RequestPart(name="file") MultipartFile file
     ) {
         try {
             if(memberInfoService
                     .changeMemberInfo(
                             id,
-                            memberPatchInfoRequestDto
+                            memberPatchInfoRequestDto,
+                            file
                     )) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());

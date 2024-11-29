@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "회원 정보 수정 API", description = "회원 정보 수정 API")
 @RequestMapping("/v1")
@@ -66,7 +67,8 @@ public interface MemberInfoControllerDocs {
     @PatchMapping("/member/info/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @PathVariable Long id,
-            @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
+            @RequestPart MemberPatchInfoRequestDto memberPatchInfoRequestDto,
+            @RequestPart(name="file") MultipartFile file
     );
 
     /*
