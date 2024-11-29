@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
@@ -10,7 +9,7 @@ import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 
@@ -65,7 +62,7 @@ public class StockServiceImpl implements StockService {
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
-        String filePath = fileService.getFilePath(new FileRequestDto(FileReferenceType.STOCK, id));
+        String filePath = fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, id));
 
         return StockGetResponseDto.builder()
                 .id(findStock.getId())
@@ -121,7 +118,7 @@ public class StockServiceImpl implements StockService {
                         .statusCode(USING_STATE.getCode())
                         .build());
 
-        fileService.uploadImage(file, new FileRequestDto(FileReferenceType.STOCK, savedStock.getId()));
+        fileService.uploadImage(file, new FileRequest(FileReferenceType.STOCK, savedStock.getId()));
 
         return true;
     }
@@ -152,7 +149,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
-        fileService.updateImage(file, new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+        fileService.updateImage(file, new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }
@@ -175,7 +172,7 @@ public class StockServiceImpl implements StockService {
         findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(findStock);
 
-        fileService.deleteFile(new FileRequestDto(FileReferenceType.STOCK, findStock.getId()));
+        fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }

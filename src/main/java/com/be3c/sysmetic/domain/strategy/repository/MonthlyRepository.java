@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
+import com.be3c.sysmetic.domain.strategy.dto.MonthlyRecord;
 import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,14 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
             Pageable pageable
     );
 
+    // 특정 전략의 월간분석 데이터 삭제
+    void deleteAllByStrategyId(@Param("strategyId") Long strategyId);
+
     /* 엑셀을 위한 메서드 */
     List<Monthly> findAllByStrategyIdOrderByYearNumberAscMonthNumberAsc(Long strategyId);
 
+    // 전략 상세 페이지에서 사용!
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MonthlyRecord(m.yearNumber, m.monthNumber, m.accumulatedProfitLossRate) From Monthly m "
+            + "WHERE m.strategy.id = :strategyId ORDER BY m.yearNumber ASC, m.monthNumber ASC")
+    List<MonthlyRecord> findAllMonthlyRecord(@Param("strategyId") Long strategyId);
 }

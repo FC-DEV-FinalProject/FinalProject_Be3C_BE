@@ -4,9 +4,10 @@ import com.be3c.sysmetic.domain.member.dto.TokenApiResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,36 +41,37 @@ public class TokenController {
     )
     @GetMapping("/auth")
     public ResponseEntity<APIResponse<TokenApiResponseDto>> checkToken(HttpServletRequest request) {
-
         // Access 토큰 추출
         String accessToken = jwtTokenProvider.extractToken(request);
         if(accessToken == null) {
-            return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.fail(ErrorCode.UNAUTHORIZED, "토큰 미존재 또는 정상적이지 않은 토큰"));
         }
+
         // 토큰에서 회원id 추출
         Claims claims = jwtTokenProvider.parseTokenClaims(accessToken);
         Long memberId = claims.get("memberId", Long.class);
 
         // 회원id를 통해서 Member 추출
-        Optional<Member> member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
 
         // roleCode("RC001"방식) 를 Role("USER"방식) 로 명칭 변환
-        String role = jwtTokenProvider.roleCodeChangeRole(member.get().getRoleCode());
+        String role = jwtTokenProvider.roleCodeChangeRole(member.getRoleCode());
 
         // 프로필 이미지 경로 추출
         String profileImage = null;
         try {
-            profileImage = fileService.getFilePath(new FileRequestDto(FileReferenceType.MEMBER, memberId));
-        } catch (EntityNotFoundException e) {
+            profileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
+        } catch (IllegalArgumentException e) {
             log.info("프로필 이미지 추출 실패");
         }
 
-        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, nickname, profileImage)
+        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, nickname, phoneNumber, profileImage)
         TokenApiResponseDto dto = TokenApiResponseDto.builder()
                 .memberId(memberId)
                 .roleCode(role)
-                .email(member.get().getEmail())
-                .nickname(member.get().getNickname())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .phoneNumber(member.getPhoneNumber())
                 .profileImage(profileImage)
                 .build();
 

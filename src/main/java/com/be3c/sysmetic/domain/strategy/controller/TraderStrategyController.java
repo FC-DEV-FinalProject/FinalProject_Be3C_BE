@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "트레이더 전략 API", description = "트레이더 전략 관리 및 조회")
-@RequestMapping("/trader")
+@RequestMapping("/v1/trader")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 @RestController
 public class TraderStrategyController {
@@ -43,13 +43,12 @@ public class TraderStrategyController {
     )
     @PostMapping(value = "/strategy", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     // @PreAuthorize("hasRole('ROLE_TRADER'))
-    public ResponseEntity<APIResponse> insertStrategy(
+    public ResponseEntity<APIResponse<StrategyPostResponseDto>> insertStrategy(
             @RequestPart("requestDto") @Parameter(description = "전략 등록 요청 DTO") @Valid StrategyPostRequestDto requestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        traderStrategyService.insertStrategy(requestDto, file);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success());
+                .body(APIResponse.success(traderStrategyService.insertStrategy(requestDto, file)));
     }
 
     // 전략 수정

@@ -112,7 +112,7 @@ public class FolderServiceTest {
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         folderRepository.findByMemberIdAndStatusCode(userId, Code.USING_STATE.getCode());
@@ -128,7 +128,7 @@ public class FolderServiceTest {
         for(int i = 0; i < 5; i++) {
             folderService.insertFolder(FolderPostRequestDto.builder()
                             .name("테스트" + i)
-                            .CheckDupl(true)
+                            .checkDupl(true)
                             .build());
         }
 
@@ -139,7 +139,7 @@ public class FolderServiceTest {
         assertThrows(ResourceLimitExceededException.class, () -> {
             folderService.insertFolder(FolderPostRequestDto.builder()
                     .name("테스트" + 6)
-                    .CheckDupl(true)
+                    .checkDupl(true)
                     .build());
         });
     }
@@ -150,13 +150,13 @@ public class FolderServiceTest {
     public void testInsertFolderDuplName() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertThrows(ConflictException.class, () -> {
             folderService.insertFolder(FolderPostRequestDto.builder()
                     .name("테스트폴더")
-                    .CheckDupl(true)
+                    .checkDupl(true)
                     .build());
         });
     }
@@ -168,7 +168,7 @@ public class FolderServiceTest {
         assertThrows(IllegalStateException.class, () -> {
             folderService.insertFolder(FolderPostRequestDto.builder()
                     .name("테스트폴더")
-                    .CheckDupl(false)
+                    .checkDupl(false)
                     .build());
         });
     }
@@ -180,7 +180,7 @@ public class FolderServiceTest {
         // given
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         FolderPutRequestDto folderPutRequestDto = FolderPutRequestDto.builder()
@@ -205,7 +205,7 @@ public class FolderServiceTest {
     public void testUpdateFolderNotDuplCheckRequest() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertThrows(IllegalStateException.class, () -> {
@@ -223,12 +223,12 @@ public class FolderServiceTest {
     public void testUpdateFolderDuplNameRequest() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("중복테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertThrows(ConflictException.class, () -> {
@@ -259,12 +259,12 @@ public class FolderServiceTest {
     public void testDeleteFolder() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더2")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         folderService.deleteFolder(1L);
@@ -276,7 +276,7 @@ public class FolderServiceTest {
     public void testDeleteLastFolder() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertThrows(IllegalStateException.class, () -> {
@@ -290,7 +290,7 @@ public class FolderServiceTest {
     public void testDeleteNotExistFolder() {
         folderService.insertFolder(FolderPostRequestDto.builder()
                 .name("테스트폴더")
-                .CheckDupl(true)
+                .checkDupl(true)
                 .build());
 
         assertThrows(EntityNotFoundException.class, () -> {

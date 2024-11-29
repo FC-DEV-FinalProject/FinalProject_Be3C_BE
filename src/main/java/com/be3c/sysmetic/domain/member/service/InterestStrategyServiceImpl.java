@@ -107,7 +107,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 USING_STATE.getCode()
         ).orElseThrow(EntityNotFoundException::new));
 
-        return false;
+        return true;
     }
 
     /*
@@ -134,7 +134,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         followPostRequestDto.getStrategyId()
                 );
 
-        String traderEmail = interestStrategy.get().getStrategy().getTrader().getEmail();
+        String traderEmail = memberRepository.findById(userId).orElseThrow(EntityNotFoundException::new).getEmail();
 
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, followPostRequestDto.getFolderId(), followPostRequestDto.getStrategyId());

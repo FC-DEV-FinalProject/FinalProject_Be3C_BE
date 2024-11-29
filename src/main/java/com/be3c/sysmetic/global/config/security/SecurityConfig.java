@@ -67,7 +67,6 @@ public class SecurityConfig {
                                 .requestMatchers("/trader").hasRole("TRADER")
                                 .anyRequest().authenticated()
                 )
-
                 // 예외 처리
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint())

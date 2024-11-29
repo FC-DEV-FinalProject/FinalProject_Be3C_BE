@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.global.util.file.service;
 
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,14 +49,13 @@ public class S3Service {
     /**
      * S3 버킷에 업로드
      * @param file 업로드 할 파일
-     * @param fileRequestDto 폴더 스트럭쳐를 만들기 위한 reference 정보
-     * @param extention 검증된 파일 확장자 e.g) .png
+     * @param fileRequest 폴더 스트럭쳐를 만들기 위한 reference 정보
      * @return 업로드 한 경로, s3의 keyName
      */
-    public String upload(MultipartFile file, FileRequestDto fileRequestDto, String extention) {
+    public String upload(MultipartFile file, FileRequest fileRequest) {
 
-        String structuredReferenceId = createFolderStructure(fileRequestDto.referenceId());
-        String keyName = fileRequestDto.referenceType() + structuredReferenceId + UUID.randomUUID() + extention;
+        String structuredReferenceId = createFolderStructure(fileRequest.referenceId());
+        String keyName = fileRequest.referenceType() + structuredReferenceId + UUID.randomUUID();
 
         try (InputStream inputStream = file.getInputStream()) {
         RequestBody requestBody = RequestBody.fromInputStream(inputStream, file.getSize());
@@ -72,6 +71,9 @@ public class S3Service {
 
         } catch (IOException e) {
             throw new RuntimeException("파일 입력 오류로 S3 파일 업로드에 실패했습니다: " + e, e);
+        } catch (Exception e){
+            throw new RuntimeException("S3 파일 업로드에 실패했습니다: " + e, e);
+
         }
 
         return keyName;
