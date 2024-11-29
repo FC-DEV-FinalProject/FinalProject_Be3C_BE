@@ -33,6 +33,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final StrategyRepository strategyRepository;
+    private final int PAGE_SIZE = 10;
 
     /*
         findStrategyPage : 메인 전략 목록 페이지 (수익률순 조회)
@@ -41,8 +42,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
 
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
 
         Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(String.valueOf(StrategyStatusCode.PUBLIC), pageable)
                 .map(strategy -> new StrategyListDto(
@@ -75,8 +75,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE);            // 팔로우 수 내림차순 정렬
 
         Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
 
@@ -96,8 +95,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
 
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
 
         Member trader = memberRepository.findById(traderId)
                 .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
@@ -135,8 +133,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListByNameDto> findStrategiesByName(String keyword, Integer pageNum) {
 
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
 
         Page<Strategy> strategies = strategyListRepository.findAllByContainingName(keyword, pageable);
 
