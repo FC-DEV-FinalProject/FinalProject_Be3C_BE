@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/v1")
 public class RegisterController {
 
     private final RegisterService registerService;
@@ -47,7 +48,7 @@ public class RegisterController {
 
     // 이메일 중복확인 api
     @Operation(
-            summary = "이메일 중복 확인",
+            summary = "이메일 중복확인",
             description = "이메일 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-duplicate-email")
@@ -59,7 +60,7 @@ public class RegisterController {
     // 이메일 인증코드 전송 api
     @Operation(
             summary = "이메일 인증코드 전송",
-            description = "사용자에게 이메일 인증 코드를 전송하는 API"
+            description = "사용자에게 이메일 인증코드를 전송하는 API"
     )
     @GetMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
@@ -70,7 +71,7 @@ public class RegisterController {
     // 이메일 인증코드 확인 api
     @Operation(
             summary = "이메일 인증코드 확인",
-            description = "사용자가 입력한 이메일 인증 코드를 검증하는 API"
+            description = "사용자가 입력한 이메일 인증코드를 검증하는 API"
     )
     @PostMapping("/auth/email-code")
     public ResponseEntity<APIResponse<String>> verifyCode(@Valid @RequestBody EmailResponseDto emailResponseDto) {
@@ -80,7 +81,7 @@ public class RegisterController {
 
     // 닉네임 중복확인 api
     @Operation(
-            summary = "닉네임 중복 확인",
+            summary = "닉네임 중복확인",
             description = "닉네임 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-nickname")

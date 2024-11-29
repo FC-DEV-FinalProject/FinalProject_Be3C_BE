@@ -14,6 +14,21 @@ import java.time.LocalDateTime;
 @Schema(description = "관리자 문의 답변 조회 응답 DTO")
 public class InquiryAnswerShowResponseDto {
 
+    @Schema(description = "이 공지사항이 있던 페이지", example = "1")
+    private int page;
+
+    @Schema(description = "지정했던 정렬순", example = "searchType")
+    private String sort;
+
+    @Schema(description = "지정했던 답변상태", example = "searchType")
+    private String closed;
+
+    @Schema(description = "검색했던 검색 조건", example = "searchType")
+    private String searchType;
+
+    @Schema(description = "검색했던 검색 단어", example = "searchText")
+    private String searchText;
+
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
 

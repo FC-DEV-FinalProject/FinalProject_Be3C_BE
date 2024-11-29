@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/api/excel")
+@RequestMapping("/v1/excel")
 @RequiredArgsConstructor
 public class ExcelControllerImpl implements ExcelController {
 

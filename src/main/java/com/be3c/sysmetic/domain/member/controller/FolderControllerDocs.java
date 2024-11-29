@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.dto.FolderPutRequestDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +27,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "중복된 폴더명이 없음",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "409",
@@ -40,7 +44,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @GetMapping("/member/folder/availability")
     ResponseEntity<APIResponse<String>> getDuplCheck(
             @RequestParam String folderName
     );
@@ -59,7 +62,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "해당 유저의 폴더 목록 반환 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -73,7 +79,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @GetMapping("/member/folder")
     ResponseEntity<APIResponse<List<FolderListResponseDto>>> getAllFolder(
     );
 
@@ -94,7 +99,10 @@ public interface FolderControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "폴더 추가 성공",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -122,7 +130,6 @@ public interface FolderControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @PostMapping("/member/folder/")
     ResponseEntity<APIResponse<String>> postFolder(
             @Valid @RequestBody FolderPostRequestDto folderPostRequestDto
     );
@@ -173,7 +180,6 @@ public interface FolderControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @PutMapping("/member/folder")
     ResponseEntity<APIResponse<String>> putFolder(
             @Valid @RequestBody FolderPutRequestDto folderPutRequestDto
     );
@@ -217,7 +223,6 @@ public interface FolderControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    @DeleteMapping("/member/folder/{id}")
     ResponseEntity<APIResponse<String>> deleteFolder(
             @PathVariable Long id
     );

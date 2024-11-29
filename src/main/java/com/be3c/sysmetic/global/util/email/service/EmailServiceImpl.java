@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
             subscriberRequest.setEventOccurredBy(EventOccuredBy.MANUAL);
             return emailApiClient.addUserSubscriberRequest(subscriberRequest);
         } catch (Exception e) {
-            handleException(e, "일반회원 구독 요청 실패");
+            handleException(e, "일반회원 구독 수정 요청 실패");
         }
         return null;
     }
@@ -61,13 +61,13 @@ public class EmailServiceImpl implements EmailService {
             subscriberRequest.setEventOccurredBy(EventOccuredBy.MANUAL);
             return emailApiClient.addTraderSubscriberRequest(subscriberRequest);
         } catch (Exception e) {
-            handleException(e, "트레이더 구독 요청 실패");
+            handleException(e, "트레이더 구독 수정 요청 실패");
         }
         return null;
     }
 
     @Override
-    public StibeeApiResponse deleteUserSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails) {
         try {
             return emailApiClient.deleteUserSubscriberRequest(emails);
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails) {
+    public StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails) {
         try {
             return emailApiClient.deleteTraderSubscriberRequest(emails);
         } catch (Exception e) {
@@ -136,19 +136,19 @@ public class EmailServiceImpl implements EmailService {
     private void handleException(Exception e, String message) {
         if (e instanceof WebClientResponseException) {
             WebClientResponseException webClientException = (WebClientResponseException) e;
-            log.error("{} 발생: 상태 코드 = {}, 메시지 = {}", message,
+            log.error("{} : API 호출 실패. 상태 코드 = {}, 메시지 = {}", message,
                     webClientException.getStatusCode().value(),
                     webClientException.getResponseBodyAsString());
         } else if (e instanceof IllegalArgumentException) {
-            log.error("{} 실패: 잘못된 요청 값입니다. 메시지: {}", message, e.getMessage());
+            log.error("{} : 잘못된 요청 값입니다. 메시지: {}", message, e.getMessage());
         } else if (e instanceof IOException) {
-            log.error("{} 실패: 파일 처리 중 오류 발생. 메시지: {}", message, e.getMessage());
+            log.error("{} : 입출력 처리 중 오류 발생. 메시지: {}", message, e.getMessage());
         } else if (e instanceof RedisConnectionException) {
-            log.error("{} 실패: Redis 연결 오류 발생. 메시지: {}", message, e.getMessage());
+            log.error("{} : Redis 연결 오류 발생. 메시지: {}", message, e.getMessage());
         } else if (e instanceof JsonProcessingException) {
-            log.error("{} 실패: JSON 직렬화 오류 발생. 메시지: {}", message, e.getMessage());
+            log.error("{} : JSON 직렬화 오류 발생. 메시지: {}", message, e.getMessage());
         } else {
-            log.error("{} 실패: {}", message, e.getMessage(), e);
+            log.error("{} : {}", message, e.getMessage(), e);
         }
         throw new EmailSendingException(message, e);
     }

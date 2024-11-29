@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.global.util.email.service;
 
-import com.be3c.sysmetic.global.util.email.dto.InquiryRequest;
-import com.be3c.sysmetic.global.util.email.dto.InterestRequest;
-import com.be3c.sysmetic.global.util.email.dto.StibeeApiResponse;
-import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
+import com.be3c.sysmetic.global.util.email.dto.*;
 
 import java.util.List;
 
@@ -47,13 +44,13 @@ public interface EmailService {
      * 일반회원 주소록에서 삭제
      * @param emails 삭제할 회원의 이메일 주소를 리스트 형태로
      */
-    StibeeApiResponse deleteUserSubscriberRequest(List<String> emails);
+    StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails);
 
     /**
      * 트레이더 주소록에서 삭제
      * @param emails 삭제할 회원의 이메일 주소를 리스트 형태로
      */
-    StibeeApiResponse deleteTraderSubscriberRequest(List<String> emails);
+    StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails);
 
     // 2.자동 메일 api 사용 -------------------------------------------------------------------------------------
 

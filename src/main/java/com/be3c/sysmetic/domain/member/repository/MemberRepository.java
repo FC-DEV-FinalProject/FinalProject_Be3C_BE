@@ -2,7 +2,6 @@ package com.be3c.sysmetic.domain.member.repository;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -72,5 +71,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     );
 
 
+    Optional<Member> findDistinctByNickname(String nickname);
 
+    Optional<Member> findByPassword(String email);
+
+    // 메인 페이지에서 사용!
+    Long countAllByRoleCode(String roleCode);
 }

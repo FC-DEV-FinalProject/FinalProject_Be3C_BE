@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.List;
 public class FollowDeleteRequestDto {
 
     @NotBlank
+    @JsonProperty("strategyId")
     @Schema(description = "삭제할 전략 ID 리스트", example = "[1, 2, 3]")
     private List<Long> strategyId;
 }

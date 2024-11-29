@@ -145,7 +145,7 @@ public class EmailServiceTest {
     void testDeleteUserSubscriberRequest() {
         List<String> emailsToDelete = List.of(DELETE_TEST_EMAIL);
 
-        StibeeApiResponse response = emailService.deleteUserSubscriberRequest(emailsToDelete);
+        StibeeSimpleResponse response = emailService.deleteUserSubscriberRequest(emailsToDelete);
 
         assertNotNull(response);
         assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
@@ -155,7 +155,7 @@ public class EmailServiceTest {
     void testDeleteTraderRequest() {
         List<String> emailsToDelete = List.of(DELETE_TEST_EMAIL);
 
-        StibeeApiResponse response = emailService.deleteTraderSubscriberRequest(emailsToDelete);
+        StibeeSimpleResponse response = emailService.deleteTraderSubscriberRequest(emailsToDelete);
 
         assertNotNull(response);
         assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
@@ -169,7 +169,7 @@ public class EmailServiceTest {
 
 
     @Test
-    void testSendAndSaveAuthCode() throws InterruptedException {
+    void testSendAndSaveAuthCode() {
         // 실제 이메일 API로 인증 코드 발송
         emailService.sendAndSaveAuthCode(ADD_TEST_EMAIL);
 

@@ -25,16 +25,17 @@ public class Notice {
     @Column(name = "notice_content", nullable = false, length = 1000)
     private String noticeContent;
 
-//    @Column(name = "writer", nullable = false)
-//    private Long writer;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member writer;
 
+//    @Column(name = "writer", nullable = false)
+//    private String writerNickname;
+
     @Column(name = "write_date", nullable = false)
     private LocalDateTime writeDate;
 
+    // 화면엔 안 보임 : id or 닉네임
     @Column(name = "corrector")
     private Long correctorId;
 
@@ -64,6 +65,7 @@ public class Notice {
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
         notice.setWriter(writer);
+//        notice.setWriterNickname(writer.getNickname());
         notice.setWriteDate(LocalDateTime.now());
         notice.setCorrectorId(writer.getId());
         notice.setHits(0L);
