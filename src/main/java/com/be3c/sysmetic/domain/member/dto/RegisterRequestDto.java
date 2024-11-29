@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
@@ -13,8 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class RegisterRequestDto {
 
-    @JsonProperty("profileImage")
-    private MultipartFile profileImage; // 프로필 이미지 (선택)
+//    @JsonProperty("profileImage")
+//    private MultipartFile profileImage; // 프로필 이미지 (선택)
 
     @NotNull
     @JsonProperty("roleCode")

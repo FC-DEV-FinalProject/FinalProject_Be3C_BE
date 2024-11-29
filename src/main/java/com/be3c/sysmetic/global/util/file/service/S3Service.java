@@ -1,10 +1,14 @@
 package com.be3c.sysmetic.global.util.file.service;
 
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileDeleteException;
+import com.be3c.sysmetic.global.util.file.exception.FileUploadException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -22,6 +26,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3Service {
 
     private final S3Client s3Client;
@@ -70,10 +75,17 @@ public class S3Service {
                 requestBody);
 
         } catch (IOException e) {
-            throw new RuntimeException("파일 입력 오류로 S3 파일 업로드에 실패했습니다: " + e, e);
-        } catch (Exception e){
-            throw new RuntimeException("S3 파일 업로드에 실패했습니다: " + e, e);
-
+            log.error("S3 파일 업로드에 실패했습니다. 파일 입력 오류.  fileRequest 정보: referenceId={}, referenceType={}. 오류 메시지: {}",
+                    fileRequest.referenceId(), fileRequest.referenceType(), e.getMessage(), e);
+            throw new FileUploadException();
+        } catch (SdkException e) {
+            log.error("S3 파일 업로드에 실패했습니다. AWS SDK 오류.  fileRequest 정보: referenceId={}, referenceType={}. 오류 메시지: {}",
+                    fileRequest.referenceId(), fileRequest.referenceType(), e.getMessage(), e);
+            throw new FileUploadException();
+        } catch (Exception e) {
+            log.error("S3 파일 업로드에 실패했습니다. fileRequest 정보: referenceId={}, referenceType={}. 오류 메시지: {}",
+                    fileRequest.referenceId(), fileRequest.referenceType(), e.getMessage(), e);
+            throw new FileUploadException();
         }
 
         return keyName;
@@ -97,10 +109,6 @@ public class S3Service {
                 .build();
 
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
-//            logger.info("Presigned URL: [{}]", presignedRequest.url().toString());
-//            logger.info("HTTP method: [{}]", presignedRequest.httpRequest().method());
-        System.out.println("Presigned URL: [{}]"+ presignedRequest.url().toString());
-        System.out.println("HTTP method: [{}]" + presignedRequest.httpRequest().method());
 
         return presignedRequest.url().toExternalForm();
     }
@@ -112,6 +120,7 @@ public class S3Service {
      */
     public boolean deleteObject(String keyName) {
 
+        try{
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(keyName)
@@ -120,6 +129,13 @@ public class S3Service {
         DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
 
         return response.sdkHttpResponse().isSuccessful();
+        } catch (SdkException e) {
+            log.error("S3 파일 삭제에 실패했습니다. AWS SDK 오류. 키 이름: {} 오류 메시지: {}", keyName, e.getMessage(), e);
+            throw new FileDeleteException();
+        } catch (Exception e) {
+            log.error("S3 파일 삭제에 실패했습니다. 키 이름: {} 오류 메시지: {}", keyName, e.getMessage(), e);
+            throw new FileDeleteException();
+        }
     }
 
     public String updateObject(MultipartFile file, String keyName){
@@ -139,7 +155,17 @@ public class S3Service {
                     requestBody);
 
         } catch (IOException e) {
-            throw new RuntimeException("파일 입력 오류로 S3 파일 업로드에 실패했습니다: " + e, e);
+            log.error("S3 파일 업데이트에 실패했습니다. 파일 입력 오류. fileRequest 정보: keyName={}. 오류 메시지: {}",
+                    keyName, e.getMessage(), e);
+            throw new FileUploadException();
+        } catch (SdkException e) {
+            log.error("S3 파일 업데이트에 실패했습니다. AWS SDK 오류.  fileRequest 정보: keyName={}. 오류 메시지: {}",
+                    keyName, e.getMessage(), e);
+            throw new FileUploadException();
+        } catch (Exception e) {
+            log.error("S3 파일 업데이트에 실패했습니다. fileRequest 정보: keyName={}. 오류 메시지: {}",
+                    keyName, e.getMessage(), e);
+            throw new FileUploadException();
         }
 
         return keyName;
