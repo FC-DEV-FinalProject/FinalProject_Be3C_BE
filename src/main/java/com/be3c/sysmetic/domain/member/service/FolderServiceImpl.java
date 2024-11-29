@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
@@ -110,6 +111,7 @@ public class FolderServiceImpl implements FolderService {
                                 userId,
                                 USING_STATE.getCode())
                         .orElseThrow(() -> new UsernameNotFoundException("")))
+                .latestInterestStrategyAddedDate(LocalDateTime.of(2000,1,1,0,0,0))
                 .build()
         );
 
@@ -185,6 +187,6 @@ public class FolderServiceImpl implements FolderService {
 
         folderRepository.save(find_folder);
 
-        return false;
+        return true;
     }
 }
