@@ -13,14 +13,13 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
-import com.be3c.sysmetic.global.exception.ConflictException;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -121,7 +120,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         // 미사용 상태로 변경
         Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
 
@@ -138,47 +137,47 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     // 전략명 중복 여부 검증
     private void checkDuplName(String name) {
         if(strategyRepository.existsByName(name)) {
-            throw new ConflictException(StrategyExceptionMessage.DUPLICATE_STRATEGY_NAME.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.DUPLICATE_STRATEGY_NAME.getMessage(), ErrorCode.DUPLICATE_RESOURCE);
         }
     }
 
     // 상태 검증 - 비공개 상태만 기본정보 수정 가능
     private void checkStatus(String status) {
         if(!status.equals(StrategyStatusCode.PRIVATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
     }
 
     // member 검증
     private void checkTrader(Long traderId) {
         if(!securityUtils.getUserIdInSecurityContext().equals(traderId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
     }
 
     // find member
     private Member findMember(Long traderId) {
         return memberRepository.findById(traderId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     // find method
     private Method findMethod(Long methodId) {
         return methodRepository.findById(methodId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     // find strategy
     private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     // 전략종목 교차테이블 저장
     private void insertStrategyStockReference(List<Long> stockIdList, Strategy strategy) {
         stockIdList.forEach((id) -> {
             Stock stock = stockRepository.findById(id).orElseThrow(() ->
-                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
             StrategyStockReference strategyStockReference = StrategyStockReference.builder()
                     .strategy(strategy)
@@ -206,7 +205,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         if(!toAddIdList.isEmpty()) {
             List<StrategyStockReference> addList = toAddIdList.stream().map(stockId -> {
                 Stock stock = stockRepository.findById(stockId).orElseThrow(() ->
-                        new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                        new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
                 
                 return StrategyStockReference.builder()
                         .strategy(strategy)
