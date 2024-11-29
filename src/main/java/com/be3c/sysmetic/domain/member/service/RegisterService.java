@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface RegisterService {
     // 1. 이메일 중복확인
@@ -19,5 +20,5 @@ public interface RegisterService {
 
     // 5. 회원가입
     @Transactional
-    boolean registerMember(RegisterRequestDto dto);
+    boolean registerMember(RegisterRequestDto dto, MultipartFile file);
 }

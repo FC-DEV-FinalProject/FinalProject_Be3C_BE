@@ -37,6 +37,7 @@ public class Member extends BaseEntity {
     public void prePersist() {
         usingStatusCode = "US001";  // 유효: US001, 휴면: US002
         totalFollow = 0;
+        totalStrategyCount = 0;
     }
 
     @Id

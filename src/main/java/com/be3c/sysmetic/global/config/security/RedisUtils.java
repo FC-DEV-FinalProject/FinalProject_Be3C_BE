@@ -1,5 +1,7 @@
 package com.be3c.sysmetic.global.config.security;
 
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -54,6 +56,10 @@ public class RedisUtils {
 
     // 2. 인증코드 조회 메서드
     public String getEmailAuthCode(String email) {
+        if(redisTemplate1.opsForValue().get(email) == null) {
+            // 인증코드 조회 실패 시 예외발생
+            throw new MemberBadRequestException(MemberExceptionMessage.REDIS_EMAIL_CODE_ERROR.getMessage());
+        }
         return redisTemplate1.opsForValue().get(email);
     }
 

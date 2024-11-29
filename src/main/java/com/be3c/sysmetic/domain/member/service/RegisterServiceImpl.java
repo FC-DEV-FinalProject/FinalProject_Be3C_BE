@@ -2,21 +2,32 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import com.be3c.sysmetic.global.util.email.dto.Subscriber;
 import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
+import com.be3c.sysmetic.global.util.email.exception.EmailSendingException;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
+import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+
+import static com.be3c.sysmetic.global.util.file.dto.FileReferenceType.MEMBER;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
@@ -61,40 +72,50 @@ public class RegisterServiceImpl implements RegisterService {
     private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final EmailService emailService;
-
-    private static final Long EXPIRE_TIME = 60 * 60 * 1000L; // 1시간(인증코드 만료시간)
+    private final FileService fileService;
 
     // 1. 이메일 중복확인
     @Override
     public boolean checkEmailDuplication(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
         if(member.isPresent()) {
-            return true; // 이메일 중복O
+            // 이메일 사용 불가능(중복O) -> 예외 발생
+            throw new MemberBadRequestException(MemberExceptionMessage.EMAIL_ALREADY_IN_USE.getMessage());
         }
-        return false; // 이메일 중복X
+        // 이메일 사용 가능 (중복X)
+        return true;
     }
 
     // 2. 이메일 인증코드 발송 및 저장
     @Override
-    @Transactional
     public boolean sendVerifyEmailCode(String email) {
-
-        emailService.sendAndSaveAuthCode(email);
+        try {
+            emailService.sendAndSaveAuthCode(email);
+        } catch (Exception e) {
+            // 이메일 관련 예외 발생 시
+            throw new MemberBadRequestException(MemberExceptionMessage.EMAIL_ERROR.getMessage());
+        }
+        // 이메일 인증코드 발송 및 저장 성공
         return true;
     }
 
     // 3. 이메일 인증코드 확인
     @Override
     public boolean checkVerifyEmailCode(String email, String inputEmailCode) {
+        // Redis에 저장된 인증코드 가져오기
         String savedAuthCode = redisUtils.getEmailAuthCode(email);
-        System.out.println("savedAuthCode = " + savedAuthCode);
+
+        // 사용자 입력 인증코드 일치 여부 확인
         if(!inputEmailCode.equals(savedAuthCode)) {
-            return false; // 인증 실패
+            // 인증코드 불일치
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_EMAIL_CODE.getMessage());
         }
 
-        // 인증 성공하면 인증내역 지우기
+        // 인증코드 일치하면 인증내역 삭제
         redisUtils.deleteEmailAuthCode(email);
-        return true; // 인증 성공
+
+        // 인증코드 일치
+        return true;
     }
 
     // 4. 닉네임 중복확인
@@ -102,17 +123,17 @@ public class RegisterServiceImpl implements RegisterService {
     public boolean checkNicknameDuplication(String nickname) {
         Optional<Member> member = memberRepository.findByNickname(nickname);
         if(member.isPresent()) {
-            return false; // 중복X
+            // 닉네임 사용 불가능(중복O) -> 예외 발생
+            throw new MemberBadRequestException(MemberExceptionMessage.NICKNAME_ALREADY_IN_USE.getMessage());
         }
-        return true; // 중복O
+        // 닉네임 사용 가능(중복X)
+        return true;
     }
 
-    // 5. 회원가입
-    @Override
-    @Transactional
-    public boolean registerMember(RegisterRequestDto dto) {
+    // 0. 회원 정보 저장 메서드
+    private Member saveMember(RegisterRequestDto dto) {
         try {
-            Member member = new Member().toBuilder()
+            Member member = Member.builder()
                     .roleCode(dto.getRoleCode().getCode())
                     .email(dto.getEmail())
                     .password(bCryptPasswordEncoder.encode(dto.getPassword()))
@@ -126,32 +147,59 @@ public class RegisterServiceImpl implements RegisterService {
                     .marketingConsentDate(LocalDateTime.parse(dto.getMarketingConsentDate()))
                     .build();
             memberRepository.save(member);
-
-            // 메일링 서비스에 등록하고 가입 이메일 발송
-            SubscriberRequest subscriberRequest = SubscriberRequest.builder()
-                    .subscribers(List.of(
-                            Subscriber.builder()
-                                    .email(dto.getEmail())
-                                    .name(dto.getNickname())
-                                    .subscribedDate(LocalDateTime.now())
-                                    .isAdConsent(true)
-                                    .build()
-                    ))
-                    .build();
-
-            switch (dto.getRoleCode()) {
-                case "RC001":
-                    emailService.addUserSubscriberRequest(subscriberRequest);
-                    break;
-                case "RC002":
-                    emailService.addTraderSubscriberRequest(subscriberRequest);
-                    break;
-            }
-
-            return true;
+            return member;
+        } catch (DateTimeParseException e) {
+            throw new MemberBadRequestException("잘못된 날짜 형식으로 인해 회원 저장 실패", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberBadRequestException("데이터 무결성 위반으로 인해 회원 저장 실패", e);
+        } catch (InvalidDataAccessApiUsageException e) {
+            throw new MemberBadRequestException("잘못된 데이터 접근으로 인해 회원 저장 실패", e);
         } catch (Exception e) {
-            throw new RuntimeException("회원가입에 실패하였습니다.", e);
+            throw new MemberBadRequestException("회원 저장 중 알 수 없는 오류 발생", e);
         }
+    }
+
+    // 5. 회원가입
+    @Override
+    @Transactional
+    public boolean registerMember(RegisterRequestDto dto, MultipartFile file) {
+        // 이메일 중복체크
+        checkEmailDuplication(dto.getEmail());
+
+        // 닉네임 중복체크
+        checkNicknameDuplication(dto.getNickname());
+
+        // 회원정보 저장
+        Member member = saveMember(dto);
+
+        // 프로필 이미지 저장
+        if(file != null && !file.isEmpty()) {
+            fileService.uploadImage(file, new FileRequestDto(MEMBER, member.getId()));
+        }
+
+        // 메일링 서비스에 등록하고 가입 이메일 발송
+        SubscriberRequest subscriberRequest = SubscriberRequest.builder()
+                .subscribers(List.of(
+                        Subscriber.builder()
+                                .email(dto.getEmail())
+                                .name(dto.getNickname())
+                                .subscribedDate(LocalDateTime.now())
+                                .isAdConsent(true)
+                                .build()
+                ))
+                .build();
+
+        switch (dto.getRoleCode()) {
+            case USER:
+                emailService.addUserSubscriberRequest(subscriberRequest);
+                break;
+            case TRADER:
+                emailService.addTraderSubscriberRequest(subscriberRequest);
+                break;
+        }
+
+        // 회원가입 성공
+        return true;
     }
 
 }
