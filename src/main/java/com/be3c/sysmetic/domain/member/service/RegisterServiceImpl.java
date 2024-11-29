@@ -10,7 +10,7 @@ import com.be3c.sysmetic.global.util.email.dto.Subscriber;
 import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
 import com.be3c.sysmetic.global.util.email.exception.EmailSendingException;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
-import com.be3c.sysmetic.global.util.file.dto.FileRequestDto;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +174,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         // 프로필 이미지 저장
         if(file != null && !file.isEmpty()) {
-            fileService.uploadImage(file, new FileRequestDto(MEMBER, member.getId()));
+            fileService.uploadImage(file, new FileRequest(MEMBER, member.getId()));
         }
 
         // 메일링 서비스에 등록하고 가입 이메일 발송
