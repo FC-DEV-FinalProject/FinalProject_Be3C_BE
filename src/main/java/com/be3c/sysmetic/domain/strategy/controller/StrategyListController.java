@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByNameDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
@@ -34,8 +35,6 @@ public class StrategyListController implements StrategyListControllerDocs {
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum){
         PageResponse<StrategyListDto> strategyList = strategyListService.findStrategyPage(pageNum);
 
-        log.info("StrategyListController getStrategies requested, pageNum = {}", pageNum);
-
         if (strategyList.getContent().isEmpty())
             return APIResponse.fail(ErrorCode.BAD_REQUEST, "요청하신 페이지가 없습니다.");
 
@@ -52,8 +51,6 @@ public class StrategyListController implements StrategyListControllerDocs {
     public APIResponse<PageResponse<TraderNicknameListDto>> searchByTraderNickname(
             @RequestParam("nickname") String nickname,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
-
-        log.info("StrategyListController searchByTraderNickname requested, nickName = {}, pageNum =  {}", nickname, pageNum);
 
         PageResponse<TraderNicknameListDto> traderList = strategyListService.findTraderNickname(nickname, pageNum);
 
@@ -75,11 +72,27 @@ public class StrategyListController implements StrategyListControllerDocs {
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
         PageResponse<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
 
-        log.info("StrategyListController getStrategiesByTraderId requested, traderId = {}, pageNum = {}", traderId, pageNum);
-
         if (strategyListByTrader.getContent().isEmpty())
             return APIResponse.fail(ErrorCode.NOT_FOUND, "해당 트레이더가 등록한 전략이 없습니다.");
 
         return APIResponse.success(strategyListByTrader);
+    }
+
+
+    /*
+        getStrategiesByName : 전략명으로 검색
+    */
+    @Override
+    @GetMapping("/name")
+    public APIResponse<PageResponse<StrategyListByNameDto>> getStrategiesByName(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
+
+        PageResponse<StrategyListByNameDto> strategyListByName = strategyListService.findStrategiesByName(keyword, pageNum);
+
+
+
+
+        return APIResponse.success();
     }
 }

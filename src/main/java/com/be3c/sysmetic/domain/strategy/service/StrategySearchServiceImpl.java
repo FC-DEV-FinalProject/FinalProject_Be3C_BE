@@ -22,6 +22,7 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
     private final StrategyRepository strategyRepository;
     private final StockGetter stockGetter;
+    private final int PAGE_SIZE = 10;
 
     /*
         searchConditions : 상세 조건 검색 결과로 나온 전략을 StrategySearchResponseDto로 변환해서 PageReposne에 담아 반환
@@ -30,9 +31,7 @@ public class StrategySearchServiceImpl implements StrategySearchService {
     public PageResponse<StrategySearchResponseDto> searchConditions(
             Integer pageNum, StrategySearchRequestDto strategySearchRequestDto) {
 
-        int pageSize = 10;
-
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE);
 
         Page<Strategy> sPage = strategyRepository.searchByConditions(pageable, strategySearchRequestDto);
 
@@ -72,8 +71,8 @@ public class StrategySearchServiceImpl implements StrategySearchService {
     */
     @Override
     public PageResponse<StrategyAlgorithmResponseDto> searchAlgorithm(Integer pageNum, StrategyAlgorithmOption algorithm) {
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE);
 
         Page<Strategy> sPage = strategyRepository.searchByAlgorithm(pageable, String.valueOf(algorithm));
 

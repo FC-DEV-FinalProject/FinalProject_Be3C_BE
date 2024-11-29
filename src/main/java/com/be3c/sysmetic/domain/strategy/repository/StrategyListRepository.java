@@ -31,4 +31,8 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
 
     // 닉네임으로 트레이더 조회 -> 트레이더 별 전략 목록
     Page<Strategy> findAllByTraderAndStatusCode(Member trader, String statusCode, Pageable pageable);
+
+    // 전략명으로 검색
+    @Query("SELECT s FROM Strategy s WHERE s.name LIKE %:keyword% AND s.statusCode = 'PUBLIC'")
+    Page<Strategy> findAllByContainingName(@Param("keyword") String keyword, Pageable pageable);
 }
