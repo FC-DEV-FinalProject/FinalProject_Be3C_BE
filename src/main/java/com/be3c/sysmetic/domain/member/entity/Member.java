@@ -27,6 +27,7 @@ public class Member extends BaseEntity {
         phoneNumber : 휴대폰 번호
         usingStatusCode : 회원상태코드
         totalFollow : 총 팔로워 수
+        totalStrategyCount : 총 전략 수
         receiveInfoConsent : 정보성 수신 동의 여부
         infoConsentDate : 정보성 수신 동의일
         receiveMarketingConsent : 마케팅 수신 동의 여부
@@ -70,6 +71,7 @@ public class Member extends BaseEntity {
     @Column(name = "total_follow", nullable = false)
     private Integer totalFollow;
 
+    // 전략에서 사용!
     @Column(name = "total_strategy_count", nullable = false)
     private Integer totalStrategyCount;
 
