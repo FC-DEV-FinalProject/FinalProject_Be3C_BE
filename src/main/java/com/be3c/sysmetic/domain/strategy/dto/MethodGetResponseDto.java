@@ -19,7 +19,6 @@ public class MethodGetResponseDto {
     @Schema(description="매매 방식 이름", example="")
     private String name;
 
-//    추후 추가 예정
-//    @Schema(description = "아이콘 이미지 경로")
-//    private String filePath;
+    @Schema(description = "아이콘 이미지 경로")
+    private String filePath;
 }

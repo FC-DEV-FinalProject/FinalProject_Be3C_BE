@@ -8,6 +8,9 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,8 @@ public class MethodServiceImpl implements MethodService {
 
     private final MethodRepository methodRepository;
 
+    private final FileService fileService;
+
     /*
         1. 이름이 같은 활성화된 매매 유형이 있는지 찾는다.
         2. 이름이 같은 활성화된 매매 유형이 존재한다면, return false
@@ -50,11 +55,18 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public MethodGetResponseDto findById(Long id) throws NullPointerException {
         Method method = methodRepository.findByIdAndStatusCode(
-                        id,
-                        USING_STATE.getCode()
-                ).orElseThrow(EntityNotFoundException::new);
-        // 아이콘 파일 패스 찾는 메서드 필요
-        return new MethodGetResponseDto(method.getId(), method.getName());
+                id,
+                USING_STATE.getCode()
+        ).orElseThrow(EntityNotFoundException::new);
+        return MethodGetResponseDto.builder()
+                .id(method.getId())
+                .name(method.getName())
+                .filePath(fileService.getFilePath(
+                        new FileRequest(
+                                FileReferenceType.METHOD,
+                                method.getId()
+                        )))
+                .build();
     }
 
     /*
@@ -68,21 +80,23 @@ public class MethodServiceImpl implements MethodService {
     public PageResponse<MethodGetResponseDto> findMethodPage(Integer page) {
         Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createdAt").descending());
 
-        Page<MethodGetResponseDto> findPage = methodRepository
+        Page<MethodGetResponseDto> methodPage = methodRepository
                 .findAllByStatusCode(pageable, USING_STATE.getCode());
 
-        if(!findPage.hasContent()) {
+        if(!methodPage.hasContent()) {
             throw new EntityNotFoundException();
         }
 
-//        파일 패스 찾는 메서드 추가 예정
+        methodPage.getContent().forEach(method -> {
+            method.setFilePath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, method.getId())));
+        });
 
         return PageResponse.<MethodGetResponseDto>builder()
-                .totalElement(findPage.getTotalElements())
-                .currentPage(findPage.getNumber())
-                .totalPages(findPage.getTotalPages())
-                .pageSize(findPage.getNumberOfElements())
-                .content(findPage.getContent())
+                .totalElement(methodPage.getTotalElements())
+                .currentPage(methodPage.getNumber())
+                .totalPages(methodPage.getTotalPages())
+                .pageSize(methodPage.getNumberOfElements())
+                .content(methodPage.getContent())
                 .build();
     }
 
@@ -132,9 +146,9 @@ public class MethodServiceImpl implements MethodService {
         }
 
         Method method = methodRepository.findByIdAndStatusCode(
-                            methodPutRequestDto.getId(),
-                            USING_STATE.getCode())
-                    .orElseThrow(EntityNotFoundException::new);
+                        methodPutRequestDto.getId(),
+                        USING_STATE.getCode())
+                .orElseThrow(EntityNotFoundException::new);
 
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
@@ -154,9 +168,9 @@ public class MethodServiceImpl implements MethodService {
     @Override
     public boolean deleteMethod(Long id) {
         Method method = methodRepository.findByIdAndStatusCode(
-                        id,
-                        USING_STATE.getCode()
-                ).orElseThrow(EntityNotFoundException::new);
+                id,
+                USING_STATE.getCode()
+        ).orElseThrow(EntityNotFoundException::new);
 
         method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
