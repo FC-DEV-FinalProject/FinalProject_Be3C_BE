@@ -112,7 +112,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
             return true;
         }
-        saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
+        //saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
 
         return false;
     }
