@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -52,6 +53,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final FileService fileService;
 
+    private final StockGetter stockGetter;
+
     /**
      * 추후에 수정 필요 (SELECT가 너무 많이 날아간다.)
      */
@@ -85,7 +88,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         if(folderPage.hasContent()) {
             folderPage.getContent().forEach(interestStrategy -> {
                 interestStrategy.setTraderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, interestStrategy.getTraderId())));
-//                interestStrategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, interestStrategy.getMethodId())));
+                interestStrategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, interestStrategy.getMethodId())));
+                stockGetter.getStocks(interestStrategy.getId()).getStockIds().forEach(stockId -> {
+                            interestStrategy.getStockIconPath().add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)));
+                        }
+                );
             });
 
             return PageResponse.<InterestStrategyGetResponseDto>builder()

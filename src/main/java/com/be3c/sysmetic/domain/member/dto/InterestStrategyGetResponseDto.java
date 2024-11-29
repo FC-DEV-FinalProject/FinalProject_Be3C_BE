@@ -24,8 +24,10 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "트레이더 이름", example = "Jane Doe")
     private String traderName;
 
-    @Schema(description = "매매 방식 아이콘 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
+    @Schema(description = "프로필 사진 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
     private String traderProfileImage;
+
+    private Long methodId;
 
     @Schema(description = "매매 방식 아이콘 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
     private String methodIconPath;
@@ -45,12 +47,13 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "최대 낙폭(MDD)", example = "-12.34")
     private Double MDD;
 
-    public InterestStrategyGetResponseDto(Long id, String strategyName, Long traderId, String traderName, String traderProfileImage, String methodIconPath, List<String> stockIconPath, Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
+    public InterestStrategyGetResponseDto(Long id, String strategyName, Long traderId, String traderName, String traderProfileImage, Long methodId, String methodIconPath, List<String> stockIconPath, Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
         this.id = id;
         this.strategyName = strategyName;
         this.traderId = traderId;
         this.traderName = traderName;
         this.traderProfileImage = traderProfileImage;
+        this.methodId = methodId;
         this.methodIconPath = methodIconPath;
         this.stockIconPath = stockIconPath;
         this.followerCount = followerCount;

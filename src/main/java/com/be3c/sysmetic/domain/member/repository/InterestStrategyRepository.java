@@ -21,6 +21,7 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
             m.id,
             m.name,
             null,
+            me.id,
             null,
             null,
             s.followerCount,
@@ -31,6 +32,7 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
         FROM InterestStrategy i
         JOIN i.strategy s
         JOIN s.trader m
+        JOIN i.strategy.method me
         JOIN StrategyStatistics ss on ss.strategy.id = s.id
         WHERE i.member.id = :memberId AND i.folder.id = :folderId AND i.statusCode = :statusCode
         """)
