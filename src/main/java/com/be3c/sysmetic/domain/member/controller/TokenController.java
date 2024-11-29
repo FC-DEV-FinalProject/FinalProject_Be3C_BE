@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,7 +62,7 @@ public class TokenController {
         String profileImage = null;
         try {
             profileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
-        } catch (IllegalArgumentException e) {
+        } catch (FileNotFoundException e) {
             log.info("프로필 이미지 추출 실패");
         }
 
