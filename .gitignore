@@ -4,6 +4,15 @@ cloud.properties
 application-test.properties
 jwt.properties
 
+### Mac ###
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+# QueryDSL Q파일 경로
+src/main/generated/
+
 HELP.md
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -207,4 +216,3 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,intellij,java
-

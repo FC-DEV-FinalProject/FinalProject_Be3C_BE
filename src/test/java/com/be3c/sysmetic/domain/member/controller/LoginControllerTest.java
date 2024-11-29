@@ -17,13 +17,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestPropertySource(locations = "/application-test.properties")
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,14 +60,19 @@ class LoginControllerTest {
                 .roleCode("USER")
                 .name("테스트")
                 .nickname("테스트")
+                .birth(LocalDate.of(2000,1,1))
                 .phoneNumber("01012341234")
                 .usingStatusCode("사용")
                 .totalFollow(0)
                 .totalStrategyCount(0)
-                .receiveInfoConsent("Y")
+                .receiveInfoConsent("true")
                 .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("Y")
+                .receiveMarketingConsent("true")
                 .marketingConsentDate(LocalDateTime.now())
+//                .createdBy(1L)
+//                .createdDate(LocalDateTime.now())
+//                .modifiedBy(1L)
+//                .modifiedDate(LocalDateTime.now())
                 .build();
         memberRepository.save(member);
     }
@@ -77,14 +82,14 @@ class LoginControllerTest {
     void successLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
 
         String requestBody = String.format(
                 "{\"email\":\"%s\", \"password\":\"%s\", \"rememberMe\":%b}",
                 email, password, rememberMe
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(requestBody)   // JSON 데이터를 요청 본문에 추가
                         .contentType(MediaType.APPLICATION_JSON)// 요청 Content-Type을 JSON으로 설정
                         .accept(MediaType.APPLICATION_JSON))    // 응답의 Accept 타입 설정
@@ -111,7 +116,7 @@ class LoginControllerTest {
     void failLoginTest() throws Exception {
         String email = "test@test.com";
         String password = "Password1@";
-        String rememberMe = "Y";
+        String rememberMe = "true";
         // 1. 로그인 형식 불일치
         // 1-1. 이메일 형식 불일치
         String invalidEmailRequestBody = String.format(
@@ -119,7 +124,7 @@ class LoginControllerTest {
                 "formatMismatch", password, rememberMe
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(invalidEmailRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -131,7 +136,7 @@ class LoginControllerTest {
                 email, "formatMismatch", rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(invalidPasswordRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -143,7 +148,7 @@ class LoginControllerTest {
                 "unregister@test.com", password, rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(unregisterEmailRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -155,7 +160,7 @@ class LoginControllerTest {
                 email, "unMatch123@", rememberMe
         );
 
-        resultActions = mockMvc.perform(post("/auth/login")
+        resultActions = mockMvc.perform(post("/v1/auth/login")
                         .content(unMatchPasswordRequestBody)  // JSON 본문 데이터 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

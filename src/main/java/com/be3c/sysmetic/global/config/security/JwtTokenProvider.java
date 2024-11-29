@@ -2,6 +2,7 @@ package com.be3c.sysmetic.global.config.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,8 @@ public class JwtTokenProvider {
         5. 재발급 필요 여부 확인 메서드
         6. Access 와 Refresh Token 재발급 메서드
         7. Access 토큰에서 사용자 정보 추출 메서드
+        8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
+        9. roleCode 를 role 로 명칭 변환 메서드
     */
 
     @Autowired
@@ -46,7 +49,15 @@ public class JwtTokenProvider {
     private long HOUR_REFRESH_TOKEN_EXPIRE_TIME;     // 1시간
 
     // 1. Token 생성 메서드
-    public String generateToken(Long memberId, String email, String role, long expiration) {
+    public String generateToken(Long memberId, String email, String roleCode, long expiration) {
+        String role = null;
+        if (roleCode.startsWith("RC")) {
+            // "RC"로 시작하는 경우, roleCode를 role로 변경
+            role = roleCodeChangeRole(roleCode);
+        } else {
+            role = roleCode;
+        }
+
         Date now = new Date();
         Date tokenExpires = new Date(now.getTime() + expiration);
         return Jwts.builder()
@@ -60,18 +71,18 @@ public class JwtTokenProvider {
     }
 
     // 2. Access Token 생성 메서드
-    public String generateAccessToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     // 3. Refresh Token (Month) 생성 메서드
-    public String generateMonthRefreshToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateMonthRefreshToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, MONTH_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 0. Refresh Token (Hour) 생성 메서드
-    public String generateHourRefreshToken(Long memberId, String email, String role) {
-        return generateToken(memberId, email, role, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
+    public String generateHourRefreshToken(Long memberId, String email, String roleCode) {
+        return generateToken(memberId, email, roleCode, HOUR_REFRESH_TOKEN_EXPIRE_TIME);
     }
 
     // 4. 토큰 유효성 검증 메서드
@@ -125,37 +136,37 @@ public class JwtTokenProvider {
         }
     }
 
-        /* 5. Token 재발급 메서드
-            올바른 토큰이라고 가정
-            1) Access 토큰은 만료O, Refresh 토큰은 만료X 경우
-                - request에 있는 Access 토큰을 서버에서 받는다.
-                - Access 토큰의 만료일자 확인
-                - 1-1) 만료되지 않은 경우
-                    -> 로그인 단계 진행
-                - 1-2) 만료된 경우
-                    - Refresh 토큰의 만료일자 확인
-                        - 1-2-1) 만료된 경우
-                            -> 유효하지 않은 접근으로 처리 (재로그인 안내)
-                        - 1-2-2) 만료되지 않은 경우
-                            -> Access 와 Refresh Token 재발급
-            2) Access 와 Refresh 토큰 모두 만료된 경우
+    /* 5. Token 재발급 메서드
+        올바른 토큰이라고 가정
+        1) Access 토큰은 만료O, Refresh 토큰은 만료X 경우
+            - request에 있는 Access 토큰을 서버에서 받는다.
+            - Access 토큰의 만료일자 확인
+            - 1-1) 만료되지 않은 경우
+                -> 로그인 단계 진행
+            - 1-2) 만료된 경우
+                - Refresh 토큰의 만료일자 확인
+                    - 1-2-1) 만료된 경우
+                        -> 유효하지 않은 접근으로 처리 (재로그인 안내)
+                    - 1-2-2) 만료되지 않은 경우
+                        -> Access 와 Refresh Token 재발급
+        2) Access 와 Refresh 토큰 모두 만료된 경우
 
-            [순서]
-            1. Access 토큰을 받아서 validateToken(token) 메서드로 유효성 검증
-            2. 검증 결과에 따른 처리
-                2-1. 검증 결과 true인 경우 (유효)
-                    -> Access 토큰이 유효하므로, 재발급 진행하지 않고 메서드 종료
-                2-2. 검증 결과가 false인 경우 (만료)
-                    -> 3. refresh 토큰의 유효성 검증
-                2-3. 다른 예외가 발생한 경우
-                    -> 예외 처리
-            3. Refresh 토큰의 만료 여부 확인
-                3-1. 유효한 경우
-                    -> 4. Access 와 Refresh 토큰 재발급
-                3-2. 만료된 경우
-                    -> 재발급 불가능. 예외 발생 (재로그인 유도)
-            4. Access 와 Refresh Token 재발급
-        */
+        [순서]
+        1. Access 토큰을 받아서 validateToken(token) 메서드로 유효성 검증
+        2. 검증 결과에 따른 처리
+            2-1. 검증 결과 true인 경우 (유효)
+                -> Access 토큰이 유효하므로, 재발급 진행하지 않고 메서드 종료
+            2-2. 검증 결과가 false인 경우 (만료)
+                -> 3. refresh 토큰의 유효성 검증
+            2-3. 다른 예외가 발생한 경우
+                -> 예외 처리
+        3. Refresh 토큰의 만료 여부 확인
+            3-1. 유효한 경우
+                -> 4. Access 와 Refresh 토큰 재발급
+            3-2. 만료된 경우
+                -> 재발급 불가능. 예외 발생 (재로그인 유도)
+        4. Access 와 Refresh Token 재발급
+    */
     // 6. Access 와 Refresh Token 재발급 메서드
     public Map<String, String> reissueToken(String token) {
         /*
@@ -165,36 +176,28 @@ public class JwtTokenProvider {
             새롭게 만든 토큰을 반환한다.
          */
         Map<String, String> tokenMap = new HashMap<>();
-        if(needsReissueToken(token)) {
-            Claims claims = parseTokenClaims(token);
-            Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
-            String email = (String) claims.get("email");
-            String role = (String) claims.get("role");
 
-            String accessToken = generateAccessToken(memberId, email, role);
-            String refreshToken = generateMonthRefreshToken(memberId, email, role);
-            tokenMap.put("accessToken", accessToken);
-            tokenMap.put("refreshToken", refreshToken);
+        Claims claims = parseTokenClaims(token);
+        Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
+        String email = (String) claims.get("email");
+        String role = (String) claims.get("role");
 
-            return tokenMap;
-        }
-        return null;
+        String accessToken = generateAccessToken(memberId, email, role);
+        String refreshToken = generateMonthRefreshToken(memberId, email, role);
+        tokenMap.put("accessToken", accessToken);
+        tokenMap.put("refreshToken", refreshToken);
+
+        return tokenMap;
     }
 
     // 7. Access 토큰에서 사용자 정보 추출 메서드
     public Claims parseTokenClaims(String token) {
-//        return Jwts.parser()
-//                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
         try {
-            Claims claims = Jwts.parser()
-                   .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
-                   .build()
-                   .parseSignedClaims(token)
-                   .getPayload();
-            return claims;
+            return Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (ExpiredJwtException e) {
             log.info("만료된 토큰");
             return e.getClaims();
@@ -213,4 +216,40 @@ public class JwtTokenProvider {
         }
     }
 
+    // 8. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
+    public String extractToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.split(" ")[1]; // "Bearer "를 제외한 순수 토큰만 추출
+        }
+        return null;
+    }
+
+    // 9. roleCode 를 role 로 명칭 변환 메서드
+    /*
+        RC001 (일반회원)(USER) <-> RC003 (일반회원 관리자)(MANAGER)
+        RC002 (트레이더)(TRADER) <-> RC004 (트레이더 관리자)(MANAGER)
+        RC005 (수퍼관리자)(ADMIN)
+     */
+    public String roleCodeChangeRole(String roleCode) {
+        if (roleCode == null || roleCode.isEmpty()) {
+            log.info("roleCode가 null이거나 빈 값입니다.");
+            throw new IllegalArgumentException("roleCode가 올바르지 않습니다.");
+        }
+
+        if(roleCode.equals("USER") || roleCode.equals("TRADER") || roleCode.equals("MANAGER") || roleCode.equals("ADMIN")) {
+            return roleCode;
+        }
+
+        return switch (roleCode) {
+            case "RC001" -> "USER";
+            case "RC002" -> "TRADER";
+            case "RC003", "RC004" -> "MANAGER";
+            case "RC005" -> "ADMIN";
+            default -> {
+                log.info("올바르지 않은 roleCode값이 입력됐습니다.");
+                throw new IllegalArgumentException("Invalid roleCode: " + roleCode);
+            }
+        };
+    }
 }

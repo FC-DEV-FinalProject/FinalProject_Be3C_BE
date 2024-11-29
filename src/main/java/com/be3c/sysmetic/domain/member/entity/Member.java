@@ -3,8 +3,8 @@ package com.be3c.sysmetic.domain.member.entity;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,6 +23,7 @@ public class Member extends BaseEntity {
         password : 비밀번호
         name : 이름
         nickname : 닉네임
+        birth : 생년월일
         phoneNumber : 휴대폰 번호
         usingStatusCode : 회원상태코드
         totalFollow : 총 팔로워 수
@@ -32,6 +33,12 @@ public class Member extends BaseEntity {
         receiveMarketingConsent : 마케팅 수신 동의 여부
         marketingConsentDate : 마케팅 수신 동의일
      */
+
+    @PrePersist
+    public void prePersist() {
+        usingStatusCode = "US001";  // 유효: US001, 휴면: US002
+        totalFollow = 0;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,6 +59,9 @@ public class Member extends BaseEntity {
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
+    @Column(name = "birth", nullable = false)
+    private LocalDate birth;
+
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
@@ -61,6 +71,7 @@ public class Member extends BaseEntity {
     @Column(name = "total_follow", nullable = false)
     private Integer totalFollow;
 
+    // 전략에서 사용!
     @Column(name = "total_strategy_count", nullable = false)
     private Integer totalStrategyCount;
 

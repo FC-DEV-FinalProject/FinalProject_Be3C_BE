@@ -61,13 +61,12 @@ public class SecurityConfig {
                         authorize
                                 .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                                 .permitAll()
-                                .requestMatchers("/", "/auth/login", "/auth/register", "/error/*").permitAll()
+                                .requestMatchers("/", "/**", "/auth/login", "/auth/register", "/error").permitAll()
                                 .requestMatchers("/admin").hasRole("ADMIN")
                                 .requestMatchers("/manager").hasRole("MANAGER")
                                 .requestMatchers("/trader").hasRole("TRADER")
                                 .anyRequest().authenticated()
                 )
-
                 // 예외 처리
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint())

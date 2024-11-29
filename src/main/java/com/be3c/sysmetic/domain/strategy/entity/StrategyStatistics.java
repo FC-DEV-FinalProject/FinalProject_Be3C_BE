@@ -6,7 +6,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -47,8 +47,8 @@ public class StrategyStatistics extends BaseEntity {
         highPointRenewalProgress : 고점갱신후경과일
         profitFactor :Profit Factor
         roa : ROA
-        firstRegistrationDate : 최초등록일시
-        lastRegistrationDate : 최종등록일시
+        firstRegistrationDate : 최초등록일
+        lastRegistrationDate : 최종등록일
     */
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -141,10 +141,10 @@ public class StrategyStatistics extends BaseEntity {
 
     @CreatedDate
     @Column(name = "first_registration_date", nullable = false)
-    private LocalDateTime firstRegistrationDate; // 최초등록일시
+    private LocalDate firstRegistrationDate; // 최초등록일
 
     @LastModifiedDate
     @Column(name = "last_registration_date", nullable = false)
-    private LocalDateTime lastRegistrationDate; // 최종등록일시
+    private LocalDate lastRegistrationDate; // 최종등록일
 
 }

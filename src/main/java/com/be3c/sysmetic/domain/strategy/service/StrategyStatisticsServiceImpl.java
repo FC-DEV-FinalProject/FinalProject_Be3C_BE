@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
@@ -9,7 +10,8 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
-import com.be3c.sysmetic.global.util.doublehandler.DoubleHandler;
+import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,17 +23,11 @@ import java.time.Period;
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyStatisticsServiceImpl implements StrategyStatisticsService {
 
-    /*
-    공개 상태인 전략만 계산
-
-    일간분석 데이터 없는 경우 고려 -> 예외 처리할지, 모두 0으로 저장할지 고민 todo 리팩토링
-    일간분석 데이터 존재하는 경우 - date로 정렬
-     */
-
-    private final DoubleHandler doubleHandler;
     private final DailyRepository dailyRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
     private final StrategyRepository strategyRepository;
+    private final DoubleHandler doubleHandler;
+    private final SecurityUtils securityUtils;
 
     // 전략통계 DB 저장 - SchedulerConfiguration 에서 호출하는 메서드
     public void runStrategyStatistics(Long strategyId) {
@@ -41,6 +37,10 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
         // 최근 통계 조회
         final StrategyStatistics savedStatistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+
+        if(recentDaily == null) {
+            return;
+        }
 
         // 다회 사용시 여러번 조회하지 않도록 저장하여 사용
         final Daily firstDaily = dailyRepository.findTopByStrategyIdOrderByDateAsc(strategyId);
@@ -96,16 +96,25 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
     }
 
-    // 전략통계 조회
-    public StrategyStatisticsResponseDto findStrategyStatistics(Long strategyId) {
+    // 전략통계 조회 - PUBLIC 상태인 전략의 통계 조회
+    public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
-        return StrategyStatisticsResponseDto.builder()
+
+        // 전략 상태 PUBLIC 여부 검증
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+        }
+
+        return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
                 .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
                 .principal(statistics.getPrincipal())
-                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate().toLocalDate(), statistics.getLastRegistrationDate().toLocalDate()))
-                .startDate(statistics.getFirstRegistrationDate().toLocalDate())
-                .endDate(statistics.getLastRegistrationDate().toLocalDate())
+                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate(), statistics.getLastRegistrationDate()))
+                .startDate(statistics.getFirstRegistrationDate())
+                .endDate(statistics.getLastRegistrationDate())
                 .accumulatedProfitLossAmount(statistics.getAccumulatedProfitLossAmount())
                 .accumulatedProfitLossRate(statistics.getAccumulatedProfitLossRate())
                 .maximumAccumulatedProfitLossAmount(statistics.getMaximumAccumulatedProfitLossAmount())
@@ -133,9 +142,84 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
                 .build();
     }
 
+    /*
+    전략 통계 조회 - 트레이더 또는 관리자의 통계 조회
+    1) 트레이더
+    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
+    2) 관리자
+    모든 상태의 전략 조회 가능
+     */
+    public StrategyStatisticsGetResponseDto findTraderStrategyStatistics(Long strategyId) {
+        String userRole = securityUtils.getUserRoleInSecurityContext();
+
+        // trader일 경우, 본인의 전략인지 검증
+        if(userRole.equals("TRADER")) {
+            validUser(strategyId);
+        }
+
+        // member일 경우, 권한 없음 처리
+        if(userRole.equals("MEMBER")) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+
+        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+
+        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+        }
+
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+
+        return StrategyStatisticsGetResponseDto.builder()
+                .currentBalance(statistics.getCurrentBalance())
+                .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
+                .principal(statistics.getPrincipal())
+                .operationPeriod(calculateOperationPeriod(statistics.getFirstRegistrationDate(), statistics.getLastRegistrationDate()))
+                .startDate(statistics.getFirstRegistrationDate())
+                .endDate(statistics.getLastRegistrationDate())
+                .accumulatedProfitLossAmount(statistics.getAccumulatedProfitLossAmount())
+                .accumulatedProfitLossRate(statistics.getAccumulatedProfitLossRate())
+                .maximumAccumulatedProfitLossAmount(statistics.getMaximumAccumulatedProfitLossAmount())
+                .maximumAccumulatedProfitLossRate(statistics.getMaximumAccumulatedProfitLossRate())
+                .currentCapitalReductionAmount(statistics.getCurrentCapitalReductionAmount())
+                .currentCapitalReductionRate(statistics.getCurrentCapitalReductionRate())
+                .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
+                .maximumCapitalReductionRate(statistics.getMaximumCapitalReductionRate())
+                .averageProfitLossAmount(statistics.getAverageProfitLossAmount())
+                .averageProfitLossRate(statistics.getAverageProfitLossRate())
+                .maximumDailyProfitAmount(statistics.getMaximumDailyProfitAmount())
+                .maximumDailyProfitRate(statistics.getMaximumDailyProfitRate())
+                .maximumDailyLossAmount(statistics.getMaximumDailyLossAmount())
+                .maximumDailyLossRate(statistics.getMaximumDailyLossRate())
+                .totalTradingDays(statistics.getTotalTradingDays())
+                .totalProfitDays(statistics.getTotalProfitDays())
+                .totalLossDays(statistics.getTotalLossDays())
+                .currentContinuousProfitLossDays(statistics.getCurrentContinuousProfitLossDays())
+                .maxContinuousProfitDays(statistics.getMaximumContinuousProfitDays())
+                .maxContinuousLossDays(statistics.getMaximumContinuousLossDays())
+                .winningRate(statistics.getWinningRate())
+                .profitFactor(statistics.getProfitFactor())
+                .roa(statistics.getRoa())
+                .highPointRenewalProgress(statistics.getHighPointRenewalProgress())
+                .build();
+    }
+
+    // 현재 로그인한 유저와 전략 업로드한 유저가 일치하는지 검증
+    private void validUser(Long strategyId) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
+
+        if(!uploadedTraderId.equals(userId)) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+    }
+
     // find strategy by id
     private Strategy findStrategyById(Long strategyId) {
-        return strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+        return strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
     }
 
     // 잔고 -> 가장 최근 일간분석 데이터의 잔고
