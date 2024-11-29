@@ -36,4 +36,8 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
     @Modifying(clearAutomatically = true)
     @Query("delete Inquiry i where i.id in :idList")
     int bulkDelete(@Param("idList") List<Long> idList);
+
+    @Modifying
+    @Query("DELETE FROM Inquiry i WHERE i.strategy.id = :strategyId")
+    void deleteByStrategyId(@Param("strategyId") Long strategyId);
 }

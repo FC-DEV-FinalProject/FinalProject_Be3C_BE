@@ -4,10 +4,7 @@ import com.be3c.sysmetic.domain.member.dto.FolderListResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Long> {
+
+    List<Folder> findByMemberId(Long memberId);
+
     List<Folder> findAllByMemberIdAndStatusCode(Long memberId, String statusCode);
 
     @Query("""
@@ -61,4 +61,8 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
             f.statusCode = :statusCode
     """)
     Optional<Folder> findByMemberIdAndIdAndStatusCode(Long memberId, Long id, String statusCode);
+
+    @Modifying
+    @Query("DELETE FROM Folder f WHERE f.member.id = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
 }

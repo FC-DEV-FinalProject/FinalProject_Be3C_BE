@@ -143,9 +143,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         } else if(interestStrategy.get().getStatusCode().equals(Code.UNFOLLOW.getCode())) {
             interestStrategy.get().setStatusCode(FOLLOW.getCode());
             followStrategyLog(
-                    userId,
-                    followPostRequestDto.getFolderId(),
-                    followPostRequestDto.getStrategyId(),
+                    interestStrategy.get().getId(),
                     FOLLOW.getCode()
             );
             emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
@@ -191,28 +189,23 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         strategyId,
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
-        interestStrategyRepository.save(
-                InterestStrategy.builder()
-                        .member(memberRepository.findByIdAndUsingStatusCode(
-                                userId,
-                                USING_STATE.getCode()
-                        ).orElseThrow(EntityNotFoundException::new))
-                        .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
-                                userId,
-                                folderId,
-                                USING_STATE.getCode()
-                        ).orElseThrow(EntityNotFoundException::new))
-                        .strategy(strategy)
-                        .statusCode(FOLLOW.getCode())
-                        .build()
-        );
+
+        InterestStrategy interestStrategy = InterestStrategy.builder()
+                .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
+                        userId,
+                        folderId,
+                        USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new))
+                .strategy(strategy)
+                .statusCode(FOLLOW.getCode())
+                .build();
+
+        interestStrategyRepository.save(interestStrategy);
 
         strategy.increaseFollowerCount();
 
         followStrategyLog(
-                userId,
-                folderId,
-                strategyId,
+                interestStrategy.getId(),
                 FOLLOW.getCode()
         );
     }
@@ -225,7 +218,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
      */
     private void unFollowStrategy(Long userId, Long strategyId) {
         InterestStrategy interestStrategy = interestStrategyRepository
-                .findByMemberIdAndAndStrategyIdAndStatusCode(
+                .findByMemberIdAndStrategyIdAndStatusCode(
                         userId,
                         strategyId,
                         FOLLOW.getCode()
@@ -238,9 +231,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         interestStrategy.getStrategy().decreaseFollowerCount();
 
         followStrategyLog(
-                userId,
-                interestStrategy.getFolder().getId(),
-                strategyId,
+                interestStrategy.getId(),
                 UNFOLLOW.getCode()
         );
     }
@@ -251,22 +242,15 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         3. 해당 관심 전략을 찾는다.
         4. 로그를 등록한다.
      */
-    private void followStrategyLog(Long userId, Long folderId, Long strategyId, String LogCode) {
+    private void followStrategyLog(Long interestStrategyId, String LogCode) {
         interestStrategyLogRepository.save(
                 InterestStrategyLog.builder()
-                        .member(memberRepository.findByIdAndUsingStatusCode(
-                                        userId,
-                                        USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_USER.getMessage())))
-                        .folder(folderRepository.findByMemberIdAndIdAndStatusCode(
-                                        userId,
-                                        folderId,
-                                        USING_STATE.getCode()
-                        ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_FOLDER.getMessage())))
-                        .strategy(strategyRepository.findByIdAndStatusCode(
-                                        strategyId,
-                                        USING_STATE.getCode()
-                                ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_STRATEGY.getMessage())))
+                        .interestStrategy(
+                                interestStrategyRepository
+                                        .findById(
+                                                interestStrategyId
+                                        ).orElseThrow(EntityNotFoundException::new)
+                        )
                         .LogCode(LogCode)
                         .isSendMail(Code.NOT_SEND_FOLLOW_MAIL.getCode())
                         .build()
