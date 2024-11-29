@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
@@ -33,23 +34,12 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final DoubleHandler doubleHandler;
     private final StrategyRepository strategyRepository;
 
-    // /*
-    //     getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
-    // */
-    // @Override
-    // public int getTotalPageNumber(String statusCode, int pageSize) {
-    //     long totalStrategyCount = strategyListRepository.countByStatusCode(statusCode);
-    //     return (int) Math.ceil((double) totalStrategyCount / pageSize);
-    // }
-
     /*
         findStrategyPage : 메인 전략 목록 페이지 (수익률순 조회)
         Strategy 엔티티를 StrategyListDto로 반환
     */
     @Override
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
-
-        log.info("StrategyListServiceImpl findStrategyPage requested, pageNum = {}", pageNum);
 
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
@@ -69,8 +59,6 @@ public class StrategyListServiceImpl implements StrategyListService {
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));
 
-        log.info("StrategyListServiceImpl strategies has content true / false = {}", strategies.hasContent());
-
         return PageResponse.<StrategyListDto>builder()
                  .currentPage(strategies.getNumber())
                  .pageSize(strategies.getSize())
@@ -87,14 +75,10 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
-        log.info("StrategyListServiceImpl findTraderNickname requested, nickname = {} , pageNum = {}", nickname, pageNum);
-
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
 
         Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
-
-        log.info("StrategyListServiceImpl traders has content true / false = {} ", traders.hasContent());
 
         return PageResponse.<TraderNicknameListDto>builder()
                 .currentPage(traders.getNumber())
@@ -111,8 +95,6 @@ public class StrategyListServiceImpl implements StrategyListService {
     */
     @Override
     public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
-
-        log.info("StrategyListServiceImpl findStrategiesByTrader requested traderId = {}, pageNum = {}", traderId, pageNum);
 
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
@@ -137,14 +119,50 @@ public class StrategyListServiceImpl implements StrategyListService {
                         doubleHandler.cutDouble(strategy.getSmScore())
                 ));
 
-        log.info("StrategyListServiceImpl strategiesByTrader has content true / false = {} ", strategiesByTrader.hasContent());
-
         return PageResponse.<StrategyListByTraderDto>builder()
                 .currentPage(strategiesByTrader.getNumber())
                 .pageSize(strategiesByTrader.getSize())
                 .totalElement(strategiesByTrader.getTotalElements())
                 .totalPages(strategiesByTrader.getTotalPages())
                 .content(strategiesByTrader.getContent())
+                .build();
+    }
+
+
+    /*
+        findStrategiesByName : 전략명으로 검색
+    */
+    @Override
+    public PageResponse<StrategyListByNameDto> findStrategiesByName(String keyword, Integer pageNum) {
+
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+
+        Page<Strategy> strategies = strategyListRepository.findAllByContainingName(keyword, pageable);
+
+        // Strategy 엔티티를 DTO로 매핑
+        Page<StrategyListByNameDto> resultPage = strategies.map(strategy ->
+                new StrategyListByNameDto(
+                        strategy.getId(),
+                        strategy.getTrader().getId(),
+                        strategy.getTrader().getNickname(),
+                        strategy.getMethod().getId(),
+                        strategy.getMethod().getName(),
+                        strategy.getName(),
+                        strategy.getCycle(),
+                        stockGetter.getStocks(strategy.getId()),
+                        strategy.getAccumulatedProfitLossRate(),
+                        strategy.getMdd(),
+                        strategy.getSmScore()
+                )
+        );
+
+        return PageResponse.<StrategyListByNameDto>builder()
+                .currentPage(resultPage.getNumber())
+                .pageSize(resultPage.getSize())
+                .totalElement(resultPage.getTotalElements())
+                .totalPages(resultPage.getTotalPages())
+                .content(resultPage.getContent())
                 .build();
     }
 }
