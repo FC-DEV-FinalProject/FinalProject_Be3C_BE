@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/main")
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
-public class MainPageController {
+public class MainPageController implements MainPageControllerDocs {
 
     private final MainPageService mainPageService;
 
