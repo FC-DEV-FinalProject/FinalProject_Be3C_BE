@@ -16,6 +16,22 @@ import java.time.LocalDate;
 @Table(name = "daily")
 public class Daily extends BaseEntity implements Comparable<Daily> {
 
+    /*
+        Daily : 일간 데이터
+
+        id : Daily id
+        strategy : 전략
+        date : 데이터 날짜
+        principal : 원금
+        currentBalance : 잔고
+        standardAmount : 기준가
+        depositWithdrawalAmount : 입출금금액
+        profitLossAmount : 손익금액
+        profitLossRate : 손익율
+        accumulatedProfitLossAmount : 누적 손익 금액
+        accumulatedProfitLossRate : 누적 손익율
+    */
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

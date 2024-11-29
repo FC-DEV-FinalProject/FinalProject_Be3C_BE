@@ -13,6 +13,7 @@ public class TokenApiResponseDto {
     private String roleCode;
     private String email;
     private String nickname;
+    private String phoneNumber;
     private String profileImage;
 
 }
