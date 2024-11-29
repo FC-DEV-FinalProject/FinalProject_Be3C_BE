@@ -5,6 +5,9 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +26,8 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
     private final StrategyRepository strategyRepository;
     private final StockGetter stockGetter;
+    private final FileService fileService;
+
     private final int PAGE_SIZE = 10;
 
     /*
@@ -40,21 +46,28 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
         List<StrategySearchResponseDto> strategyList = sPage.getContent()
                 .stream()
-                .map(s -> StrategySearchResponseDto.builder()
-                        .strategyId(s.getId())
-                        .traderId(s.getTrader().getId())
-                        .traderNickname(s.getTrader().getNickname())
-                        .methodId(s.getMethod().getId())
-                        .methodName(s.getMethod().getName())
-                        .name(s.getName())
-                        .cycle(s.getCycle())
-                        .stockList(stockGetter.getStocks(s.getId()))
-                        .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
-                        .mdd(s.getMdd())
-                        .smScore(s.getSmScore())
-                        .build()
-                )
-                .toList();
+                .map(s -> {
+                    List<String> stockIconPaths = new ArrayList<>();
+
+                    stockGetter.getStocks(s.getId()).getStockIds().forEach(stockId ->
+                            stockIconPaths.add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)))
+                    );
+
+                    return StrategySearchResponseDto.builder()
+                                    .strategyId(s.getId())
+                                    .traderId(s.getTrader().getId())
+                                    .traderNickname(s.getTrader().getNickname())
+                                    .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
+                                    .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
+                                    .stockIconPath(stockIconPaths)
+                                    .name(s.getName())
+                                    .cycle(s.getCycle())
+                                    .stockList(stockGetter.getStocks(s.getId()))
+                                    .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
+                                    .mdd(s.getMdd())
+                                    .smScore(s.getSmScore())
+                                    .build();
+    }).toList();
 
         return PageResponse.<StrategySearchResponseDto>builder()
                 .currentPage(sPage.getNumber())
@@ -78,22 +91,28 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
         List<StrategyAlgorithmResponseDto> strategyList = sPage.getContent()
                 .stream()
-                .map(s -> StrategyAlgorithmResponseDto.builder()
-                        .algorithm(algorithm)
-                        .id(s.getId())
-                        .traderId(s.getTrader().getId())
-                        .traderNickname(s.getTrader().getNickname())
-                        .methodId(s.getMethod().getId())
-                        .methodName(s.getMethod().getName())
-                        .stockList(stockGetter.getStocks(s.getId()))
-                        .name(s.getName())
-                        .cycle(s.getCycle())
-                        .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
-                        .mdd(s.getMdd())
-                        .smScore(s.getSmScore())
-                        .build()
-                )
-                .toList();
+                .map(s -> {
+                    List<String> stockIconPaths = new ArrayList<>();
+
+                    stockGetter.getStocks(s.getId()).getStockIds().forEach(stockId ->
+                            stockIconPaths.add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)))
+                    );
+
+                    return StrategyAlgorithmResponseDto.builder()
+                            .algorithm(algorithm)
+                            .id(s.getId())
+                            .traderId(s.getTrader().getId())
+                            .traderNickname(s.getTrader().getNickname())
+                            .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
+                            .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
+                            .stockIconPath(stockIconPaths)
+                            .name(s.getName())
+                            .cycle(s.getCycle())
+                            .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
+                            .mdd(s.getMdd())
+                            .smScore(s.getSmScore())
+                            .build();
+                }).toList();
 
         return PageResponse.<StrategyAlgorithmResponseDto>builder()
                 .currentPage(sPage.getNumber())

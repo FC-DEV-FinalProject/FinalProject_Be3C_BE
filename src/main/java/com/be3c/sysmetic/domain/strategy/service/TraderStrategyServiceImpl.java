@@ -13,6 +13,7 @@ import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
@@ -218,4 +219,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         }
     }
 
+    @Override
+    public PageResponse<StrategyListByTraderDto> getMyStrategyList(Integer page) {
+
+
+        return null;
+    }
 }

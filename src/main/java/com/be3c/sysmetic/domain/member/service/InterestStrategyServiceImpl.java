@@ -13,6 +13,9 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.email.dto.InterestRequest;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,8 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
     private final EmailService emailService;
 
+    private final FileService fileService;
+
     /**
      * 추후에 수정 필요 (SELECT가 너무 많이 날아간다.)
      */
@@ -78,6 +83,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 );
 
         if(folderPage.hasContent()) {
+            folderPage.getContent().forEach(interestStrategy -> {
+                interestStrategy.setTraderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, interestStrategy.getTraderId())));
+//                interestStrategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, interestStrategy.getMethodId())));
+            });
+
             return PageResponse.<InterestStrategyGetResponseDto>builder()
                     .totalPages(folderPage.getTotalPages())
                     .totalElement(folderPage.getTotalElements())

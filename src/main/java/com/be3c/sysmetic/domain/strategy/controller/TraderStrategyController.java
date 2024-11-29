@@ -6,11 +6,13 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,6 +230,23 @@ public class TraderStrategyController {
     public ResponseEntity<APIResponse<MethodAndStockGetResponseDto>> findMethodAndStockList() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(strategyService.findMethodAndStock()));
+    }
+
+    @Operation(
+            summary = "나의 전략 목록 조회",
+            description = "자신이 등록한 전략 목록 조회"
+    )
+    @GetMapping("/member/strategy/{page}")
+    public ResponseEntity<APIResponse<PageResponse<StrategyListByTraderDto>>> getMyStrategyList(
+            @PathVariable Integer page
+    ) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(traderStrategyService.getMyStrategyList(page)));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 }

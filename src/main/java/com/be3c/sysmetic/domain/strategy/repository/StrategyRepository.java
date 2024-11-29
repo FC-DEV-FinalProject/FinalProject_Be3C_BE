@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.dto.KpRatios;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

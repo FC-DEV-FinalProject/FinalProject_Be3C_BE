@@ -18,7 +18,10 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
             (
             s.id,
             s.name,
+            m.id,
             m.name,
+            null,
+            null,
             null,
             s.followerCount,
             s.smScore,
