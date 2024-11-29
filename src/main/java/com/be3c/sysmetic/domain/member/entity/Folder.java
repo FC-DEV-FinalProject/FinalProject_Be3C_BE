@@ -49,7 +49,6 @@ public class Folder extends BaseEntity {
     @JoinColumn(name = "member_id", updatable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE) // 외래 키에 ON DELETE CASCADE 적용
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     private List<InterestStrategy> interestStrategies;
 }

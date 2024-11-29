@@ -30,12 +30,4 @@ public class MemberPatchInfoRequestDto {
     @Schema(description = "닉네임 중복 체크 여부", example = "true")
     @JsonProperty("nickname_dupl_check")
     private Boolean nicknameDuplCheck;
-
-    @Schema(description = "정보 수신 동의 여부", example = "true")
-    @JsonProperty("receive_info_consent")
-    private Boolean receiveInfoConsent;
-
-    @Schema(description = "마케팅 수신 동의 여부", example = "false")
-    @JsonProperty("receive_marketing_consent")
-    private Boolean receiveMarketingConsent;
 }

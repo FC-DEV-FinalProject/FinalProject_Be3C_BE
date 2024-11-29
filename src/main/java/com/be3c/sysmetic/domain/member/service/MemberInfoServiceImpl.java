@@ -1,16 +1,21 @@
 package com.be3c.sysmetic.domain.member.service;
 
+import com.be3c.sysmetic.domain.member.dto.MemberPatchConsentRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPatchInfoRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPutPasswordRequestDto;
+import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.ResetPasswordLog;
-import com.be3c.sysmetic.domain.member.repository.FolderRepository;
-import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.domain.member.repository.ResetPasswordLogRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.member.repository.*;
+import com.be3c.sysmetic.domain.strategy.entity.Reply;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
+import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.email.dto.Subscriber;
+import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +28,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @Transactional
@@ -31,17 +41,47 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     private final SecurityUtils securityUtils;
 
+    private final EmailService emailService;
+
     private final MemberRepository memberRepository;
 
     private final ResetPasswordLogRepository resetPasswordLogRepository;
 
+    private final MonthlyRepository monthlyRepository;
+
+    private final DailyRepository dailyRepository;
+
+    private final StrategyRepository strategyRepository;
+
+    private final InterestStrategyRepository interestStrategyRepository;
+
+    private final FolderRepository folderRepository;
+
+    private final InquiryAnswerRepository inquiryAnswerRepository;
+
+    private final InquiryRepository inquiryRepository;
+
+    private final ResetPasswordLogRepository resetpasswordLogRepository;
+
+    private final AccountImageRepository accountImageRepository;
+
+    private final ReplyRepository replyRepository;
+
+    private final StrategyApprovalRepository strategyApprovalRepository;
+
+    private final StrategyStatisticsRepository strategyStatisticsRepository;
+
+    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
+
     private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public boolean changePassword(MemberPutPasswordRequestDto memberPutPasswordRequestDto, HttpServletRequest request) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
+    private final InterestStrategyLogRepository interestStrategyLogRepository;
 
-        if(memberPutPasswordRequestDto.getUserId().equals(userId)) {
+    @Override
+    public boolean changePassword(Long userId, MemberPutPasswordRequestDto memberPutPasswordRequestDto, HttpServletRequest request) {
+        Long requestId = securityUtils.getUserIdInSecurityContext();
+
+        if(!(memberPutPasswordRequestDto.getUserId().equals(userId) || userId.equals(requestId))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
@@ -72,32 +112,45 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     }
 
     @Override
-    public boolean changeMemberInfo(MemberPatchInfoRequestDto memberPatchInfoRequestDto) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
+    public boolean changeMemberInfo(Long userId, MemberPatchInfoRequestDto memberPatchInfoRequestDto) {
+        Long requestId = securityUtils.getUserIdInSecurityContext();
 
-        if(memberPatchInfoRequestDto.getUserId().equals(userId)) {
+        if(!(memberPatchInfoRequestDto.getUserId().equals(userId) || userId.equals(requestId))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
         Member member = findMemberById(userId);
 
-        if(memberPatchInfoRequestDto.getNicknameDuplCheck()) {
+        if(memberPatchInfoRequestDto.getNicknameDuplCheck() &&
+            memberPatchInfoRequestDto.getNickname() != null &&
+            memberPatchInfoRequestDto.getNickname().isEmpty()
+        ) {
             member.setNickname(memberPatchInfoRequestDto.getNickname());
+
+            List<Subscriber> subscribers = new ArrayList<>();
+
+            subscribers.add(Subscriber.builder()
+                            .email(member.getEmail())
+                            .name(memberPatchInfoRequestDto.getNickname())
+                    .build());
+
+            switch (member.getRoleCode()) {
+                case "USER":
+                    emailService.updateUserSubscriberRequest(SubscriberRequest.builder()
+                            .subscribers(subscribers)
+                            .build());
+                    break;
+                case "TRADER":
+                    emailService.updateTraderSubscriberRequest(SubscriberRequest.builder()
+                            .subscribers(subscribers)
+                            .build());
+                    break;
+            }
+
         }
 
-        member.setPhoneNumber(memberPatchInfoRequestDto.getPhoneNumber());
-
-        // 수정 필요. 너무 구리다.
-        if(memberPatchInfoRequestDto.getReceiveInfoConsent()) {
-            member.setReceiveInfoConsent(Code.RECEIVE_MAIL.getCode());
-        } else {
-            member.setReceiveInfoConsent(Code.NOT_RECEIVE_MAIL.getCode());
-        }
-
-        if(memberPatchInfoRequestDto.getReceiveMarketingConsent()) {
-            member.setReceiveMarketingConsent(Code.RECEIVE_MAIL.getCode());
-        } else {
-            member.setReceiveMarketingConsent(Code.NOT_RECEIVE_MAIL.getCode());
+        if(!memberPatchInfoRequestDto.getPhoneNumber().isEmpty()) {
+            member.setPhoneNumber(memberPatchInfoRequestDto.getPhoneNumber());
         }
 
         memberRepository.save(member);
@@ -106,22 +159,55 @@ public class MemberInfoServiceImpl implements MemberInfoService {
     }
 
     @Override
-    public boolean deleteUser(Long userId, HttpServletRequest request) throws AuthenticationCredentialsNotFoundException {
+    public boolean changeMemberConsent(Long userId, MemberPatchConsentRequestDto memberPatchInfoRequestDto) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteUser(Long userId) throws AuthenticationCredentialsNotFoundException {
         Long requestId = securityUtils.getUserIdInSecurityContext();
 
         if(!requestId.equals(userId)) {
             throw new AuthenticationCredentialsNotFoundException("");
         }
 
-        if(!securityUtils.getUserIdInSecurityContext().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
         Member member = findMemberById(userId);
 
-        memberRepository.delete(member);
+        deleteUser(member);
 
         return true;
+    }
+
+    private void deleteUser(Member member) {
+        List<Strategy> strategyList = strategyRepository.findByTraderId(member.getId());
+        List<Folder> folderList = folderRepository.findByMemberId(member.getId());
+
+        replyRepository.deleteByMemberId(member.getId());
+
+        // strategy 삭제
+        strategyList.forEach(strategy -> {
+            strategyStatisticsRepository.deleteByStrategyId(strategy.getId());
+            dailyRepository.deleteByStrategyId(strategy.getId());
+            monthlyRepository.deleteByStrategyId(strategy.getId());
+            strategyStockReferenceRepository.deleteByStrategyId(strategy.getId());
+            strategyApprovalRepository.deleteByStrategyId(strategy.getId());
+            accountImageRepository.deleteByStrategyId(strategy.getId());
+            inquiryAnswerRepository.deleteByStrategyId(strategy.getId());
+            inquiryRepository.deleteByStrategyId(strategy.getId());
+        });
+
+        strategyRepository.deleteByMemberId(member.getId());
+
+        folderList.forEach(folder -> {
+            folder.getInterestStrategies().forEach(interestStrategy -> {
+                interestStrategyLogRepository.deleteByInterestStrategyId(interestStrategy.getId());
+            });
+            interestStrategyRepository.deleteByFolderId(folder.getId());
+        });
+
+        folderRepository.deleteByMemberId(member.getId());
+
+        memberRepository.delete(member);
     }
 
     private void saveChangePasswordLog(HttpServletRequest request, Member member, String resultCode) {

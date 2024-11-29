@@ -1,14 +1,18 @@
 package com.be3c.sysmetic.domain.member.controller;
 
+import com.be3c.sysmetic.domain.member.dto.MemberPatchConsentRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPatchInfoRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPutPasswordRequestDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,7 +90,7 @@ public interface MemberInfoControllerDocs {
     @PatchMapping("/member/consent/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberConsent(
             @PathVariable Long id,
-            @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
+            @RequestBody MemberPatchConsentRequestDto memberPatchConsentRequestDto
     );
 
     /*
@@ -109,7 +113,6 @@ public interface MemberInfoControllerDocs {
     })
     @DeleteMapping("/member/{id}")
     public ResponseEntity<APIResponse<String>> deleteMemberInfo(
-            @PathVariable(name="id") Long userId,
-            HttpServletRequest request
+            @PathVariable(name="id") Long userId
     );
 }

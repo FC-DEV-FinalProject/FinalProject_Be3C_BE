@@ -31,7 +31,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phoneNumber = :phoneNumber")
     List<String> findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
 
-
     @Modifying
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
@@ -70,7 +69,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             Pageable pageable
     );
 
-
+    @Query("SELECT DISTINCT m FROM Member m " +
+            "LEFT JOIN FETCH m.folders " +
+            "LEFT JOIN FETCH m.strategies " +
+            "LEFT JOIN FETCH m.replies " +
+            "WHERE m.id = :memberId")
+    Optional<Member> findMemberByIdWithStrategiesAndFolderAndReply(Long memberId);
     Optional<Member> findDistinctByNickname(String nickname);
 
 }

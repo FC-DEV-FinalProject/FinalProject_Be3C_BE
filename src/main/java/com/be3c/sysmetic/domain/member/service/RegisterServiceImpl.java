@@ -1,8 +1,11 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
+import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import com.be3c.sysmetic.global.util.email.dto.Subscriber;
 import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
@@ -58,6 +61,7 @@ public class RegisterServiceImpl implements RegisterService {
          5. 회원가입
      */
     private final MemberRepository memberRepository;
+    private final FolderRepository folderRepository;
     private final RedisUtils redisUtils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final EmailService emailService;
@@ -145,6 +149,16 @@ public class RegisterServiceImpl implements RegisterService {
                     emailService.addTraderSubscriberRequest(subscriberRequest);
                     break;
             }
+
+            // 회원가입 시 해당 회원에게 default 폴더 추가
+            folderRepository.save(Folder.builder()
+                            .name("default")
+                            .member(member)
+                            .latestInterestStrategyAddedDate(LocalDateTime.now())
+                            .internalInterestStrategyCount(0)
+                            .statusCode(Code.USING_STATE.getCode())
+                            .build()
+            );
 
             return true;
         } catch (Exception e) {

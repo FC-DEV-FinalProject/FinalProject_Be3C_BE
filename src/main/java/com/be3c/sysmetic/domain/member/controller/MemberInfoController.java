@@ -1,11 +1,13 @@
 package com.be3c.sysmetic.domain.member.controller;
 
+import com.be3c.sysmetic.domain.member.dto.MemberPatchConsentRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPatchInfoRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPutPasswordRequestDto;
 import com.be3c.sysmetic.domain.member.service.MemberInfoService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.email.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,14 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@RequestMapping("/api")
-public class MemberInfoController {
+@RequestMapping("/v1")
+public class MemberInfoController implements MemberInfoControllerDocs {
 
     private final MemberInfoService memberInfoService;
+
+    private final EmailService emailService;
+
+
 
     /*
         회원 비밀번호 변경 api
@@ -31,14 +37,17 @@ public class MemberInfoController {
         3. 해당 유저가 존재하지 않을 때 : NOT_FOUND
         4. Security Context에 userId가 존재하지 않을 때 : FORBIDDEN
      */
-    @PutMapping("/member/info/password")
+    @Override
+    @PatchMapping("/member/info/{id}/password")
     public ResponseEntity<APIResponse<String>> putPassword(
+            @PathVariable Long id,
             @RequestBody MemberPutPasswordRequestDto memberPutPasswordRequestDto,
             HttpServletRequest request
     ) {
         try {
             if(memberInfoService
                     .changePassword(
+                            id,
                             memberPutPasswordRequestDto,
                             request)
             ) {
@@ -60,13 +69,16 @@ public class MemberInfoController {
         3. 수정할 회원을 찾지 못했을 때 : NOT_FOUND
         4. Security Context에서 회원 Id를 찾지 못했을 때 : FORBIDDEN
      */
-    @PatchMapping("/member/info")
+    @Override
+    @PatchMapping("/member/info/{id}")
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
+            @PathVariable Long id,
             @RequestBody MemberPatchInfoRequestDto memberPatchInfoRequestDto
     ) {
         try {
             if(memberInfoService
                     .changeMemberInfo(
+                            id,
                             memberPatchInfoRequestDto
                     )) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -80,20 +92,37 @@ public class MemberInfoController {
         }
     }
 
-    /*
-        회원 탈퇴 api
-        1. 회원 탈퇴에 성공했을 때 : OK
-        2. 회원 탈퇴에 실패했을 때 : INTERNAL_SERVER_ERROR
-        3. 탈퇴할 회원을 찾지 못했을 때 : NOT_FOUND
-        4. Security Context에서 회원 아이디를 찾지 못했을 때 : FORBIDDEN
-     */
-    @DeleteMapping("/member/{id}")
-    public ResponseEntity<APIResponse<String>> deleteMemberInfo(
-            @PathVariable(name="id") Long userId,
-            HttpServletRequest request
+    @Override
+    @PatchMapping("/member/consent/{id}")
+    public ResponseEntity<APIResponse<String>> updateMemberConsent(
+            @PathVariable Long id,
+            @RequestBody MemberPatchConsentRequestDto memberPatchConsentRequestDto
     ) {
         try {
-            if(memberInfoService.deleteUser(userId, request)) {
+            memberInfoService.changeMemberConsent(id, memberPatchConsentRequestDto);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
+    }
+
+    /*
+            회원 탈퇴 api
+            1. 회원 탈퇴에 성공했을 때 : OK
+            2. 회원 탈퇴에 실패했을 때 : INTERNAL_SERVER_ERROR
+            3. 탈퇴할 회원을 찾지 못했을 때 : NOT_FOUND
+            4. Security Context에서 회원 아이디를 찾지 못했을 때 : FORBIDDEN
+         */
+    @Override
+    @DeleteMapping("/member/{id}")
+    public ResponseEntity<APIResponse<String>> deleteMemberInfo(
+            @PathVariable(name="id") Long userId
+    ) {
+        try {
+            if(memberInfoService.deleteUser(userId)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }

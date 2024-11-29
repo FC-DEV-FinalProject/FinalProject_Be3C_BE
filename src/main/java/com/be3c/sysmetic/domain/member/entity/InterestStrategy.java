@@ -33,7 +33,7 @@ public class InterestStrategy extends BaseEntity {
     @Column(name = "status_code", nullable = false, length = 20)
     private String statusCode;
 
-    @OneToMany(mappedBy = "interestStrategy", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE) // 외래 키에 ON DELETE CASCADE 적용
-    private List<InterestStrategyLog> logs;
+    @OneToMany(mappedBy = "interestStrategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<InterestStrategyLog> interestStrategyLogs;
 }

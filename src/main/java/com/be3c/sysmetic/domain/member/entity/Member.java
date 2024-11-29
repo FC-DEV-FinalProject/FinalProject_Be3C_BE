@@ -90,18 +90,15 @@ public class Member extends BaseEntity {
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @ToString.Exclude
-    @OnDelete(action = OnDeleteAction.CASCADE) // 외래 키에 ON DELETE CASCADE 적용
     private List<Folder> folders;
 
-    @OneToMany(mappedBy = "trader", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "trader", fetch = FetchType.LAZY)
     @ToString.Exclude
-    @OnDelete(action = OnDeleteAction.CASCADE) // 외래 키에 ON DELETE CASCADE 적용
     private List<Strategy> strategies;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @ToString.Exclude
-    @OnDelete(action = OnDeleteAction.CASCADE) // 외래 키에 ON DELETE CASCADE 적용
     private List<Reply> replies;
 }

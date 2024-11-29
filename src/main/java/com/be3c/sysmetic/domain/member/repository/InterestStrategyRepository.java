@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.member.entity.InterestStrategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -64,5 +65,9 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
     Optional<InterestStrategy> findByMemberIdAndStrategyId(
             Long memberId, Long strategyId
     );
+
+    @Modifying
+    @Query("DELETE FROM InterestStrategy i WHERE i.folder.id = :folderId")
+    void deleteByFolderId(Long folderId);
 
 }
