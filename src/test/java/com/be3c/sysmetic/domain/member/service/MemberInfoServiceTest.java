@@ -175,8 +175,6 @@ public class MemberInfoServiceTest {
                 1L, // memberId
                 "test@example.com", // email
                 "TRADER", // role
-                "",
-                "",
                 authorities // 권한 목록
         );
 
