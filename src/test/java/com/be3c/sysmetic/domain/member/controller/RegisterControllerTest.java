@@ -49,7 +49,7 @@ class RegisterControllerTest {
         Mockito.when(registerService.checkEmailDuplication("test@test.com")).thenReturn(true); // 반환 값 설정
 
         // Test
-        mockMvc.perform(get("/auth/check-duplicate-email")
+        mockMvc.perform(get("/v1/auth/check-duplicate-email")
                         .param("email", "test@test.com")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -61,7 +61,7 @@ class RegisterControllerTest {
         Mockito.when(registerService.sendVerifyEmailCode("test@test.com")).thenReturn(true); // 이 메서드는 void 메서드임
 
         // Test
-        mockMvc.perform(get("/auth/email-code")
+        mockMvc.perform(get("/v1/auth/email-code")
                         .param("email", "test@test.com")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -78,7 +78,7 @@ class RegisterControllerTest {
         Mockito.when(registerService.checkVerifyEmailCode("test@test.com", "123456")).thenReturn(true);
 
         // Test
-        mockMvc.perform(post("/auth/email-code")
+        mockMvc.perform(post("/v1/auth/email-code")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emailResponseDto)))
                 .andExpect(status().isOk());
@@ -90,7 +90,7 @@ class RegisterControllerTest {
         Mockito.when(registerService.checkNicknameDuplication("닉네임테스트")).thenReturn(true); // 반환 값 설정
 
         // Test
-        mockMvc.perform(get("/auth/check-nickname")
+        mockMvc.perform(get("/v1/auth/check-nickname")
                         .param("nickname", "닉네임테스트")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -132,7 +132,7 @@ class RegisterControllerTest {
         Mockito.doReturn(true).when(registerService).registerMember(any(RegisterRequestDto.class), any());
 
         // Test
-        MvcResult result = mockMvc.perform(multipart("/auth/register")
+        MvcResult result = mockMvc.perform(multipart("/v1/auth/register")
                         .file(dto)
                         .file(file)
                         .contentType(MediaType.MULTIPART_FORM_DATA))

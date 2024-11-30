@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -95,7 +96,7 @@ public class RegisterController {
             summary = "회원가입",
             description = "사용자 회원가입을 처리하는 API"
     )
-    @PostMapping("/auth/register")
+    @PostMapping(value = "/auth/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> register(@Valid @RequestPart RegisterRequestDto registerResponseDto,
                                                         @RequestPart(value = "file", required = false) MultipartFile file,
                                                         Errors errors

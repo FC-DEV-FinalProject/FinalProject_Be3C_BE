@@ -4,6 +4,10 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,10 +23,6 @@ public class InterestStrategy extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", nullable = false)
     private Folder folder;
 
@@ -32,4 +32,8 @@ public class InterestStrategy extends BaseEntity {
 
     @Column(name = "status_code", nullable = false, length = 20)
     private String statusCode;
+
+    @OneToMany(mappedBy = "interestStrategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<InterestStrategyLog> interestStrategyLogs;
 }

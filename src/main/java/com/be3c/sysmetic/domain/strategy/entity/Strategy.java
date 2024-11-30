@@ -5,10 +5,14 @@ import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -71,6 +75,36 @@ public class Strategy extends BaseEntity {
     @LastModifiedDate
     @Column(name = "strategy_modified_date", nullable = false)
     private LocalDateTime strategyModifiedDate;
+
+    // StrategyStockReference 매핑
+    @OneToMany(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<StrategyStockReference> stockReferences;
+
+    // StrategyApprovalHistory 매핑
+    @OneToMany(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<StrategyApprovalHistory> approvalHistories;
+
+    // StrategyStatistics 매핑
+    @OneToOne(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private StrategyStatistics statistics;
+
+    // Monthly 매핑
+    @OneToMany(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Monthly> monthlyData;
+
+    // Daily 매핑
+    @OneToMany(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Daily> dailyData;
+
+    // AccountImage 매핑
+    @OneToMany(mappedBy = "strategy", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<AccountImage> accountImages;
 
     public void increaseFollowerCount() {
         followerCount++;
