@@ -639,13 +639,12 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
-            @RequestParam(value = "traderId") Long traderId, // 임시
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-//        Long userId = securityUtils.getUserIdInSecurityContext();
+        Long userId = securityUtils.getUserIdInSecurityContext();
 
         if (page <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -663,7 +662,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
-        inquiryListShowRequestDto.setTraderId(traderId);
+        inquiryListShowRequestDto.setTraderId(userId);
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
