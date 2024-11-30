@@ -48,7 +48,7 @@ public interface StockControllerDocs {
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @NotBlank @RequestParam String name
+            @RequestParam String name
     );
 
     /*
@@ -111,7 +111,7 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
     public ResponseEntity<APIResponse<PageResponse<StockGetResponseDto>>> getStockPage(
-            @NotBlank @PathVariable Integer page
+            @PathVariable Integer page
     );
 
     /*
