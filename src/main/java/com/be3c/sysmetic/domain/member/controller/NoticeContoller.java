@@ -8,17 +8,22 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.SuccessCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +36,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final SecurityUtils securityUtils;
 
     private final NoticeService noticeService;
+    private final FileService fileService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
 
@@ -43,20 +49,34 @@ public class NoticeContoller implements NoticeControllerDocs {
         5. 등록하는 관리자 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/notice/write")
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody @Valid NoticeSaveRequestDto noticeSaveRequestDto) {
+            @RequestPart(value = "NoticeSaveRequestDto") @Valid NoticeSaveRequestDto noticeSaveRequestDto,
+            @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
+            @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
+
+        if(fileList.size() > 3) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 파일이 3개 초과입니다."));
+        }
+
+        if(imageList.size() > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 이미지가 5개 초과입니다."));
+        }
 
         try {
             if (noticeService.registerNotice(
                     userId,
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
-                    noticeSaveRequestDto.getIsAttatchment(),
-                    noticeSaveRequestDto.getIsOpen())) {
+//                    noticeSaveRequestDto.getIsAttachment(),
+                    noticeSaveRequestDto.getIsOpen(),
+                    fileList,
+                    imageList)) {
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
@@ -77,7 +97,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -113,18 +133,13 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     public static NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice) {
 
-        String writerNickname = notice.getWriter().getNickname();
-        if (writerNickname == null) {
-            writerNickname = "삭제된 회원입니다.";
-        }
-
         return NoticeAdminListOneShowResponseDto.builder()
                 .noticeId(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
-                .writerNickname(writerNickname)
+                .writerNickname(notice.getWriterNickname())
                 .writeDate(notice.getWriteDate())
                 .hits(notice.getHits())
-                .isAttatchment(notice.getIsAttatchment())
+                .isAttachment(notice.getIsAttachment())
                 .isOpen(notice.getIsOpen())
                 .build();
     }
@@ -138,10 +153,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @PutMapping("/admin/notice/{noticeId}/closed")
     public ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
-            @PathVariable Long noticeId) {
+            @PathVariable(name="noticeId") Long noticeId) {
 
         try {
 
@@ -167,10 +182,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -192,9 +207,27 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice previousNotice = noticeService.findNoticeById(noticeId-1);
             Notice nextNotice = noticeService.findNoticeById(noticeId+1);
 
-            String writerNickname = notice.getWriter().getNickname();
-            if (writerNickname == null) {
-                writerNickname = "삭제된 회원입니다.";
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
             }
 
             NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
@@ -206,10 +239,12 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeContent(notice.getNoticeContent())
                     .writeDate(notice.getWriteDate())
                     .correctDate(notice.getCorrectDate())
-                    .writerNickname(writerNickname)
+                    .writerNickname(notice.getWriterNickname())
                     .hits(notice.getHits())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .previousTitle(previousNotice.getNoticeTitle())
                     .previousWriteDate(previousNotice.getWriteDate())
                     .nextTitle(nextNotice.getNoticeTitle())
@@ -234,10 +269,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -255,6 +290,29 @@ public class NoticeContoller implements NoticeControllerDocs {
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
 
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
+            }
+
             NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
                     .page(page)
                     .searchType(searchType)
@@ -262,8 +320,10 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeId(notice.getId())
                     .noticeTitle(notice.getNoticeTitle())
                     .noticeContent(notice.getNoticeContent())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -286,18 +346,19 @@ public class NoticeContoller implements NoticeControllerDocs {
             +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @PutMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
-            @PathVariable Long noticeId,
-            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto) {
+            @PathVariable(name="noticeId") Long noticeId,
+            @RequestPart(value = "NoticeModifyRequestDto") @Valid NoticeModifyRequestDto noticeModifyRequestDto,
+            @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
+            @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList) {
 
         LocalDateTime modifyInModifyPageTime = noticeModifyRequestDto.getModifyInModifyPageTime();
         if (modifyInModifyPageTime == null) {
             String str = "3000-11-05 13:47:13.248";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-            LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
-            modifyInModifyPageTime = dateTime;
+            modifyInModifyPageTime = LocalDateTime.parse(str, formatter);
         }
 
         Long userId = securityUtils.getUserIdInSecurityContext();
@@ -312,8 +373,11 @@ public class NoticeContoller implements NoticeControllerDocs {
                         noticeModifyRequestDto.getNoticeTitle(),
                         noticeModifyRequestDto.getNoticeContent(),
                         userId,
-                        noticeModifyRequestDto.getIsAttatchment(),
-                        noticeModifyRequestDto.getIsOpen())) {
+                        noticeModifyRequestDto.getIsOpen(),
+                        noticeModifyRequestDto.getExistFileDtoList(),
+                        noticeModifyRequestDto.getExistImageDtoList(),
+                        newFileList,
+                        newImageList)) {
                     return ResponseEntity.status(HttpStatus.OK)
                             .body(APIResponse.success());
                 }
@@ -328,6 +392,10 @@ public class NoticeContoller implements NoticeControllerDocs {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+        }
     }
 
 
@@ -339,10 +407,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 해당 공지사항을 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/notice/{noticeId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminNotice(
-            @PathVariable Long noticeId) {
+            @PathVariable(name="noticeId") Long noticeId) {
 
         try {
             if (noticeService.deleteAdminNotice(noticeId)) {
@@ -367,7 +435,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         4. 공지사항 중 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/notice/delete")
     public ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto) {
@@ -430,7 +498,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                 .noticeId(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
                 .writeDate(notice.getWriteDate())
-                .isAttatchment(notice.getIsAttatchment())
+                .isAttachment(notice.getIsAttachment())
                 .build();
     }
 
@@ -444,7 +512,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
     @GetMapping("/notice/{noticeId}/view")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
@@ -458,9 +526,27 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice previousNotice = noticeService.findNoticeById(noticeId-1);
             Notice nextNotice = noticeService.findNoticeById(noticeId+1);
 
-            String writerNickname = notice.getWriter().getNickname();
-            if (writerNickname == null) {
-                writerNickname = "삭제된 회원입니다.";
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+
+            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
             }
 
             NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
@@ -471,10 +557,12 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeContent(notice.getNoticeContent())
                     .writeDate(notice.getWriteDate())
                     .correctDate(notice.getCorrectDate())
-                    .writerNickname(writerNickname)
+                    .writerNickname(notice.getWriterNickname())
                     .hits(notice.getHits())
-                    .isAttatchment(notice.getIsAttatchment())
+                    .isAttachment(notice.getIsAttachment())
                     .isOpen(notice.getIsOpen())
+                    .fileDtoList(fileDtoList)
+                    .imageDtoList(imageDtoList)
                     .previousTitle(previousNotice.getNoticeTitle())
                     .previousWriteDate(previousNotice.getWriteDate())
                     .nextTitle(nextNotice.getNoticeTitle())

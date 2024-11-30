@@ -11,7 +11,6 @@ import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import com.be3c.sysmetic.global.util.email.dto.Subscriber;
 import com.be3c.sysmetic.global.util.email.dto.SubscriberRequest;
-import com.be3c.sysmetic.global.util.email.exception.EmailSendingException;
 import com.be3c.sysmetic.global.util.email.service.EmailService;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;

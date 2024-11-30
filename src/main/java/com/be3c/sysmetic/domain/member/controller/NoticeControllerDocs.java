@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "공지사항 API", description = "관리자, 트레이더, 투자자 공지사항 API")
@@ -46,9 +48,10 @@ public interface NoticeControllerDocs {
             description = "등록하는 관리자 정보를 찾지 못함 (NOT_FOUND)"
     )
     })
-    @PostMapping("/admin/notice/write")
     ResponseEntity<APIResponse<Long>> saveAdminNotice(
-            @RequestBody NoticeSaveRequestDto noticeSaveRequestDto);
+            @RequestPart @Valid NoticeSaveRequestDto noticeSaveRequestDto,
+            @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
+            @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList);
 
 
     // 관리자 공지사항 조회 / 검색 API
@@ -71,7 +74,6 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/admin/notice")
     ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
@@ -101,7 +103,6 @@ public interface NoticeControllerDocs {
                     description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             )
     })
-    @PutMapping("/admin/notice/{noticeId}/closed")
     ResponseEntity<APIResponse<Long>> modifyNoticeClosed(
             @PathVariable Long noticeId);
 
@@ -131,9 +132,8 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/admin/notice/{noticeId}/view")
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -164,9 +164,8 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/admin/notice/{noticeId}/modify")
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -199,10 +198,11 @@ public interface NoticeControllerDocs {
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)\n+ +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음"
             )
     })
-    @PutMapping("/admin/notice/{noticeId}/modify")
     ResponseEntity<APIResponse<Long>> modifyAdminNotice(
-            @PathVariable Long noticeId,
-            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto);
+            @PathVariable(name="noticeId") Long noticeId,
+            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto,
+            @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
+            @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList);
 
 
     // 관리자 공지사항 삭제 API
@@ -228,9 +228,8 @@ public interface NoticeControllerDocs {
                     description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
             )
     })
-    @DeleteMapping("/admin/notice/{noticeId}/delete")
     ResponseEntity<APIResponse<Long>> deleteAdminNotice(
-            @PathVariable Long noticeId);
+            @PathVariable(name="noticeId") Long noticeId);
 
 
     // 관리자 공지사항 목록 삭제 API
@@ -256,7 +255,6 @@ public interface NoticeControllerDocs {
                     description = "공지사항 중 삭제에 실패 (MULTI_STATUS)"
             )
     })
-    @DeleteMapping("/admin/notice/delete")
     ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminNoticeList(
             @RequestBody @Valid NoticeListDeleteRequestDto noticeListDeleteRequestDto);
 
@@ -276,7 +274,6 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/notice")
     ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -302,9 +299,8 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    @GetMapping("/notice/{noticeId}/view")
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
 }
