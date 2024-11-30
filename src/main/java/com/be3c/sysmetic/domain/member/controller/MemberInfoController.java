@@ -72,7 +72,7 @@ public class MemberInfoController implements MemberInfoControllerDocs {
         4. Security Context에서 회원 Id를 찾지 못했을 때 : FORBIDDEN
      */
     @Override
-    @PatchMapping("/member/info/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value= "/member/info/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @PathVariable Long id,
             @RequestPart MemberPatchInfoRequestDto memberPatchInfoRequestDto,
