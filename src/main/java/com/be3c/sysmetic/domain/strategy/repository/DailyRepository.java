@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -285,4 +286,8 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.KpRatioParametersDto(d.date, d.profitLossRate, d.accumulatedProfitLossRate) "
             + "FROM Daily d WHERE d.strategy.id = :strategyId ORDER BY d.date DESC")
     List<KpRatioParametersDto> findKpRatioParameters(@Param("strategyId") Long strategyId);
+
+    @Modifying
+    @Query("DELETE FROM Daily d WHERE d.strategy.id = :strategyId")
+    int deleteByStrategyId(Long strategyId);
 }

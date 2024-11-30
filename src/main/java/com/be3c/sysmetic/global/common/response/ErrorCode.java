@@ -32,6 +32,7 @@ public enum ErrorCode {
         403 Forbidden
      */
     FORBIDDEN(HttpStatus.FORBIDDEN, "요청 권한이 부족합니다."),
+    DISABLED_DATA_STATUS(HttpStatus.FORBIDDEN, "사용 불가능한 상태입니다."),
 
     /*
         404 Not Found

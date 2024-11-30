@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "notice")
-public class Notice {
+public class Notice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,49 +30,45 @@ public class Notice {
     @JoinColumn(name = "member_id", nullable = false)
     private Member writer;
 
-//    @Column(name = "writer", nullable = false)
-//    private String writerNickname;
+    @Column(name = "writer_nickname", nullable = false)
+    private String writerNickname;
 
     @Column(name = "write_date", nullable = false)
     private LocalDateTime writeDate;
 
-    // 화면엔 안 보임 : id or 닉네임
-    @Column(name = "corrector")
+    // 화면엔 안 보임
+    @Column(name = "corrector_id", nullable = false)
     private Long correctorId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "member_id")
-//    private Member corrector;
-
-    @Column(name = "correct_date")
+    @Column(name = "correct_date", nullable = false)
     private LocalDateTime correctDate;
 
     @Column(name = "hits", nullable = false)
     private Long hits;
 
     @Column(name = "is_attachment", nullable = false)
-    private Integer isAttatchment; // enum or long
+    private Boolean isAttachment;
 
     @Column(name = "is_open", nullable = false)
-    private Integer isOpen; // enum or long
+    private Boolean isOpen;
 
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
-                                      Integer isAttatchment,
-                                      Integer isOpen) {
-        Notice notice = new Notice();
+                                      Boolean isAttachment,
+                                      Boolean isOpen) {
 
-        notice.setNoticeTitle(noticeTitle);
-        notice.setNoticeContent(noticeContent);
-        notice.setWriter(writer);
-//        notice.setWriterNickname(writer.getNickname());
-        notice.setWriteDate(LocalDateTime.now());
-        notice.setCorrectorId(writer.getId());
-        notice.setHits(0L);
-        notice.setIsAttatchment(isAttatchment);
-        notice.setIsOpen(isOpen);
-
-        return notice;
+        return Notice.builder()
+                .noticeTitle(noticeTitle)
+                .noticeContent(noticeContent)
+                .writer(writer)
+                .writerNickname(writer.getNickname())
+                .writeDate(LocalDateTime.now())
+                .correctorId(writer.getId())
+                .correctDate(LocalDateTime.now())
+                .hits(0L)
+                .isAttachment(isAttachment)
+                .isOpen(isOpen)
+                .build();
     }
 }

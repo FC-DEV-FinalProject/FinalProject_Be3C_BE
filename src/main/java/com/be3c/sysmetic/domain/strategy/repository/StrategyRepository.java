@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
+    List<Strategy> findByTraderId(Long traderId);
 
     // 닉네임으로 트레이더 조회, 일치한 닉네임, 전략 수 내림차순 정렬
     @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
@@ -49,6 +51,13 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             @Param("userId") Long userId,
             @Param("statusCode") String statusCode
     );
+
+    @Modifying
+    @Query("DELETE FROM Strategy s WHERE s.trader.id = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT count (*) FROM Strategy s WHERE s.trader.id = :memberId")
+    long countByMemberId(@Param("memberId") Long memberId);
 
 
     @Query("SELECT COUNT(*) FROM Strategy s WHERE s.trader.id = :traderId AND s.statusCode = 'PUBLIC'")
