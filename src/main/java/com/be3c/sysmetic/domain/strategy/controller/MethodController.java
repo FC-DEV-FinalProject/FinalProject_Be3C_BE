@@ -73,7 +73,7 @@ public class MethodController implements MethodControllerDocs {
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     @GetMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     ) {
         try {
             return ResponseEntity.status(HttpStatus.OK)
@@ -97,7 +97,7 @@ public class MethodController implements MethodControllerDocs {
     @Override
     @GetMapping("/admin/methodlist")
     public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
-            @NotBlank @RequestParam Integer page
+            @RequestParam Integer page
     ) {
         try {
             PageResponse<MethodGetResponseDto> methodList = methodService.findMethodPage(page);
@@ -156,7 +156,7 @@ public class MethodController implements MethodControllerDocs {
     @Override
     @PutMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto,
+            @Valid @RequestPart MethodPutRequestDto methodPutRequestDto,
             @RequestPart(value = "file") MultipartFile file
     ) {
         try {
@@ -190,7 +190,7 @@ public class MethodController implements MethodControllerDocs {
     @Override
     @DeleteMapping("/admin/method/{id}")
     public ResponseEntity<APIResponse<String>> deleteMethod(
-            @NotBlank @PathVariable Long id
+         @PathVariable Long id
     ) {
         try {
             if(methodService.deleteMethod(id)) {
