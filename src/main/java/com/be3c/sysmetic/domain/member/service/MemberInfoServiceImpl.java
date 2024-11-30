@@ -133,10 +133,10 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
         if(memberPatchInfoRequestDto.getNicknameDuplCheck() &&
             memberPatchInfoRequestDto.getNickname() != null &&
-            memberPatchInfoRequestDto.getNickname().isEmpty()
+            !memberPatchInfoRequestDto.getNickname().isEmpty()
         ) {
             member.setNickname(memberPatchInfoRequestDto.getNickname());
-
+/*
             List<Subscriber> subscribers = new ArrayList<>();
 
             subscribers.add(Subscriber.builder()
@@ -156,7 +156,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
                             .build());
                     break;
             }
-
+            */
         }
 
         if(!memberPatchInfoRequestDto.getPhoneNumber().isEmpty()) {
