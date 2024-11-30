@@ -133,7 +133,7 @@ public interface NoticeControllerDocs {
             )
     })
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -165,7 +165,7 @@ public interface NoticeControllerDocs {
             )
     })
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -199,7 +199,7 @@ public interface NoticeControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> modifyAdminNotice(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto,
             @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
             @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList);
@@ -229,7 +229,7 @@ public interface NoticeControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> deleteAdminNotice(
-            @PathVariable Long noticeId);
+            @PathVariable(name="noticeId") Long noticeId);
 
 
     // 관리자 공지사항 목록 삭제 API
@@ -300,7 +300,7 @@ public interface NoticeControllerDocs {
             )
     })
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
-            @PathVariable Long noticeId,
+            @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
 }
