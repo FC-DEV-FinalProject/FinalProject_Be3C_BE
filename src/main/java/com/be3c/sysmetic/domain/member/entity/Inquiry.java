@@ -40,6 +40,9 @@ public class Inquiry extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member inquirer;
 
+    @Column(name = "trader_id", nullable = false)
+    private Long traderId;
+
     @Column(name = "trader_nickname", nullable = false)
     private String traderNickname;
 
@@ -66,6 +69,7 @@ public class Inquiry extends BaseEntity {
         inquiry.setStrategy(strategy);
         inquiry.setStrategyName(strategy.getName());
         inquiry.setInquirer(member);
+        inquiry.setTraderId(strategy.getTrader().getId());
         inquiry.setTraderNickname(strategy.getTrader().getNickname());
         inquiry.setInquirerNickname(member.getNickname());
 
