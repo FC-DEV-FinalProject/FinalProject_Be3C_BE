@@ -292,8 +292,8 @@ public class DailyServiceImpl implements DailyService {
                 .profitLossRate(dailyProfitLossRate) // 일손익률
                 .currentBalance(strategyCalculator.getCurrentBalance(isFirst, beforeBalance, requestDto.getDepositWithdrawalAmount(), requestDto.getDailyProfitLossAmount())) // 잔고
                 .standardAmount(strategyCalculator.getStandardAmount(isFirst, requestDto.getDepositWithdrawalAmount(), requestDto.getDailyProfitLossAmount(), beforeBalance, beforePrincipal)) // 기준가
-                .accumulatedProfitLossAmount(getAccumulatedProfitLossAmount(strategyId, requestDto.getDailyProfitLossAmount())) // 누적손익금액
-                .accumulatedProfitLossRate(getAccumulatedProfitLossRate(strategyId, dailyProfitLossRate)) // 누적손익률
+                .accumulatedProfitLossAmount(isFirst ? requestDto.getDailyProfitLossAmount() : getAccumulatedProfitLossAmount(strategyId, requestDto.getDailyProfitLossAmount())) // 누적손익금액
+                .accumulatedProfitLossRate(isFirst ? dailyProfitLossRate : getAccumulatedProfitLossRate(strategyId, dailyProfitLossRate)) // 누적손익률
                 .build();
     }
 
