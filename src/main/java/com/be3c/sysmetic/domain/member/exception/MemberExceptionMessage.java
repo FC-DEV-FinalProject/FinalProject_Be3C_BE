@@ -7,6 +7,10 @@ public enum MemberExceptionMessage {
     REGISTRATION_FAILED("회원가입에 실패했습니다. 관리자에게 문의해 주세요."),
     NICKNAME_ALREADY_IN_USE("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요."),
 
+    // 로그인 관련
+    INVALID_CREDENTIALS("입력하신 이메일 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요."),
+    MEMBER_NOT_FOUND("해당 이메일로 등록된 회원 정보를 찾을 수 없습니다."),
+
     // Redis 관련 오류
     REDIS_EMAIL_CODE_ERROR("Redis 이메일 인증코드 관련 오류 발생"),
 
