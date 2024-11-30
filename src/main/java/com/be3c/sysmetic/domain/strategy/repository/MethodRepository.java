@@ -19,12 +19,12 @@ public interface MethodRepository extends JpaRepository<Method, Long> {
     Optional<Method> findByNameAndStatusCode(String name, String statusCode);
 
     // 추후 f.file_path 추가 생각중.
-    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name) " +
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name, null) " +
            "FROM Method m WHERE m.statusCode = :statusCode")
     Page<MethodGetResponseDto> findAllByStatusCode(Pageable pageable, String statusCode);
 
     // 전략관리 페이지 매매방식 조회
-    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name) " +
+    @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto(m.id, m.name, null) " +
             "FROM Method m WHERE m.statusCode = :statusCode")
     List<MethodGetResponseDto> findAllByStatusCode(String statusCode);
 }
