@@ -6,12 +6,15 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -228,6 +231,28 @@ public class TraderStrategyController {
     public ResponseEntity<APIResponse<MethodAndStockGetResponseDto>> findMethodAndStockList() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(strategyService.findMethodAndStock()));
+    }
+
+    // 비공개 전환
+    @Operation(
+            summary = "비공개 전환",
+            description = "트레이더가 본인의 전략을 비공개로 전환"
+    )
+    @PatchMapping("/strategy/{id}/visibility")
+    public ResponseEntity<APIResponse<String>> patchStrategy(
+            @NotBlank @PathVariable Long id
+    ) {
+        try {
+            if(strategyService.privateStrategy(id)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
     }
 
 }
