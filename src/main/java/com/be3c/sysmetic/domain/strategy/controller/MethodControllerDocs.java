@@ -42,7 +42,7 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @NotBlank @RequestParam String name
+            @RequestParam String name
     );
 
     /*
@@ -76,7 +76,7 @@ public interface MethodControllerDocs {
     })
 //    @GetMapping("/admin/method/{id:[0-9]+}")
     public ResponseEntity<APIResponse<MethodGetResponseDto>> getMethod(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     );
 
     /*
@@ -110,7 +110,7 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<PageResponse<MethodGetResponseDto>>> getMethods(
-            @NotBlank @RequestParam Integer page
+            @RequestParam Integer page
     );
 
     /*
@@ -224,6 +224,6 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> deleteMethod(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     );
 }
