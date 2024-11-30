@@ -108,11 +108,11 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         ) {
             member.setPassword(passwordEncoder.encode(memberPutPasswordRequestDto.getNewPassword()));
 
-            saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_SUCCESS.getCode());
+            //saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_SUCCESS.getCode());
 
             return true;
         }
-        saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
+        //saveChangePasswordLog(request, member, Code.PASSWORD_CHANGE_FAIL.getCode());
 
         return false;
     }

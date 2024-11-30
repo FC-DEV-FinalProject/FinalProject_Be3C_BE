@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.member.controller;
 
+import org.springframework.http.MediaType;
 import com.be3c.sysmetic.domain.member.dto.MemberPatchConsentRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPatchInfoRequestDto;
 import com.be3c.sysmetic.domain.member.dto.MemberPutPasswordRequestDto;
@@ -71,7 +72,7 @@ public class MemberInfoController implements MemberInfoControllerDocs {
         4. Security Context에서 회원 Id를 찾지 못했을 때 : FORBIDDEN
      */
     @Override
-    @PatchMapping("/member/info/{id}")
+    @PatchMapping("/member/info/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @PathVariable Long id,
             @RequestPart MemberPatchInfoRequestDto memberPatchInfoRequestDto,
