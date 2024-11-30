@@ -12,8 +12,6 @@ import lombok.*;
 @Schema(description = "공지사항 등록 요청 DTO")
 public class NoticeSaveRequestDto {
 
-    private Long userId;
-
     @Schema(description = "공지사항 제목", example = "공지사항 제목 예시")
     @NotNull
     private String noticeTitle;

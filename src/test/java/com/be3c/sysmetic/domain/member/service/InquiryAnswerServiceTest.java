@@ -86,27 +86,27 @@ public class InquiryAnswerServiceTest {
 
 
     private Inquiry createInquiry(String inquiryTitle, String inquiryContent) {
-        Inquiry inquiry = Inquiry.createInquiry(createStrategy(), createMember(), inquiryTitle, inquiryContent);
+        Inquiry inquiry = Inquiry.createInquiry(createStrategy("삼성전자"), createMember("닉네임"), inquiryTitle, inquiryContent);
         em.persist(inquiry);
         return inquiry;
     }
 
-    private Member createMember() {
+
+    private Member createMember(String nickName) {
         Member member = new Member();
-//        member.setId(1L);
-        member.setRoleCode("UR001");
+        member.setRoleCode("USER");
         member.setEmail("user@gmail.com");
         member.setPassword("123456");
         member.setName("송중기");
-        member.setNickname("유시진11");
+        member.setNickname(nickName);
         member.setBirth(LocalDateTime.now().toLocalDate());
         member.setPhoneNumber("01012345678");
-        member.setUsingStatusCode("MS002");
+        member.setUsingStatusCode("UR001");
         member.setTotalFollow(39);
         member.setTotalStrategyCount(100);
-        member.setReceiveInfoConsent("Y");
+        member.setReceiveInfoConsent("true");
         member.setInfoConsentDate(LocalDateTime.now());
-        member.setReceiveMarketingConsent("Y");
+        member.setReceiveMarketingConsent("true");
         member.setMarketingConsentDate(LocalDateTime.now());
         em.persist(member);
         return member;
@@ -114,26 +114,27 @@ public class InquiryAnswerServiceTest {
 
     private Method createMethod() {
         Method method = new Method();
-        method.setName("Manual");
-        method.setStatusCode("StatusCode");
-//        method.setExplanation("Explanation");
-//        method.setMethodCreatedDate(LocalDateTime.now());
+        method.setName("DAY");
+        method.setStatusCode("PUBLIC");
+        method.setMethodCreatedDate(LocalDateTime.now());
         em.persist(method);
         return method;
     }
 
-    private Strategy createStrategy() {
+    private Strategy createStrategy(String name) {
         Strategy strategy = new Strategy();
-        strategy.setTrader(createMember());
+        strategy.setTrader(createMember("닉네임1"));
         strategy.setMethod(createMethod());
-        strategy.setStatusCode("ST002");
-        strategy.setName("삼성전자");
-        strategy.setCycle('D');
-//        strategy.setMinOperationAmount(1.1);
-        strategy.setContent("내용");
+        strategy.setStatusCode("PUBLIC");
+        strategy.setName(name);
+        strategy.setCycle('P');
+        strategy.setContent("전략내용");
         strategy.setFollowerCount(36L);
+        strategy.setMdd(1.1);
         strategy.setKpRatio(2.2);
         strategy.setSmScore(3.3);
+        strategy.setWinningRate(4.4);
+        strategy.setAccumulatedProfitLossRate(5.5);
         strategy.setStrategyCreatedDate(LocalDateTime.now());
         strategy.setStrategyModifiedDate(LocalDateTime.now());
         em.persist(strategy);

@@ -27,52 +27,48 @@ public class Notice extends BaseEntity {
     private String noticeContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "id", name = "writer_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member writer;
 
-//    @Column(name = "writer", nullable = false)
-//    private String writerNickname;
+    @Column(name = "writer_nickname", nullable = false)
+    private String writerNickname;
 
     @Column(name = "write_date", nullable = false)
     private LocalDateTime writeDate;
 
-    // 화면엔 안 보임 : id or 닉네임
-    @Column(name = "corrector_id")
+    // 화면엔 안 보임
+    @Column(name = "corrector_id", nullable = false)
     private Long correctorId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "member_id")
-//    private Member corrector;
-
-    @Column(name = "correct_date")
+    @Column(name = "correct_date", nullable = false)
     private LocalDateTime correctDate;
 
     @Column(name = "hits", nullable = false)
     private Long hits;
 
     @Column(name = "is_attachment", nullable = false)
-    private Integer isAttachment; // enum or long
+    private Integer isAttachment;
 
     @Column(name = "is_open", nullable = false)
-    private Integer isOpen; // enum or long
+    private Integer isOpen;
 
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
                                       Integer isAttachment,
                                       Integer isOpen) {
-        Notice notice = new Notice();
 
-        notice.setNoticeTitle(noticeTitle);
-        notice.setNoticeContent(noticeContent);
-        notice.setWriter(writer);
-//        notice.setWriterNickname(writer.getNickname());
-        notice.setWriteDate(LocalDateTime.now());
-        notice.setCorrectorId(writer.getId());
-        notice.setHits(0L);
-        notice.setIsAttachment(isAttachment);
-        notice.setIsOpen(isOpen);
-
-        return notice;
+        return Notice.builder()
+                .noticeTitle(noticeTitle)
+                .noticeContent(noticeContent)
+                .writer(writer)
+                .writerNickname(writer.getNickname())
+                .writeDate(LocalDateTime.now())
+                .correctorId(writer.getId())
+                .correctDate(LocalDateTime.now())
+                .hits(0L)
+                .isAttachment(isAttachment)
+                .isOpen(isOpen)
+                .build();
     }
 }

@@ -5,17 +5,23 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
+import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,24 +126,39 @@ public class NoticeServiceImpl implements NoticeService {
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
+        notice.setCorrectDate(LocalDateTime.now());
         notice.setCorrectorId(correctorId);
         notice.setIsOpen(isOpen);
 
+        int countFile = 0;
         boolean deleteAllFile = true;
         for (NoticeExistFileImageRequestDto n : existFileDtoList) {
             if (!n.getExist()) {
                 fileService.deleteFileById(n.getFileId());
                 deleteAllFile = false;
+            } else {
+                countFile++;
             }
         }
         if (deleteAllFile && newFileList.isEmpty()) {
             notice.setIsAttachment(0);
         }
+        countFile = countFile + newFileList.size();
+        if (countFile > 3) {
+            throw new IllegalArgumentException("파일이 3개 이상입니다.");
+        }
 
+        int countImage = 0;
         for (NoticeExistFileImageRequestDto n : existImageDtoList) {
             if (!n.getExist()) {
                 fileService.deleteFileById(n.getFileId());
+            } else {
+                countImage++;
             }
+        }
+        countImage = countImage + newImageList.size();
+        if (countImage > 5) {
+            throw new IllegalArgumentException("이미지가 5개 이상입니다.");
         }
 
 

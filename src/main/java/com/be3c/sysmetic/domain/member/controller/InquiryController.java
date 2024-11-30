@@ -46,8 +46,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @GetMapping("/admin/inquiry")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")    @GetMapping("/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -96,10 +95,10 @@ public class InquiryController implements InquiryControllerDocs {
 
         return InquiryAdminListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
-                .traderNickname(inquiry.getStrategy().getTrader().getNickname())
-                .strategyName(inquiry.getStrategy().getName())
+                .traderNickname(inquiry.getTraderNickname())
+                .strategyName(inquiry.getStrategyName())
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquirerNickname(inquiry.getInquirerNickname())
                 .inquiryStatus(inquiry.getInquiryStatus())
                 .build();
     }
@@ -113,7 +112,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
             @PathVariable Long inquiryId,
@@ -156,13 +155,13 @@ public class InquiryController implements InquiryControllerDocs {
 
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                    .inquirerNickname(inquiry.getInquirer().getNickname())
+                    .inquirerNickname(inquiry.getInquirerNickname())
                     .inquiryStatus(inquiry.getInquiryStatus())
 
                     // 전략 위 아이콘들
-                    .strategyName(inquiry.getStrategy().getName())
+                    .strategyName(inquiry.getStrategyName())
                     // 트레이더의 프로필 사진
-                    .traderNickname(inquiry.getStrategy().getTrader().getNickname())
+                    .traderNickname(inquiry.getTraderNickname())
 
                     .inquiryContent(inquiry.getInquiryContent())
 
@@ -194,8 +193,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")    @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
             @PathVariable Long inquiryId) {
 
@@ -222,7 +220,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
@@ -253,7 +251,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 등록 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable Long strategyId) {
@@ -285,7 +283,7 @@ public class InquiryController implements InquiryControllerDocs {
         5. 등록하는 질문자나 해당 전략의 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
             @PathVariable Long strategyId,
@@ -319,7 +317,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -369,7 +367,7 @@ public class InquiryController implements InquiryControllerDocs {
         return InquiryListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .inquiryTitle(inquiry.getInquiryTitle())
-                .strategyName(inquiry.getStrategy().getName())
+                .strategyName(inquiry.getStrategyName())
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
                 .inquiryStatus(inquiry.getInquiryStatus())
                 .build();
@@ -384,7 +382,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
      @Override
-//     @PreAuthorize("hasRole('ROLE_USER')")
+//     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
      @GetMapping("/member/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable Long inquiryId,
@@ -425,13 +423,13 @@ public class InquiryController implements InquiryControllerDocs {
 
                      .inquiryTitle(inquiry.getInquiryTitle())
                      .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                     .inquirerNickname(inquiry.getInquirer().getNickname())
+                     .inquirerNickname(inquiry.getInquirerNickname())
                      .inquiryStatus(inquiry.getInquiryStatus())
 
                      // 전략 위 아이콘들
-                     .strategyName(inquiry.getStrategy().getName())
+                     .strategyName(inquiry.getStrategyName())
                      // 트레이더의 프로필 사진
-                     .traderNickname(inquiry.getStrategy().getTrader().getNickname())
+                     .traderNickname(inquiry.getTraderNickname())
 
                      .inquiryContent(inquiry.getInquiryContent())
 
@@ -463,7 +461,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable Long inquiryId,
@@ -523,7 +521,7 @@ public class InquiryController implements InquiryControllerDocs {
             +) 답변이 등록된 문의를 수정 시도함
      */
      @Override
-//     @PreAuthorize("hasRole('ROLE_USER')")
+//     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
      @PutMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
             @PathVariable Long inquiryId,
@@ -567,7 +565,7 @@ public class InquiryController implements InquiryControllerDocs {
         5. 답변이 등록된 문의를 수정 시도함 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable Long inquiryId) {
@@ -607,7 +605,7 @@ public class InquiryController implements InquiryControllerDocs {
         5. 등록하는 문의 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @PostMapping("/trader/inquiry/{inquiryId}/write")
     public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
             @PathVariable Long inquiryId,
@@ -638,7 +636,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -691,7 +689,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
             @PathVariable Long inquiryId,
@@ -732,13 +730,13 @@ public class InquiryController implements InquiryControllerDocs {
 
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                    .inquirerNickname(inquiry.getInquirer().getNickname())
+                    .inquirerNickname(inquiry.getInquirerNickname())
                     .inquiryStatus(inquiry.getInquiryStatus())
 
                     // 전략 위 아이콘들
-                    .strategyName(inquiry.getStrategy().getName())
+                    .strategyName(inquiry.getStrategyName())
                     // 트레이더의 프로필 사진
-                    .traderNickname(inquiry.getStrategy().getTrader().getNickname())
+                    .traderNickname(inquiry.getTraderNickname())
 
                     .inquiryContent(inquiry.getInquiryContent())
 
