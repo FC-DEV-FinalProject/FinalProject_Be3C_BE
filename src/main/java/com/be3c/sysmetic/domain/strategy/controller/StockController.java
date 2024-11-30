@@ -69,7 +69,7 @@ public class StockController implements StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     ) {
         try {
             StockGetResponseDto findStock = stockService.findItemById(id);
@@ -92,7 +92,7 @@ public class StockController implements StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
     public ResponseEntity<APIResponse<PageResponse<StockGetResponseDto>>> getStockPage(
-            @NotBlank @PathVariable Integer page
+            @PathVariable Integer page
     ) {
         try {
             PageResponse<StockGetResponseDto> stockPage = stockService.findItemPage(page);
@@ -118,7 +118,7 @@ public class StockController implements StockControllerDocs {
      */
     @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @PostMapping("/admin/stock", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin/stock", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> saveitem(
             @Valid @RequestPart StockPostRequestDto stockPostRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
@@ -146,7 +146,7 @@ public class StockController implements StockControllerDocs {
      */
     @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @PutMapping("/admin/stock",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/admin/stock", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> updateItem(
             @Valid @RequestPart StockPutRequestDto stockPutRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
@@ -179,7 +179,7 @@ public class StockController implements StockControllerDocs {
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<String>> deleteItem(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     ) {
         try {
             if(stockService.deleteItem(id)) {
