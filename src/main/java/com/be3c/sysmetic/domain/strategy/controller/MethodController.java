@@ -156,7 +156,7 @@ public class MethodController implements MethodControllerDocs {
     @Override
     @PutMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<APIResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto,
+            @Valid @RequestPart MethodPutRequestDto methodPutRequestDto,
             @RequestPart(value = "file") MultipartFile file
     ) {
         try {
