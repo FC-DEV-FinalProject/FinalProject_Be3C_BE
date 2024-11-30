@@ -17,21 +17,21 @@ public class MemberPutPasswordRequestDto {
 
     @Schema(description = "회원 ID", example = "12345")
     @NotNull(message = "userId는 필수 값입니다.")
-    @JsonProperty("user_id")
+    @JsonProperty("userId")
     private Long userId;
 
     @Schema(description = "현재 비밀번호", example = "current_password")
     @NotBlank(message = "currentPassword는 필수 값입니다.")
-    @JsonProperty("current_password")
+    @JsonProperty("currentPassword")
     private String currentPassword;
 
     @Schema(description = "새 비밀번호", example = "new_password123")
     @NotBlank(message = "newPassword는 필수 값입니다.")
-    @JsonProperty("new_password")
+    @JsonProperty("newPassword")
     private String newPassword;
 
     @Schema(description = "새 비밀번호 확인", example = "new_password123")
     @NotBlank(message = "newPasswordConfirm는 필수 값입니다.")
-    @JsonProperty("new_password_confirm")
+    @JsonProperty("newPasswordConfirm")
     private String newPasswordConfirm;
 }
