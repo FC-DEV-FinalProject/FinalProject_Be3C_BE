@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailStatistics;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,8 @@ import java.util.List;
 @Repository
 public interface StrategyStatisticsRepository extends JpaRepository<StrategyStatistics, Long> {
     StrategyStatistics findByStrategyId(Long strategyId);
+
+    @Modifying
     void deleteByStrategyId(Long strategyId);
 
 

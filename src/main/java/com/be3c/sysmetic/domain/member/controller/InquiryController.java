@@ -46,7 +46,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -62,7 +62,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(searchType.equals("strategy") || searchType.equals("trader") || searchType.equals("inquirer"))) {
@@ -96,10 +96,10 @@ public class InquiryController implements InquiryControllerDocs {
 
         return InquiryAdminListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
-                .traderNickname(inquiry.getStrategy().getTrader().getNickname())
-                .strategyName(inquiry.getStrategy().getName())
+                .traderNickname(inquiry.getTraderNickname())
+                .strategyName(inquiry.getStrategyName())
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquirerNickname(inquiry.getInquirerNickname())
                 .inquiryStatus(inquiry.getInquiryStatus())
                 .build();
     }
@@ -113,10 +113,10 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
@@ -130,7 +130,7 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(searchType.equals("strategy") || searchType.equals("trader") || searchType.equals("inquirer"))) {
@@ -139,41 +139,42 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-            InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-            InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                    .page(page)
+                    .closed(closed)
+                    .searchType(searchType)
+                    .searchText(searchText)
 
-            inquiryAnswerShowResponseDto.setPage(page);
-            inquiryAnswerShowResponseDto.setClosed(closed);
-            inquiryAnswerShowResponseDto.setSearchType(searchType);
-            inquiryAnswerShowResponseDto.setSearchText(searchText);
+                    .inquiryId(inquiryId)
+                    .inquiryAnswerId(inquiryAnswer.getId())
 
-            inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-            inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                    .inquiryTitle(inquiry.getInquiryTitle())
+                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                    .inquirerNickname(inquiry.getInquirerNickname())
+                    .inquiryStatus(inquiry.getInquiryStatus())
 
-            inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-            inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                    // 전략 위 아이콘들
+                    .strategyName(inquiry.getStrategyName())
+                    // 트레이더의 프로필 사진
+                    .traderNickname(inquiry.getTraderNickname())
 
-            // 전략 위 아이콘들
-            inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                    .inquiryContent(inquiry.getInquiryContent())
 
-            // 트레이더의 아이콘
-            inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                    .answerTitle(inquiryAnswer.getAnswerTitle())
+                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                    .answerContent(inquiryAnswer.getAnswerContent())
 
-            inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-            inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-            inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-            inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-            inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                    .previousTitle(previousInquiry.getInquiryTitle())
+                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                    .nextTitle(nextInquiry.getInquiryTitle())
+                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .build();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -193,10 +194,10 @@ public class InquiryController implements InquiryControllerDocs {
         4. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
-            @PathVariable Long inquiryId) {
+            @PathVariable(name="inquiryId") Long inquiryId) {
 
         try {
             if (inquiryService.deleteAdminInquiry(inquiryId)) {
@@ -221,7 +222,7 @@ public class InquiryController implements InquiryControllerDocs {
         4. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/inquiry/delete")
     public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
@@ -252,14 +253,13 @@ public class InquiryController implements InquiryControllerDocs {
         3. 질문자 문의 등록 화면 조회에 실패했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
-            @PathVariable Long strategyId,
-            @RequestBody InquirySavePageShowRequestDto inquirySavePageShowRequestDto) {
+            @PathVariable(name="strategyId") Long strategyId) {
 
         try {
-            Strategy strategy = inquiryService.findStrategyForInquiryPage(inquirySavePageShowRequestDto.getStrategyId());
+            Strategy strategy = inquiryService.findStrategyForInquiryPage(strategyId);
 
             InquirySavePageShowResponseDto inquirySavePageShowResponseDto = InquirySavePageShowResponseDto.builder()
                     .strategyName(strategy.getName())
@@ -285,10 +285,10 @@ public class InquiryController implements InquiryControllerDocs {
         5. 등록하는 질문자나 해당 전략의 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @PostMapping("/strategy/{strategyId}/inquiry")
     public ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
-            @PathVariable Long strategyId,
+            @PathVariable(name="strategyId") Long strategyId,
             @RequestBody @Valid InquirySaveRequestDto inquirySaveRequestDto) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
@@ -319,7 +319,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -334,12 +334,12 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
@@ -369,7 +369,7 @@ public class InquiryController implements InquiryControllerDocs {
         return InquiryListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .inquiryTitle(inquiry.getInquiryTitle())
-                .strategyName(inquiry.getStrategy().getName())
+                .strategyName(inquiry.getStrategyName())
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
                 .inquiryStatus(inquiry.getInquiryStatus())
                 .build();
@@ -384,10 +384,10 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
      @Override
-//     @PreAuthorize("hasRole('ROLE_USER')")
+//     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
      @GetMapping("/member/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
@@ -400,49 +400,50 @@ public class InquiryController implements InquiryControllerDocs {
 
          if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
          }
 
          if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
          }
 
          try {
+             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+             Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+             Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
              InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-             InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-             InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                     .page(page)
+                     .sort(sort)
+                     .closed(closed)
 
-             inquiryAnswerShowResponseDto.setPage(page);
-             inquiryAnswerShowResponseDto.setSort(sort);
-             inquiryAnswerShowResponseDto.setClosed(closed);
+                     .inquiryId(inquiryId)
+                     .inquiryAnswerId(inquiryAnswer.getId())
 
-             inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-             inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                     .inquiryTitle(inquiry.getInquiryTitle())
+                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                     .inquirerNickname(inquiry.getInquirerNickname())
+                     .inquiryStatus(inquiry.getInquiryStatus())
 
-             inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-             inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-             inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                     // 전략 위 아이콘들
+                     .strategyName(inquiry.getStrategyName())
+                     // 트레이더의 프로필 사진
+                     .traderNickname(inquiry.getTraderNickname())
 
-             // 전략 위 아이콘들
-             inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                     .inquiryContent(inquiry.getInquiryContent())
 
-             // 트레이더의 아이콘
-             inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                     .answerTitle(inquiryAnswer.getAnswerTitle())
+                     .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                     .answerContent(inquiryAnswer.getAnswerContent())
 
-             inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-             inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-             inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-             inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-             inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-             inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-             inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                     .previousTitle(previousInquiry.getInquiryTitle())
+                     .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                     .nextTitle(nextInquiry.getInquiryTitle())
+                     .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                     .build();
 
              return ResponseEntity.status(HttpStatus.OK)
                      .body(APIResponse.success(inquiryAnswerShowResponseDto));
@@ -462,10 +463,10 @@ public class InquiryController implements InquiryControllerDocs {
         4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
@@ -479,12 +480,12 @@ public class InquiryController implements InquiryControllerDocs {
 
             if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
             }
 
             if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
             }
 
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
@@ -522,10 +523,10 @@ public class InquiryController implements InquiryControllerDocs {
             +) 답변이 등록된 문의를 수정 시도함
      */
      @Override
-//     @PreAuthorize("hasRole('ROLE_USER')")
+//     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
      @PutMapping("/member/inquiry/{inquiryId}/modify")
     public ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
          Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
@@ -566,10 +567,10 @@ public class InquiryController implements InquiryControllerDocs {
         5. 답변이 등록된 문의를 수정 시도함 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @DeleteMapping("/member/inquiry/{inquiryId}/delete")
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
-            @PathVariable Long inquiryId) {
+            @PathVariable(name="inquiryId") Long inquiryId) {
 
         Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
@@ -606,10 +607,10 @@ public class InquiryController implements InquiryControllerDocs {
         5. 등록하는 문의 정보를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @PostMapping("/trader/inquiry/{inquiryId}/write")
     public ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
 
         try {
@@ -637,7 +638,7 @@ public class InquiryController implements InquiryControllerDocs {
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/inquiry")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -652,12 +653,12 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
@@ -690,10 +691,10 @@ public class InquiryController implements InquiryControllerDocs {
         3. 해당 문의를 찾지 못했을 때 : NOT_FOUND
      */
     @Override
-//    @PreAuthorize("hasRole('ROLE_TRADER')")
+//    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/inquiry/{inquiryId}/view")
     public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
-            @PathVariable Long inquiryId,
+            @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
@@ -706,49 +707,50 @@ public class InquiryController implements InquiryControllerDocs {
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 closed가 올바르지 않습니다."));
         }
 
         if (!(sort.equals("registrationDate") || sort.equals("strategyName"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
         try {
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
+            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-            InquiryAnswer previousInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId-1);
-            InquiryAnswer nextInquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId+1);
 
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = new InquiryAnswerShowResponseDto();
+            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+                    .page(page)
+                    .sort(sort)
+                    .closed(closed)
 
-            inquiryAnswerShowResponseDto.setPage(page);
-            inquiryAnswerShowResponseDto.setSort(sort);
-            inquiryAnswerShowResponseDto.setClosed(closed);
+                    .inquiryId(inquiryId)
+                    .inquiryAnswerId(inquiryAnswer.getId())
 
-            inquiryAnswerShowResponseDto.setInquiryId(inquiryAnswer.getInquiry().getId());
-            inquiryAnswerShowResponseDto.setInquiryAnswerId(inquiryAnswer.getId());
+                    .inquiryTitle(inquiry.getInquiryTitle())
+                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                    .inquirerNickname(inquiry.getInquirerNickname())
+                    .inquiryStatus(inquiry.getInquiryStatus())
 
-            inquiryAnswerShowResponseDto.setInquiryTitle(inquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setInquiryRegistrationDate(inquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setInquirerNickname(inquiryAnswer.getInquiry().getInquirer().getNickname());
-            inquiryAnswerShowResponseDto.setInquiryStatus(inquiryAnswer.getInquiry().getInquiryStatus());
+                    // 전략 위 아이콘들
+                    .strategyName(inquiry.getStrategyName())
+                    // 트레이더의 프로필 사진
+                    .traderNickname(inquiry.getTraderNickname())
 
-            // 전략 위 아이콘들
-            inquiryAnswerShowResponseDto.setStrategyName(inquiryAnswer.getInquiry().getStrategy().getName());
+                    .inquiryContent(inquiry.getInquiryContent())
 
-            // 트레이더의 아이콘
-            inquiryAnswerShowResponseDto.setTraderNickname(inquiryAnswer.getInquiry().getStrategy().getTrader().getNickname());
+                    .answerTitle(inquiryAnswer.getAnswerTitle())
+                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
+                    .answerContent(inquiryAnswer.getAnswerContent())
 
-            inquiryAnswerShowResponseDto.setInquiryContent(inquiryAnswer.getInquiry().getInquiryContent());
-
-            inquiryAnswerShowResponseDto.setAnswerTitle(inquiryAnswer.getAnswerTitle());
-            inquiryAnswerShowResponseDto.setAnswerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate());
-            inquiryAnswerShowResponseDto.setAnswerContent(inquiryAnswer.getAnswerContent());
-
-            inquiryAnswerShowResponseDto.setPreviousTitle(previousInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setPreviousWriteDate(previousInquiryAnswer.getInquiry().getInquiryRegistrationDate());
-            inquiryAnswerShowResponseDto.setNextTitle(nextInquiryAnswer.getInquiry().getInquiryTitle());
-            inquiryAnswerShowResponseDto.setNextWriteDate(nextInquiryAnswer.getInquiry().getInquiryRegistrationDate());
+                    .previousTitle(previousInquiry.getInquiryTitle())
+                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
+                    .nextTitle(nextInquiry.getInquiryTitle())
+                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .build();
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquiryAnswerShowResponseDto));
