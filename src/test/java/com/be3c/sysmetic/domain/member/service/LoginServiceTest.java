@@ -1,132 +1,172 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
-import io.jsonwebtoken.Claims;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
-@Slf4j
-@SpringBootTest
-class LoginServiceTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-    @Autowired
+class LoginServiceImplTest {
+
+    @InjectMocks
+    private LoginServiceImpl loginService;
+
+    @Mock
     private MemberRepository memberRepository;
 
-    @Autowired
-    private LoginService loginService;
-
-    @Autowired
+    @Mock
     private JwtTokenProvider jwtTokenProvider;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    @Mock
+    private FileService fileService;
+
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
-    public void setUp() {
-        memberRepository.deleteAll();
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void 이메일_조회_성공_테스트() {
+        // Given
+        String email = "test@test.com";
+        when(memberRepository.existsByEmail(email)).thenReturn(true);
+
+        // When
+        String result = loginService.findEmail(email);
+
+        // Then
+        assertThat(result).isEqualTo(email);
+        verify(memberRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void 이메일_조회_실패_테스트() {
+        // Given
+        String email = "notfound@test.com";
+        when(memberRepository.existsByEmail(email)).thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> loginService.findEmail(email))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.EX_1.getMessage());
+        verify(memberRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void 비밀번호_검증_성공_테스트() {
+        // Given
+        String email = "test@test.com";
+        String password = "Password123!";
+        String hashedPassword = bCryptPasswordEncoder.encode(password);
 
         Member member = Member.builder()
-                .email("test@test.com")
-                .password(bCryptPasswordEncoder.encode("encodedPassword"))
-                // 초기값 설정
-                .id(001L)
-                .roleCode("USER")
-                .name("테스트")
-                .nickname("테스트")
-                .birth(LocalDate.of(2000,1,1))
-                .phoneNumber("01012341234")
-                .usingStatusCode("사용")
-                .totalFollow(0)
-                .totalStrategyCount(0)
-                .receiveInfoConsent("Y")
-                .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("Y")
-                .marketingConsentDate(LocalDateTime.now())
-//                .createdBy(1L)
-//                .createdDate(LocalDateTime.now())
-//                .modifiedBy(1L)
-//                .modifiedDate(LocalDateTime.now())
+                .email(email)
+                .password(hashedPassword)
                 .build();
-        memberRepository.save(member);
+
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        // When
+        boolean result = loginService.validatePassword(email, password);
+
+        // Then
+        assertThat(result).isTrue();
+        verify(memberRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    @DisplayName("이메일 조회 테스트")
-    public void findEmailTest() {
-        /*
-            1. 이메일 찾기 성공 -> 이메일 반환
-            2. 이메일 찾기 실패 -> UsernameNotFoundException 예외 발생
-         */
-        // 1. 이메일 찾기 성공
-        String inputEmail = "test@test.com";
-        String findEmail = loginService.findEmail(inputEmail);
-        Assertions.assertEquals(inputEmail, findEmail);
-
-        // 2. 이메일 찾기 실패
-        String wrongEmail = "wrong@test.com";
-        Assertions.assertThrows(UsernameNotFoundException.class, () -> loginService.findEmail(wrongEmail));
-    }
-
-    @Test
-    @DisplayName("비밀번호 비교 테스트")
-    public void validatePasswordTest() {
-        /*
-            1. 비밀번호 비교 성공 -> true 반환
-            2. 비밀번호 비교 실패 -> false 반환
-         */
+    void 비밀번호_검증_실패_테스트() {
+        // Given
         String email = "test@test.com";
-        String rightPassword = "encodedPassword";
-        String wrongPassword = "wrongPassword";
-        // 1. 비밀번호 비교 성공
-        Assertions.assertTrue(loginService.validatePassword(email, rightPassword));
-        // 2. 비밀번호 비교 실패
-        Assertions.assertFalse(loginService.validatePassword(email, wrongPassword));
+        String password = "WrongPassword!";
+        String hashedPassword = bCryptPasswordEncoder.encode("Password123!");
+
+        Member member = Member.builder()
+                .email(email)
+                .password(hashedPassword)
+                .build();
+
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        // When & Then
+        assertThatThrownBy(() -> loginService.validatePassword(email, password))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.EX_1.getMessage());
+        verify(memberRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    @DisplayName("로그인유지 선택에 따른 토큰 생성 메서드")
-    public void generateTokenBasedOnRememberMeTest() {
-        /*
-            1. 로그인 유지 선택O -> 30일 짜리 refresh 토큰 생성 확인
-            2. 로그인 유지 선택X -> 1시간 짜리 refresh 토큰 생성 확인
-         */
+    void 토큰_생성_테스트_rememberMe_선택() {
+        // Given
         String email = "test@test.com";
-        // 1. 로그인 유지 선택O -> 30일 짜리 refresh 토큰 생성 확인
-        Map<String, String> tokenMap = loginService.generateTokenBasedOnRememberMe(email,true);
+        boolean rememberMe = true;
 
-        String refreshToken = tokenMap.get("refreshToken");
-        Claims claims = jwtTokenProvider.parseTokenClaims(refreshToken);
+        Member member = Member.builder()
+                .id(1L)
+                .email(email)
+                .roleCode("USER")
+                .build();
 
-        long expirationTimeMills = claims.getExpiration().getTime();
-        long currentTimeMills = new Date().getTime();
-        long timeDifference = expirationTimeMills - currentTimeMills;
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+        when(jwtTokenProvider.generateAccessToken(anyLong(), anyString(), anyString())).thenReturn("accessToken");
+        when(jwtTokenProvider.generateMonthRefreshToken(anyLong(), anyString(), anyString())).thenReturn("refreshToken");
 
-        Assertions.assertTrue(Math.abs(timeDifference - (2592000000L)) < 1000, "The difference should be close to 30 days in milliseconds");
+        // When
+        Map<String, String> tokens = loginService.generateTokenBasedOnRememberMe(email, rememberMe);
 
-        // 2. 로그인 유지 선택X -> 1시간 짜리 refresh 토큰 생성 확인
-        tokenMap = loginService.generateTokenBasedOnRememberMe(email, false);
+        // Then
+        assertThat(tokens).containsKeys("accessToken", "refreshToken");
+        assertThat(tokens.get("accessToken")).isEqualTo("accessToken");
+        assertThat(tokens.get("refreshToken")).isEqualTo("refreshToken");
 
-        refreshToken = tokenMap.get("refreshToken");
-        claims = jwtTokenProvider.parseTokenClaims(refreshToken);
+        verify(memberRepository, times(1)).findByEmail(email);
+        verify(jwtTokenProvider, times(1)).generateAccessToken(1L, email, "USER");
+        verify(jwtTokenProvider, times(1)).generateMonthRefreshToken(1L, email, "USER");
+    }
 
-        expirationTimeMills = claims.getExpiration().getTime();
-        currentTimeMills = new Date().getTime();
-        timeDifference = expirationTimeMills - currentTimeMills;
+    @Test
+    void 토큰_생성_테스트_rememberMe_미선택() {
+        // Given
+        String email = "test@test.com";
+        boolean rememberMe = false;
 
-        Assertions.assertTrue(Math.abs(timeDifference - (3600000L)) < 1000, "The difference should be close to 30 days in milliseconds");
+        Member member = Member.builder()
+                .id(1L)
+                .email(email)
+                .roleCode("USER")
+                .build();
+
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+        when(jwtTokenProvider.generateAccessToken(anyLong(), anyString(), anyString())).thenReturn("accessToken");
+        when(jwtTokenProvider.generateHourRefreshToken(anyLong(), anyString(), anyString())).thenReturn("refreshToken");
+
+        // When
+        Map<String, String> tokens = loginService.generateTokenBasedOnRememberMe(email, rememberMe);
+
+        // Then
+        assertThat(tokens).containsKeys("accessToken", "refreshToken");
+        assertThat(tokens.get("accessToken")).isEqualTo("accessToken");
+        assertThat(tokens.get("refreshToken")).isEqualTo("refreshToken");
+
+        verify(memberRepository, times(1)).findByEmail(email);
+        verify(jwtTokenProvider, times(1)).generateAccessToken(1L, email, "USER");
+        verify(jwtTokenProvider, times(1)).generateHourRefreshToken(1L, email, "USER");
     }
 }
