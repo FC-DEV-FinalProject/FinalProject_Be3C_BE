@@ -47,16 +47,16 @@ public class Notice extends BaseEntity {
     private Long hits;
 
     @Column(name = "is_attachment", nullable = false)
-    private Integer isAttachment;
+    private Boolean isAttachment;
 
     @Column(name = "is_open", nullable = false)
-    private Integer isOpen;
+    private Boolean isOpen;
 
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
-                                      Integer isAttachment,
-                                      Integer isOpen) {
+                                      Boolean isAttachment,
+                                      Boolean isOpen) {
 
         return Notice.builder()
                 .noticeTitle(noticeTitle)

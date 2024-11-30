@@ -32,11 +32,11 @@ public class NoticeShowModifyPageResponseDto {
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
-    private Integer isAttachment;
+    @Schema(description = "첨부 파일 여부", example = "true")
+    private Boolean isAttachment;
 
-    @Schema(description = "공개 여부 (0: 비공개, 1: 공개)", example = "1")
-    private Integer isOpen;
+    @Schema(description = "공개 여부", example = "true")
+    private Boolean isOpen;
 
     @Schema(description = "이 공지사항의 파일 정보를 담은 리스트", example = "[]")
     private List<NoticeDetailFileShowResponseDto> fileDtoList;

@@ -40,16 +40,16 @@ public class NoticeServiceImpl implements NoticeService {
     // 등록
     @Override
     @Transactional
-    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Integer isOpen,
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Boolean isOpen,
                                     List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
 
-        Integer isAttachment;
+        Boolean isAttachment;
         if (fileList.isEmpty()) {
-            isAttachment = 0;
+            isAttachment = false;
         } else {
-            isAttachment = 1;
+            isAttachment = true;
         }
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
@@ -88,10 +88,10 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
-        if (notice.getIsOpen() == 0) {
-            notice.setIsOpen(1);
+        if (!notice.getIsOpen()) {
+            notice.setIsOpen(true);
         } else {
-            notice.setIsOpen(0);
+            notice.setIsOpen(false);
         }
 
         return true;
@@ -119,7 +119,7 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Integer isOpen,
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
                                 List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
@@ -141,7 +141,7 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
         if (deleteAllFile && newFileList.isEmpty()) {
-            notice.setIsAttachment(0);
+            notice.setIsAttachment(false);
         }
         countFile = countFile + newFileList.size();
         if (countFile > 3) {
