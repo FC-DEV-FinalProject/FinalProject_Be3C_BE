@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import org.springframework.http.MediaType;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
@@ -117,7 +118,7 @@ public class StockController implements StockControllerDocs {
      */
     @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @PostMapping("/admin/stock")
+    @PostMapping("/admin/stock", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> saveitem(
             @Valid @RequestPart StockPostRequestDto stockPostRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
@@ -145,9 +146,9 @@ public class StockController implements StockControllerDocs {
      */
     @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @PutMapping("/admin/stock")
+    @PutMapping("/admin/stock",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> updateItem(
-            @Valid @RequestBody StockPutRequestDto stockPutRequestDto,
+            @Valid @RequestPart StockPutRequestDto stockPutRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
