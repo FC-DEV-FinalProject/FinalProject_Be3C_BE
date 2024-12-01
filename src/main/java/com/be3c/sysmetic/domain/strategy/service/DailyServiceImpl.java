@@ -187,7 +187,7 @@ public class DailyServiceImpl implements DailyService {
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
+        if(userRole.equals("USER")) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
