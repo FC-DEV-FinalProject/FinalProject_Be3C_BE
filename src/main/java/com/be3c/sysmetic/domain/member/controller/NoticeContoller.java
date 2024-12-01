@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Notice;
+import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
 import com.be3c.sysmetic.domain.member.service.NoticeService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
@@ -21,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +38,7 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final FileService fileService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
+    private final NoticeRepository noticeRepository;
 
     /*
         관리자 공지사항 등록 API
@@ -204,8 +204,8 @@ public class NoticeContoller implements NoticeControllerDocs {
             noticeService.upHits(noticeId);
 
             Notice notice = noticeService.findNoticeById(noticeId);
-            Notice previousNotice = noticeService.findNoticeById(noticeId-1);
-            Notice nextNotice = noticeService.findNoticeById(noticeId+1);
+            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(Notice.createNotice(null, null, null, null, null));
+            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(Notice.createNotice(null, null, null, null, null));
 
             List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
@@ -524,8 +524,8 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
-            Notice previousNotice = noticeService.findNoticeById(noticeId-1);
-            Notice nextNotice = noticeService.findNoticeById(noticeId+1);
+            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(Notice.createNotice(null, null, null, null, null));
+            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(Notice.createNotice(null, null, null, null, null));
 
             List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));

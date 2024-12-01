@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -34,6 +35,7 @@ public class InquiryController implements InquiryControllerDocs {
     private final InquiryAnswerService inquiryAnswerService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
+    private final InquiryRepository inquiryRepository;
 
     /*
         관리자 문의 조회 / 검색 API
@@ -136,8 +138,8 @@ public class InquiryController implements InquiryControllerDocs {
 
         try {
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
-            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
+            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
 
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
@@ -408,8 +410,8 @@ public class InquiryController implements InquiryControllerDocs {
 
          try {
              Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-             Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
-             Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+             Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
+             Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
 
              InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
@@ -717,8 +719,8 @@ public class InquiryController implements InquiryControllerDocs {
 
         try {
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            Inquiry previousInquiry = inquiryService.findOneInquiry(inquiryId-1);
-            Inquiry nextInquiry = inquiryService.findOneInquiry(inquiryId+1);
+            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
+            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
 
             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
 
