@@ -14,11 +14,12 @@ import java.util.List;
 
 @Repository
 public interface StrategyStatisticsRepository extends JpaRepository<StrategyStatistics, Long> {
+    // Optional로 변경? 변경 x?
     StrategyStatistics findByStrategyId(Long strategyId);
+//    Optional<StrategyStatistics> findByStrategyId(Long strategyId);
 
     @Modifying
     void deleteByStrategyId(Long strategyId);
-
 
     // @Query("SELECT SUM(s.accumulatedProfitLossRate), s.accumulatedProfitLossRate FROM StrategyStatistics s WHERE s.strategy.statusCode = :statusCode")
     // List<Object[]> findSumAndIndividualProfitLossRate(@Param("statusCode") String statusCode);
