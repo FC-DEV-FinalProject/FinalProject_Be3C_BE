@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -132,11 +133,15 @@ public class AccountImageServiceImpl implements AccountImageService {
 
     // 실계좌이미지 등록
     @Transactional
-    public void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList) {
+    public void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList, List<MultipartFile> images) {
         Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         validUser(savedStrategy.getTrader().getId());
+
+        if(requestDtoList.size() != images.size()) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVAILD_SIZE.getMessage(), ErrorCode.BAD_REQUEST);
+        }
 
         List<AccountImage> accountImageList = requestDtoList.stream().map(requestDto ->
                 AccountImage.builder()
@@ -149,7 +154,7 @@ public class AccountImageServiceImpl implements AccountImageService {
         // 파일 등록
         for(int i=0; i<accountImageList.size(); i++) {
             FileRequest fileRequest = new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageList.get(i).getId());
-            fileServiceImpl.uploadImage(requestDtoList.get(i).getImage(), fileRequest);
+            fileServiceImpl.uploadImage(images.get(i), fileRequest);
         }
     }
 

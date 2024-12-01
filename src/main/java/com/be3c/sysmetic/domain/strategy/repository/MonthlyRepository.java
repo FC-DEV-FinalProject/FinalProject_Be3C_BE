@@ -25,6 +25,7 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
         OR (m.yearNumber = :#{#startYearMonth?.year} AND m.monthNumber >= :#{#startYearMonth?.monthValue})))
         AND (:endYearMonth IS NULL OR (m.yearNumber < :#{#endYearMonth?.year} 
         OR (m.yearNumber = :#{#endYearMonth?.year} AND m.monthNumber <= :#{#endYearMonth?.monthValue})))
+        ORDER BY m.yearNumber DESC, m.monthNumber DESC
     """)
     Page<Monthly> findAllByStrategyIdAndDateBetween(
             @Param("strategyId") Long strategyId,
