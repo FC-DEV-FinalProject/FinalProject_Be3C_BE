@@ -74,7 +74,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     userId,
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
-//                    noticeSaveRequestDto.getIsAttachment(),
+                    noticeSaveRequestDto.getIsAttachment(),
                     noticeSaveRequestDto.getIsOpen(),
                     fileList,
                     imageList)) {
@@ -383,14 +383,13 @@ public class NoticeContoller implements NoticeControllerDocs {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         try {
-            Notice notice = noticeService.findNoticeById(noticeId);
-
 
             if (noticeService.modifyNotice(
                     noticeId,
                     noticeModifyRequestDto.getNoticeTitle(),
                     noticeModifyRequestDto.getNoticeContent(),
                     userId,
+                    noticeModifyRequestDto.getIsAttachment(),
                     noticeModifyRequestDto.getIsOpen(),
                     noticeModifyRequestDto.getExistFileDtoList(),
                     noticeModifyRequestDto.getExistImageDtoList(),
@@ -594,11 +593,6 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeTitle(notice.getNoticeTitle())
                     .noticeContent(notice.getNoticeContent())
                     .writeDate(notice.getWriteDate())
-                    .correctDate(notice.getCorrectDate())
-                    .writerNickname(notice.getWriterNickname())
-                    .hits(notice.getHits())
-                    .isAttachment(notice.getIsAttachment())
-                    .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
                     .previousTitle(previousNoticeTitle)

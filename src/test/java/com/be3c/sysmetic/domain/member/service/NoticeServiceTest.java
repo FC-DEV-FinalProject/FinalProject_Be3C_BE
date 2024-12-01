@@ -83,7 +83,7 @@ class NoticeServiceTest {
         Member member = createMember("닉네임");
 
         //when
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, false, new ArrayList<>(), new ArrayList<>());
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
         Notice notice = noticeList.get(0);
 
@@ -95,12 +95,12 @@ class NoticeServiceTest {
     public void 공지사항_수정() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, false, new ArrayList<>(), new ArrayList<>());
 
         //when
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
         Notice notice = noticeList.get(0);
-        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
         //then
         assertEquals("수정공지제목1", notice.getNoticeTitle());
@@ -112,7 +112,7 @@ class NoticeServiceTest {
     public void 공지사항_공개여부_수정() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, false, new ArrayList<>(), new ArrayList<>());
 
         //when
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
@@ -127,11 +127,11 @@ class NoticeServiceTest {
     public void 공지사항_검색() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목2", "공지내용2", false,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목3", "공지내용3", false,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목4", "공지내용4", false,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목5", "공지내용5", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목2", "공지내용2", false, false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목3", "공지내용3", false, false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목4", "공지내용4", false, false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목5", "공지내용5", false, false, new ArrayList<>(), new ArrayList<>());
 
         //when
         int page = 1;

@@ -5,18 +5,13 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
-import com.be3c.sysmetic.global.common.response.APIResponse;
-import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,17 +35,10 @@ public class NoticeServiceImpl implements NoticeService {
     // 등록
     @Override
     @Transactional
-    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Boolean isOpen,
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Boolean isAttachment, Boolean isOpen,
                                     List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
-
-        Boolean isAttachment;
-        if (fileList.isEmpty()) {
-            isAttachment = false;
-        } else {
-            isAttachment = true;
-        }
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
 
@@ -119,30 +107,27 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isAttachment, Boolean isOpen,
                                 List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
-        notice.setCorrectDate(LocalDateTime.now());
         notice.setCorrectorId(correctorId);
+        notice.setCorrectDate(LocalDateTime.now());
+        notice.setIsAttachment(isAttachment);
         notice.setIsOpen(isOpen);
 
         int countFile = 0;
-        boolean deleteAllFile = true;
         for (NoticeExistFileImageRequestDto n : existFileDtoList) {
             if (!n.getExist()) {
                 fileService.deleteFileById(n.getFileId());
-                deleteAllFile = false;
             } else {
                 countFile++;
             }
         }
-        if (deleteAllFile && newFileList.isEmpty()) {
-            notice.setIsAttachment(false);
-        }
+
         countFile = countFile + newFileList.size();
         if (countFile > 3) {
             throw new IllegalArgumentException("파일이 3개 이상입니다.");
@@ -213,7 +198,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
 
-    // 회원 검색 조회
+    // 일반 검색 조회
     // 검색 (조건: 제목+내용)
     @Override
     public Page<Notice> findNotice(String searchText, Integer page) {

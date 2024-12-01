@@ -20,9 +20,9 @@ public class NoticeSaveRequestDto {
     @NotNull
     private String noticeContent;
 
-//    @Schema(description = "첨부 파일 여부", example = "true")
-//    @NotNull
-//    private Boolean isAttachment;
+    @Schema(description = "첨부 파일 여부", example = "true")
+    @NotNull
+    private Boolean isAttachment;
 
     @Schema(description = "공개 여부", example = "true")
     @NotNull
