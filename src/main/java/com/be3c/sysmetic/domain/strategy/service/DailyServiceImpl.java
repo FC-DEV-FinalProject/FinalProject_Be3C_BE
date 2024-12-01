@@ -174,17 +174,20 @@ public class DailyServiceImpl implements DailyService {
      */
     @Override
     public PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+
         Pageable pageable = PageRequest.of(page, 10);
 
         String userRole = securityUtils.getUserRoleInSecurityContext();
 
         // trader일 경우, 본인의 전략인지 검증
         if(userRole.equals("TRADER")) {
-           validUser(strategyId);
+           validUser(exitingStrategy.getTrader().getId());
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
+        if(userRole.equals("USER")) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
