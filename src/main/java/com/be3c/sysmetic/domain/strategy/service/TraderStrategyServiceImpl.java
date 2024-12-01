@@ -72,7 +72,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
 
         // 1. 현재 기본 통계 정보를 전략 등록 시 등록하지 않고 있음
-//        insertBasicStrategyStatistics(saveStrategy);
+        insertBasicStrategyStatistics(saveStrategy);
 
         return StrategyPostResponseDto.builder().strategyId(saveStrategy.getId()).build();
     }
