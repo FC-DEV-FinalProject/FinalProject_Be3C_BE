@@ -5,6 +5,8 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.MemberRole;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchType;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,22 +49,28 @@ public class MemberManagementServiceImpl implements MemberManagementService {
                 RC001 이나 RC002 인 경우, 변경X
                 RC003 이나 RC004 인 경우, 변경O - RC003 > RC001, RC004 > RC002
          */
+
         // 회원 조회
         Member member = memberRepository.findById(memberId).orElseThrow(() ->
-                new EntityNotFoundException("회원 정보를 찾을 수 없습니다. 회원 ID: " + memberId)
+                new MemberBadRequestException(MemberExceptionMessage.NOT_FOUND_MEMBER.getMessage() + "회원 ID: " + memberId)
         );
 
         // 현재 회원등급
-        MemberRole currentRoleCode = MemberRole.getEnumRole(member.getRoleCode());
+        MemberRole currentRoleCode = null;
+        if(member.getRoleCode().startsWith("RC")) {
+            currentRoleCode = MemberRole.getEnumRole(member.getRoleCode());
+        } else {
+            currentRoleCode = MemberRole.valueOf(member.getRoleCode());
+        }
 
         // 변경될 회원등급  (관리자 지정 / 해지)
-        MemberRole updateRole = hasManagerRights ? currentRoleCode.promoteToManager() : currentRoleCode.demoteFromManager();
+        MemberRole updateRole = (hasManagerRights ? currentRoleCode.promoteToManager() : currentRoleCode.demoteFromManager());
 
-        // 역할이 달라진 경우 업데이트
+        // 회원등급이 달라진 경우 업데이트
         if(!currentRoleCode.equals(updateRole)) {
             int updated = memberRepository.updateRoleCode(memberId, updateRole.getCode());
             if(updated == 0) {
-                throw new IllegalArgumentException("회원의 등급변경에 실패했습니다. 회원 ID: " + memberId);
+                throw new MemberBadRequestException(MemberExceptionMessage.FAIL_ROLE_CHANGE.getMessage() + "회원 ID: " + memberId);
             }
         }
     }

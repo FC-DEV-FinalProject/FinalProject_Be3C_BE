@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum MemberSearchType {
+    NICKNAME("NICKNAME"),
     EMAIL("EMAIL"),
     NAME("NAME"),
-    NICKNAME("NICKNAME"),
-    PHONENUMBER("NICKNAME");
+    PHONENUMBER("PHONENUMBER");
 
     private final String code;
 

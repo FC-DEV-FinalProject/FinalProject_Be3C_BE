@@ -41,16 +41,16 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         )
         FROM Member m
         WHERE (
-            (:role = 'ALL' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004')) OR
-            (:role = 'USER' AND m.roleCode = 'RC001') OR
-            (:role = 'TRADER' AND m.roleCode = 'RC002') OR
-            (:role = 'MANAGER' AND m.roleCode IN ('RC003', 'RC004'))
+            (:role = 'ALL' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004', 'USER', 'TRADER', 'USER_MANAGER', 'TRADER_MANAGER')) OR
+            (:role = 'USER' AND m.roleCode = 'RC001', 'USER') OR
+            (:role = 'TRADER' AND m.roleCode = 'RC002', 'TRADER') OR
+            (:role = 'MANAGER' AND m.roleCode IN ('RC003', 'RC004', 'USER_MANAGER', 'TRADER_MANAGER'))
         )
         AND (
             :searchType IS NULL OR
+            (:searchType = 'NICKNAME' AND m.nickname LIKE %:searchKeyword%) OR
             (:searchType = 'EMAIL' AND m.email LIKE %:searchKeyword%) OR
             (:searchType = 'NAME' AND m.name LIKE %:searchKeyword%) OR
-            (:searchType = 'NICKNAME' AND m.nickname LIKE %:searchKeyword%) OR
             (:searchType = 'PHONENUMBER' AND m.phoneNumber LIKE %:searchKeyword%) OR
             (
                 m.email LIKE %:searchKeyword% OR
