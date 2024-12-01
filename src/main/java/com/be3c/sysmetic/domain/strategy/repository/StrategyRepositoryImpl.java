@@ -1,21 +1,27 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
-import com.be3c.sysmetic.domain.strategy.entity.QStrategy;
-import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
+import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.be3c.sysmetic.domain.strategy.entity.QStrategy.strategy;
+import static com.be3c.sysmetic.domain.strategy.entity.QStrategyGraphAnalysis.strategyGraphAnalysis;
 
 @RequiredArgsConstructor
 public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
@@ -100,6 +106,98 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         return new PageImpl<>(result, pageable, result.size());
     }
 
+
+    /*
+        findGraphAnalysis : 분석 그래프 데이터 - optionOne, optionTwo, period 에 해당하는 컬럼 반환
+    */
+    @Override
+    public StrategyAnalysisResponseDto findGraphAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+        QStrategyGraphAnalysis analysis = QStrategyGraphAnalysis.strategyGraphAnalysis;
+
+        LocalDate latestDate = jpaQueryFactory
+                .select(analysis.date.max())
+                .from(analysis)
+                .where(analysis.strategy.id.eq(id))
+                .fetchOne();
+
+        LocalDate startDate = calculateStartDate(latestDate, period);
+
+        List<StrategyGraphAnalysis> result = jpaQueryFactory
+                .selectFrom(analysis)
+                .where(analysis.strategy.id.eq(id),
+                        analysis.date.between(startDate, latestDate))
+                .orderBy(analysis.date.asc())
+                .fetch();
+
+        List<String> xAxis = result.stream()
+                .map(data -> data.getDate().toString())
+                .collect(Collectors.toList());
+
+        Map<StrategyAnalysisOption, List<Double>> yAxis = new HashMap<>();
+
+        yAxis.put(optionOne, result.stream()
+                .map(data -> getValueByOption(data, optionOne))
+                .collect(Collectors.toList()));
+
+        if (!optionOne.equals(optionTwo)) {
+            yAxis.put(optionTwo, result.stream()
+                    .map(data -> getValueByOption(data, optionTwo))
+                    .collect(Collectors.toList()));
+        }
+
+        return new StrategyAnalysisResponseDto(xAxis, yAxis);
+    }
+
+    private LocalDate calculateStartDate(LocalDate latestDate, String period) {
+        switch (period) {
+            case "ONE_MONTH":
+                return latestDate.minusMonths(1);
+            case "THREE_MONTH":
+                return latestDate.minusMonths(3);
+            case "SIX_MONTH":
+                return latestDate.minusMonths(6);
+            case "ONE_YEAR":
+                return latestDate.minusYears(1);
+            case "ALL":
+            default:
+                return LocalDate.of(2000, 1, 1);        // 2000년 1월 1일 이후의 기간
+        }
+    }
+
+    private Double getValueByOption(StrategyGraphAnalysis data, StrategyAnalysisOption option) {
+        switch (option) {
+            case STANDARD_AMOUNT:
+                return data.getStandardAmount();
+            case CURRENT_BALANCE:
+                return data.getCurrentBalance();
+            case PRINCIPAL:
+                return data.getPrincipal();
+            case ACCUMULATED_DEPOSIT_WITHDRAWAL_AMOUNT:
+                return data.getAccumulatedDepositWithdrawalAmount();
+            case DEPOSIT_WITHDRAWAL_AMOUNT:
+                return data.getDepositWithdrawalAmount();
+            case DAILY_PROFIT_LOSS_AMOUNT:
+                return data.getProfitLossAmount();
+            case DAILY_PROFIT_LOSS_RATE:
+                return data.getProfitLossRate();
+            case ACCUMULATED_PROFIT_LOSS_AMOUNT:
+                return data.getAccumulatedProfitLossAmount();
+            case CURRENT_CAPITAL_REDUCTION_AMOUNT:
+                return data.getCurrentCapitalReductionAmount();
+            case AVERAGE_PROFIT_LOSS_AMOUNT:
+                return data.getAverageProfitLossAmount();
+            case AVERAGE_PROFIT_LOSS_RATE:
+                return data.getAverageProfitLossRate();
+            case WINNING_RATE:
+                return data.getWinningRate();
+            case PROFIT_FACTOR:
+                return data.getProfitFactor();
+            case ROA:
+                return data.getRoa();
+            default:
+                throw new IllegalArgumentException("Unknown option: " + option);
+        }
+    }
 
     // 매매방식 조건
     private BooleanBuilder getMethodCond(StrategySearchRequestDto strategySearchRequestDto) {

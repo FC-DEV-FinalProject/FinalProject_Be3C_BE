@@ -1,17 +1,25 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.strategy.dto.*;
-import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyDetailRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
+import com.be3c.sysmetic.domain.strategy.entity.Daily;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyGraphAnalysis;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
+import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
+import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
+import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
+import com.be3c.sysmetic.global.common.response.APIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,21 +29,21 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyDetailServiceImpl implements StrategyDetailService {
 
+    private final StrategyRepository strategyRepository;
     private final StrategyDetailRepository strategyDetailRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
+    private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
     private final MonthlyRepository monthlyRepository;
+    private final DailyRepository dailyRepository;
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
+    private final StrategyIndicatorsCalculator strategyIndicatorsCalculator;
 
     @Override
     @Transactional
     public StrategyDetailDto getDetail(Long id) {
 
-        // TODO 아래 메서드 사용
-        // StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
-        // TODO Optional 적용; 추후에 DB에 초기값 추가하면 삭제
-        StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id)
-                .orElseGet(this::createDefaultStatistics);
+        StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
 
         return strategyDetailRepository.findPublicStrategy(id)
                 .map(strategy -> StrategyDetailDto.builder()
@@ -62,15 +70,147 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
 
+    // 분석 지표 그래프 데이터 요청
+    @Override
+    public StrategyAnalysisResponseDto getAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
-    // TODO 추후 DB에 초기값 추가하면 삭제
-    private StrategyDetailStatistics createDefaultStatistics() {
-        return new StrategyDetailStatistics(
-                0.0,
-                0.0,
-                0.0,
-                0.0
-        );
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(id, optionOne, optionTwo, period);
+
+        if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
+
+        return analysis;
+    }
+
+
+    // saveAnalysis - 분석 지표 그래프 데이터 생성 (일간 분석 등록하면, 그래프 데이터도 생성)
+    @Override
+    @Transactional
+    public APIResponse<String> saveAnalysis(Long strategyId, LocalDate date) {
+        Daily daily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        Double accumulatedProfitLossAmount = daily.getAccumulatedProfitLossAmount();
+        Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
+
+        StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
+                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .daily(daily)
+                .date(daily.getDate())
+                .standardAmount(daily.getStandardAmount())
+                .currentBalance(daily.getCurrentBalance())
+                .principal(daily.getPrincipal())
+                .accumulatedDepositWithdrawalAmount(dailyRepository.findTotalDepositWithdrawalAmountByStrategyId(strategyId))
+                .depositWithdrawalAmount(daily.getDepositWithdrawalAmount())
+                .profitLossAmount(daily.getProfitLossAmount())
+                .profitLossRate(daily.getProfitLossRate())
+                .accumulatedProfitLossAmount(daily.getAccumulatedProfitLossAmount())
+                .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
+                .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
+                .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))
+                .profitFactor(strategyIndicatorsCalculator.calProfitFactor(strategyId))
+                .roa(strategyIndicatorsCalculator.calRoa(accumulatedProfitLossAmount, maximumCapitalReductionAmount))
+                .maximumCapitalReductionAmount(maximumCapitalReductionAmount)
+                .build();
+
+        strategyGraphAnalysisRepository.save(data);
+        return APIResponse.success("분석 지표 그래프 데이터 생성 성공");
+    }
+
+
+    // updateAnalysis - 분석 지표 그래프 데이터 수정(일간 분석 데이터 수정하면, 그래프 데이터도 수정)
+    @Override
+    @Transactional
+    public APIResponse<String> updateAnalysis(Long strategyId, Long dailyId, LocalDate date) {
+        Daily newDaily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        Double accumulatedProfitLossAmount = statistics.getAccumulatedProfitLossAmount();
+        Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
+
+        StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
+                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .daily(newDaily)
+                .date(newDaily.getDate())
+                .standardAmount(newDaily.getStandardAmount())
+                .currentBalance(newDaily.getCurrentBalance())
+                .principal(newDaily.getPrincipal())
+                .accumulatedDepositWithdrawalAmount(dailyRepository.findTotalDepositWithdrawalAmountByStrategyId(strategyId))
+                .depositWithdrawalAmount(newDaily.getDepositWithdrawalAmount())
+                .profitLossAmount(newDaily.getProfitLossAmount())
+                .profitLossRate(newDaily.getProfitLossRate())
+                .accumulatedProfitLossAmount(newDaily.getAccumulatedProfitLossAmount())
+                .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
+                .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
+                .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))
+                .profitFactor(strategyIndicatorsCalculator.calProfitFactor(strategyId))
+                .roa(strategyIndicatorsCalculator.calRoa(accumulatedProfitLossAmount, maximumCapitalReductionAmount))
+                .maximumCapitalReductionAmount(maximumCapitalReductionAmount)
+                .build();
+
+        strategyGraphAnalysisRepository.save(data);
+        return APIResponse.success("분석 지표 그래프 데이터 생성 성공");
+    }
+
+
+    // deleteAnalysis - 일간 분석 삭제하면, 해당 날짜 그래프 데이터 삭제
+    @Override
+    @Transactional
+    public APIResponse<String> deleteAnalysis(Long strategyId, Long dailyId, Daily deletedDaily) {
+
+        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new IllegalArgumentException("Strategy not fount with ID : " + strategyId));
+
+        // DB에서 삭제
+        strategyGraphAnalysisRepository.deleteByDailyId(dailyId);
+
+        // 빼야 하는 값
+        Double profitLossAmountToMinus = deletedDaily.getProfitLossAmount();
+        Double profitLossRateToMinus = deletedDaily.getProfitLossRate();
+        Double depositWithdrawalAmountToMinus = deletedDaily.getDepositWithdrawalAmount();
+
+        List<StrategyGraphAnalysis> toBeModified = strategyGraphAnalysisRepository.findByIdAndAfterDate(strategyId, deletedDaily.getDate());
+
+        toBeModified.forEach(analysis -> {
+            analysis.setAccumulatedDepositWithdrawalAmount(analysis.getAccumulatedDepositWithdrawalAmount() - depositWithdrawalAmountToMinus);
+            analysis.setAverageProfitLossAmount(analysis.getAverageProfitLossAmount() - profitLossAmountToMinus);
+            analysis.setAverageProfitLossRate(analysis.getAverageProfitLossRate() - profitLossRateToMinus);
+            analysis.setWinningRate(calculateUpdatedWinningRate(strategyId, analysis.getDate()));
+            analysis.setProfitFactor(calculateUpdatedProfitFactor(strategyId, analysis.getDate()));
+            analysis.setRoa(calculateUpdatedRoa(strategyId, analysis.getDate(), analysis.getAccumulatedProfitLossAmount()));
+            analysis.setMaximumCapitalReductionAmount(strategyGraphAnalysisRepository.findTop1MaximumCapitalReductionAmountByStrategyId(strategyId));
+        });
+
+        strategyGraphAnalysisRepository.saveAll(toBeModified);
+
+        return APIResponse.success("그래프 데이터 삭제 성공");
+    }
+
+    // 그 시점의 winningRate 계산
+    private Double calculateUpdatedWinningRate(Long strategyId, LocalDate date) {
+        Long tradingDays = strategyGraphAnalysisRepository.countAllByStrategyIdBeforeDate(strategyId, date);
+        if (tradingDays == 0) return 0.0;
+
+        Long profitDays = strategyGraphAnalysisRepository.countProfitDaysByStrategyIdBeforeDate(strategyId, date);
+
+        return doubleHandler.cutDouble(tradingDays / (double) profitDays);
+    }
+
+    // 그 시점의 Profit Factor 계산
+    private Double calculateUpdatedProfitFactor(Long strategyId, LocalDate date) {
+        Object[] profitLossAmounts = strategyGraphAnalysisRepository.findProfitLossAmount(strategyId, date);
+        if (profitLossAmounts == null) return 0.0;
+        Double profit = (Double) profitLossAmounts[0];
+        Double loss = (Double) profitLossAmounts[1];
+        if (loss == 0) return 0.0;
+        return doubleHandler.cutDouble(profit / loss);
+    }
+
+    // 그 시점의 ROA 계산
+    private Double calculateUpdatedRoa(Long strategyId, LocalDate date, Double accumulatedProfitLossAmount) {
+        Double maximumCapitalReductionAmount = strategyGraphAnalysisRepository.findMaximumCapitalReductionAmountBeforeDate(strategyId, date);
+
+        if (maximumCapitalReductionAmount == 0) return 0.0;
+
+        return doubleHandler.cutDouble(accumulatedProfitLossAmount / maximumCapitalReductionAmount * -1);
     }
 
     // getMonthlyRecords : 월간 분석 데이터 가져오기

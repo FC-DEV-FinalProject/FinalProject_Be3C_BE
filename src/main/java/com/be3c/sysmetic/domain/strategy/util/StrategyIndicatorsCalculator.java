@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-// TODO 테스트 안함. 테스트 필요!
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -122,5 +121,58 @@ public class StrategyIndicatorsCalculator {
         Double cdfValuePercentage = normalDistribution.cumulativeProbability(zScore) * 100;
 
         return doubleHandler.cutDouble(cdfValuePercentage);
+    }
+
+    // currentCapitalReductionAmount 현재자본인하금액
+    public Double calCurrentCapitalReductionAmount(Long strategyId, Double accumulatedProfitLossAmount) {
+        Double maxAccumulatedProfitLossAmount = dailyRepository.findTopByStrategyIdOrderByProfitLossAmountDesc(strategyId).getAccumulatedProfitLossAmount();
+
+        return accumulatedProfitLossAmount > 0 ? doubleHandler.cutDouble(accumulatedProfitLossAmount - maxAccumulatedProfitLossAmount) : 0;
+    }
+
+    // averageProfitLossAmount 평균손익률
+    public Double calAverageProfitLossAmount(Long strategyId, Double accumulatedProfitLossAmount) {
+
+        Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
+
+        if(totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+
+        return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays);
+    }
+
+    // averageProfitLossRate 평균손익률
+    public Double calAverageProfitLossRate(Long strategyId, Double accumulatedProfitLossAmount){
+        Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
+
+        if(totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+
+        return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays * 100);
+    }
+
+    // winningRate 승률
+    public Double calWinningRate(Long strategyId) {
+        Long totalProfitDays = dailyRepository.countProfitDays(strategyId);
+        Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
+
+        if(totalProfitDays == null || totalProfitDays == 0L || totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+
+        return doubleHandler.cutDouble((double) (totalProfitDays / totalTradingDays));
+    }
+
+    // profitFactor
+    public Double calProfitFactor(Long strategyId) {
+        Double totalProfitAmount = dailyRepository.findTotalProfitAmountByStrategyId(strategyId);
+        Double totalLossAmount = dailyRepository.findTotalLossAmountByStrategyId(strategyId);
+
+        if(totalProfitAmount == null || totalLossAmount == null || totalLossAmount == 0) return 0.0;
+
+        return totalLossAmount < 0 ? doubleHandler.cutDouble(totalProfitAmount / (totalLossAmount * -1)) : 0.0;
+    }
+
+    // roa
+    public Double calRoa(Double accumulatedProfitLossAmount, Double maximumCapitalReductionAmount) {
+        if (maximumCapitalReductionAmount == null || maximumCapitalReductionAmount == 0.0) return 0.0;
+
+        return doubleHandler.cutDouble(accumulatedProfitLossAmount / maximumCapitalReductionAmount * -1);
     }
 }
