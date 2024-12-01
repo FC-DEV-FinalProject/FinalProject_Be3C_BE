@@ -14,6 +14,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.BasicPermission;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ class NoticeServiceTest {
     NoticeRepository noticeRepository;
 
     @Test
-    @Rollback(value = false)
+//    @Rollback(value = false)
     public void dummy_data() throws Exception {
         Member member1 = createMember("닉네임1");
         Member member2 = createMember("닉네임2");
@@ -48,14 +49,14 @@ class NoticeServiceTest {
 
         int countNotice = 1;
         Member member = null;
-        Integer isOpen = null;
+        Boolean isOpen = null;
         for(int i = 1; i <= 3; i++) {
             if (i == 1) { member = member7; }
             else if (i == 2) { member = member8; }
             else if (i == 3) { member = member9; }
             for(int j = 1; j <= 2; j++) {
-                if (j == 1) { isOpen = 0; }
-                if (j == 2) { isOpen = 1; }
+                if (j == 1) { isOpen = false; }
+                if (j == 2) { isOpen = true; }
                 for(int l = 1; l <= 10; l++) {
                     Notice notice = Notice.builder()
                             .noticeTitle("공지제목" + countNotice)
@@ -66,7 +67,7 @@ class NoticeServiceTest {
                             .correctorId(member.getId())
                             .correctDate(LocalDateTime.now())
                             .hits(0L)
-                            .isAttachment(0)
+                            .isAttachment(false)
                             .isOpen(isOpen)
                             .build();
                     noticeRepository.save(notice);
@@ -82,7 +83,7 @@ class NoticeServiceTest {
         Member member = createMember("닉네임");
 
         //when
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
         Notice notice = noticeList.get(0);
 
@@ -94,12 +95,12 @@ class NoticeServiceTest {
     public void 공지사항_수정() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
 
         //when
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
         Notice notice = noticeList.get(0);
-        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, 0, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
         //then
         assertEquals("수정공지제목1", notice.getNoticeTitle());
@@ -111,7 +112,7 @@ class NoticeServiceTest {
     public void 공지사항_공개여부_수정() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, new ArrayList<>(), new ArrayList<>());
 
         //when
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
@@ -119,18 +120,18 @@ class NoticeServiceTest {
         noticeService.modifyNoticeClosed(notice.getId());
 
         //then
-        assertEquals(0, notice.getIsOpen());
+        assertEquals(true, notice.getIsOpen());
     }
 
     @Test
     public void 공지사항_검색() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", 0,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목2", "공지내용2", 0,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목3", "공지내용3", 0,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목4", "공지내용4", 0,  new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목5", "공지내용5", 0,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목2", "공지내용2", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목3", "공지내용3", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목4", "공지내용4", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목5", "공지내용5", false,  new ArrayList<>(), new ArrayList<>());
 
         //when
         int page = 1;
