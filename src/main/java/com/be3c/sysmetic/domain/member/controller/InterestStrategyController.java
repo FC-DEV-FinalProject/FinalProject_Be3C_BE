@@ -36,7 +36,7 @@ public class InterestStrategyController implements InterestStrategyControllerDoc
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
     @GetMapping("/member/interestStrategy")
     public ResponseEntity<APIResponse<PageResponse<InterestStrategyGetResponseDto>>> getFolderPage(
-            InterestStrategyGetRequestDto interestStrategyGetRequestDto
+            @ModelAttribute InterestStrategyGetRequestDto interestStrategyGetRequestDto
     ) {
         try {
             PageResponse<InterestStrategyGetResponseDto> interestStrategyPage =
@@ -108,19 +108,38 @@ public class InterestStrategyController implements InterestStrategyControllerDoc
         }
     }
 
+    @Override
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
+    @DeleteMapping("/strategy/follow/{strategyId}")
+    public ResponseEntity<APIResponse<String>> unFollow(
+            @PathVariable Long strategyId
+    ) {
+        try {
+            if (interestStrategyService.unfollow(strategyId)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
+        }
+    }
+
     /*
-        관심 전략 선택 삭제 api (단일 삭제 포함)
+        관심 전략 선택 삭제 api
         1. 선택한 관심 전략 전부 삭제에 성공했을 때 : OK
         2. 선택한 관심 전략 중 일부만 삭제에 성공했을 때 : MULTI_STATUS
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @Override
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    @DeleteMapping("/strategy/follow")
-    public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
+    @DeleteMapping("/strategy/followlist")
+    public ResponseEntity<APIResponse<Map<Long, String>>> unFollowList(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
     ) {
-        Map<Long, String> unFollowResult = interestStrategyService.unfollow(
+        Map<Long, String> unFollowResult = interestStrategyService.unFollowList(
                 followPostRequestDto
         );
 
