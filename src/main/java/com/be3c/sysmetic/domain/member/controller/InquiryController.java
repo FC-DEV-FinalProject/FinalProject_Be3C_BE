@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -138,10 +140,43 @@ public class InquiryController implements InquiryControllerDocs {
 
         try {
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
-            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
+            String previousInquiryTitle;
+            LocalDateTime previousInquiryWriteDate;
+            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
+            if (previousInquiry == null) {
+                previousInquiryTitle = null;
+                previousInquiryWriteDate = null;
+            } else {
+                previousInquiryTitle = previousInquiry.getInquiryTitle();
+                previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+            }
+            String nextInquiryTitle;
+            LocalDateTime nextInquiryWriteDate;
+            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
+            if (nextInquiry == null) {
+                nextInquiryTitle = null;
+                nextInquiryWriteDate = null;
+            } else {
+                nextInquiryTitle = nextInquiry.getInquiryTitle();
+                nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
+            }
 
-            InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+            Long inquiryAnswerId;
+            String answerTitle;
+            LocalDateTime answerRegistrationDate;
+            String answerContent;
+            if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+                inquiryAnswerId = null;
+                answerTitle = null;
+                answerRegistrationDate = null;
+                answerContent = null;
+            } else {
+                InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+                inquiryAnswerId = inquiryAnswer.getId();
+                answerTitle = inquiryAnswer.getAnswerTitle();
+                answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+                answerContent = inquiryAnswer.getAnswerContent();
+            }
 
             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
                     .page(page)
@@ -150,7 +185,7 @@ public class InquiryController implements InquiryControllerDocs {
                     .searchText(searchText)
 
                     .inquiryId(inquiryId)
-                    .inquiryAnswerId(inquiryAnswer.getId())
+                    .inquiryAnswerId(inquiryAnswerId)
 
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
@@ -164,14 +199,14 @@ public class InquiryController implements InquiryControllerDocs {
 
                     .inquiryContent(inquiry.getInquiryContent())
 
-                    .answerTitle(inquiryAnswer.getAnswerTitle())
-                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
-                    .answerContent(inquiryAnswer.getAnswerContent())
+                    .answerTitle(answerTitle)
+                    .answerRegistrationDate(answerRegistrationDate)
+                    .answerContent(answerContent)
 
-                    .previousTitle(previousInquiry.getInquiryTitle())
-                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
-                    .nextTitle(nextInquiry.getInquiryTitle())
-                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .previousTitle(previousInquiryTitle)
+                    .previousWriteDate(previousInquiryWriteDate)
+                    .nextTitle(nextInquiryTitle)
+                    .nextWriteDate(nextInquiryWriteDate)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -410,10 +445,43 @@ public class InquiryController implements InquiryControllerDocs {
 
          try {
              Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-             Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
-             Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
+             String previousInquiryTitle;
+             LocalDateTime previousInquiryWriteDate;
+             Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
+             if (previousInquiry == null) {
+                 previousInquiryTitle = null;
+                 previousInquiryWriteDate = null;
+             } else {
+                 previousInquiryTitle = previousInquiry.getInquiryTitle();
+                 previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+             }
+             String nextInquiryTitle;
+             LocalDateTime nextInquiryWriteDate;
+             Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
+             if (nextInquiry == null) {
+                 nextInquiryTitle = null;
+                 nextInquiryWriteDate = null;
+             } else {
+                 nextInquiryTitle = nextInquiry.getInquiryTitle();
+                 nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
+             }
 
-             InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+             Long inquiryAnswerId;
+             String answerTitle;
+             LocalDateTime answerRegistrationDate;
+             String answerContent;
+             if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+                 inquiryAnswerId = null;
+                 answerTitle = null;
+                 answerRegistrationDate = null;
+                 answerContent = null;
+             } else {
+                 InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+                 inquiryAnswerId = inquiryAnswer.getId();
+                 answerTitle = inquiryAnswer.getAnswerTitle();
+                 answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+                 answerContent = inquiryAnswer.getAnswerContent();
+             }
 
              InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
                      .page(page)
@@ -421,7 +489,7 @@ public class InquiryController implements InquiryControllerDocs {
                      .closed(closed)
 
                      .inquiryId(inquiryId)
-                     .inquiryAnswerId(inquiryAnswer.getId())
+                     .inquiryAnswerId(inquiryAnswerId)
 
                      .inquiryTitle(inquiry.getInquiryTitle())
                      .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
@@ -435,14 +503,14 @@ public class InquiryController implements InquiryControllerDocs {
 
                      .inquiryContent(inquiry.getInquiryContent())
 
-                     .answerTitle(inquiryAnswer.getAnswerTitle())
-                     .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
-                     .answerContent(inquiryAnswer.getAnswerContent())
+                     .answerTitle(answerTitle)
+                     .answerRegistrationDate(answerRegistrationDate)
+                     .answerContent(answerContent)
 
-                     .previousTitle(previousInquiry.getInquiryTitle())
-                     .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
-                     .nextTitle(nextInquiry.getInquiryTitle())
-                     .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                     .previousTitle(previousInquiryTitle)
+                     .previousWriteDate(previousInquiryWriteDate)
+                     .nextTitle(nextInquiryTitle)
+                     .nextWriteDate(nextInquiryWriteDate)
                      .build();
 
              return ResponseEntity.status(HttpStatus.OK)
@@ -719,10 +787,43 @@ public class InquiryController implements InquiryControllerDocs {
 
         try {
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(Inquiry.createInquiry(null, null, null, null));
-            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(Inquiry.createInquiry(null, null, null, null));
+            String previousInquiryTitle;
+            LocalDateTime previousInquiryWriteDate;
+            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
+            if (previousInquiry == null) {
+                previousInquiryTitle = null;
+                previousInquiryWriteDate = null;
+            } else {
+                previousInquiryTitle = previousInquiry.getInquiryTitle();
+                previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+            }
+            String nextInquiryTitle;
+            LocalDateTime nextInquiryWriteDate;
+            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
+            if (nextInquiry == null) {
+                nextInquiryTitle = null;
+                nextInquiryWriteDate = null;
+            } else {
+                nextInquiryTitle = nextInquiry.getInquiryTitle();
+                nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
+            }
 
-            InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+            Long inquiryAnswerId;
+            String answerTitle;
+            LocalDateTime answerRegistrationDate;
+            String answerContent;
+            if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+                inquiryAnswerId = null;
+                answerTitle = null;
+                answerRegistrationDate = null;
+                answerContent = null;
+            } else {
+                InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
+                inquiryAnswerId = inquiryAnswer.getId();
+                answerTitle = inquiryAnswer.getAnswerTitle();
+                answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+                answerContent = inquiryAnswer.getAnswerContent();
+            }
 
             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
                     .page(page)
@@ -730,7 +831,7 @@ public class InquiryController implements InquiryControllerDocs {
                     .closed(closed)
 
                     .inquiryId(inquiryId)
-                    .inquiryAnswerId(inquiryAnswer.getId())
+                    .inquiryAnswerId(inquiryAnswerId)
 
                     .inquiryTitle(inquiry.getInquiryTitle())
                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
@@ -744,14 +845,14 @@ public class InquiryController implements InquiryControllerDocs {
 
                     .inquiryContent(inquiry.getInquiryContent())
 
-                    .answerTitle(inquiryAnswer.getAnswerTitle())
-                    .answerRegistrationDate(inquiryAnswer.getAnswerRegistrationDate())
-                    .answerContent(inquiryAnswer.getAnswerContent())
+                    .answerTitle(answerTitle)
+                    .answerRegistrationDate(answerRegistrationDate)
+                    .answerContent(answerContent)
 
-                    .previousTitle(previousInquiry.getInquiryTitle())
-                    .previousWriteDate(previousInquiry.getInquiryRegistrationDate())
-                    .nextTitle(nextInquiry.getInquiryTitle())
-                    .nextWriteDate(nextInquiry.getInquiryRegistrationDate())
+                    .previousTitle(previousInquiryTitle)
+                    .previousWriteDate(previousInquiryWriteDate)
+                    .nextTitle(nextInquiryTitle)
+                    .nextWriteDate(nextInquiryWriteDate)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)

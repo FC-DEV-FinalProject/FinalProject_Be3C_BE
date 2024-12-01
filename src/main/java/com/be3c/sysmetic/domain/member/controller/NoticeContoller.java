@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -204,8 +205,26 @@ public class NoticeContoller implements NoticeControllerDocs {
             noticeService.upHits(noticeId);
 
             Notice notice = noticeService.findNoticeById(noticeId);
-            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(Notice.createNotice(null, null, null, null, null));
-            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(Notice.createNotice(null, null, null, null, null));
+            String previousNoticeTitle;
+            LocalDateTime previousNoticeWriteDate;
+            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(null);
+            if (previousNotice == null) {
+                previousNoticeTitle = null;
+                previousNoticeWriteDate = null;
+            } else {
+                previousNoticeTitle = previousNotice.getNoticeTitle();
+                previousNoticeWriteDate = previousNotice.getWriteDate();
+            }
+            String nextNoticeTitle;
+            LocalDateTime nextNoticeWriteDate;
+            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(null);
+            if (nextNotice == null) {
+                nextNoticeTitle = null;
+                nextNoticeWriteDate = null;
+            } else {
+                nextNoticeTitle = nextNotice.getNoticeTitle();
+                nextNoticeWriteDate = nextNotice.getWriteDate();
+            }
 
             List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
@@ -245,10 +264,10 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
-                    .previousTitle(previousNotice.getNoticeTitle())
-                    .previousWriteDate(previousNotice.getWriteDate())
-                    .nextTitle(nextNotice.getNoticeTitle())
-                    .nextWriteDate(nextNotice.getWriteDate())
+                    .previousTitle(previousNoticeTitle)
+                    .previousWriteDate(previousNoticeWriteDate)
+                    .nextTitle(nextNoticeTitle)
+                    .nextWriteDate(nextNoticeWriteDate)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -524,8 +543,26 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
-            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(Notice.createNotice(null, null, null, null, null));
-            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(Notice.createNotice(null, null, null, null, null));
+            String previousNoticeTitle;
+            LocalDateTime previousNoticeWriteDate;
+            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(null);
+            if (previousNotice == null) {
+                previousNoticeTitle = null;
+                previousNoticeWriteDate = null;
+            } else {
+                previousNoticeTitle = previousNotice.getNoticeTitle();
+                previousNoticeWriteDate = previousNotice.getWriteDate();
+            }
+            String nextNoticeTitle;
+            LocalDateTime nextNoticeWriteDate;
+            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(null);
+            if (nextNotice == null) {
+                nextNoticeTitle = null;
+                nextNoticeWriteDate = null;
+            } else {
+                nextNoticeTitle = nextNotice.getNoticeTitle();
+                nextNoticeWriteDate = nextNotice.getWriteDate();
+            }
 
             List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
@@ -564,10 +601,10 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
-                    .previousTitle(previousNotice.getNoticeTitle())
-                    .previousWriteDate(previousNotice.getWriteDate())
-                    .nextTitle(nextNotice.getNoticeTitle())
-                    .nextWriteDate(nextNotice.getWriteDate())
+                    .previousTitle(previousNoticeTitle)
+                    .previousWriteDate(previousNoticeWriteDate)
+                    .nextTitle(nextNoticeTitle)
+                    .nextWriteDate(nextNoticeWriteDate)
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
