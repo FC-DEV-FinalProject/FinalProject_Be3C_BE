@@ -78,21 +78,28 @@ public class MonthlyServiceImpl implements MonthlyService {
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
+        // 해당 부분 메서드 통합을 위한 api 변경
+//        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+//        }
 
         Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
                 .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
                 .map(this::entityToDto);
 
-        return PageResponse.<MonthlyGetResponseDto>builder()
-                .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(monthlyResponseDtoPage.getTotalElements())
-                .totalPages(monthlyResponseDtoPage.getTotalPages())
-                .content(monthlyResponseDtoPage.getContent())
-                .build();
+        // 페이지 내부에 데이터가 하나라도 존재한다면 ( 정상 페이지 요청 )
+        if(monthlyResponseDtoPage.hasContent()) {
+            return PageResponse.<MonthlyGetResponseDto>builder()
+                    .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
+                    .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
+                    .totalElement(monthlyResponseDtoPage.getTotalElements())
+                    .totalPages(monthlyResponseDtoPage.getTotalPages())
+                    .content(monthlyResponseDtoPage.getContent())
+                    .build();
+        }
+
+        // 페이지 내부에 데이터가 하나라도 존재하지 않는다면 ( 비정상 페이지 요청 )
+        throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
 
     /*

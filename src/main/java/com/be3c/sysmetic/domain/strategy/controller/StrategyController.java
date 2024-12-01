@@ -30,9 +30,9 @@ public class StrategyController {
     // 일간데이터 조회
     @Operation(
             summary = "일간분석 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 일간분석 데이터 조회"
+            description = "전략의 일간분석 데이터 조회"
     )
-    @GetMapping("/strategy/daily/{strategyId}")
+    @GetMapping("/daily/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<DailyGetResponseDto>>> findDaily(
             @PathVariable Long strategyId,
             @RequestParam("page") Integer page,
@@ -46,9 +46,9 @@ public class StrategyController {
     // 월간데이터 조회
     @Operation(
             summary = "월간분석 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 월간분석 데이터 조회"
+            description = "전략의 월간분석 데이터 조회"
     )
-    @GetMapping("/strategy/monthly/{strategyId}")
+    @GetMapping("/monthly/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<MonthlyGetResponseDto>>> findMonthly(
             @PathVariable Long strategyId,
             @RequestParam("page") Integer page,
@@ -62,9 +62,9 @@ public class StrategyController {
     // 실계좌이미지 조회
     @Operation(
             summary = "실계좌이미지 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 실계좌이미지 조회"
+            description = "전략의 실계좌이미지 조회"
     )
-    @GetMapping("/strategy/account-image/{strategyId}")
+    @GetMapping("/account-image/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<AccountImageResponseDto>>> getAccountImage(
             @PathVariable Long strategyId,
             @RequestParam Integer page
@@ -76,9 +76,9 @@ public class StrategyController {
     // 통계 조회
     @Operation(
             summary = "통계 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 통계 조회"
+            description = "전략의 통계 정보 조회"
     )
-    @GetMapping("/strategy/statistics/{strategyId}")
+    @GetMapping("/statistics/{strategyId}")
     public ResponseEntity<APIResponse<StrategyStatisticsGetResponseDto>> findStatistics(@PathVariable Long strategyId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(strategyStatisticsService.findStrategyStatistics(strategyId)));

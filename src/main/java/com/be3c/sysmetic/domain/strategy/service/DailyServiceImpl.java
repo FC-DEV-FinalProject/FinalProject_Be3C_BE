@@ -16,7 +16,9 @@ import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
+@Slf4j
 @Service
 public class DailyServiceImpl implements DailyService {
     private final DailyRepository dailyRepository;
@@ -148,69 +151,78 @@ public class DailyServiceImpl implements DailyService {
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
+        // 같은 api로 통합하기 위해 public 여부 검증 삭제
+//        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+//        }
 
         Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
                 .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
                 .map(this::entityToDto);
 
-        return PageResponse.<DailyGetResponseDto>builder()
-                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(dailyResponseDtoPage.getTotalElements())
-                .totalPages(dailyResponseDtoPage.getTotalPages())
-                .content(dailyResponseDtoPage.getContent())
-                .build();
+        // 페이지 요청이 제대로 된 것인지 확인 ( 페이지 안에 데이터가 하나라도 존재한다면 )
+        if(dailyResponseDtoPage.hasContent()) {
+            return PageResponse.<DailyGetResponseDto>builder()
+                    .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
+                    .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
+                    .totalElement(dailyResponseDtoPage.getTotalElements())
+                    .totalPages(dailyResponseDtoPage.getTotalPages())
+                    .content(dailyResponseDtoPage.getContent())
+                    .build();
+        }
+
+        // 페이지 안에 데이터가 하나라도 존재하지 않는다면 ( 잘못된 페이지 요청 )
+        throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
 
     /*
+    해당 부분 미사용으로 인한 삭제
+    
     일간분석 조회 - 트레이더 또는 관리자의 일간분석 데이터 조회
     1) 트레이더
     본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
     2) 관리자
     모든 상태의 전략 조회 가능
      */
-    @Override
-    public PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
-        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        Pageable pageable = PageRequest.of(page, 10);
-
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        // trader일 경우, 본인의 전략인지 검증
-        if(userRole.equals("TRADER")) {
-           validUser(exitingStrategy.getTrader().getId());
-        }
-
-        // member일 경우, 권한 없음 처리
-        if(userRole.equals("USER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
-        }
-
-        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
-
-        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
-                .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
-                .map(this::entityToDto);
-
-        return PageResponse.<DailyGetResponseDto>builder()
-                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(dailyResponseDtoPage.getTotalElements())
-                .totalPages(dailyResponseDtoPage.getTotalPages())
-                .content(dailyResponseDtoPage.getContent())
-                .build();
-    }
+//    @Override
+//    public PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
+//        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+//
+//        Pageable pageable = PageRequest.of(page, 10);
+//
+//        String userRole = securityUtils.getUserRoleInSecurityContext();
+//
+//        // trader일 경우, 본인의 전략인지 검증
+//        if(userRole.equals("TRADER")) {
+//           validUser(exitingStrategy.getTrader().getId());
+//        }
+//
+//        // member일 경우, 권한 없음 처리
+//        if(userRole.equals("USER")) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
+//        }
+//
+//        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
+//        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+//
+//        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+//        }
+//
+//        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
+//                .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
+//                .map(this::entityToDto);
+//
+//        return PageResponse.<DailyGetResponseDto>builder()
+//                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
+//                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
+//                .totalElement(dailyResponseDtoPage.getTotalElements())
+//                .totalPages(dailyResponseDtoPage.getTotalPages())
+//                .content(dailyResponseDtoPage.getContent())
+//                .build();
+//    }
 
     // 중복 여부 조회
     @Override

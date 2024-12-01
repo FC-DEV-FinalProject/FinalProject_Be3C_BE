@@ -326,7 +326,7 @@ public class InterestStrategyServiceTest {
                 .strategyId(unfollowList)
                 .build();
 
-        interestStrategyService.unfollow(followDeleteRequestDto);
+        interestStrategyService.unFollowList(followDeleteRequestDto);
     }
 
     @Test
@@ -361,7 +361,7 @@ public class InterestStrategyServiceTest {
                 .strategyId(unfollowList)
                 .build();
 
-        interestStrategyService.unfollow(followDeleteRequestDto);
+        interestStrategyService.unFollowList(followDeleteRequestDto);
 
         interestStrategyService.follow(FollowPostRequestDto.builder()
                         .folderId(1L)

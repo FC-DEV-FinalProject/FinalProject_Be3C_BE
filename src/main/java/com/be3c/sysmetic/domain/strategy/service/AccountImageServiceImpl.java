@@ -14,6 +14,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,21 +54,26 @@ public class AccountImageServiceImpl implements AccountImageService {
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
+        // private이라도 접근 가능
+//        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+//        }
 
         Page<AccountImageResponseDto> accountImageResponseDtoPage = accountImageRepository
                 .findAllByStrategyIdOrderByAccountImageCreatedAt(strategyId, pageable)
                 .map(this::entityToDto);
 
-        return PageResponse.<AccountImageResponseDto>builder()
-                .currentPage(accountImageResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(accountImageResponseDtoPage.getPageable().getPageSize())
-                .totalElement(accountImageResponseDtoPage.getTotalElements())
-                .totalPages(accountImageResponseDtoPage.getTotalPages())
-                .content(accountImageResponseDtoPage.getContent())
-                .build();
+        if(accountImageResponseDtoPage.hasContent()) {
+            return PageResponse.<AccountImageResponseDto>builder()
+                    .currentPage(accountImageResponseDtoPage.getPageable().getPageNumber())
+                    .pageSize(accountImageResponseDtoPage.getPageable().getPageSize())
+                    .totalElement(accountImageResponseDtoPage.getTotalElements())
+                    .totalPages(accountImageResponseDtoPage.getTotalPages())
+                    .content(accountImageResponseDtoPage.getContent())
+                    .build();
+        }
+
+        throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
 
     /*
@@ -158,12 +164,20 @@ public class AccountImageServiceImpl implements AccountImageService {
     }
 
     private AccountImageResponseDto entityToDto(AccountImage accountImage) {
-        return AccountImageResponseDto.builder()
-                .accountImageId(accountImage.getId())
-                .title(accountImage.getTitle())
-                .imageUrl(fileServiceImpl.getFilePath(
-                        new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImage.getId()))) // 파일 조회
-                .build();
+        try {
+            return AccountImageResponseDto.builder()
+                    .accountImageId(accountImage.getId())
+                    .title(accountImage.getTitle())
+                    .imageUrl(fileServiceImpl.getFilePath(
+                            new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImage.getId()))) // 파일 조회
+                    .build();
+        } catch (FileNotFoundException e) {
+            return AccountImageResponseDto.builder()
+                    .accountImageId(accountImage.getId())
+                    .title(accountImage.getTitle())
+                    .imageUrl(null) // 파일 조회
+                    .build();
+        }
     }
 
     private Strategy findStrategyByStrategyId(Long strategyId) {

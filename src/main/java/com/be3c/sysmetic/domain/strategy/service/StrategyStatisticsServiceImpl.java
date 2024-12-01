@@ -37,6 +37,8 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         final Daily recentDaily = dailyRepository.findTopByStrategyIdOrderByDateDesc(strategyId);
 
         // 최근 통계 조회
+        // 2. 전략 등록 시 StrategyStatistics 테이블에서 strategyId로 찾기를 시도했을 때, 당연히 존재하지 않음 ( 전략 등록 후 첫 날의 경우 )
+        // 3. 이 부분에서 Exception이 발생할 가능성이 존재함.
         final StrategyStatistics savedStatistics = strategyStatisticsRepository.findByStrategyId(strategyId);
 
         if(recentDaily == null) {
@@ -99,15 +101,20 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
     // 전략통계 조회 - PUBLIC 상태인 전략의 통계 조회
     public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
+        // 만약 통계 정보가 존재하지 않는다면 Exception이 발생할 가능성이 존재한다.
+        // Optional로 변경할까?
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+//        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId)
+//                .orElseThrow(() ->
+//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
+//        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
+//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+//        }
 
         return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
