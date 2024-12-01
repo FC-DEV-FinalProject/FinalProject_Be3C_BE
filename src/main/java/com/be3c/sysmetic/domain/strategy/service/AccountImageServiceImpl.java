@@ -101,7 +101,7 @@ public class AccountImageServiceImpl implements AccountImageService {
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
+        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
