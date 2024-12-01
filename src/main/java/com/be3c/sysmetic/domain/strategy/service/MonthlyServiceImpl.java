@@ -116,7 +116,7 @@ public class MonthlyServiceImpl implements MonthlyService {
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
+        if(userRole.equals("USER")) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.FORBIDDEN);
         }
 

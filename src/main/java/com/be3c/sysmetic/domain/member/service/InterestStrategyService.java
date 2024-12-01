@@ -11,5 +11,6 @@ public interface InterestStrategyService {
 
     boolean moveFolder(FollowPutRequestDto followPutRequestDto);
     boolean follow(FollowPostRequestDto followPostRequestDto);
-    Map<Long, String> unfollow(FollowDeleteRequestDto followDeleteRequestDto);
+    boolean unfollow(Long strategyId);
+    Map<Long, String> unFollowList(FollowDeleteRequestDto followDeleteRequestDto);
 }

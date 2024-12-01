@@ -354,39 +354,40 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
             @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList) {
 
-        LocalDateTime modifyInModifyPageTime = noticeModifyRequestDto.getModifyInModifyPageTime();
-        if (modifyInModifyPageTime == null) {
-            String str = "3000-11-05 13:47:13.248";
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-            modifyInModifyPageTime = LocalDateTime.parse(str, formatter);
-        }
+//        LocalDateTime modifyInModifyPageTime = noticeModifyRequestDto.getModifyInModifyPageTime();
+//        if (modifyInModifyPageTime == null) {
+//            String str = "3000-11-05 13:47:13.248";
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+//            modifyInModifyPageTime = LocalDateTime.parse(str, formatter);
+//        }
 
         Long userId = securityUtils.getUserIdInSecurityContext();
 
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
 
-            if (modifyInModifyPageTime.isBefore(notice.getCorrectDate())) {
 
-                if (noticeService.modifyNotice(
-                        noticeId,
-                        noticeModifyRequestDto.getNoticeTitle(),
-                        noticeModifyRequestDto.getNoticeContent(),
-                        userId,
-                        noticeModifyRequestDto.getIsOpen(),
-                        noticeModifyRequestDto.getExistFileDtoList(),
-                        noticeModifyRequestDto.getExistImageDtoList(),
-                        newFileList,
-                        newImageList)) {
-                    return ResponseEntity.status(HttpStatus.OK)
-                            .body(APIResponse.success());
-                }
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작습니다."));
+            if (noticeService.modifyNotice(
+                    noticeId,
+                    noticeModifyRequestDto.getNoticeTitle(),
+                    noticeModifyRequestDto.getNoticeContent(),
+                    userId,
+                    noticeModifyRequestDto.getIsOpen(),
+                    noticeModifyRequestDto.getExistFileDtoList(),
+                    noticeModifyRequestDto.getExistImageDtoList(),
+                    newFileList,
+                    newImageList)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(APIResponse.success());
             }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+
+//            if (modifyInModifyPageTime.isBefore(notice.getCorrectDate())) {
+//            } else {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작습니다."));
+//            }
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
