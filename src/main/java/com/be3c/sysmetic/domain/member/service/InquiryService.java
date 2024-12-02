@@ -100,11 +100,11 @@ public interface InquiryService {
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
     // 검색 (전략명, 트레이더, 질문자)
-    Page<Inquiry> findInquiresAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page);
+    Page<Inquiry> findInquiriesAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page);
 
 
     // 문의자, 트레이더 검색 조회
     // 정렬 순 셀렉트 박스 (최신순, 전략명)
     // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
-    Page<Inquiry> findInquires(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page);
+    Page<Inquiry> findInquiries(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page);
 }

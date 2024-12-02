@@ -40,7 +40,7 @@ public class NoticeServiceImpl implements NoticeService {
                                   Boolean fileExists, Boolean imageExists, Boolean isOpen,
                                     List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
-        Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
+        Member writer = memberRepository.findById(writerId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, fileExists, imageExists, isOpen);
 
@@ -84,7 +84,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public boolean modifyNoticeClosed(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         if (!notice.getIsOpen()) {
             notice.setIsOpen(true);
@@ -101,7 +101,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public void upHits(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         notice.setHits(notice.getHits() + 1);
     }
@@ -110,7 +110,7 @@ public class NoticeServiceImpl implements NoticeService {
     // 문의 아이디로 문의 조회
     @Override
     public Notice findNoticeById(Long noticeId) {
-        return noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        return noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
     }
 
 
@@ -121,7 +121,7 @@ public class NoticeServiceImpl implements NoticeService {
                                 Boolean fileExists, Boolean imageExists, Boolean isOpen,
                                 List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
@@ -186,7 +186,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public boolean deleteAdminNotice(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         noticeRepository.delete(notice);
 

@@ -137,6 +137,10 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "207",
                     description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminInquiryList(

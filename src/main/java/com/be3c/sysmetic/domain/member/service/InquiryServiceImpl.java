@@ -156,7 +156,7 @@ public class InquiryServiceImpl implements InquiryService {
     public Map<Long, String> deleteAdminInquiryList(List<Long> inquiryIdList) {
 
         if (inquiryIdList == null || inquiryIdList.isEmpty()) {
-            throw new IllegalArgumentException("문의가 한 개도 선택되지 않았습니다.");
+            throw new EntityNotFoundException("문의가 한 개도 선택되지 않았습니다.");
         }
 
         Map<Long, String> failDelete = new HashMap<>();
@@ -396,7 +396,7 @@ public class InquiryServiceImpl implements InquiryService {
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
     // 검색 (전략명, 트레이더, 질문자)
-    public Page<Inquiry> findInquiresAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page) {
+    public Page<Inquiry> findInquiriesAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page) {
 
         return inquiryRepository.adminInquirySearchWithBooleanBuilder(inquiryAdminListShowRequestDto, PageRequest.of(page, 10));
     }
@@ -405,7 +405,7 @@ public class InquiryServiceImpl implements InquiryService {
     // 문의자, 트레이더 검색 조회
     // 정렬 순 셀렉트 박스 (최신순, 전략명)
     // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
-    public Page<Inquiry> findInquires(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page) {
+    public Page<Inquiry> findInquiries(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page) {
 
         return inquiryRepository.inquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
     }

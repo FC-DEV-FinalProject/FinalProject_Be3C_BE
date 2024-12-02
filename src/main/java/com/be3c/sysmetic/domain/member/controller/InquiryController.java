@@ -76,7 +76,7 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryAdminListShowRequestDto.setSearchType(searchType);
         inquiryAdminListShowRequestDto.setSearchText(searchText);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiresAdmin(inquiryAdminListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiriesAdmin(inquiryAdminListShowRequestDto, page-1);
 
         List<InquiryAdminListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
@@ -199,7 +199,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -227,7 +227,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -238,6 +238,7 @@ public class InquiryController implements InquiryControllerDocs {
         2. 문의 목록 삭제에 성공했을 때 : OK
         3. 해당 문의를 찾지 못했을 때 : NOT_FOUND
         4. 문의 중 일부만 삭제에 실패했을 때 : MULTI_STATUS
+        5. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
@@ -259,11 +260,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -293,7 +290,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -329,7 +326,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -349,8 +346,6 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
         if (page <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
@@ -366,12 +361,14 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
         inquiryListShowRequestDto.setInquirerId(userId);
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
@@ -432,10 +429,15 @@ public class InquiryController implements InquiryControllerDocs {
                      .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
          }
 
-         Long userId = securityUtils.getUserIdInSecurityContext();
-
          try {
-             Inquiry inquiry = inquiryService.findInquiryByInquirerIdAndInquiryId(inquiryId, userId);
+             Long userId = securityUtils.getUserIdInSecurityContext();
+             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+             if (!userId.equals(inquiry.getInquirer().getId())) {
+                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                         .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+             }
+
              String previousInquiryTitle = inquiryService.inquirerFindPreviousInquiryTitle(inquiryId, userId);
              LocalDateTime previousInquiryWriteDate = inquiryService.inquirerFindPreviousInquiryWriteDate(inquiryId, userId);
              String nextInquiryTitle = inquiryService.inquirerFindNextInquiryTitle(inquiryId, userId);
@@ -493,7 +495,7 @@ public class InquiryController implements InquiryControllerDocs {
          }
          catch (EntityNotFoundException e) {
              return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                     .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
          }
     }
 
@@ -551,7 +553,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -596,7 +598,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -632,7 +634,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
         catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -657,6 +659,13 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto) {
 
         try {
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getTraderId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+            }
+
             if (inquiryAnswerService.registerInquiryAnswer(
                     inquiryId,
                     inquiryDetailSaveRequestDto.getAnswerTitle(),
@@ -669,7 +678,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -689,8 +698,6 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
         if (page <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
@@ -706,12 +713,14 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
         inquiryListShowRequestDto.setTraderId(userId);
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquires(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
@@ -761,10 +770,15 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
-
         try {
-            Inquiry inquiry = inquiryService.findInquiryByTraderIdAndInquiryId(inquiryId, userId);
+            Long userId = securityUtils.getUserIdInSecurityContext();
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+
+            if(!Objects.equals(userId, inquiry.getTraderId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+            }
+
             String previousInquiryTitle = inquiryService.traderFindPreviousInquiryTitle(inquiryId, userId);
             LocalDateTime previousInquiryWriteDate = inquiryService.traderFindPreviousInquiryWriteDate(inquiryId, userId);
             String nextInquiryTitle = inquiryService.traderFindNextInquiryTitle(inquiryId, userId);
@@ -822,7 +836,7 @@ public class InquiryController implements InquiryControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 }
