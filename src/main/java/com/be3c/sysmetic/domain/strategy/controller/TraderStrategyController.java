@@ -199,10 +199,10 @@ public class TraderStrategyController {
             summary = "실계좌이미지 삭제",
             description = "트레이더가 본인의 실계좌이미지 삭제"
     )
-    @DeleteMapping("/strategy/account-image/{accountImageId}")
+    @DeleteMapping("/strategy/account-image")
     // @PreAuthorize("hasRole('ROLE_TRADER')")
-    public ResponseEntity<APIResponse> deleteAccountImage(@PathVariable Long accountImageId) {
-        accountImageService.deleteAccountImage(accountImageId);
+    public ResponseEntity<APIResponse> deleteAccountImage(@RequestBody AccountImageDeleteRequestDto accountImageIdList) {
+        accountImageService.deleteAccountImage(accountImageIdList);
         return ResponseEntity.ok(APIResponse.success());
     }
 

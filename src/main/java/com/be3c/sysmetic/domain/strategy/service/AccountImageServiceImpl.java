@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.AccountImageDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -119,16 +119,22 @@ public class AccountImageServiceImpl implements AccountImageService {
     }
 
     // 실계좌이미지 삭제
-    public void deleteAccountImage(Long accountImageId) {
-        AccountImage accountImage = accountImageRepository.findById(accountImageId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+    @Transactional
+    public void deleteAccountImage(AccountImageDeleteRequestDto accountImageIdList) {
+        List<AccountImage> accountImageList = accountImageIdList.getAccountImageId().stream().map(accountImageId -> {
+            return accountImageRepository.findById(accountImageId).orElseThrow(() ->
+                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+        }).toList();
 
-        validUser(accountImage.getStrategy().getTrader().getId());
+        validUser(accountImageList.get(0).getStrategy().getTrader().getId());
 
         // 파일 삭제
-        fileServiceImpl.deleteFile(new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
+        accountImageIdList.getAccountImageId().stream().map(accountImageId -> {
+            return fileServiceImpl.deleteFile(new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
+        });
 
-        accountImageRepository.deleteById(accountImageId);
+        // 실계좌이미지 삭제
+        accountImageRepository.deleteAll(accountImageList);
     }
 
     // 실계좌이미지 등록
