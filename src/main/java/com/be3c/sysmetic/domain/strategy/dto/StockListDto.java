@@ -18,4 +18,5 @@ public class StockListDto {
 
     private HashSet<Long> stockIds;
     private HashSet<String> stockNames;
+    private HashSet<String> stockIconPath;
 }

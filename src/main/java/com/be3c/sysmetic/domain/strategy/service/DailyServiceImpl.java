@@ -4,12 +4,16 @@ import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
-import com.be3c.sysmetic.domain.strategy.repository.*;
+import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -37,13 +41,11 @@ public class DailyServiceImpl implements DailyService {
     private final MonthlyRepository monthlyRepository;
     private final StrategyRepository strategyRepository;
     private final StrategyStatisticsRepository statisticsRepository;
-
-    private final StrategyDetailService strategyDetailService;
+    private final StrategyViewAuthorize strategyViewAuthorize;
 
     private final StrategyCalculator strategyCalculator;
     private final MonthlyServiceImpl monthlyService;
     private final SecurityUtils securityUtils;
-    private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
 
     // 일간분석 등록
     @Transactional
@@ -69,9 +71,6 @@ public class DailyServiceImpl implements DailyService {
                 .stream().map(Daily::getDate).collect(Collectors.toList());
 
         monthlyService.updateMonthly(strategyId, updatedDateList);
-
-        // StrategyGraphAnalysis 분석 그래프 등록 (분석 그래프)
-        dailyList.forEach(daily -> strategyDetailService.saveAnalysis(strategyId, daily.getDate()));
     }
 
     // 일간분석 수정
@@ -95,7 +94,7 @@ public class DailyServiceImpl implements DailyService {
                         new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         // 일간분석 수정
-        dailyRepository.saveAndFlush(daily);            // 기존 save -> saveAndFlush로 수정 (DailyRepository에 반영 필요)
+        dailyRepository.save(daily);
 
         // 누적금액 갱신
         recalculateAccumulatedData(strategyId, daily.getDate());
@@ -103,9 +102,6 @@ public class DailyServiceImpl implements DailyService {
         // 월간분석 갱신
         List<LocalDate> updatedDateList = List.of(daily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
-
-        // StrategyGraphAnalysis 분석 그래프 수정 (분석 그래프)
-        strategyDetailService.updateAnalysis(strategyId, dailyId, daily.getDate());
     }
 
     // 일간분석 삭제
@@ -136,10 +132,6 @@ public class DailyServiceImpl implements DailyService {
         List<LocalDate> updatedDateList = List.of(exitingDaily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
 
-        // StrategyGraphAnalysis 분석 그래프 데이터 삭제 (삭제하는 existingDaily 전달)
-        strategyDetailService.deleteAnalysis(strategyId, dailyId, exitingDaily);
-
-
         if(countDaily < 3) {
             // 일간분석 데이터 수가 3 미만일 경우 비공개 전환
             strategyRepository.updateStatusToPrivate(strategyId);
@@ -149,8 +141,6 @@ public class DailyServiceImpl implements DailyService {
             // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제
             monthlyRepository.deleteAllByStrategyId(strategyId);
             statisticsRepository.deleteByStrategyId(strategyId);
-            // 분석 그래프 데이터 삭제
-            strategyGraphAnalysisRepository.deleteAllByStrategyId(strategyId);
         }
     }
 
@@ -159,27 +149,10 @@ public class DailyServiceImpl implements DailyService {
     public PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page, 10);
 
-        // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        if (strategy.getStatusCode().equals("NOT_USING_STATE")) {
-            // 1. 상태 코드가 NOT_USING_STATE인 경우 - 실패 (삭제된 전략)
-            throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
-        } else if (strategy.getStatusCode().equals("PUBLIC")) {
-            // 2. 상태 코드가 PUBLIC이면 모든 요청에 대해 성공
-        } else if (strategy.getTrader().getId().equals(securityUtils.getUserIdInSecurityContext()) ||
-                "USER_MANAGER".equals(userRole) ||
-                "TRADER_MANAGER".equals(userRole) ||
-                "ADMIN".equals(userRole)
-        ) {
-            // 3. 상태 코드가 NOT_USING_STATE, PUBLIC이 아니면서 트레이더 ID가 일치하거나 사용자 역할이 MANAGER인 경우 - 성공
-        } else {
-            // 4. 나머지 경우 - 실패
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.NOT_FOUND);
-        }
+        strategyViewAuthorize.Authorize(strategy);
 
         Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
                 .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)

@@ -10,6 +10,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
@@ -31,6 +32,7 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
     private final SecurityUtils securityUtils;
+    private final StrategyViewAuthorize strategyViewAuthorize;
 
     // 전략통계 DB 저장 - SchedulerConfiguration 에서 호출하는 메서드
     public void runStrategyStatistics(Long strategyId) {
@@ -114,23 +116,7 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        if (strategy.getStatusCode().equals("NOT_USING_STATE")) {
-            // 1. 상태 코드가 NOT_USING_STATE인 경우 - 실패 (삭제된 전략)
-            throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
-        } else if (strategy.getStatusCode().equals("PUBLIC")) {
-            // 2. 상태 코드가 PUBLIC이면 모든 요청에 대해 성공
-        } else if (strategy.getTrader().getId().equals(securityUtils.getUserIdInSecurityContext()) ||
-                "USER_MANAGER".equals(userRole) ||
-                "TRADER_MANAGER".equals(userRole) ||
-                "ADMIN".equals(userRole)
-        ) {
-            // 3. 상태 코드가 NOT_USING_STATE, PUBLIC이 아니면서 트레이더 ID가 일치하거나 사용자 역할이 MANAGER인 경우 - 성공
-        } else {
-            // 4. 나머지 경우 - 실패
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.NOT_FOUND);
-        }
+        strategyViewAuthorize.Authorize(strategy);
 
         return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
