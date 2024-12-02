@@ -8,14 +8,11 @@ import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
-import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
