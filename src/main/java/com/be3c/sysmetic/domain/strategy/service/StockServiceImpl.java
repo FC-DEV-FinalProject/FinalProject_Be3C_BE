@@ -142,14 +142,14 @@ public class StockServiceImpl implements StockService {
             throw new IllegalStateException();
         }
 
-        if(!duplCheck(stockPutRequestDto.getName())) {
-            throw new ConflictException();
-        }
-
         Stock findStock = stockRepository.findByIdAndStatusCode(
                         stockPutRequestDto.getId(),
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
+
+        if(!(findStock.getName().equals(stockPutRequestDto.getName()) && duplCheck(stockPutRequestDto.getName()))) {
+            throw new ConflictException();
+        }
 
         findStock.setName(stockPutRequestDto.getName());
 

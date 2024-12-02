@@ -141,14 +141,14 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        if(duplCheck(methodPutRequestDto.getName())) {
-            throw new ConflictException();
-        }
-
         Method method = methodRepository.findByIdAndStatusCode(
                         methodPutRequestDto.getId(),
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
+
+        if(!(method.getName().equals(methodPutRequestDto.getName()) && duplCheck(methodPutRequestDto.getName()))) {
+            throw new ConflictException();
+        }
 
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
