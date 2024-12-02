@@ -10,6 +10,9 @@ import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +37,12 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     private final DailyRepository dailyRepository;
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
+    private final FileService fileService;
     private final StrategyIndicatorsCalculator strategyIndicatorsCalculator;
 
     @Override
     @Transactional
+    // 아이콘 / 프로필 이미지
     public StrategyDetailDto getDetail(Long id) {
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
@@ -45,9 +50,11 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         return strategyDetailRepository.findPublicStrategy(id)
                 .map(strategy -> StrategyDetailDto.builder()
                         .id(strategy.getId())
+                        .traderId(strategy.getTrader().getId())
                         .traderNickname(strategy.getTrader().getNickname())
-                        .methodId(strategy.getMethod().getId())
+                        .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
                         .methodName(strategy.getMethod().getName())
+                        .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))
                         .name(strategy.getName())
                         .statusCode(strategy.getStatusCode())

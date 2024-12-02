@@ -1,9 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class StrategyListDto {
 
@@ -13,7 +16,8 @@ public class StrategyListDto {
         strategyId : 전략 id
         traderId : 트레이더 id
         traderNickname : 트레이더 닉네임
-        methodId : 매매방식 id
+        traderProfileImage : 트레이더 프로필 이미지 경로
+        methodIconPath : 매매 유형 아이콘
         methodName : 매매방식명
         name : 전략 명
         cycle : 주기
@@ -26,11 +30,27 @@ public class StrategyListDto {
     private Long traderId;
     private String traderNickname;
     private Long methodId;
-    private String methodName;
+    private String methodIconPath;
     private String name;
     private Character cycle;
     private StockListDto stockList;
     private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
+
+    public static StrategyListDto getStrategyListDto(Strategy strategy, StockListDto stockList, String methodIconPath) {
+        return StrategyListDto.builder()
+                .strategyId(strategy.getId())
+                .traderId(strategy.getTrader().getId())
+                .traderNickname(strategy.getTrader().getNickname())
+                .methodId(strategy.getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .name(strategy.getName())
+                .cycle(strategy.getCycle())
+                .stockList(stockList)
+                .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                .mdd(strategy.getMdd())
+                .smScore(strategy.getSmScore())
+                .build();
+    }
 }

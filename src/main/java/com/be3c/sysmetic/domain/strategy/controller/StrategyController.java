@@ -30,7 +30,7 @@ public class StrategyController {
     // 일간데이터 조회
     @Operation(
             summary = "일간분석 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 일간분석 데이터 조회"
+            description = "전략의 일간분석 데이터 조회"
     )
     @GetMapping("/daily/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<DailyGetResponseDto>>> findDaily(
@@ -46,7 +46,7 @@ public class StrategyController {
     // 월간데이터 조회
     @Operation(
             summary = "월간분석 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 월간분석 데이터 조회"
+            description = "전략의 월간분석 데이터 조회"
     )
     @GetMapping("/monthly/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<MonthlyGetResponseDto>>> findMonthly(
@@ -62,7 +62,7 @@ public class StrategyController {
     // 실계좌이미지 조회
     @Operation(
             summary = "실계좌이미지 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 실계좌이미지 조회"
+            description = "전략의 실계좌이미지 조회"
     )
     @GetMapping("/account-image/{strategyId}")
     public ResponseEntity<APIResponse<PageResponse<AccountImageResponseDto>>> getAccountImage(
@@ -76,7 +76,7 @@ public class StrategyController {
     // 통계 조회
     @Operation(
             summary = "통계 조회",
-            description = "모든 회원이 접근 가능한 PUBLIC 상태인 전략의 통계 조회"
+            description = "전략의 통계 정보 조회"
     )
     @GetMapping("/statistics/{strategyId}")
     public ResponseEntity<APIResponse<StrategyStatisticsGetResponseDto>> findStatistics(@PathVariable Long strategyId) {

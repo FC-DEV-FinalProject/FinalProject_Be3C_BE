@@ -11,6 +11,7 @@ import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -50,6 +51,7 @@ public class MonthlyServiceImpl implements MonthlyService {
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
     private final SecurityUtils securityUtils;
+    private final StrategyViewAuthorize strategyViewAuthorize;
 
     // 월간분석 업데이트
     @Override
@@ -78,21 +80,25 @@ public class MonthlyServiceImpl implements MonthlyService {
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
+        strategyViewAuthorize.Authorize(strategy);
 
         Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
                 .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
                 .map(this::entityToDto);
 
-        return PageResponse.<MonthlyGetResponseDto>builder()
-                .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(monthlyResponseDtoPage.getTotalElements())
-                .totalPages(monthlyResponseDtoPage.getTotalPages())
-                .content(monthlyResponseDtoPage.getContent())
-                .build();
+        // 페이지 내부에 데이터가 하나라도 존재한다면 ( 정상 페이지 요청 )
+        if(monthlyResponseDtoPage.hasContent()) {
+            return PageResponse.<MonthlyGetResponseDto>builder()
+                    .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
+                    .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
+                    .totalElement(monthlyResponseDtoPage.getTotalElements())
+                    .totalPages(monthlyResponseDtoPage.getTotalPages())
+                    .content(monthlyResponseDtoPage.getContent())
+                    .build();
+        }
+
+        // 페이지 내부에 데이터가 하나라도 존재하지 않는다면 ( 비정상 페이지 요청 )
+        throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
 
     /*
