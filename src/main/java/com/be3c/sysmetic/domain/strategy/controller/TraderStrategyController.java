@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -179,7 +180,7 @@ public class TraderStrategyController {
     )
     @PatchMapping("/strategy/{id}/visibility")
     public ResponseEntity<APIResponse<String>> patchStrategy(
-            @NotBlank @PathVariable Long id
+            @NotNull @PathVariable Long id
     ) {
         try {
             if(strategyService.privateStrategy(id)) {

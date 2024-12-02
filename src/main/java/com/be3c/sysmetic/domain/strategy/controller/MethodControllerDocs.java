@@ -42,7 +42,7 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @RequestParam String name
+            @NotBlank @RequestParam String name
     );
 
     /*

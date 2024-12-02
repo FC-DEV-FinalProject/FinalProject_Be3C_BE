@@ -66,9 +66,6 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     ) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        log.info("userId : {}", userId);
-        log.info("interestStrategyGetRequestDto : {}", interestStrategyGetRequestDto.toString());
-
         Pageable pageable = PageRequest.of(
                 interestStrategyGetRequestDto.getPage() - 1,
                 10,
@@ -78,11 +75,9 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 .findPageByIdAndStatusCode(
                         userId,
                         interestStrategyGetRequestDto.getFolderId(),
-                        USING_STATE.getCode(),
+                        FOLLOW.getCode(),
                         pageable
                 );
-
-        log.info("folderPage : {}", folderPage.getTotalElements());
 
         if(folderPage.hasContent()) {
             return PageResponse.<InterestStrategyGetResponseDto>builder()
