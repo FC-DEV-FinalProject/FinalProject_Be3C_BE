@@ -1,11 +1,14 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class StrategyListByTraderDto {
     /*
@@ -26,19 +29,11 @@ public class StrategyListByTraderDto {
         mdd : MDD
         smScore : SM Score
      */
-
-    // 11월 24일
+    // 12월 2일
     private Long traderId;
     private String traderNickname;
-    private Long methodId;
-    private String methodName;
-    private StockListDto stockList;
-    private Long strategyId;
-    private String strategyName;
-    private Character cycle;
-    private Long followerCount;
-    private Long strategyCount;
-    private Double accumulatedProfitLossRate;
-    private Double mdd;
-    private Double smScore;
+    private String traderProfileImage;
+    private Integer followerCount;
+    private Integer strategyCount;
+    PageResponse<TraderStrategyListDto> strategyListDto;
 }

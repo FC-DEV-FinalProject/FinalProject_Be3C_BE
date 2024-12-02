@@ -93,7 +93,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public boolean sendVerifyEmailCode(String email) {
         try {
-            emailService.sendAndSaveAuthCode(email);
+            emailService.sendAndSaveAuthCode(email).subscribe();
         } catch (Exception e) {
             // 이메일 관련 예외 발생 시
             throw new MemberBadRequestException(MemberExceptionMessage.EMAIL_ERROR.getMessage());
@@ -171,7 +171,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         // 닉네임 중복체크
         checkNicknameDuplication(dto.getNickname());
-      
+
         // 회원정보 저장
         Member member = saveMember(dto);
 
@@ -200,7 +200,7 @@ public class RegisterServiceImpl implements RegisterService {
                 emailService.addTraderSubscriberRequest(subscriberRequest);
                 break;
         }
-      
+
         // 회원가입 시 해당 회원에게 default 폴더 추가
         folderRepository.save(Folder.builder()
                         .name("default")

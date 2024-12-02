@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.global.util.email.service;
 
 import com.be3c.sysmetic.global.util.email.dto.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -43,32 +44,39 @@ public interface EmailService {
     /**
      * 일반회원 주소록에서 삭제
      * @param emails 삭제할 회원의 이메일 주소를 리스트 형태로
+     * @return 작업 완료 객체. subscribe()로 실행해주세요.
      */
-    StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails);
+    Mono<StibeeSimpleResponse> deleteUserSubscriberRequest(List<String> emails);
 
     /**
      * 트레이더 주소록에서 삭제
      * @param emails 삭제할 회원의 이메일 주소를 리스트 형태로
+     * @return 작업 완료 객체. subscribe()로 실행해주세요.
      */
-    StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails);
+    Mono<StibeeSimpleResponse> deleteTraderSubscriberRequest(List<String> emails);
+
 
     // 2.자동 메일 api 사용 -------------------------------------------------------------------------------------
+
 
     /**
      * email 인증 코드를 메일로 보내고 레디스에 저장
      * @param toEmail 인증할 메일 주소
+     * @return 작업 완료 객체. subscribe()로 실행해주세요.
      */
-    void sendAndSaveAuthCode(String toEmail);
+    Mono<Void> sendAndSaveAuthCode(String toEmail);
 
     /**
      * 문의가 등록을 이메일로 알림
-     * @param inquiryRequest
+     * @param inquiryRequest 문의 등록 알림 요청 양식
+     * @return 작업 완료 객체. subscribe()로 실행해주세요.
      */
-    void notifyStrategyInquiryRegistration(InquiryRequest inquiryRequest);
+    Mono<String> notifyStrategyInquiryRegistration(InquiryRequest inquiryRequest);
 
     /**
      * 관심전략이 등록되면 전략 등록자에게 이메일로 알림
-     * @param interestRequest
+     * @param interestRequest 관심 전략 등록 알림 요청 양식
+     * @return 작업 완료 객체. subscribe()로 실행해주세요.
      */
-    void notifyStrategyInterestRegistration(InterestRequest interestRequest);
+    Mono<String> notifyStrategyInterestRegistration(InterestRequest interestRequest);
 }

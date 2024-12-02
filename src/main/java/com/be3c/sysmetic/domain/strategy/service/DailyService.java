@@ -14,7 +14,7 @@ public interface DailyService {
     void deleteDaily(Long dailyId);
     DailyPostResponseDto getIsDuplicate(Long strategyId, List<DailyRequestDto> requestDtoList);
     PageResponse<DailyGetResponseDto> findDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate);
-    PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate);
+//    PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate);
 }
 
 /*

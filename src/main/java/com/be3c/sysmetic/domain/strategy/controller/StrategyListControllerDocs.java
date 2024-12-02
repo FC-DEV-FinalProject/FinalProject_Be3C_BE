@@ -55,7 +55,7 @@ public interface StrategyListControllerDocs {
                     @ApiResponse(responseCode = "400")
             }
     )
-    APIResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTraderId(
+    APIResponse<StrategyListByTraderDto> getStrategiesByTraderId(
             @RequestParam("traderId") Long traderId,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum);
 
@@ -71,7 +71,7 @@ public interface StrategyListControllerDocs {
                     @ApiResponse(responseCode = "400")
             }
     )
-    APIResponse<PageResponse<StrategyListByNameDto>> getStrategiesByName(
+    APIResponse<PageResponse<StrategyListDto>> getStrategiesByName(
             @RequestParam("keyword") String keyword,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum);
 
