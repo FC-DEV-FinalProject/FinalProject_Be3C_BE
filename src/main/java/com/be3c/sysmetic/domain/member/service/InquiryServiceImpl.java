@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -153,17 +154,68 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
 
-    // 이전 문의 조회
+    // 이전 문의 제목 조회
     @Override
-    public List<Inquiry> findPreviousInquiry(Long inquiryId) {
-        return inquiryRepository.findPreviousInquiry(inquiryId, PageRequest.of(0, 1));
+    public String findPreviousInquiryTitle(Long inquiryId) {
+        List<Inquiry> previousInquiryList = inquiryRepository.findPreviousInquiry(inquiryId, PageRequest.of(0, 1));
+
+        String previousInquiryTitle;
+        if (previousInquiryList.isEmpty()) {
+            previousInquiryTitle = null;
+        } else {
+            Inquiry previousInquiry = previousInquiryList.get(0);
+            previousInquiryTitle = previousInquiry.getInquiryTitle();
+        }
+
+        return previousInquiryTitle;
     }
 
-
-    // 다음 문의 조회
+    // 이전 문의 작성일 조회
     @Override
-    public List<Inquiry> findNextInquiry(Long inquiryId) {
-        return inquiryRepository.findNextInquiry(inquiryId, PageRequest.of(0, 1));
+    public LocalDateTime findPreviousInquiryWriteDate(Long inquiryId) {
+        List<Inquiry> previousInquiryList = inquiryRepository.findPreviousInquiry(inquiryId, PageRequest.of(0, 1));
+
+        LocalDateTime previousInquiryWriteDate;
+        if (previousInquiryList.isEmpty()) {
+            previousInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = previousInquiryList.get(0);
+            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        return previousInquiryWriteDate;
+    }
+
+    // 다음 문의 제목 조회
+    @Override
+    public String findNextInquiryTitle(Long inquiryId) {
+        List<Inquiry> nextInquiryList = inquiryRepository.findNextInquiry(inquiryId, PageRequest.of(0, 1));
+
+        String nextInquiryTitle;
+        if (nextInquiryList.isEmpty()) {
+            nextInquiryTitle = null;
+        } else {
+            Inquiry previousInquiry = nextInquiryList.get(0);
+            nextInquiryTitle = previousInquiry.getInquiryTitle();
+        }
+
+        return nextInquiryTitle;
+    }
+
+    // 다음 문의 제목 조회
+    @Override
+    public LocalDateTime findNextInquiryWriteDate(Long inquiryId) {
+        List<Inquiry> nextInquiryList = inquiryRepository.findNextInquiry(inquiryId, PageRequest.of(0, 1));
+
+        LocalDateTime nextInquiryWriteDate;
+        if (nextInquiryList.isEmpty()) {
+            nextInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = nextInquiryList.get(0);
+            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        return nextInquiryWriteDate;
     }
 
 

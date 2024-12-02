@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.member.entity.Notice;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +46,15 @@ public interface NoticeService {
     // 검색 (조건: 제목+내용)
     Page<Notice> findNotice(String searchText, Integer page);
 
-    // 이전글 조회
-    List<Notice> findPreviousNotice(Long noticeId);
+    // 이전글 제목 조회
+    String findPreviousNoticeTitle(Long noticeId);
 
-    // 다음글 조회
-    List<Notice> findNextNotice(Long noticeId);
+    // 이전글 작성일 조회
+    LocalDateTime findPreviousNoticeWriteDate(Long noticeId);
+
+    // 다음글 제목 조회
+    String findNextNoticeTitle(Long noticeId);
+
+    // 다음글 제목 조회
+    LocalDateTime findNextNoticeWriteDate(Long noticeId);
 }

@@ -140,29 +140,11 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
-            String previousInquiryTitle;
-            LocalDateTime previousInquiryWriteDate;
-            List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
-            if (previousInquiryList.isEmpty()) {
-                previousInquiryTitle = null;
-                previousInquiryWriteDate = null;
-            } else {
-                Inquiry previousInquiry = previousInquiryList.get(0);
-                previousInquiryTitle = previousInquiry.getInquiryTitle();
-                previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-            }
-            String nextInquiryTitle;
-            LocalDateTime nextInquiryWriteDate;
-            List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
-            if (nextInquiryList.isEmpty()) {
-                nextInquiryTitle = null;
-                nextInquiryWriteDate = null;
-            } else {
-                Inquiry nextInquiry = nextInquiryList.get(0);
-                nextInquiryTitle = nextInquiry.getInquiryTitle();
-                nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
-            }
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
+            LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
+            String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
+            LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
 
             Long inquiryAnswerId;
             String answerTitle;
@@ -447,29 +429,11 @@ public class InquiryController implements InquiryControllerDocs {
          }
 
          try {
-             Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
-             String previousInquiryTitle;
-             LocalDateTime previousInquiryWriteDate;
-             List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
-             if (previousInquiryList.isEmpty()) {
-                 previousInquiryTitle = null;
-                 previousInquiryWriteDate = null;
-             } else {
-                 Inquiry previousInquiry = previousInquiryList.get(0);
-                 previousInquiryTitle = previousInquiry.getInquiryTitle();
-                 previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-             }
-             String nextInquiryTitle;
-             LocalDateTime nextInquiryWriteDate;
-             List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
-             if (nextInquiryList.isEmpty()) {
-                 nextInquiryTitle = null;
-                 nextInquiryWriteDate = null;
-             } else {
-                 Inquiry nextInquiry = nextInquiryList.get(0);
-                 nextInquiryTitle = nextInquiry.getInquiryTitle();
-                 nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
-             }
+             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+             String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
+             LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
+             String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
+             LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
 
              Long inquiryAnswerId;
              String answerTitle;
@@ -561,7 +525,7 @@ public class InquiryController implements InquiryControllerDocs {
                         .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
             }
 
-            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
             if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -603,8 +567,7 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
         try {
-
-            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
             if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -647,8 +610,7 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable(name="inquiryId") Long inquiryId) {
 
         try {
-
-            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
             if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -793,29 +755,11 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
-            String previousInquiryTitle;
-            LocalDateTime previousInquiryWriteDate;
-            List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
-            if (previousInquiryList.isEmpty()) {
-                previousInquiryTitle = null;
-                previousInquiryWriteDate = null;
-            } else {
-                Inquiry previousInquiry = previousInquiryList.get(0);
-                previousInquiryTitle = previousInquiry.getInquiryTitle();
-                previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-            }
-            String nextInquiryTitle;
-            LocalDateTime nextInquiryWriteDate;
-            List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
-            if (nextInquiryList.isEmpty()) {
-                nextInquiryTitle = null;
-                nextInquiryWriteDate = null;
-            } else {
-                Inquiry nextInquiry = nextInquiryList.get(0);
-                nextInquiryTitle = nextInquiry.getInquiryTitle();
-                nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
-            }
+            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
+            LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
+            String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
+            LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
 
             Long inquiryAnswerId;
             String answerTitle;

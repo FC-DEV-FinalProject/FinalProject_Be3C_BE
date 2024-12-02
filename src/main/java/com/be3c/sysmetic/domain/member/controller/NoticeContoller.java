@@ -210,28 +210,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         try {
 
             Notice notice = noticeService.findNoticeById(noticeId);
-            String previousNoticeTitle;
-            LocalDateTime previousNoticeWriteDate;
-            List<Notice> previousNoticeList = noticeService.findPreviousNotice(noticeId);
-            if (previousNoticeList.isEmpty()) {
-                previousNoticeTitle = null;
-                previousNoticeWriteDate = null;
-            } else {
-                Notice previousNotice = previousNoticeList.get(0);
-                previousNoticeTitle = previousNotice.getNoticeTitle();
-                previousNoticeWriteDate = previousNotice.getWriteDate();
-            }
-            String nextNoticeTitle;
-            LocalDateTime nextNoticeWriteDate;
-            List<Notice> nextNoticeList = noticeService.findNextNotice(noticeId);
-            if (nextNoticeList.isEmpty()) {
-                nextNoticeTitle = null;
-                nextNoticeWriteDate = null;
-            } else {
-                Notice nextNotice = nextNoticeList.get(0);
-                nextNoticeTitle = nextNotice.getNoticeTitle();
-                nextNoticeWriteDate = nextNotice.getWriteDate();
-            }
+            String previousNoticeTitle = noticeService.findPreviousNoticeTitle(noticeId);
+            LocalDateTime previousNoticeWriteDate = noticeService.findPreviousNoticeWriteDate(noticeId);
+            String nextNoticeTitle = noticeService.findNextNoticeTitle(noticeId);
+            LocalDateTime nextNoticeWriteDate = noticeService.findNextNoticeWriteDate(noticeId);
 
             List<NoticeDetailFileShowResponseDto> fileDtoList = null;
             if (notice.getFileExists()) {
@@ -568,28 +550,10 @@ public class NoticeContoller implements NoticeControllerDocs {
             noticeService.upHits(noticeId);
 
             Notice notice = noticeService.findNoticeById(noticeId);
-            String previousNoticeTitle;
-            LocalDateTime previousNoticeWriteDate;
-            List<Notice> previousNoticeList = noticeService.findPreviousNotice(noticeId);
-            if (previousNoticeList.isEmpty()) {
-                previousNoticeTitle = null;
-                previousNoticeWriteDate = null;
-            } else {
-                Notice previousNotice = previousNoticeList.get(0);
-                previousNoticeTitle = previousNotice.getNoticeTitle();
-                previousNoticeWriteDate = previousNotice.getWriteDate();
-            }
-            String nextNoticeTitle;
-            LocalDateTime nextNoticeWriteDate;
-            List<Notice> nextNoticeList = noticeService.findNextNotice(noticeId);
-            if (nextNoticeList.isEmpty()) {
-                nextNoticeTitle = null;
-                nextNoticeWriteDate = null;
-            } else {
-                Notice nextNotice = nextNoticeList.get(0);
-                nextNoticeTitle = nextNotice.getNoticeTitle();
-                nextNoticeWriteDate = nextNotice.getWriteDate();
-            }
+            String previousNoticeTitle = noticeService.findPreviousNoticeTitle(noticeId);
+            LocalDateTime previousNoticeWriteDate = noticeService.findPreviousNoticeWriteDate(noticeId);
+            String nextNoticeTitle = noticeService.findNextNoticeTitle(noticeId);
+            LocalDateTime nextNoticeWriteDate = noticeService.findNextNoticeWriteDate(noticeId);
 
             List<NoticeDetailFileShowResponseDto> fileDtoList = null;
             if (notice.getFileExists()) {

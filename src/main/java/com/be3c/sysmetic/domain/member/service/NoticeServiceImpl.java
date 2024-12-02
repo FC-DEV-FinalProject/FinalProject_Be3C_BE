@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.NoticeExistFileImageRequestDto;
+import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
@@ -224,16 +225,67 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
 
-    // 이전글 조회
+    // 이전글 제목 조회
     @Override
-    public List<Notice> findPreviousNotice(Long noticeId) {
-        return noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+    public String findPreviousNoticeTitle(Long noticeId) {
+        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+
+        String previousNoticeTitle;
+        if (previousNoticeList.isEmpty()) {
+            previousNoticeTitle = null;
+        } else {
+            Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeTitle = previousNotice.getNoticeTitle();
+        }
+
+        return previousNoticeTitle;
     }
 
-
-    // 다음글 조회
+    // 이전글 작성일 조회
     @Override
-    public List<Notice> findNextNotice(Long noticeId) {
-        return noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+    public LocalDateTime findPreviousNoticeWriteDate(Long noticeId) {
+        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+
+        LocalDateTime previousNoticeWriteDate;
+        if (previousNoticeList.isEmpty()) {
+            previousNoticeWriteDate = null;
+        } else {
+            Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeWriteDate = previousNotice.getWriteDate();
+        }
+
+        return previousNoticeWriteDate;
+    }
+
+    // 다음글 제목 조회
+    @Override
+    public String findNextNoticeTitle(Long noticeId) {
+        List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+
+        String nextNoticeTitle;
+        if (nextNoticeList.isEmpty()) {
+            nextNoticeTitle = null;
+        } else {
+            Notice previousNotice = nextNoticeList.get(0);
+            nextNoticeTitle = previousNotice.getNoticeTitle();
+        }
+
+        return nextNoticeTitle;
+    }
+
+    // 다음글 제목 조회
+    @Override
+    public LocalDateTime findNextNoticeWriteDate(Long noticeId) {
+        List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+
+        LocalDateTime nextNoticeWriteDate;
+        if (nextNoticeList.isEmpty()) {
+            nextNoticeWriteDate = null;
+        } else {
+            Notice previousNotice = nextNoticeList.get(0);
+            nextNoticeWriteDate = previousNotice.getWriteDate();
+        }
+
+        return nextNoticeWriteDate;
     }
 }
