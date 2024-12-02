@@ -27,7 +27,7 @@ public class StrategySearchController implements StrategySearchControllerDocs {
         HTTP Method : POST
         Request Body : JSON
         {
-             "methods": ["MANUAL", "SYSTEM", "HYBRID"],
+             "methods": ["메뉴얼", "시스템", "하이브리드"],
              "cycle": ["D", "P"],
              "stockNames": ["국내주식", "해외주식", "국내ETF", "해외ETF", "국내채권", "해외채권", "국내리츠, "해외리츠"],
              "accumulatedProfitLossRateRangeStart": "10",
