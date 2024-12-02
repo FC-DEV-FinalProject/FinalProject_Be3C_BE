@@ -74,9 +74,6 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     ) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        log.info("userId : {}", userId);
-        log.info("interestStrategyGetRequestDto : {}", interestStrategyGetRequestDto.toString());
-
         Pageable pageable = PageRequest.of(
                 interestStrategyGetRequestDto.getPage() - 1,
                 10,
@@ -86,11 +83,9 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                 .findPageByIdAndStatusCode(
                         userId,
                         interestStrategyGetRequestDto.getFolderId(),
-                        USING_STATE.getCode(),
+                        FOLLOW.getCode(),
                         pageable
                 );
-
-        log.info("folderPage : {}", folderPage.getTotalElements());
 
         if(folderPage.hasContent()) {
             folderPage.getContent().forEach(interestStrategy -> {
@@ -181,18 +176,16 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
     public boolean unfollow(Long strategyId) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        log.info("strategy id : {}", strategyId);
-        log.info("userId : {}", userId);
         unFollowStrategy(userId, strategyId);
         return true;
     }
 
     /*
-            1. SecurityContext에서 유저 아이디를 찾는다.
-            2. 언팔로우 요청 목록을 돌면서 해당 전략의 관심 전략 삭제를 진행한다.
-                2-1. 만약 삭제할 관심 전략을 찾지 못했다면, 실패한 전략 Id와 실패 이유를 Map에 저장한다.
-                2-2. 실패 목록을 반환한다.
-         */
+        1. SecurityContext에서 유저 아이디를 찾는다.
+        2. 언팔로우 요청 목록을 돌면서 해당 전략의 관심 전략 삭제를 진행한다.
+            2-1. 만약 삭제할 관심 전략을 찾지 못했다면, 실패한 전략 Id와 실패 이유를 Map에 저장한다.
+            2-2. 실패 목록을 반환한다.
+     */
     @Override
     public Map<Long, String> unFollowList(FollowDeleteRequestDto followDeleteRequestDto) {
         Long userId = securityUtils.getUserIdInSecurityContext();
@@ -218,7 +211,6 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         5. 관심 전략 등록 로그를 저장한다.
      */
     private void followStrategy(Long userId, Long folderId, Long strategyId) {
-
         Strategy strategy = strategyRepository
                 .findByIdAndOpenStatusCode(
                         strategyId
@@ -258,13 +250,11 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         FOLLOW.getCode()
                 ).orElseThrow(() -> new EntityNotFoundException(NOT_FOUND_STRATEGY.getMessage()));
 
-        log.info("interest id : {}", interestStrategy.getId());
         interestStrategy.setStatusCode(UNFOLLOW.getCode());
 
         interestStrategyRepository.save(interestStrategy);
 
         interestStrategy.getStrategy().decreaseFollowerCount();
-
 
         followStrategyLog(
                 interestStrategy.getId(),

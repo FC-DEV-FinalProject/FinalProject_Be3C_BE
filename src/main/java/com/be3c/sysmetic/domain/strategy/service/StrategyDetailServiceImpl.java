@@ -47,37 +47,30 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
 
         return strategyDetailRepository.findPublicStrategy(id)
-                .map(strategy -> {
-                    List<String> stockIconPaths = new ArrayList<>();
-
-                    stockGetter.getStocks(strategy.getId()).getStockIds().forEach(stockId ->
-                            stockIconPaths.add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)))
-                    );
-
-                    return StrategyDetailDto.builder()
-                                    .id(strategy.getId())
-                                    .traderId(strategy.getTrader().getId())
-                                    .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
-                                    .traderNickname(strategy.getTrader().getNickname())
-                                    .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
-                                    .stockList(stockGetter.getStocks(strategy.getId()))
-                                    .name(strategy.getName())
-                                    .statusCode(strategy.getStatusCode())
-                                    .cycle(strategy.getCycle())
-                                    .content(strategy.getContent())
-                                    .followerCount(strategy.getFollowerCount())
-                                    .mdd(strategy.getMdd())
-                                    .kpRatio(strategy.getKpRatio())
-                                    .smScore(strategy.getSmScore())
-                                    .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
-                                    .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
-                                    .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
-                                    .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
-                                    .winningRate(strategy.getWinningRate())
-                                    .monthlyRecord(getMonthlyRecords(strategy.getId()))
-                                    .build();
-            })
-                    .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
+                .map(strategy -> StrategyDetailDto.builder()
+                        .id(strategy.getId())
+                        .traderId(strategy.getTrader().getId())
+                        .traderNickname(strategy.getTrader().getNickname())
+                        .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .methodName(strategy.getMethod().getName())
+                        .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
+                        .stockList(stockGetter.getStocks(strategy.getId()))
+                        .name(strategy.getName())
+                        .statusCode(strategy.getStatusCode())
+                        .cycle(strategy.getCycle())
+                        .content(strategy.getContent())
+                        .followerCount(strategy.getFollowerCount())
+                        .mdd(strategy.getMdd())
+                        .kpRatio(strategy.getKpRatio())
+                        .smScore(strategy.getSmScore())
+                        .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                        .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
+                        .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
+                        .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
+                        .winningRate(strategy.getWinningRate())
+                        .monthlyRecord(getMonthlyRecords(strategy.getId()))
+                        .build())
+                .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
 
     // 분석 지표 그래프 데이터 요청

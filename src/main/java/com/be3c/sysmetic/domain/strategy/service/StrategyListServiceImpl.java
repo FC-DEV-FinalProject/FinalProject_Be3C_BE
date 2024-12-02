@@ -57,6 +57,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .map(strategy -> StrategyListDto.getStrategyListDto(
                                 strategy,
                                 stockGetter.getStocks(strategy.getId()),
+                                fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
                                 fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
                         )
                 );
@@ -152,6 +153,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .map(strategy -> StrategyListDto.getStrategyListDto(
                         strategy,
                         stockGetter.getStocks(strategy.getId()),
+                        fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
                         fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
                         )
         );

@@ -8,6 +8,9 @@ import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -36,6 +40,8 @@ import java.util.NoSuchElementException;
 public class MethodController implements MethodControllerDocs {
 
     private final MethodService methodService;
+
+    private final FileService fileService;
 
     /*
         매매 방식 조회 (개별)
@@ -154,30 +160,33 @@ public class MethodController implements MethodControllerDocs {
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
     @Override
-    @PutMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PatchMapping(value = "/admin/method/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> putMethod(
-            @Valid @RequestPart MethodPutRequestDto methodPutRequestDto,
-            @RequestPart(value = "file") MultipartFile file
+            @PathVariable Long id,
+            @RequestPart MethodPutRequestDto methodPutRequestDto,
+            @RequestPart(name = "file", required = false) MultipartFile file
     ) {
-        try {
-            if(methodService.updateMethod(methodPutRequestDto, file)) {
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(APIResponse.success());
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        } catch (IllegalArgumentException |
-                 IllegalStateException |
-                 DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        } catch (ConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(APIResponse.success());
+//        try {
+//            if(methodService.updateMethod(methodPutRequestDto, file)) {
+//                return ResponseEntity.status(HttpStatus.OK)
+//                        .body(APIResponse.success());
+//            }
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+//        } catch (IllegalArgumentException |
+//                 IllegalStateException |
+//                 DataIntegrityViolationException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+//        } catch (EntityNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+//        } catch (ConflictException e) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT)
+//                    .body(APIResponse.fail(ErrorCode.DUPLICATE_RESOURCE));
+//        }
     }
 
     /*

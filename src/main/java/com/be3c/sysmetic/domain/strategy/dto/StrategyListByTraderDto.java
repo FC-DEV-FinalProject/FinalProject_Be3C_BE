@@ -15,10 +15,8 @@ public class StrategyListByTraderDto {
 
         StrategyListByTraderDto : 트레이더별 전략 목록 응답용 DTO
 
-        strategyId : 전략 id
         traderId : 트레이더 id
         traderNickname : 트레이더 닉네임
-        traderProfileImage : 트레이더 프로필 이미지
         methodId : 매매방식 id
         methodName : 매매방식명
         stockList : 종목 리스트

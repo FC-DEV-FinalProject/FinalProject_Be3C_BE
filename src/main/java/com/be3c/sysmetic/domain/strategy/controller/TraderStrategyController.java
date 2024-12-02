@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "트레이더 전략 API", description = "트레이더 전략 관리 및 조회")
 @RequestMapping("/v1/trader")
@@ -177,7 +178,7 @@ public class TraderStrategyController {
             description = "자신이 등록한 전략 목록 조회"
     )
     @GetMapping("/member/strategy/{page}")
-    public ResponseEntity<APIResponse<PageResponse<StrategyListByTraderDto>>> getMyStrategyList(
+    public ResponseEntity<APIResponse<MyStrategyListResponseDto>> getMyStrategyList(
             @PathVariable Integer page
     ) {
         try {

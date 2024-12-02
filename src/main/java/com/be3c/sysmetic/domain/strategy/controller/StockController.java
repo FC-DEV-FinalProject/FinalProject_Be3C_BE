@@ -146,9 +146,9 @@ public class StockController implements StockControllerDocs {
      */
     @Override
 //    @PreAuthorize(("hasRole('MANAGER')"))
-    @PutMapping(value = "/admin/stock", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/admin/stock", consumes = {"multipart/form-data"})
     public ResponseEntity<APIResponse<String>> updateItem(
-            @Valid @RequestPart StockPutRequestDto stockPutRequestDto,
+            @Valid @RequestPart("stockPutRequestDto") StockPutRequestDto stockPutRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         try {
