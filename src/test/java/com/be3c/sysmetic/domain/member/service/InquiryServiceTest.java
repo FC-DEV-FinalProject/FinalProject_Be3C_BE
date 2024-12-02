@@ -218,8 +218,8 @@ public class InquiryServiceTest {
 
         //when
         int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquiresAdmin(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquiresAdmin(inquirySearch2, page-1);
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiriesAdmin(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiriesAdmin(inquirySearch2, page-1);
 
         //then
         assertEquals(3, inquiryList1.getNumberOfElements());
@@ -257,9 +257,9 @@ public class InquiryServiceTest {
 
         //when
         int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquires(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquires(inquirySearch2, page-1);
-        Page<Inquiry> inquiryList3 = inquiryService.findInquires(inquirySearch3, page-1);
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiries(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiries(inquirySearch2, page-1);
+        Page<Inquiry> inquiryList3 = inquiryService.findInquiries(inquirySearch3, page-1);
 
         // then
         assertEquals(6, inquiryList1.getNumberOfElements());
