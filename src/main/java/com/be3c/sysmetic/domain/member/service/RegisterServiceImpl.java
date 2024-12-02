@@ -77,7 +77,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Transactional
     public boolean sendVerifyEmailCode(String email) {
 
-        emailService.sendAndSaveAuthCode(email);
+        emailService.sendAndSaveAuthCode(email).subscribe();
         return true;
     }
 

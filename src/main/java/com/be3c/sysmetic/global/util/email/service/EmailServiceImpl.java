@@ -132,9 +132,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public Mono<String> notifyStrategyInquiryRegistration(InquiryRequest inquiryRequestDto) {
+    public Mono<String> notifyStrategyInquiryRegistration(InquiryRequest inquiryRequest) {
 
-            return emailApiClient.sendInquiryRegistrationEmailRequest(inquiryRequestDto);
+            return emailApiClient.sendInquiryRegistrationEmailRequest(inquiryRequest);
     }
 
     @Override
