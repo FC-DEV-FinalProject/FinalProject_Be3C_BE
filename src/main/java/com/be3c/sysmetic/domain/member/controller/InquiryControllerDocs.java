@@ -15,6 +15,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 public interface InquiryControllerDocs {
 
@@ -137,7 +139,7 @@ public interface InquiryControllerDocs {
                     description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
             )
     })
-    ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+    ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
 
@@ -442,6 +444,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패했을 때 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({

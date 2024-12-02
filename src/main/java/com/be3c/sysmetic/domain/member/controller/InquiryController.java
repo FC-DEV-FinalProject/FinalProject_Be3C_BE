@@ -4,7 +4,6 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
-import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
@@ -12,9 +11,9 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.common.response.SuccessCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -141,10 +141,10 @@ public class InquiryController implements InquiryControllerDocs {
 
         try {
             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
-            LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
-            String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
-            LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
+            String previousInquiryTitle = inquiryService.adminFindPreviousInquiryTitle(inquiryId);
+            LocalDateTime previousInquiryWriteDate = inquiryService.adminFindPreviousInquiryWriteDate(inquiryId);
+            String nextInquiryTitle = inquiryService.adminFindNextInquiryTitle(inquiryId);
+            LocalDateTime nextInquiryWriteDate = inquiryService.adminFindNextInquiryWriteDate(inquiryId);
 
             Long inquiryAnswerId;
             String answerTitle;
@@ -242,24 +242,28 @@ public class InquiryController implements InquiryControllerDocs {
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/admin/inquiry/delete")
-    public ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto) {
 
         List<Long> inquiryIdList = noticeListDeleteRequestDto.getInquiryIdList();
 
         try {
-            Integer deleteCount = inquiryService.deleteAdminInquiryList(inquiryIdList);
+            Map<Long, String> deleteResult = inquiryService.deleteAdminInquiryList(inquiryIdList);
 
-            if (deleteCount == inquiryIdList.size()) {
+            if (deleteResult.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(APIResponse.success(deleteCount));
+                        .body(APIResponse.success());
             }
             return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-                    .body(APIResponse.fail(ErrorCode.MULTI_STATUS));
+                    .body(APIResponse.success(SuccessCode.OK, deleteResult));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
@@ -428,12 +432,14 @@ public class InquiryController implements InquiryControllerDocs {
                      .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
          }
 
+         Long userId = securityUtils.getUserIdInSecurityContext();
+
          try {
-             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-             String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
-             LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
-             String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
-             LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
+             Inquiry inquiry = inquiryService.findInquiryByInquirerIdAndInquiryId(inquiryId, userId);
+             String previousInquiryTitle = inquiryService.inquirerFindPreviousInquiryTitle(inquiryId, userId);
+             LocalDateTime previousInquiryWriteDate = inquiryService.inquirerFindPreviousInquiryWriteDate(inquiryId, userId);
+             String nextInquiryTitle = inquiryService.inquirerFindNextInquiryTitle(inquiryId, userId);
+             LocalDateTime nextInquiryWriteDate = inquiryService.inquirerFindNextInquiryWriteDate(inquiryId, userId);
 
              Long inquiryAnswerId;
              String answerTitle;
@@ -728,6 +734,7 @@ public class InquiryController implements InquiryControllerDocs {
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 문의의 상세 데이터 조회에 성공했을 때 : OK
         3. 해당 문의를 찾지 못했을 때 : NOT_FOUND
+        4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
@@ -754,12 +761,14 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            String previousInquiryTitle = inquiryService.findPreviousInquiryTitle(inquiryId);
-            LocalDateTime previousInquiryWriteDate = inquiryService.findPreviousInquiryWriteDate(inquiryId);
-            String nextInquiryTitle = inquiryService.findNextInquiryTitle(inquiryId);
-            LocalDateTime nextInquiryWriteDate = inquiryService.findNextInquiryWriteDate(inquiryId);
+            Inquiry inquiry = inquiryService.findInquiryByTraderIdAndInquiryId(inquiryId, userId);
+            String previousInquiryTitle = inquiryService.traderFindPreviousInquiryTitle(inquiryId, userId);
+            LocalDateTime previousInquiryWriteDate = inquiryService.traderFindPreviousInquiryWriteDate(inquiryId, userId);
+            String nextInquiryTitle = inquiryService.traderFindNextInquiryTitle(inquiryId, userId);
+            LocalDateTime nextInquiryWriteDate = inquiryService.traderFindNextInquiryWriteDate(inquiryId, userId);
 
             Long inquiryAnswerId;
             String answerTitle;

@@ -199,6 +199,10 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public Map<Long, String> deleteAdminNoticeList(List<Long> noticeIdList) {
 
+        if (noticeIdList == null || noticeIdList.isEmpty()) {
+            throw new IllegalArgumentException("공지가 한 개도 선택되지 않았습니다.");
+        }
+
         Map<Long, String> failDelete = new HashMap<>();
 
         for (Long noticeId : noticeIdList) {

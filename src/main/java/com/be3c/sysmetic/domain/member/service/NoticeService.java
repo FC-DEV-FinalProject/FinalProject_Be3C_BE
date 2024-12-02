@@ -34,7 +34,8 @@ public interface NoticeService {
     // 관리자 문의 수정
     boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
                          Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                         List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList);
+                         List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList,
+                         List<MultipartFile> newFileList, List<MultipartFile> newImageList);
 
     // 관리자 문의 삭제
     boolean deleteAdminNotice(Long noticeId);

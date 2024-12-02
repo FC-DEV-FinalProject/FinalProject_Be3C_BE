@@ -6,11 +6,11 @@ import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface InquiryService {
 
@@ -53,19 +53,49 @@ public interface InquiryService {
     boolean deleteAdminInquiry(Long inquiryId);
 
     // 관리자 목록 삭제
-    Integer deleteAdminInquiryList(List<Long> inquiryIdList);
+    Map<Long, String> deleteAdminInquiryList(List<Long> inquiryIdList);
 
-    // 이전 문의 제목 조회
-    String findPreviousInquiryTitle(Long inquiryId);
+    // 트레이더별 문의id로 조회
+    Inquiry findInquiryByTraderIdAndInquiryId(Long inquiryId, Long traderId);
 
-    // 이전 문의 작성일 조회
-    LocalDateTime findPreviousInquiryWriteDate(Long inquiryId);
+    // 질문자별 문의id로 조회
+    Inquiry findInquiryByInquirerIdAndInquiryId(Long inquiryId, Long inquirerId);
 
-    // 다음 문의 제목 조회
-    String findNextInquiryTitle(Long inquiryId);
+    // 관리자 이전 문의 제목 조회
+    String adminFindPreviousInquiryTitle(Long inquiryId);
 
-    // 다음 문의 제목 조회
-    LocalDateTime findNextInquiryWriteDate(Long inquiryId);
+    // 관리자 이전 문의 작성일 조회
+    LocalDateTime adminFindPreviousInquiryWriteDate(Long inquiryId);
+
+    // 관리자 다음 문의 제목 조회
+    String adminFindNextInquiryTitle(Long inquiryId);
+
+    // 관리자 다음 문의 제목 조회
+    LocalDateTime adminFindNextInquiryWriteDate(Long inquiryId);
+
+    // 트레이더 이전 문의 제목 조회
+    String traderFindPreviousInquiryTitle(Long inquiryId, Long traderId);
+
+    // 트레이더 이전 문의 작성일 조회
+    LocalDateTime traderFindPreviousInquiryWriteDate(Long inquiryId, Long traderId);
+
+    // 트레이더 다음 문의 제목 조회
+    String traderFindNextInquiryTitle(Long inquiryId, Long traderId);
+
+    // 트레이더 다음 문의 제목 조회
+    LocalDateTime traderFindNextInquiryWriteDate(Long inquiryId, Long traderId);
+
+    // 질문자 이전 문의 제목 조회
+    String inquirerFindPreviousInquiryTitle(Long inquiryId, Long inquirerId);
+
+    // 질문자 이전 문의 작성일 조회
+    LocalDateTime inquirerFindPreviousInquiryWriteDate(Long inquiryId, Long inquirerId);
+
+    // 질문자 다음 문의 제목 조회
+    String inquirerFindNextInquiryTitle(Long inquiryId, Long inquirerId);
+
+    // 질문자 다음 문의 제목 조회
+    LocalDateTime inquirerFindNextInquiryWriteDate(Long inquiryId, Long inquirerId);
 
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
