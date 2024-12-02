@@ -131,8 +131,29 @@ public interface InterestStrategyControllerDocs {
         3. SecurityContext에 userId가 존재하지 않을 떄 : FORBIDDEN
      */
     @Operation(
+            summary = "관심 전략 단일 삭제",
+            description = "사용자가 관심 전략을 삭제하는 API"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "관심 전략 삭제 성공",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
+    public ResponseEntity<APIResponse<String>> unFollow(
+            @PathVariable Long id
+    );
+
+    @Operation(
             summary = "관심 전략 선택 삭제",
-            description = "사용자가 선택한 관심 전략을 삭제하는 API (단일 또는 다중 삭제 포함)"
+            description = "사용자가 선택한 관심 전략을 삭제하는 API (선택 삭제)"
     )
     @ApiResponses({
             @ApiResponse(
@@ -152,7 +173,7 @@ public interface InterestStrategyControllerDocs {
             )
     })
     // @PreAuthorize("hasRole('ROLE_USER') and !hasRole('ROLE_TRADER')")
-    public ResponseEntity<APIResponse<Map<Long, String>>> unfollow(
+    public ResponseEntity<APIResponse<Map<Long, String>>> unFollowList(
             @Valid @RequestBody FollowDeleteRequestDto followPostRequestDto
     );
 }

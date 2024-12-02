@@ -29,7 +29,7 @@ public class TraderStrategyAllowController implements TraderStrategyAllowControl
     @Override
     @PostMapping("/strategy/approve-open/{id}")
     public ResponseEntity<APIResponse<String>> postApproveOpenStrategy(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     ) {
         try {
             strategyAllowApprovalService.approveOpen(id);
@@ -51,7 +51,7 @@ public class TraderStrategyAllowController implements TraderStrategyAllowControl
     @Override
     @PatchMapping("/strategy/approve-cancel/{id}")
     public ResponseEntity<APIResponse<String>> postApproveCancelStrategy(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     ) {
         try {
             strategyAllowApprovalService.approveCancel(id);

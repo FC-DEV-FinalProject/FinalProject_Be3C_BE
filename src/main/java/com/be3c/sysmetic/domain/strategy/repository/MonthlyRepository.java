@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,6 +25,7 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
         OR (m.yearNumber = :#{#startYearMonth?.year} AND m.monthNumber >= :#{#startYearMonth?.monthValue})))
         AND (:endYearMonth IS NULL OR (m.yearNumber < :#{#endYearMonth?.year} 
         OR (m.yearNumber = :#{#endYearMonth?.year} AND m.monthNumber <= :#{#endYearMonth?.monthValue})))
+        ORDER BY m.yearNumber DESC, m.monthNumber DESC
     """)
     Page<Monthly> findAllByStrategyIdAndDateBetween(
             @Param("strategyId") Long strategyId,
@@ -42,4 +44,8 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.MonthlyRecord(m.yearNumber, m.monthNumber, m.accumulatedProfitLossRate) From Monthly m "
             + "WHERE m.strategy.id = :strategyId ORDER BY m.yearNumber ASC, m.monthNumber ASC")
     List<MonthlyRecord> findAllMonthlyRecord(@Param("strategyId") Long strategyId);
+
+    @Modifying
+    @Query("DELETE FROM Monthly m WHERE m.strategy.id = :strategyId")
+    void deleteByStrategyId(Long strategyId);
 }

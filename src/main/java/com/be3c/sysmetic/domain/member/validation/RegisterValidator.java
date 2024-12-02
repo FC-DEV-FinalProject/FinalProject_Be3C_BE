@@ -1,6 +1,11 @@
 package com.be3c.sysmetic.domain.member.validation;
 
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -12,6 +17,8 @@ import java.time.Period;
 import java.util.regex.Pattern;
 
 @Component
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RegisterValidator implements Validator {
 
     private static final Pattern IMAGE_PATTERN = Pattern.compile("^.+\\.(jpg|jpeg|png|gif)$", Pattern.CASE_INSENSITIVE);
@@ -20,6 +27,8 @@ public class RegisterValidator implements Validator {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[가-힣]{1,10}$");
     private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[가-힣0-9]{3,10}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^010\\d{8}$");
+
+    private final MessageSource messageSource;
 
     // 검증하려는 클래스 체크
     @Override
@@ -51,84 +60,85 @@ public class RegisterValidator implements Validator {
             12. 마케팅 수신 동의일
          */
 
-        // 1. 프로필 이미지 형식 확인
-        if (dto.getProfileImage() != null && !isValidImage(dto.getProfileImage())) {
-            errors.rejectValue("profileImage", "Invalid.profileImage", "프로필 이미지는 jpg, jpeg, png, gif 형식의 파일만 허용됩니다.");
-        }
+//        // 1. 프로필 이미지 형식 확인
+//        if (dto.getProfileImage() != null && !isValidImage(dto.getProfileImage())) {
+//            errors.rejectValue("profileImage", "Invalid.profileImage", getMessage("Invalid.profileImage"));
+//        }
 
         // 2. 회원 등급 코드 NotNull/NotBlank 확인
         if (isNullOrBlank(dto.getRoleCode().getCode())) {
-            errors.rejectValue("roleCode", "NotEmpty.roleCode", "회원 유형 선택은 필수입니다. 가입하려는 회원 유형을 선택해 주세요.");
+            errors.rejectValue("roleCode", "NotEmpty.roleCode", getMessage("NotEmpty.roleCode"));
         }
 
         // 3. 이메일 NotNull/NotBlank 및 형식 확인
         if (isNullOrBlank(dto.getEmail())) {
             System.out.println("[Validator 메시지]");
-            errors.rejectValue("email", "NotEmpty.email", "이메일 입력은 필수입니다.");
+            errors.rejectValue("email", "NotEmpty.email", getMessage("NotEmpty.email"));
         } else if (!EMAIL_PATTERN.matcher(dto.getEmail()).matches()) {
             System.out.println("[Validator 메시지]");
-            errors.rejectValue("email", "Invalid.email", "유효한 이메일 형식이 아닙니다.");
+            errors.rejectValue("email", "Invalid.email", getMessage("Invalid.email"));
         }
 
         // 4. 비밀번호 NotNull/NotBlank 및 형식 확인
         if (isNullOrBlank(dto.getPassword())) {
-            errors.rejectValue("password", "NotEmpty.password", "비밀번호 입력은 필수입니다.");
+            errors.rejectValue("password", "NotEmpty.password", getMessage("NotEmpty.password"));
         } else if (!PASSWORD_PATTERN.matcher(dto.getPassword()).matches()) {
-            errors.rejectValue("password", "Invalid.password", "비밀번호는 영문자(대, 소문자), 숫자, 특수문자를 포함하여 6~20자로 입력해야 합니다.");
+            errors.rejectValue("password", "Invalid.password", getMessage("Invalid.password"));
         }
 
         // 5. 비밀번호 재입력 확인
         if (!dto.getPassword().equals(dto.getRewritePassword())) {
-            errors.rejectValue("rewritePassword", "Mismatch.passwordConfirm", "비밀번호가 일치하지 않습니다.");
+            errors.rejectValue("rewritePassword", "Mismatch.passwordConfirm", getMessage("Mismatch.passwordConfirm"));
         }
 
         // 6. 이름 NotNull/NotBlank 및 형식 확인
         if (isNullOrBlank(dto.getName())) {
-            errors.rejectValue("name", "NotEmpty.name", "이름 입력은 필수입니다.");
+            errors.rejectValue("name", "NotEmpty.name", getMessage("NotEmpty.name"));
         } else if (!NAME_PATTERN.matcher(dto.getName()).matches()) {
-            errors.rejectValue("name", "Invalid.name", "이름은 한글 1자 이상 10자 이내로 입력해야 합니다.");
+            errors.rejectValue("name", "Invalid.name", getMessage("Invalid.name"));
         }
 
         // 7. 닉네임 NotNull/NotBlank 및 형식 확인
         if (isNullOrBlank(dto.getNickname())) {
-            errors.rejectValue("nickname", "NotEmpty.nickname", "닉네임 입력은 필수입니다.");
+            errors.rejectValue("nickname", "NotEmpty.nickname", getMessage("NotEmpty.nickname"));
         } else if (!NICKNAME_PATTERN.matcher(dto.getNickname()).matches()) {
-            errors.rejectValue("nickname", "Invalid.nickname", "닉네임은 한글 또는 숫자로 3자 이상 10자 이내로 입력해야 합니다.");
+            errors.rejectValue("nickname", "Invalid.nickname", getMessage("Invalid.nickname"));
         }
 
         // 0. 생년월일 형식 확인
         if (dto.getBirth() == null) {
-            errors.rejectValue("birth", "NotNull.birth", "생년월일은 필수 입력 값입니다.");
-        } else if (!isValidAge(LocalDateTime.parse(dto.getBirth()))) {
-            errors.rejectValue("birth", "Invalid.birth", "14세 미만은 가입할 수 없습니다.");
+            errors.rejectValue("birth", "NotNull.birth", getMessage("NotNull.birth"));
+        } else if (!isValidAge(LocalDate.parse(dto.getBirth()))) {
+            errors.rejectValue("birth", "Invalid.birth", getMessage("Invalid.birth"));
         }
 
         // 8. 휴대폰 번호 NotNull/NotBlank 및 형식 확인
         if (isNullOrBlank(dto.getPhoneNumber())) {
-            errors.rejectValue("phoneNumber", "NotEmpty.phoneNumber", "휴대폰번호 입력은 필수입니다.");
+            errors.rejectValue("phoneNumber", "NotEmpty.phoneNumber", getMessage("NotEmpty.phoneNumber"));
         } else if (!PHONE_PATTERN.matcher(dto.getPhoneNumber()).matches()) {
-            errors.rejectValue("phoneNumber", "Invalid.phoneNumber", "휴대폰번호는 - 없이 010으로 시작하는 11자리 숫자로 입력해야 합니다.");
+            errors.rejectValue("phoneNumber", "Invalid.phoneNumber", getMessage("Invalid.phoneNumber"));
         }
 
         // 9. 정보성 수신 동의 여부 확인
         if (isNullOrBlank(String.valueOf(dto.getReceiveInfoConsent())) || (!dto.getReceiveInfoConsent())) {
-            errors.rejectValue("receiveInfoConsent", "NotNull.receiveInfoConsent", "정보성 수신 동의 여부를 선택해 주세요.");
+            errors.rejectValue("receiveInfoConsent", "NotNull.receiveInfoConsent", getMessage("NotNull.receiveInfoConsent"));
         }
 
         // 10. 정보성 수신 동의일 형식 확인
         if (dto.getInfoConsentDate() == null) {
-            errors.rejectValue("infoConsentDate", "NotNull.infoConsentDate", "정보성 수신 동의일은 필수 입력 값입니다.");
+            errors.rejectValue("infoConsentDate", "NotNull.infoConsentDate", getMessage("NotNull.infoConsentDate"));
         }
 
         // 11. 마케팅 수신 동의 여부 확인
         if (isNullOrBlank(String.valueOf(dto.getReceiveMarketingConsent())) || (!dto.getReceiveMarketingConsent())) {
-            errors.rejectValue("receiveMarketingConsent", "NotNull.receiveMarketingConsent", "마케팅 수신 동의 여부를 선택해 주세요.");
+            errors.rejectValue("receiveMarketingConsent", "NotNull.receiveMarketingConsent", getMessage("NotNull.receiveMarketingConsent"));
         }
 
         // 12. 마케팅 수신 동의일 형식 확인
         if (dto.getMarketingConsentDate() == null) {
-            errors.rejectValue("marketingConsentDate", "NotNull.marketingConsentDate", "마케팅 수신 동의일은 필수 입력 값입니다.");
+            errors.rejectValue("marketingConsentDate", "NotNull.marketingConsentDate", getMessage("NotNull.marketingConsentDate"));
         }
+
     }
 
     private boolean isValidImage(MultipartFile file) {
@@ -139,8 +149,8 @@ public class RegisterValidator implements Validator {
         return value == null || value.trim().isEmpty();
     }
 
-    private boolean isValidAge(LocalDateTime birthDateTime) {
-        LocalDate birthDate = birthDateTime.toLocalDate();
+    private boolean isValidAge(LocalDate birthDate) {
+//        LocalDate birthDate = birthDateTime.toLocalDate();
         LocalDate today = LocalDate.now();
 
         // 나이 계산
@@ -148,6 +158,10 @@ public class RegisterValidator implements Validator {
 
         // 14세 이상인지 확인
         return age >= 14;
+    }
+
+    private String getMessage(String code, Object... args) {
+        return messageSource.getMessage(code, args, null);
     }
 
 }

@@ -24,10 +24,7 @@ public class LogoutController {
 
     private final LogoutService logoutService;
 
-    /*
-        로그아웃 api
-        1. 로그아웃 성공했을 때 : OK
-     */
+    // 로그아웃 api
     @Operation(
             summary = "로그아웃",
             description = "사용자를 로그아웃 처리하는 API"

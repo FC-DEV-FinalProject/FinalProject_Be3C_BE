@@ -16,13 +16,15 @@ import java.util.List;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
+    List<Strategy> findByTraderId(Long traderId);
 
     // 닉네임으로 트레이더 조회, 일치한 닉네임, 전략 수 내림차순 정렬
     @Query("SELECT DISTINCT s FROM Strategy s JOIN s.trader m " +
             "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")
     Page<Strategy> findByTraderNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
 
-    Optional<Strategy> findByIdAndStatusCode(Long id, String statusCode);
+    @Query("SELECT s FROM Strategy s WHERE s.id = :id AND s.statusCode = 'PUBLIC'")
+    Optional<Strategy> findByIdAndOpenStatusCode(Long id);
 
     // 전략명 중복 확인
     boolean existsByName(String name);
@@ -48,6 +50,13 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             @Param("userId") Long userId,
             @Param("statusCode") String statusCode
     );
+
+    @Modifying
+    @Query("DELETE FROM Strategy s WHERE s.trader.id = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT count (*) FROM Strategy s WHERE s.trader.id = :memberId")
+    long countByMemberId(@Param("memberId") Long memberId);
 
 
     @Query("SELECT COUNT(*) FROM Strategy s WHERE s.trader.id = :traderId AND s.statusCode = 'PUBLIC'")

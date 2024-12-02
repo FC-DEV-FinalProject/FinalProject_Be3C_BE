@@ -53,46 +53,31 @@ public class LoginController {
     private final LoginService loginService;
     private final RedisUtils redisUtils;
 
-
-    /*
-        로그인 api
-        1. 로그인 성공했을 때 : OK
-        2. 이메일 또는 비밀번호 불일치 : BAD_REQUEST
-     */
+    // 로그인 api
     @Operation(
             summary = "로그인",
             description = "사용자가 이메일과 비밀번호를 통해 로그인하는 API"
     )
     @PostMapping("/auth/login")
-    public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto, HttpServletResponse response) {
+    public ResponseEntity<APIResponse<LoginRequestDto>> login(@RequestBody @Valid LoginRequestDto requestDto,
+                                                              HttpServletResponse response) {
 
-        String email = requestDto.getEmail();
-        String password = requestDto.getPassword();
-        Boolean rememberMe = requestDto.getRememberMe();
+        // 이메일 확인
+        String memberEmail = loginService.findEmail(requestDto.getEmail());
 
-        try {
-            // 1. 이메일 확인
-            String memberEmail = loginService.findEmail(email);
+        // 비밀번호 비교
+        loginService.validatePassword(requestDto.getEmail(), requestDto.getPassword());
 
-            // 2. 비밀번호 비교
-            if(!loginService.validatePassword(memberEmail, password)) {
-                // 로그인 실패(비밀번호 불일치)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "이메일 또는 비밀번호가 일치하지 않습니다"));
-            }
+        // rememberMe에 따른 Jwt 토큰 생성
+        Map<String,String> tokenMap = loginService.generateTokenBasedOnRememberMe(memberEmail,requestDto.getRememberMe());
 
-            // 3. rememberMe에 따른 Jwt 토큰 생성
-            Map<String,String> tokenMap = loginService.generateTokenBasedOnRememberMe(memberEmail,rememberMe);
+        // 응답 헤더에 토큰 추가
+        response.setHeader("Authorization", "Bearer " + tokenMap.get("accessToken"));
 
-            // 4. 응답 헤더에 토큰 추가
-            response.setHeader("Authorization", "Bearer " + tokenMap.get("accessToken"));
+        // 생성된 토큰 Redis에 저장
+        redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
 
-            // 5. 생성된 토큰 Redis에 저장
-            redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
-
-            return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST,"이메일 또는 비밀번호가 일치하지 않습니다"));
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
 
 }

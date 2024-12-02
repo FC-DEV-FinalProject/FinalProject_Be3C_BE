@@ -1,14 +1,12 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
-import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
-import com.be3c.sysmetic.global.util.file.dto.FileRequest;
-import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,17 +54,14 @@ public class LoginServiceImpl implements LoginService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final JwtTokenProvider jwtTokenProvider;
-    private final FileService fileService;
 
     // 1. DB에서 Email 조회
     @Override
     public String findEmail(String email) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.info("존재하지 않는 이메일");
-                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
-                });
-        return member.getEmail();
+        if(!memberRepository.existsByEmail(email)) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_CREDENTIALS.getMessage());
+        }
+        return email;
     }
 
     // 2. 비밀번호 비교
@@ -74,12 +69,13 @@ public class LoginServiceImpl implements LoginService {
     public boolean validatePassword(String email, String password) {
         // DB에 저장된 pw 조회
         Member member = memberRepository.findByEmail(email)
-                // 비교
-                .orElseThrow(() -> {
-                    log.info("비밀번호 불일치");
-                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
-                });
-        return bCryptPasswordEncoder.matches(password, member.getPassword());
+                .orElseThrow(() ->
+                    new MemberBadRequestException(MemberExceptionMessage.MEMBER_NOT_FOUND.getMessage())
+                );
+        if(!bCryptPasswordEncoder.matches(password, member.getPassword())) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_CREDENTIALS.getMessage());
+        }
+        return true;
     }
 
     // 3. rememberMe 체크여부에 따른 jwt 토큰 생성 메서드
@@ -87,17 +83,9 @@ public class LoginServiceImpl implements LoginService {
     public Map<String, String> generateTokenBasedOnRememberMe(String email, Boolean rememberMe) {
         // 회원 정보 가져오기
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.info("입력한 이메일로 저장된 회원정보가 존재하지 않습니다.");
-                    return new UsernameNotFoundException("이메일 또는 비밀번호가 일치하지 않습니다");
-                });
-
-        String memberProfileImage = null;
-        try {
-            memberProfileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, member.getId()));
-        } catch (Exception e) {
-            log.info("파일 이미지 가져오기 에러 발생");
-        }
+                .orElseThrow(() ->
+                    new MemberBadRequestException(MemberExceptionMessage.INVALID_CREDENTIALS.getMessage())
+                );
 
         // 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(member.getId(), member.getEmail(), member.getRoleCode());

@@ -10,6 +10,7 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
@@ -102,10 +103,10 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
         // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
         return StrategyStatisticsGetResponseDto.builder()
@@ -158,16 +159,16 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        if(userRole.equals("USER")) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
@@ -212,14 +213,14 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
 
         if(!uploadedTraderId.equals(userId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
     }
 
     // find strategy by id
     private Strategy findStrategyById(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     // 잔고 -> 가장 최근 일간분석 데이터의 잔고

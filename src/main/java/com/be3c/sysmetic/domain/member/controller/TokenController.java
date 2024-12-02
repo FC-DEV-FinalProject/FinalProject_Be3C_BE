@@ -8,6 +8,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,15 +62,16 @@ public class TokenController {
         String profileImage = null;
         try {
             profileImage = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
-        } catch (IllegalArgumentException e) {
+        } catch (FileNotFoundException e) {
             log.info("프로필 이미지 추출 실패");
         }
 
-        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, nickname, phoneNumber, profileImage)
+        // 응답 객체에 회원 정보 넣기 (memberId, roleCode, email, name, nickname, phoneNumber, profileImage)
         TokenApiResponseDto dto = TokenApiResponseDto.builder()
                 .memberId(memberId)
                 .roleCode(role)
                 .email(member.getEmail())
+                .name(member.getName())
                 .nickname(member.getNickname())
                 .phoneNumber(member.getPhoneNumber())
                 .profileImage(profileImage)

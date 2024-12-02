@@ -6,12 +6,10 @@ import com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Reply;
-import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.ReplyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import com.be3c.sysmetic.global.common.response.PageResponseDto;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
 
@@ -112,9 +108,8 @@ public class ReplyServiceImpl implements ReplyService{
                                 USING_STATE.getCode()
                         ).orElseThrow(() -> new EntityNotFoundException("해당 멤버를 찾을 수 없습니다.")))
                 .strategy(strategyRepository
-                        .findByIdAndStatusCode(
-                                replyPostRequestDto.getStrategyId(),
-                                Code.OPEN_STRATEGY.getCode()
+                        .findByIdAndOpenStatusCode(
+                                replyPostRequestDto.getStrategyId()
                         ).orElseThrow(() -> new EntityNotFoundException("해당 전략을 찾을 수 없습니다.")))
                 .content(replyPostRequestDto.getContent())
                 .statusCode(USING_STATE.getCode())

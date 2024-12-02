@@ -11,6 +11,7 @@ import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -75,10 +76,10 @@ public class MonthlyServiceImpl implements MonthlyService {
 
         // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
         Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
@@ -115,16 +116,16 @@ public class MonthlyServiceImpl implements MonthlyService {
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+        if(userRole.equals("USER")) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
         Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
@@ -169,7 +170,7 @@ public class MonthlyServiceImpl implements MonthlyService {
         Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
 
         if(!uploadedTraderId.equals(userId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
     }
 
@@ -187,14 +188,14 @@ public class MonthlyServiceImpl implements MonthlyService {
 
     private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     private YearMonth parseYearMonth(String yearMonth) {
         try {
             return yearMonth != null ? YearMonth.parse(yearMonth) : null;
         } catch (DateTimeParseException e) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage(), ErrorCode.BAD_REQUEST);
         }
     }
 
