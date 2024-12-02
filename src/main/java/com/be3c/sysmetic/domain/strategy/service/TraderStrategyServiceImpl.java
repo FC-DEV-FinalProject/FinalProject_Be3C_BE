@@ -6,10 +6,7 @@ import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
-import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -40,6 +37,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
     private final FileServiceImpl fileService;
     private final SecurityUtils securityUtils;
+    private final StrategyStatisticsRepository strategyStatisticsRepository;
 
     // 전략 등록
     @Override
@@ -222,7 +220,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
     // 4. 따라서 전략 등록 시 기본적인 전략 통계 row도 같이 생성해주는 게 현재로써는 수정하기 가장 쉬운 방법으로 판단.
     private void insertBasicStrategyStatistics(Strategy strategy) {
-        StrategyStatistics.builder()
+        strategyStatisticsRepository.save(StrategyStatistics.builder()
                 .strategy(strategy)
                 .currentBalance(0.0)
                 .principal(0.0)
@@ -253,6 +251,6 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
                 .roa(0.0)
                 .firstRegistrationDate(LocalDate.now())
                 .lastRegistrationDate(LocalDate.now())
-                .build();
+                .build());
     }
 }
