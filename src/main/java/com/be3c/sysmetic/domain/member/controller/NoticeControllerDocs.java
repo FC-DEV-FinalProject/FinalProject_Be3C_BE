@@ -195,8 +195,7 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
-//                            "\n+ +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음"
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)\n+ +) 공지사항 수정 화면에 들어온 시간이 해당 공지사항 최종수정일시보다 작음"
             )
     })
     ResponseEntity<APIResponse<Long>> modifyAdminNotice(
