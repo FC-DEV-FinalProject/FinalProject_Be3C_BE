@@ -29,7 +29,7 @@ public class MemberManagementServiceImpl implements MemberManagementService {
     // 1. 회원 목록 조회
     @Override
     public PageResponse<MemberGetResponseDto> findMemberPage(MemberSearchRole role, Integer page, MemberSearchType searchType, String searchKeyword) {
-        Pageable pageable = PageRequest.of(page-1, 10);
+        Pageable pageable = PageRequest.of(page, 10);
         Page<MemberGetResponseDto> members = memberRepository.findMembers(role.getCode(), searchType.getCode(), searchKeyword, pageable);
 
         return PageResponse.<MemberGetResponseDto>builder()

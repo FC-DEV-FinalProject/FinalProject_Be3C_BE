@@ -35,7 +35,7 @@ public class MemberManagementController {
     )
     @GetMapping("/admin/members")
     public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam(defaultValue = "ALL") MemberSearchRole role,
-                                                                                         @RequestParam(defaultValue = "1") Integer page,
+                                                                                         @RequestParam(defaultValue = "0") Integer page,
                                                                                          @RequestParam(defaultValue = "ALL") MemberSearchType searchType,
                                                                                          @RequestParam(required = false) String searchKeyword) {
         /*
