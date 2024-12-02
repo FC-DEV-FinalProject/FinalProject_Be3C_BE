@@ -242,6 +242,7 @@ public class FileServiceImpl implements FileService {
 
         try {
             fileRepository.delete(files.get(0));
+            log.info("file delete : {}", files.get(0).getId());
         } catch (DataAccessException e) {
             log.error("파일 삭제 실패 - DB 오류 발생. 파일 참조 정보: {}", fileRequest, e);
             throw new FileDeleteException();

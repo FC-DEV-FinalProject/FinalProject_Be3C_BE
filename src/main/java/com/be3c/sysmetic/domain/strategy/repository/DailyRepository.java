@@ -23,12 +23,13 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     // 모든 일간분석데이터 목록 조회 - 오래된순 정렬
 //    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
 
-    // 일간분석데이터 목록 조회 - 기간 검색
+    // 일간분석데이터 목록 조회 - 기간 검색, 최신순 정렬
     @Query("""
         SELECT d FROM Daily d
         WHERE d.strategy.id = :strategyId
         AND (:startDate IS NULL OR d.date >= :startDate)
         AND (:endDate IS NULL OR d.date <= :endDate)
+        ORDER BY d.date DESC
     """)
     Page<Daily> findAllByStrategyIdAndDateBetween(
             @Param("strategyId") Long strategyId,

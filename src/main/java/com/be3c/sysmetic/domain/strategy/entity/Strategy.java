@@ -61,7 +61,7 @@ public class Strategy extends BaseEntity {
     @Column(name = "sm_score", nullable = false)
     private Double smScore;
 
-    @Column(name = "winning_rate")
+    @Column(name = "winning_rate", nullable = false)
     private Double winningRate;
 
     // 누적수익률 추가

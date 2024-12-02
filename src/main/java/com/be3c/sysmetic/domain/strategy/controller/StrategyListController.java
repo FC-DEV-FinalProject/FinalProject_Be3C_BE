@@ -60,19 +60,18 @@ public class StrategyListController implements StrategyListControllerDocs {
         return APIResponse.success(traderList);
     }
 
-
     /*
         getStrategiesByTraderId : 트레이더별 전략 목록
         요청 경로 : localhost:8080/v1/strategy/list/pick?traderId=1&pageNum=0
     */
     @Override
     @GetMapping("/pick")
-    public APIResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTraderId(
+    public APIResponse<StrategyListByTraderDto> getStrategiesByTraderId(
             @RequestParam("traderId") Long traderId,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
-        PageResponse<StrategyListByTraderDto> strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
+        StrategyListByTraderDto strategyListByTrader = strategyListService.findStrategiesByTrader(traderId, pageNum);
 
-        if (strategyListByTrader.getContent().isEmpty())
+        if (strategyListByTrader.getStrategyListDto().getContent().isEmpty())
             return APIResponse.fail(ErrorCode.NOT_FOUND, "해당 트레이더가 등록한 전략이 없습니다.");
 
         return APIResponse.success(strategyListByTrader);
@@ -84,15 +83,12 @@ public class StrategyListController implements StrategyListControllerDocs {
     */
     @Override
     @GetMapping("/name")
-    public APIResponse<PageResponse<StrategyListByNameDto>> getStrategiesByName(
+    public APIResponse<PageResponse<StrategyListDto>> getStrategiesByName(
             @RequestParam("keyword") String keyword,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum) {
 
-        PageResponse<StrategyListByNameDto> strategyListByName = strategyListService.findStrategiesByName(keyword, pageNum);
+        PageResponse<StrategyListDto> strategyListByName = strategyListService.findStrategiesByName(keyword, pageNum);
 
-
-
-
-        return APIResponse.success();
+        return APIResponse.success(strategyListByName);
     }
 }

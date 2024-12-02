@@ -26,7 +26,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         BooleanBuilder predicate = new BooleanBuilder();
 
         // 검색 (제목, 내용, 제목+내용, 작성자)
-        if (searchText != null) {
+        if (searchText != null && !searchText.isEmpty()) {
             if (searchType.equals("title")) {
                 if (StringUtils.hasText(searchText)) {
                     predicate.and(notice.noticeTitle.contains(searchText));
@@ -66,8 +66,10 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
 
         BooleanBuilder predicate = new BooleanBuilder();
 
-        if (StringUtils.hasText(searchText)) {
-            predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+        if (searchText != null && !searchText.isEmpty()) {
+            if (StringUtils.hasText(searchText)) {
+                predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+            }
         }
 
         QueryResults<Notice> results = jpaQueryFactory

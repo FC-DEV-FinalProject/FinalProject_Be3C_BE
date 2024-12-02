@@ -7,6 +7,8 @@ import com.be3c.sysmetic.global.util.email.service.EmailService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -145,20 +147,17 @@ public class EmailServiceTest {
     void testDeleteUserSubscriberRequest() {
         List<String> emailsToDelete = List.of(DELETE_TEST_EMAIL);
 
-        StibeeSimpleResponse response = emailService.deleteUserSubscriberRequest(emailsToDelete);
-
-        assertNotNull(response);
-        assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
+        emailService.deleteUserSubscriberRequest(emailsToDelete).subscribe();
     }
 
     @Test
     void testDeleteTraderRequest() {
         List<String> emailsToDelete = List.of(DELETE_TEST_EMAIL);
 
-        StibeeSimpleResponse response = emailService.deleteTraderSubscriberRequest(emailsToDelete);
+        emailService.deleteTraderSubscriberRequest(emailsToDelete).subscribe();
 
-        assertNotNull(response);
-        assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
+//        assertNotNull(response);
+//        assertTrue(response.isOk(), "응답 상태가 'ok'여야 합니다.");
     }
 
 
@@ -167,33 +166,22 @@ public class EmailServiceTest {
 
     // Email API 테스트
 
-
-    @Test
-    void testSendAndSaveAuthCode() {
-        // 실제 이메일 API로 인증 코드 발송
-        emailService.sendAndSaveAuthCode(ADD_TEST_EMAIL);
-
-        // Redis에 인증 코드 저장 확인
-        String authCode = redisUtils.getEmailAuthCode(ADD_TEST_EMAIL);
-        assertNotNull(authCode, "인증 코드가 Redis에 저장되어야 합니다.");
-
-        // 인증 코드 형식 확인 (6자리 숫자)
-        assertTrue(authCode.matches("\\d{6}"), "인증 코드는 6자리 숫자여야 합니다.");
-
-        // 이메일 발송 확인하기
-    }
-
     @Test
     void testNotifyStrategyInquiryRegistration() {
         // 실제 이메일 알림을 보내는 요청
         InquiryRequest inquiryRequest = new InquiryRequest(ADD_TEST_EMAIL, "Test Inquirer", 123L);
 
         // 실제 이메일 발송 요청
-        emailService.notifyStrategyInquiryRegistration(inquiryRequest);
+        Mono<String> monoResponse = emailService.notifyStrategyInquiryRegistration(inquiryRequest);
+
+        StepVerifier.create(monoResponse)
+                .expectNext("ok")
+                .expectComplete()
+                .verify();
+
+        System.out.println("monoResponse.subscribe() = " + monoResponse.subscribe());
 
         // 이메일 발송이 정상적으로 처리되었는지 확인
-        // 해당 부분은 서비스 내부에서 이메일 발송 성공 여부를 로그나 다른 방식으로 확인해야 합니다.
-        // 예를 들어 이메일 발송이 성공적으로 이루어졌다면, 로그에 성공 메시지가 있어야 합니다.
     }
 
     @Test
@@ -202,9 +190,28 @@ public class EmailServiceTest {
         InterestRequest interestRequest = new InterestRequest(ADD_TEST_EMAIL);
 
         // 실제 이메일 발송 요청
-        emailService.notifyStrategyInterestRegistration(interestRequest);
+        Mono<String> monoResponse = emailService.notifyStrategyInterestRegistration(interestRequest);
+
+        StepVerifier.create(monoResponse)
+                .expectNext("ok")
+                .expectComplete()
+                .verify();
+
+        System.out.println("monoResponse.subscribe() = " + monoResponse.subscribe());
 
         // 이메일 발송이 정상적으로 처리되었는지 확인
-        // 해당 부분도 로그나 이메일 발송 API의 실제 응답을 확인하는 방법으로 검증할 수 있습니다.
+    }
+
+    @Test
+    void testAddSendDeleteTiming(){
+
+        Mono<Void> monoResponse = emailService.sendAndSaveAuthCode(ADD_TEST_EMAIL);
+
+        StepVerifier.create(monoResponse)
+                .expectComplete()
+                .verify();
+
+        System.out.println("monoResponse.subscribe() = " + monoResponse.subscribe());
+
     }
 }

@@ -24,12 +24,6 @@ public class InquiryAnswerShowResponseDto {
     @Schema(description = "지정했던 답변상태", example = "searchType")
     private String closed;
 
-    @Schema(description = "검색했던 검색 조건", example = "searchType")
-    private String searchType;
-
-    @Schema(description = "검색했던 검색 단어", example = "searchText")
-    private String searchText;
-
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
 

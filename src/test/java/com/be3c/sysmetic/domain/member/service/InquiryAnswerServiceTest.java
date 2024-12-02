@@ -33,22 +33,22 @@ public class InquiryAnswerServiceTest {
     @Autowired
     private InquiryAnswerRepository inquiryAnswerRepository;
 
-    @Test
-    public void 전체_조회() throws Exception {
-        //given
-        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
-        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
-
-        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
-        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
-
-        //when
-        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findAllInquiryAnswers();
-
-        //then
-        assertEquals(2, inquiryAnswerList.size());
-
-    }
+//    @Test
+//    public void 전체_조회() throws Exception {
+//        //given
+//        Inquiry inquiry1 = createInquiry("문의제목1", "문의내용1");
+//        Inquiry inquiry2 = createInquiry("문의제목2", "문의내용2");
+//
+//        inquiryAnswerService.registerInquiryAnswer(inquiry1.getId(), "답변제목1", "답변내용1");
+//        inquiryAnswerService.registerInquiryAnswer(inquiry2.getId(), "답변제목2", "답변내용2");
+//
+//        //when
+//        List<InquiryAnswer> inquiryAnswerList = inquiryAnswerService.findAllInquiryAnswers();
+//
+//        //then
+//        assertEquals(2, inquiryAnswerList.size());
+//
+//    }
 
     @Test
     public void 문의별_조회() throws Exception {

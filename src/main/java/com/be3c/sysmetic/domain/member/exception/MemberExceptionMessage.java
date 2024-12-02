@@ -11,6 +11,10 @@ public enum MemberExceptionMessage {
     INVALID_CREDENTIALS("입력하신 이메일 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요."),
     MEMBER_NOT_FOUND("해당 이메일로 등록된 회원 정보를 찾을 수 없습니다."),
 
+    // 회원 관리 페이지 관련
+    NOT_FOUND_MEMBER("해당 회원 정보를 찾을 수 없습니다."),
+    FAIL_ROLE_CHANGE("회원의 등급변경에 실패했습니다."),
+
     // Redis 관련 오류
     REDIS_EMAIL_CODE_ERROR("Redis 이메일 인증코드 관련 오류 발생"),
 

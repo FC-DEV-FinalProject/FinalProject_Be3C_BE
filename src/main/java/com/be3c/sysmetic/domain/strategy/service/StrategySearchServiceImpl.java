@@ -41,9 +41,6 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
         Page<Strategy> sPage = strategyRepository.searchByConditions(pageable, strategySearchRequestDto);
 
-        // if (sPage.getContent().isEmpty())
-        //     throw new NoSuchElementException("상세 조건에 해당하는 검색 결과가 존재하지 않습니다.");
-
         List<StrategySearchResponseDto> strategyList = sPage.getContent()
                 .stream()
                 .map(s -> {

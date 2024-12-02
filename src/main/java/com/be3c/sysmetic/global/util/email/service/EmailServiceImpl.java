@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +46,7 @@ public class EmailServiceImpl implements EmailService {
         return null;
     }
 
+
     @Override
     public StibeeApiResponse updateUserSubscriberRequest(SubscriberRequest subscriberRequest) {
         try {
@@ -66,73 +69,86 @@ public class EmailServiceImpl implements EmailService {
         return null;
     }
 
+
     @Override
-    public StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails) {
-        try {
-            return emailApiClient.deleteUserSubscriberRequest(emails);
-        } catch (Exception e) {
-            handleException(e, "일반회원 구독 삭제 실패");
-        }
-        return null;
+    public Mono<StibeeSimpleResponse> deleteUserSubscriberRequest(List<String> emails) {
+        return emailApiClient.deleteUserSubscriberRequest(emails);
     }
 
     @Override
-    public StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails) {
-        try {
-            return emailApiClient.deleteTraderSubscriberRequest(emails);
-        } catch (Exception e) {
-            handleException(e, "트레이더 구독 삭제 실패");
-        }
-        return null;
+    public Mono<StibeeSimpleResponse> deleteTraderSubscriberRequest(List<String> emails) {
+        return emailApiClient.deleteTraderSubscriberRequest(emails);
     }
+
 
     // 자동 email API -------------------------------------------------------------------------
 
     @Override
-    public void sendAndSaveAuthCode(String toEmail) {
-        try {
-            emailApiClient.addTempSubscriberRequest(SubscriberRequest.builder()
-                    .subscribers(List.of(Subscriber.builder().email(toEmail).build()))
-                    .build());
+    public Mono<Void> sendAndSaveAuthCode(String toEmail) {
 
-            String authCode = generateVerificationCode();
-            String response = emailApiClient.sendAuthEmailRequest(new AuthCodeRequest(toEmail, authCode));
+        String authCode = generateAuthCode();
 
-            if (!"ok".equals(response)) {
-                log.error("이메일 인증코드 발송 실패: 응답 'ok'가 아님 응답: {}", response);
-                throw new EmailSendingException("이메일 인증코드 발송 실패: 응답 'ok'가 아님 응답: " + response);
-            }
 
-            redisUtils.saveEmailAuthCodeWithExpireTime(toEmail, authCode, TimeUnit.HOURS.toMillis(1));
-            emailApiClient.deleteTempSubscriberRequest(List.of(toEmail));
-        } catch (Exception e) {
-            handleException(e, "이메일 인증코드 발송 중 오류 발생");
-        }
+        return Mono.fromRunnable(() -> {
+
+                    emailApiClient.addTempSubscriberRequest(SubscriberRequest.builder()
+                            .subscribers(List.of(Subscriber.builder().email(toEmail).build()))
+                            .build());
+                })
+                .then(Mono.delay(Duration.ofSeconds(5))) // 5초 지연 : 스티비 작동 안 됨 문제로 필수
+                .then(Mono.fromRunnable(() -> {
+
+                    Mono<String> sendMonoResponse = emailApiClient.sendAuthEmailRequest(new AuthCodeRequest(toEmail, authCode));
+
+                    sendMonoResponse.subscribe(response -> {
+                        // 응답값 "ok"로 처리
+                        if (!"ok".equals(response)) {
+                            log.error("이메일 인증코드 발송 실패: 응답 'ok'가 아님 응답: {} 수신자: {}", response, toEmail);
+                        }
+                    });
+                }))
+                .then(Mono.delay(Duration.ofSeconds(5))) // 5초 지연
+                .then(Mono.fromRunnable(() -> {
+
+                    redisUtils.saveEmailAuthCodeWithExpireTime(toEmail, authCode, TimeUnit.HOURS.toMillis(1));
+                    emailApiClient.deleteTempSubscriberRequest(List.of(toEmail));
+                }));
     }
 
-    private String generateVerificationCode() {
-        int code = 100000 + ThreadLocalRandom.current().nextInt(900000); // 6자리 랜덤 숫자
-        return String.valueOf(code);
+    private String generateAuthCode() {
+
+        String authCodeCharset =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        + "0123456789";
+
+        // ThreadLocalRandom을 사용하여 랜덤 인덱스를 선택
+        StringBuilder authCode = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(authCodeCharset.length());
+            authCode.append(authCodeCharset.charAt(randomIndex));
+        }
+
+        return authCode.toString();
     }
 
     @Override
-    public void notifyStrategyInquiryRegistration(InquiryRequest inquiryRequestDto) {
-        try {
-            emailApiClient.sendInquiryRegistrationEmailRequest(inquiryRequestDto);
-        } catch (Exception e) {
-            handleException(e, "문의 등록 알람 이메일 발송 실패");
-        }
+    public Mono<String> notifyStrategyInquiryRegistration(InquiryRequest inquiryRequest) {
+
+            return emailApiClient.sendInquiryRegistrationEmailRequest(inquiryRequest);
     }
 
     @Override
-    public void notifyStrategyInterestRegistration(InterestRequest interestRequest) {
-        try {
-            emailApiClient.sendInterestRegistrationEmailRequest(interestRequest);
-        } catch (Exception e) {
-            handleException(e, "관심 등록 알람 이메일 발송 실패");
-        }
+    public Mono<String> notifyStrategyInterestRegistration(InterestRequest interestRequest) {
+
+            return emailApiClient.sendInterestRegistrationEmailRequest(interestRequest);
     }
 
+
+    /**
+     * Exception 처리 공통화 메서드
+     * @param e 예외 객체
+     * @param message 예외 메세지
+     */
     private void handleException(Exception e, String message) {
         if (e instanceof WebClientResponseException) {
             WebClientResponseException webClientException = (WebClientResponseException) e;
@@ -152,5 +168,6 @@ public class EmailServiceImpl implements EmailService {
         }
         throw new EmailSendingException(message, e);
     }
+
 
 }

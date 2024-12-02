@@ -84,23 +84,6 @@ public class TraderStrategyController {
                 .body(APIResponse.success());
     }
 
-    // 일간데이터 조회
-    @Operation(
-            summary = "일간분석 조회",
-            description = "트레이더가 본인 전략의 일간분석 데이터를 조회하는 API로, public, private, pending approval 상태인 전략에 대해 일간분석 데이터 조회 가능"
-    )
-    @GetMapping("/strategy/daily/{strategyId}")
-    // @PreAuthorize("hasRole('ROLE_TRADER') and hasRole('ROLE_ADMIN') and hasRole('ROLE_MANAGER')")
-    public ResponseEntity<APIResponse<PageResponse<DailyGetResponseDto>>> findTraderDaily(
-            @PathVariable Long strategyId,
-            @RequestParam("page") Integer page,
-            @RequestParam(value = "startDate", required = false) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) LocalDate endDate
-    ) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(dailyService.findTraderDaily(strategyId, page, startDate, endDate)));
-    }
-
     // 일간분석 등록
     @Operation(
             summary = "일간분석 등록",
@@ -150,63 +133,18 @@ public class TraderStrategyController {
                 .body(APIResponse.success());
     }
 
-    // 월간데이터 조회
-    @Operation(
-            summary = "월간분석 조회",
-            description = "트레이더가 본인 전략의 월간분석 데이터를 조회하는 API로, public, private, pending approval 상태인 전략에 대해 월간분석 데이터 조회 가능"
-    )
-    @GetMapping("/strategy/monthly/{strategyId}")
-    // @PreAuthorize("hasRole('ROLE_TRADER') and hasRole('ROLE_ADMIN') and hasRole('ROLE_MANAGER')")
-    public ResponseEntity<APIResponse<PageResponse<MonthlyGetResponseDto>>> findTraderMonthly(
-            @PathVariable Long strategyId,
-            @RequestParam("page") Integer page,
-            @RequestParam(value = "startYearMonth", required = false) @Schema(description = "조회 시작 년월", example = "2024-01") String startYearMonth,
-            @RequestParam(value = "endYearMonth", required = false) @Schema(description = "조회 종료 년월", example = "2024-10") String endYearMonth
-    ) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(monthlyService.findTraderMonthly(strategyId, page, startYearMonth, endYearMonth)));
-    }
-
-    // 통계 조회
-    @Operation(
-            summary = "통계 조회",
-            description = "트레이더가 본인 전략의 통계를 조회하는 API로, public, private, pending approval 상태인 전략에 대해 통계 조회 가능"
-    )
-    @GetMapping("/strategy/statistics/{strategyId}")
-    // @PreAuthorize("hasRole('ROLE_TRADER') and hasRole('ROLE_ADMIN') and hasRole('ROLE_MANAGER')")
-    public ResponseEntity<APIResponse<StrategyStatisticsGetResponseDto>> findStatistics(@PathVariable Long strategyId) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(strategyStatisticsService.findTraderStrategyStatistics(strategyId)));
-    }
-
-    // 실계좌이미지 조회
-    @Operation(
-            summary = "실계좌이미지 조회",
-            description = "트레이더가 본인 전략의 실계좌 이미지를 조회하는 API로, public, private, pending approval 상태인 전략에 대해 통계 조회 가능"
-    )
-    @GetMapping("/strategy/account-image/{strategyId}")
-    // @PreAuthorize("hasRole('ROLE_TRADER') and hasRole('ROLE_ADMIN') and hasRole('ROLE_MANAGER')")
-    public ResponseEntity<APIResponse<PageResponse<AccountImageResponseDto>>> getAccountImage(
-            @PathVariable Long strategyId,
-            @RequestParam Integer page
-    ) {
-        PageResponse<AccountImageResponseDto> responseDto = accountImageService.findTraderAccountImages(strategyId, page);
-        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(responseDto));
-    }
-
     // 실계좌이미지 삭제
     @Operation(
             summary = "실계좌이미지 삭제",
             description = "트레이더가 본인의 실계좌이미지 삭제"
     )
-    @DeleteMapping("/strategy/account-image/{accountImageId}")
+    @DeleteMapping("/strategy/account-image")
     // @PreAuthorize("hasRole('ROLE_TRADER')")
-    public ResponseEntity<APIResponse> deleteAccountImage(@PathVariable Long accountImageId) {
-        accountImageService.deleteAccountImage(accountImageId);
+    public ResponseEntity<APIResponse> deleteAccountImage(@RequestBody AccountImageDeleteRequestDto accountImageIdList) {
+        accountImageService.deleteAccountImage(accountImageIdList);
         return ResponseEntity.ok(APIResponse.success());
     }
 
-    // todo. 파일 관련 작업 필요. 예슬님이 이어서 작업해주실 예정입니다.
     // 실계좌이미지 등록
     @Operation(
             summary = "실계좌이미지 등록",
@@ -215,10 +153,11 @@ public class TraderStrategyController {
     @PostMapping(value = "/strategy/account-image/{strategyId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     // @PreAuthorize("hasRole('ROLE_TRADER')")
     public ResponseEntity<APIResponse> saveAccountImage(
-            @RequestPart List<AccountImageRequestDto> accountImages,
+            @RequestPart List<AccountImageRequestDto> requestDtoList,
+            @RequestPart List<MultipartFile> images,
             @PathVariable Long strategyId
     ) {
-        accountImageService.saveAccountImage(strategyId, accountImages);
+        accountImageService.saveAccountImage(strategyId, requestDtoList, images);
         return ResponseEntity.ok(APIResponse.success());
     }
 

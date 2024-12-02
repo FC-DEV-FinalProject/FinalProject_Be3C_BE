@@ -15,6 +15,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 public interface InquiryControllerDocs {
 
@@ -79,7 +81,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
-    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -135,9 +137,13 @@ public interface InquiryControllerDocs {
             @ApiResponse(
                     responseCode = "207",
                     description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
-    ResponseEntity<APIResponse<Integer>> deleteAdminInquiryList(
+    ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminInquiryList(
             @RequestBody @Valid InquiryAdminListDeleteRequestDto noticeListDeleteRequestDto);
 
 
@@ -442,6 +448,10 @@ public interface InquiryControllerDocs {
                     responseCode = "404",
                     description = "문의의 상세 데이터 조회에 실패했을 때 (NOT_FOUND)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             )
     })
     @Parameters({

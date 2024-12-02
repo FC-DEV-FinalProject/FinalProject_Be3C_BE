@@ -201,9 +201,9 @@ public class InterestStrategyServiceTest {
         );
 
         interestStrategyService.follow(FollowPostRequestDto.builder()
-                        .strategyId(1L)
-                        .folderId(1L)
-                        .build()
+                .strategyId(1L)
+                .folderId(1L)
+                .build()
         );
     }
 
@@ -326,7 +326,7 @@ public class InterestStrategyServiceTest {
                 .strategyId(unfollowList)
                 .build();
 
-        interestStrategyService.unfollow(followDeleteRequestDto);
+        interestStrategyService.unFollowList(followDeleteRequestDto);
     }
 
     @Test
@@ -361,12 +361,12 @@ public class InterestStrategyServiceTest {
                 .strategyId(unfollowList)
                 .build();
 
-        interestStrategyService.unfollow(followDeleteRequestDto);
+        interestStrategyService.unFollowList(followDeleteRequestDto);
 
         interestStrategyService.follow(FollowPostRequestDto.builder()
-                        .folderId(1L)
-                        .strategyId(1L)
-                        .build()
+                .folderId(1L)
+                .strategyId(1L)
+                .build()
         );
     }
 }

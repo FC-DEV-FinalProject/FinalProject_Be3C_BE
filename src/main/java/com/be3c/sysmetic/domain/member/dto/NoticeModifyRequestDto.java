@@ -1,8 +1,11 @@
 package com.be3c.sysmetic.domain.member.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
@@ -22,16 +25,22 @@ public class NoticeModifyRequestDto {
 //    private LocalDateTime modifyInModifyPageTime;
 
     @Schema(description = "공지사항 제목", example = "새로운 공지사항 제목")
-    @NotNull
+    @Size(max = 100)
+    @NotBlank
     private String noticeTitle;
 
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
-    @NotNull
+    @Size(max = 1000)
+    @NotBlank
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
     @NotNull
-    private Boolean isAttachment;
+    private Boolean fileExists;
+
+    @Schema(description = "이미지 파일 존재 여부", example = "true")
+    @NotNull
+    private Boolean imageExists;
 
     @Schema(description = "공개 여부", example = "true")
     @NotNull

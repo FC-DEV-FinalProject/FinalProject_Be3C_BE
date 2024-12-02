@@ -162,7 +162,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
 
         if(interestStrategy.isEmpty()) {
             followStrategy(userId, followPostRequestDto.getFolderId(), followPostRequestDto.getStrategyId());
-//            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail)).subscribe();
             return true;
         } else if(interestStrategy.get().getStatusCode().equals(Code.UNFOLLOW.getCode())) {
             interestStrategy.get().setStatusCode(FOLLOW.getCode());
@@ -170,7 +170,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                     interestStrategy.get().getId(),
                     FOLLOW.getCode()
             );
-//            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail));
+            emailService.notifyStrategyInterestRegistration(new InterestRequest(traderEmail)).subscribe();
             return true;
         }
 
