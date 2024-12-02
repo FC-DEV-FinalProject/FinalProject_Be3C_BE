@@ -74,7 +74,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     userId,
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
-                    noticeSaveRequestDto.getIsAttachment(),
+                    noticeSaveRequestDto.getFileExists(),
+                    noticeSaveRequestDto.getImageExists(),
                     noticeSaveRequestDto.getIsOpen(),
                     fileList,
                     imageList)) {
@@ -87,6 +88,10 @@ public class NoticeContoller implements NoticeControllerDocs {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
@@ -140,7 +145,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                 .writerNickname(notice.getWriterNickname())
                 .writeDate(notice.getWriteDate())
                 .hits(notice.getHits())
-                .isAttachment(notice.getIsAttachment())
+                .fileExist(notice.getFileExists())
                 .isOpen(notice.getIsOpen())
                 .build();
     }
@@ -202,7 +207,6 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
 
         try {
-            noticeService.upHits(noticeId);
 
             Notice notice = noticeService.findNoticeById(noticeId);
             String previousNoticeTitle;
@@ -226,27 +230,34 @@ public class NoticeContoller implements NoticeControllerDocs {
                 nextNoticeWriteDate = nextNotice.getWriteDate();
             }
 
-            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+            List<NoticeDetailFileShowResponseDto> fileDtoList = null;
+            if (notice.getFileExists()) {
+                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
 
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : fileList) {
-                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                        .fileId(f.id())
-                        .fileSize(f.fileSize())
-                        .originalName(f.originalName())
-                        .path(f.url())
-                        .build();
-                fileDtoList.add(noticeDetailFileShowResponseDto);
+                fileDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : fileList) {
+                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                            .fileId(f.id())
+                            .fileSize(f.fileSize())
+                            .originalName(f.originalName())
+                            .path(f.url())
+                            .build();
+                    fileDtoList.add(noticeDetailFileShowResponseDto);
+                }
             }
 
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : imageList) {
-                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                        .fileId(f.id())
-                        .path(f.url())
-                        .build();
-                imageDtoList.add(noticeDetailImageShowResponseDto);
+            List<NoticeDetailImageShowResponseDto> imageDtoList = null;
+            if (notice.getImageExists()) {
+                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+                imageDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : imageList) {
+                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                            .fileId(f.id())
+                            .path(f.url())
+                            .build();
+                    imageDtoList.add(noticeDetailImageShowResponseDto);
+                }
             }
 
             NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
@@ -260,7 +271,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .correctDate(notice.getCorrectDate())
                     .writerNickname(notice.getWriterNickname())
                     .hits(notice.getHits())
-                    .isAttachment(notice.getIsAttachment())
+                    .fileExist(notice.getFileExists())
+                    .imageExist(notice.getImageExists())
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
@@ -309,27 +321,34 @@ public class NoticeContoller implements NoticeControllerDocs {
         try {
             Notice notice = noticeService.findNoticeById(noticeId);
 
-            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+            List<NoticeDetailFileShowResponseDto> fileDtoList = null;
+            if (notice.getFileExists()) {
+                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
 
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : fileList) {
-                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                        .fileId(f.id())
-                        .fileSize(f.fileSize())
-                        .originalName(f.originalName())
-                        .path(f.url())
-                        .build();
-                fileDtoList.add(noticeDetailFileShowResponseDto);
+                fileDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : fileList) {
+                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                            .fileId(f.id())
+                            .fileSize(f.fileSize())
+                            .originalName(f.originalName())
+                            .path(f.url())
+                            .build();
+                    fileDtoList.add(noticeDetailFileShowResponseDto);
+                }
             }
 
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : imageList) {
-                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                        .fileId(f.id())
-                        .path(f.url())
-                        .build();
-                imageDtoList.add(noticeDetailImageShowResponseDto);
+            List<NoticeDetailImageShowResponseDto> imageDtoList = null;
+            if (notice.getImageExists()) {
+                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+                imageDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : imageList) {
+                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                            .fileId(f.id())
+                            .path(f.url())
+                            .build();
+                    imageDtoList.add(noticeDetailImageShowResponseDto);
+                }
             }
 
             NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
@@ -339,7 +358,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     .noticeId(notice.getId())
                     .noticeTitle(notice.getNoticeTitle())
                     .noticeContent(notice.getNoticeContent())
-                    .isAttachment(notice.getIsAttachment())
+                    .fileExist(notice.getFileExists())
+                    .imageExist(notice.getImageExists())
                     .isOpen(notice.getIsOpen())
                     .fileDtoList(fileDtoList)
                     .imageDtoList(imageDtoList)
@@ -389,7 +409,8 @@ public class NoticeContoller implements NoticeControllerDocs {
                     noticeModifyRequestDto.getNoticeTitle(),
                     noticeModifyRequestDto.getNoticeContent(),
                     userId,
-                    noticeModifyRequestDto.getIsAttachment(),
+                    noticeModifyRequestDto.getFileExists(),
+                    noticeModifyRequestDto.getImageExists(),
                     noticeModifyRequestDto.getIsOpen(),
                     noticeModifyRequestDto.getExistFileDtoList(),
                     noticeModifyRequestDto.getExistImageDtoList(),
@@ -517,7 +538,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                 .noticeId(notice.getId())
                 .noticeTitle(notice.getNoticeTitle())
                 .writeDate(notice.getWriteDate())
-                .isAttachment(notice.getIsAttachment())
+                .fileExists(notice.getFileExists())
                 .build();
     }
 
@@ -541,6 +562,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
 
         try {
+            noticeService.upHits(noticeId);
+
             Notice notice = noticeService.findNoticeById(noticeId);
             String previousNoticeTitle;
             LocalDateTime previousNoticeWriteDate;
@@ -563,27 +586,34 @@ public class NoticeContoller implements NoticeControllerDocs {
                 nextNoticeWriteDate = nextNotice.getWriteDate();
             }
 
-            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+            List<NoticeDetailFileShowResponseDto> fileDtoList = null;
+            if (notice.getFileExists()) {
+                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
 
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : fileList) {
-                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                        .fileId(f.id())
-                        .fileSize(f.fileSize())
-                        .originalName(f.originalName())
-                        .path(f.url())
-                        .build();
-                fileDtoList.add(noticeDetailFileShowResponseDto);
+                fileDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : fileList) {
+                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                            .fileId(f.id())
+                            .fileSize(f.fileSize())
+                            .originalName(f.originalName())
+                            .path(f.url())
+                            .build();
+                    fileDtoList.add(noticeDetailFileShowResponseDto);
+                }
             }
 
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            for (FileWithInfoResponse f : imageList) {
-                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                        .fileId(f.id())
-                        .path(f.url())
-                        .build();
-                imageDtoList.add(noticeDetailImageShowResponseDto);
+            List<NoticeDetailImageShowResponseDto> imageDtoList = null;
+            if (notice.getImageExists()) {
+                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+                imageDtoList = new ArrayList<>();
+                for (FileWithInfoResponse f : imageList) {
+                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                            .fileId(f.id())
+                            .path(f.url())
+                            .build();
+                    imageDtoList.add(noticeDetailImageShowResponseDto);
+                }
             }
 
             NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()

@@ -46,8 +46,11 @@ public class Notice extends BaseEntity {
     @Column(name = "hits", nullable = false)
     private Long hits;
 
-    @Column(name = "is_attachment", nullable = false)
-    private Boolean isAttachment;
+    @Column(name = "file_exists", nullable = false)
+    private Boolean fileExists;
+
+    @Column(name = "image_exists", nullable = false)
+    private Boolean ImageExists;
 
     @Column(name = "is_open", nullable = false)
     private Boolean isOpen;
@@ -55,7 +58,8 @@ public class Notice extends BaseEntity {
     public static Notice createNotice(String noticeTitle,
                                       String noticeContent,
                                       Member writer,
-                                      Boolean isAttachment,
+                                      Boolean fileExists,
+                                      Boolean imageExists,
                                       Boolean isOpen) {
 
         return Notice.builder()
@@ -67,7 +71,8 @@ public class Notice extends BaseEntity {
                 .correctorId(writer.getId())
                 .correctDate(LocalDateTime.now())
                 .hits(0L)
-                .isAttachment(isAttachment)
+                .fileExists(fileExists)
+                .ImageExists(imageExists)
                 .isOpen(isOpen)
                 .build();
     }

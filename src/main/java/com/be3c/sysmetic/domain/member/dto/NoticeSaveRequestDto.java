@@ -20,9 +20,13 @@ public class NoticeSaveRequestDto {
     @NotNull
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
     @NotNull
-    private Boolean isAttachment;
+    private Boolean fileExists;
+
+    @Schema(description = "이미지 파일 존재 여부", example = "true")
+    @NotNull
+    private Boolean imageExists;
 
     @Schema(description = "공개 여부", example = "true")
     @NotNull

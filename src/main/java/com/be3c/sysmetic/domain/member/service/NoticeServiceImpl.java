@@ -35,22 +35,31 @@ public class NoticeServiceImpl implements NoticeService {
     // 등록
     @Override
     @Transactional
-    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Boolean isAttachment, Boolean isOpen,
+    public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent,
+                                  Boolean fileExists, Boolean imageExists, Boolean isOpen,
                                     List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(EntityNotFoundException::new);
 
-        Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, isAttachment, isOpen);
+        Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, fileExists, imageExists, isOpen);
 
         noticeRepository.save(notice);
 
-        if(!fileList.isEmpty()) {
+        if (fileList.isEmpty() == fileExists) {
+            throw new IllegalArgumentException("파일 리스트와 fileExist 값이 맞지 않습니다.");
+        }
+
+        if (imageList.isEmpty() == imageExists) {
+            throw new IllegalArgumentException("이미지 리스트와 imageExist 값이 맞지 않습니다.");
+        }
+
+        if(fileExists) {
             for (MultipartFile file : fileList) {
                 fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             }
         }
 
-        if(!imageList.isEmpty()) {
+        if(imageExists) {
             for (MultipartFile image : imageList) {
                 fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
@@ -107,7 +116,8 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isAttachment, Boolean isOpen,
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
+                                Boolean fileExists, Boolean imageExists, Boolean isOpen,
                                 List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(EntityNotFoundException::new);
@@ -116,7 +126,8 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setNoticeContent(noticeContent);
         notice.setCorrectorId(correctorId);
         notice.setCorrectDate(LocalDateTime.now());
-        notice.setIsAttachment(isAttachment);
+        notice.setFileExists(fileExists);
+        notice.setImageExists(imageExists);
         notice.setIsOpen(isOpen);
 
         int countFile = 0;
@@ -132,6 +143,9 @@ public class NoticeServiceImpl implements NoticeService {
         if (countFile > 3) {
             throw new IllegalArgumentException("파일이 3개 이상입니다.");
         }
+        if ((countFile == 0) == fileExists) {
+            throw new IllegalArgumentException("이미지 리스트와 fileExists 값이 맞지 않습니다.");
+        }
 
         int countImage = 0;
         for (NoticeExistFileImageRequestDto n : existImageDtoList) {
@@ -145,15 +159,18 @@ public class NoticeServiceImpl implements NoticeService {
         if (countImage > 5) {
             throw new IllegalArgumentException("이미지가 5개 이상입니다.");
         }
+        if ((countImage == 0) == imageExists) {
+            throw new IllegalArgumentException("이미지 리스트와 imageExists 값이 맞지 않습니다.");
+        }
 
 
-        if(!newFileList.isEmpty()) {
+        if(fileExists) {
             for (MultipartFile file : newFileList) {
                 fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             }
         }
 
-        if(!newImageList.isEmpty()) {
+        if(imageExists) {
             for (MultipartFile image : newImageList) {
                 fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }

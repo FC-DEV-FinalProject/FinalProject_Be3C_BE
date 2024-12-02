@@ -29,8 +29,8 @@ public class NoticeAdminListOneShowResponseDto {
     @Schema(description = "조회수", example = "100")
     private Long hits;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
-    private Boolean isAttachment;
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
+    private Boolean fileExist;
 
     @Schema(description = "공개 여부", example = "false")
     private Boolean isOpen;
