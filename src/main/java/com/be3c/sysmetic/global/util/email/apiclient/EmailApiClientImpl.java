@@ -2,7 +2,9 @@ package com.be3c.sysmetic.global.util.email.apiclient;
 
 import com.be3c.sysmetic.global.util.email.dto.*;
 import com.be3c.sysmetic.global.util.email.exception.EmailSendingException;
+import com.be3c.sysmetic.global.util.email.service.GmailSenderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -14,9 +16,11 @@ import java.util.List;
 /* Stibee API에 요청을 보내는 client */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class EmailApiClientImpl implements EmailApiClient {
 
     private final WebClient webClient;
+    private final GmailSenderService gmailSenderService;
 
     @Value("${stibee.base.url.address.book}")
     private String baseUrlAddressBook;
@@ -79,55 +83,51 @@ public class EmailApiClientImpl implements EmailApiClient {
                 .retrieve()
                 .onStatus(status -> status.isError(), response -> {
                     System.out.println("Error response: " + response.statusCode());
-                    return Mono.error(new EmailSendingException("구독 요청 API call failed"));
+                    return Mono.error(new EmailSendingException("구독 추가/수정 API call failed"));
                 })
                 .bodyToMono(StibeeApiResponse.class);
 
-        return apiResponseMono.block();
+        return apiResponseMono.block(); // authCode보내는 코드를 위해서는 동기적으로 기다려야 함.
     }
 
 
     // 삭제
 
-
     @Override
-    public StibeeSimpleResponse deleteUserSubscriberRequest(List<String> emails) {
+    public Mono<StibeeSimpleResponse> deleteUserSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + userListId + "/subscribers";
-
         return deleteSubscriberRequest(emails, uri);
     }
 
     @Override
-    public StibeeSimpleResponse deleteTraderSubscriberRequest(List<String> emails) {
+    public Mono<StibeeSimpleResponse> deleteTraderSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + traderListId + "/subscribers";
-
         return deleteSubscriberRequest(emails, uri);
     }
 
     @Override
-    public StibeeSimpleResponse deleteTempSubscriberRequest(List<String> emails) {
+    public Mono<StibeeSimpleResponse> deleteTempSubscriberRequest(List<String> emails) {
 
         String uri = baseUrlAddressBook + tempListId + "/subscribers";
-
         return deleteSubscriberRequest(emails, uri);
     }
 
-    private StibeeSimpleResponse deleteSubscriberRequest(List<String> emails, String uri){
+    private Mono<StibeeSimpleResponse> deleteSubscriberRequest(List<String> emails, String uri){
 
-        Mono<StibeeSimpleResponse> apiResponseMono = webClient
+        return webClient
                 .method(HttpMethod.DELETE)
                 .uri(uri)
                 .bodyValue(emails)
                 .retrieve()
-                .onStatus(status -> status.isError(), response -> {
-                    System.out.println("Error response: " + response.statusCode());
-                    return Mono.error(new RuntimeException("API call failed"));
-                })
-                .bodyToMono(StibeeSimpleResponse.class);
-
-        return apiResponseMono.block();
+                .bodyToMono(StibeeSimpleResponse.class)
+                .retry(5)
+                .onErrorResume(e -> {
+                    gmailSenderService.sendEmailToAdmin("[스티비] 구독자 정보 삭제 실패, 수동 삭제 요청 드립니다.",
+                            "삭제 실패한 구독자를 수동으로 지워주세요: " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     /*
@@ -138,42 +138,68 @@ public class EmailApiClientImpl implements EmailApiClient {
      *
      */
 
-
     @Override
-    public String sendAuthEmailRequest(AuthCodeRequest authCodeRequestDto) {
+    public Mono<String> sendAuthEmailRequest(AuthCodeRequest authCodeRequestDto) {
         String uri = baseUrlEmail + emailAuthEndPoint;
 
-        return sendAutoEmail(authCodeRequestDto, uri);
+        return sendAutoEmailAsync(authCodeRequestDto, uri);
     }
 
     @Override
-    public String sendInquiryRegistrationEmailRequest(InquiryRequest inquiryRequestDto) {
+    public Mono<String> sendInquiryRegistrationEmailRequest(InquiryRequest inquiryRequestDto) {
         String uri = baseUrlEmail + inquiryRegistrationEndPoint;
 
-        return sendAutoEmail(inquiryRequestDto, uri);
+        return sendAutoEmailAsync(inquiryRequestDto, uri);
     }
 
     @Override
-    public String sendInterestRegistrationEmailRequest(InterestRequest interestRequest) {
+    public Mono<String> sendInterestRegistrationEmailRequest(InterestRequest interestRequest) {
         String uri = baseUrlEmail + inquiryRegistrationEndPoint;
 
-        return sendAutoEmail(interestRequest, uri);
+        return sendAutoEmailAsync(interestRequest, uri);
     }
 
-    private String sendAutoEmail(EmailRequest emailRequest, String uri) {
+    private String sendAutoEmailSync(EmailRequest emailRequest, String uri) {
 
         Mono<String> apiResponseMono = webClient.post()
                 .uri(uri)
                 .bodyValue(emailRequest)
                 .retrieve()
-                .onStatus(status -> status.isError(), response -> {
-                    System.out.println("Error response: " + response.statusCode());
-                    return Mono.error(new RuntimeException("API call failed"));
-                })
+                .onStatus(status-> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> {
+                                    System.out.println("오류 응답: " + body);
+                                    return Mono.error(new RuntimeException("API 호출 실패: " + body));
+                                })
+                )
                 .bodyToMono(String.class)  // Content type : 'text/plain;charset=utf-8' 성공 : "ok"
                 ;
 
-        return apiResponseMono.block(); // 동기적으로 기다림
+        return apiResponseMono.block(); // 동기적으로 기다려야 함
+    }
+
+    private Mono<String> sendAutoEmailAsync(EmailRequest emailRequest, String uri){
+
+        Mono<String> apiResponseMono = webClient.post()
+                .uri(uri)
+                .bodyValue(emailRequest)
+                .retrieve()
+                .onStatus(status -> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> {
+                                    System.out.println("오류 응답: " + body);
+                                    return Mono.error(new RuntimeException("API 호출 실패: " + body));
+                                })
+                )
+                .bodyToMono(String.class)  // Content type : 'text/plain;charset=utf-8' 성공 : "ok"
+                .retry(5)
+                .onErrorResume(e -> {
+                    gmailSenderService.sendEmailToAdmin("[스티비] 이메일 자동 전송에 실패했습니다. ",
+                            "요청: " + emailRequest + "스티비 응답: "+ e.getMessage());
+                    return Mono.just(e+e.getMessage()+e.getCause());
+                });
+
+        return apiResponseMono;
     }
 
 }
