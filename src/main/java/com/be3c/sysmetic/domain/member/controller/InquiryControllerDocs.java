@@ -82,7 +82,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
     ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
@@ -113,7 +113,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> deleteAdminInquiry (
-            @PathVariable(name="inquiryId") Long inquiryId);
+            @PathVariable(value = "qnaId") Long inquiryId);
 
 
     // 관리자 문의 목록 삭제 API
@@ -169,7 +169,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
-            @PathVariable(name="strategyId") Long strategyId);
+            @PathVariable(value = "strategyId") Long strategyId);
 
 
     // 질문자 문의 등록 API
@@ -201,7 +201,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
-            @PathVariable(name="strategyId") Long strategyId,
+            @PathVariable(value = "strategyId") Long strategyId,
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
 
@@ -261,7 +261,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed);
@@ -297,7 +297,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed);
@@ -331,7 +331,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> modifyInquirerInquiry (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto);
 
 
@@ -363,7 +363,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
-            @PathVariable(name="inquiryId") Long inquiryId);
+            @PathVariable(value = "qnaId") Long inquiryId);
 
 
     // 트레이더 문의 답변 등록 API
@@ -395,7 +395,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestBody @Valid InquiryDetailSaveRequestDto inquiryDetailSaveRequestDto);
 
 
@@ -459,7 +459,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
-            @PathVariable(name="inquiryId") Long inquiryId,
+            @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed);
