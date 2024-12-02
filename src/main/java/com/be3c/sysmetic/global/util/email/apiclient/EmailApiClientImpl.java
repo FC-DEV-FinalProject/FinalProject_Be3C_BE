@@ -154,7 +154,7 @@ public class EmailApiClientImpl implements EmailApiClient {
 
     @Override
     public Mono<String> sendInterestRegistrationEmailRequest(InterestRequest interestRequest) {
-        String uri = baseUrlEmail + inquiryRegistrationEndPoint;
+        String uri = baseUrlEmail + interestRegistrationEndPoint;
 
         return sendAutoEmailAsync(interestRequest, uri);
     }
