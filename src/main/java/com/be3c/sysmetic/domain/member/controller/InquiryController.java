@@ -116,7 +116,7 @@ public class InquiryController implements InquiryControllerDocs {
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/inquiry/{inquiryId}/view")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
+    public ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
@@ -163,7 +163,7 @@ public class InquiryController implements InquiryControllerDocs {
                 answerContent = inquiryAnswer.getAnswerContent();
             }
 
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
+            InquiryAnswerAdminShowResponseDto inquiryAnswerAdminShowResponseDto = InquiryAnswerAdminShowResponseDto.builder()
                     .page(page)
                     .closed(closed)
                     .searchType(searchType)
@@ -195,7 +195,7 @@ public class InquiryController implements InquiryControllerDocs {
                     .build();
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(APIResponse.success(inquiryAnswerShowResponseDto));
+                    .body(APIResponse.success(inquiryAnswerAdminShowResponseDto));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

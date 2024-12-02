@@ -81,7 +81,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
             @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
     })
-    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showAdminInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(name="inquiryId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
