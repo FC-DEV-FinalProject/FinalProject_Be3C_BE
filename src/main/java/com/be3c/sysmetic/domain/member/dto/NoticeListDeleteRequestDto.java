@@ -15,7 +15,6 @@ import java.util.List;
 public class NoticeListDeleteRequestDto {
 
     @Schema(description = "삭제할 공지사항 ID 리스트", example = "[1, 2, 3]")
-    @NotNull
     private List<Long> noticeIds;
 }
 
