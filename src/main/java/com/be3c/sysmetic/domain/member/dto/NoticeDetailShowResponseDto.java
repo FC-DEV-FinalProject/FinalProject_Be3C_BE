@@ -33,21 +33,6 @@ public class NoticeDetailShowResponseDto {
     @Schema(description = "작성일시", example = "2023-11-21T10:15:30")
     private LocalDateTime writeDate;
 
-    @Schema(description = "수정일시", example = "2023-11-22T14:00:00")
-    private LocalDateTime correctDate;
-
-    @Schema(description = "작성자 닉네임", example = "홍길동")
-    private String writerNickname;
-
-    @Schema(description = "조회수", example = "100")
-    private Long hits;
-
-    @Schema(description = "첨부 파일 여부", example = "true")
-    private Boolean isAttachment;
-
-    @Schema(description = "공개 여부", example = "true")
-    private Boolean isOpen;
-
     @Schema(description = "이 공지사항의 파일 정보를 담은 리스트", example = "[]")
     private List<NoticeDetailFileShowResponseDto> fileDtoList;
 

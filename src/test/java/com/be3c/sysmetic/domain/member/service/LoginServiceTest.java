@@ -62,7 +62,7 @@ class LoginServiceImplTest {
         String email = "notfound@test.com";
         when(memberRepository.existsByEmail(email)).thenReturn(false);
 
-        // When & Then
+         When & Then
         assertThatThrownBy(() -> loginService.findEmail(email))
                 .isInstanceOf(MemberBadRequestException.class)
                 .hasMessage(MemberExceptionMessage.EX_1.getMessage());

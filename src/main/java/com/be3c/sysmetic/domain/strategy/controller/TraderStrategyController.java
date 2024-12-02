@@ -145,7 +145,6 @@ public class TraderStrategyController {
         return ResponseEntity.ok(APIResponse.success());
     }
 
-    // todo. 파일 관련 작업 필요. 예슬님이 이어서 작업해주실 예정입니다.
     // 실계좌이미지 등록
     @Operation(
             summary = "실계좌이미지 등록",
@@ -154,10 +153,11 @@ public class TraderStrategyController {
     @PostMapping(value = "/strategy/account-image/{strategyId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     // @PreAuthorize("hasRole('ROLE_TRADER')")
     public ResponseEntity<APIResponse> saveAccountImage(
-            @RequestPart List<AccountImageRequestDto> accountImages,
+            @RequestPart List<AccountImageRequestDto> requestDtoList,
+            @RequestPart List<MultipartFile> images,
             @PathVariable Long strategyId
     ) {
-        accountImageService.saveAccountImage(strategyId, accountImages);
+        accountImageService.saveAccountImage(strategyId, requestDtoList, images);
         return ResponseEntity.ok(APIResponse.success());
     }
 

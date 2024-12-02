@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 import java.util.List;
 
 @Repository
@@ -32,8 +30,7 @@ public interface StrategyStatisticsRepository extends JpaRepository<StrategyStat
     // Integer countAllPublic(@Param("statusCode") String statusCode);
 
     // 전략 상세 페이지에서 사용!
-    // TODO 초기값 넣으면 Optional 삭제하기
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.StrategyDetailStatistics(s.maximumCapitalReductionAmount, s.averageProfitLossRate, s.profitFactor, s.winningRate) "
         + "FROM StrategyStatistics s WHERE s.strategy.id = :strategyId")
-    Optional<StrategyDetailStatistics> findStrategyDetailStatistics(@Param("strategyId") Long strategyId);
+    StrategyDetailStatistics findStrategyDetailStatistics(@Param("strategyId") Long strategyId);
 }

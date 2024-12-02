@@ -17,9 +17,9 @@ import java.util.Map;
 @Schema(description = "공지사항 수정 요청 DTO")
 public class NoticeModifyRequestDto {
 
-    @Schema(description = "공지사항 수정 화면에 들어온 시간", example = "2024-11-23 21:16:19.274999")
-//    @NotNull
-    private LocalDateTime modifyInModifyPageTime;
+//    @Schema(description = "공지사항 수정 화면에 들어온 시간", example = "2024-11-23 21:16:19.274999")
+////    @NotNull
+//    private LocalDateTime modifyInModifyPageTime;
 
     @Schema(description = "공지사항 제목", example = "새로운 공지사항 제목")
     @NotNull
@@ -29,9 +29,13 @@ public class NoticeModifyRequestDto {
     @NotNull
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
     @NotNull
-    private Boolean isAttachment;
+    private Boolean fileExists;
+
+    @Schema(description = "이미지 파일 존재 여부", example = "true")
+    @NotNull
+    private Boolean imageExists;
 
     @Schema(description = "공개 여부", example = "true")
     @NotNull

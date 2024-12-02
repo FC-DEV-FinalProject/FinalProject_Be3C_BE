@@ -32,8 +32,11 @@ public class NoticeShowModifyPageResponseDto {
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
-    private Boolean isAttachment;
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
+    private Boolean fileExist;
+
+    @Schema(description = "이미지 파일 존재 여부", example = "true")
+    private Boolean imageExist;
 
     @Schema(description = "공개 여부", example = "true")
     private Boolean isOpen;
