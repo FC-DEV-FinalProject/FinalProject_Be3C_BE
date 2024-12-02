@@ -29,6 +29,7 @@ public enum MemberRole {
         return this;
     }
 
+    // roleCode가 "RC"로 시작하는 경우에만 실행
     public static MemberRole getEnumRole(String roleCode) {
         return switch (roleCode) {
             case "RC001" -> USER;
