@@ -12,5 +12,6 @@ public interface MemberInfoService {
     boolean changePassword(Long userId, MemberPutPasswordRequestDto memberPutPasswordRequestDto, HttpServletRequest request);
     boolean changeMemberInfo(Long userId, MemberPatchInfoRequestDto memberPatchInfoRequestDto, MultipartFile file);
     boolean deleteUser(Long userId) throws AuthenticationCredentialsNotFoundException;
+    void banUser(Long memberId);
     boolean changeMemberConsent(Long userId, MemberPatchConsentRequestDto memberPatchInfoRequestDto);
 }

@@ -11,12 +11,15 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberManagementServiceImpl implements MemberManagementService {
@@ -40,6 +43,7 @@ public class MemberManagementServiceImpl implements MemberManagementService {
 
     // 2. 회원 등급 변경
     @Override
+    @Transactional
     public void changeRoleCode(Long memberId, boolean hasManagerRights) {
         /*
             관리자 지정하는 경우 (hasManagerRights = true)
@@ -68,7 +72,7 @@ public class MemberManagementServiceImpl implements MemberManagementService {
 
         // 회원등급이 달라진 경우 업데이트
         if(!currentRoleCode.equals(updateRole)) {
-            int updated = memberRepository.updateRoleCode(memberId, updateRole.getCode());
+            int updated = memberRepository.updateRoleCode(memberId, updateRole.name());
             if(updated == 0) {
                 throw new MemberBadRequestException(MemberExceptionMessage.FAIL_ROLE_CHANGE.getMessage() + "회원 ID: " + memberId);
             }

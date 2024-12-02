@@ -34,9 +34,9 @@ public class MemberManagementController {
             description = "관리자가 특정 역할(role)과 검색 조건을 기반으로 회원 목록을 조회하는 API"
     )
     @GetMapping("/admin/members")
-    public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam MemberSearchRole role,
+    public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam(defaultValue = "ALL") MemberSearchRole role,
                                                                                          @RequestParam(defaultValue = "1") Integer page,
-                                                                                         @RequestParam(defaultValue = "NICKNAME", required = false) MemberSearchType searchType,
+                                                                                         @RequestParam(defaultValue = "ALL") MemberSearchType searchType,
                                                                                          @RequestParam(required = false) String searchKeyword) {
         /*
             조회 대상) all, user, trader, manager
@@ -67,7 +67,7 @@ public class MemberManagementController {
     @DeleteMapping("/admin/members/{memberId}")
     public ResponseEntity<APIResponse<String>> banMember(@PathVariable List<Long> memberId) {
         for(Long member : memberId) {
-            memberInfoService.deleteUser(member);
+            memberInfoService.banUser(member);
         }
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }

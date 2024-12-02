@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum MemberSearchType {
+    ALL("ALL"),
     NICKNAME("NICKNAME"),
     EMAIL("EMAIL"),
     NAME("NAME"),

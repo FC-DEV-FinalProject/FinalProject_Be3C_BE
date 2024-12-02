@@ -2,7 +2,6 @@ package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.entity.MemberRole;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchType;
 import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
