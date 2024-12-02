@@ -152,6 +152,21 @@ public class InquiryServiceImpl implements InquiryService {
         return inquiryRepository.bulkDelete(inquiryIdList);
     }
 
+
+    // 이전 문의 조회
+    @Override
+    public List<Inquiry> findPreviousInquiry(Long inquiryId) {
+        return inquiryRepository.findPreviousInquiry(inquiryId, PageRequest.of(0, 1));
+    }
+
+
+    // 다음 문의 조회
+    @Override
+    public List<Inquiry> findNextInquiry(Long inquiryId) {
+        return inquiryRepository.findNextInquiry(inquiryId, PageRequest.of(0, 1));
+    }
+
+
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
     // 검색 (전략명, 트레이더, 질문자)
@@ -159,6 +174,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         return inquiryRepository.adminInquirySearchWithBooleanBuilder(inquiryAdminListShowRequestDto, PageRequest.of(page, 10));
     }
+
 
     // 문의자, 트레이더 검색 조회
     // 정렬 순 셀렉트 박스 (최신순, 전략명)

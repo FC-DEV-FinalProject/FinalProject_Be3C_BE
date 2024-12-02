@@ -222,4 +222,18 @@ public class NoticeServiceImpl implements NoticeService {
 
         return noticeRepository.noticeSearchWithBooleanBuilder(searchText, PageRequest.of(page, 10));
     }
+
+
+    // 이전글 조회
+    @Override
+    public List<Notice> findPreviousNotice(Long noticeId) {
+        return noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+    }
+
+
+    // 다음글 조회
+    @Override
+    public List<Notice> findNextNotice(Long noticeId) {
+        return noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+    }
 }

@@ -50,7 +50,7 @@ public class Notice extends BaseEntity {
     private Boolean fileExists;
 
     @Column(name = "image_exists", nullable = false)
-    private Boolean ImageExists;
+    private Boolean imageExists;
 
     @Column(name = "is_open", nullable = false)
     private Boolean isOpen;
@@ -72,7 +72,7 @@ public class Notice extends BaseEntity {
                 .correctDate(LocalDateTime.now())
                 .hits(0L)
                 .fileExists(fileExists)
-                .ImageExists(imageExists)
+                .imageExists(imageExists)
                 .isOpen(isOpen)
                 .build();
     }

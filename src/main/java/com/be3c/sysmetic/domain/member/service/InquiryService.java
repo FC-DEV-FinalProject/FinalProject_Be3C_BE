@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -52,6 +53,11 @@ public interface InquiryService {
     // 관리자 목록 삭제
     Integer deleteAdminInquiryList(List<Long> inquiryIdList);
 
+    // 이전 문의 조회
+    List<Inquiry> findPreviousInquiry(Long inquiryId);
+
+    // 다음 문의 조회
+    List<Inquiry> findNextInquiry(Long inquiryId);
 
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료

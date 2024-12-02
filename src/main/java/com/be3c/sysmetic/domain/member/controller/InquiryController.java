@@ -14,6 +14,7 @@ import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -139,24 +140,26 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
             String previousInquiryTitle;
             LocalDateTime previousInquiryWriteDate;
-            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
-            if (previousInquiry == null) {
+            List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
+            if (previousInquiryList.isEmpty()) {
                 previousInquiryTitle = null;
                 previousInquiryWriteDate = null;
             } else {
+                Inquiry previousInquiry = previousInquiryList.get(0);
                 previousInquiryTitle = previousInquiry.getInquiryTitle();
                 previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
             }
             String nextInquiryTitle;
             LocalDateTime nextInquiryWriteDate;
-            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
-            if (nextInquiry == null) {
+            List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
+            if (nextInquiryList.isEmpty()) {
                 nextInquiryTitle = null;
                 nextInquiryWriteDate = null;
             } else {
+                Inquiry nextInquiry = nextInquiryList.get(0);
                 nextInquiryTitle = nextInquiry.getInquiryTitle();
                 nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
             }
@@ -444,24 +447,26 @@ public class InquiryController implements InquiryControllerDocs {
          }
 
          try {
-             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+             Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
              String previousInquiryTitle;
              LocalDateTime previousInquiryWriteDate;
-             Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
-             if (previousInquiry == null) {
+             List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
+             if (previousInquiryList.isEmpty()) {
                  previousInquiryTitle = null;
                  previousInquiryWriteDate = null;
              } else {
+                 Inquiry previousInquiry = previousInquiryList.get(0);
                  previousInquiryTitle = previousInquiry.getInquiryTitle();
                  previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
              }
              String nextInquiryTitle;
              LocalDateTime nextInquiryWriteDate;
-             Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
-             if (nextInquiry == null) {
+             List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
+             if (nextInquiryList.isEmpty()) {
                  nextInquiryTitle = null;
                  nextInquiryWriteDate = null;
              } else {
+                 Inquiry nextInquiry = nextInquiryList.get(0);
                  nextInquiryTitle = nextInquiry.getInquiryTitle();
                  nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
              }
@@ -556,9 +561,9 @@ public class InquiryController implements InquiryControllerDocs {
                         .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
             }
 
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
 
-            if(securityUtils.getUserIdInSecurityContext() != inquiry.getInquirer().getId()) {
+            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
             }
@@ -597,14 +602,15 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable(name="inquiryId") Long inquiryId,
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
-         Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-         if(securityUtils.getUserIdInSecurityContext() != inquiry.getInquirer().getId()) {
-             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                     .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-         }
-
         try {
+
+            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+
+            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+            }
+
             if (inquiryService.modifyInquiry(
                     inquiryId,
                     inquiryModifyRequestDto.getInquiryTitle(),
@@ -640,14 +646,15 @@ public class InquiryController implements InquiryControllerDocs {
     public ResponseEntity<APIResponse<Long>> deleteInquirerInquiry (
             @PathVariable(name="inquiryId") Long inquiryId) {
 
-        Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-        if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-        }
-
         try {
+
+            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+
+            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
+            }
+
             if (inquiryService.deleteInquiry(inquiryId)) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
@@ -786,24 +793,26 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
+            Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
             String previousInquiryTitle;
             LocalDateTime previousInquiryWriteDate;
-            Inquiry previousInquiry = inquiryRepository.findById(inquiryId-1).orElse(null);
-            if (previousInquiry == null) {
+            List<Inquiry> previousInquiryList = inquiryService.findPreviousInquiry(inquiryId);
+            if (previousInquiryList.isEmpty()) {
                 previousInquiryTitle = null;
                 previousInquiryWriteDate = null;
             } else {
+                Inquiry previousInquiry = previousInquiryList.get(0);
                 previousInquiryTitle = previousInquiry.getInquiryTitle();
                 previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
             }
             String nextInquiryTitle;
             LocalDateTime nextInquiryWriteDate;
-            Inquiry nextInquiry = inquiryRepository.findById(inquiryId+1).orElse(null);
-            if (nextInquiry == null) {
+            List<Inquiry> nextInquiryList = inquiryService.findNextInquiry(inquiryId);
+            if (nextInquiryList.isEmpty()) {
                 nextInquiryTitle = null;
                 nextInquiryWriteDate = null;
             } else {
+                Inquiry nextInquiry = nextInquiryList.get(0);
                 nextInquiryTitle = nextInquiry.getInquiryTitle();
                 nextInquiryWriteDate = nextInquiry.getInquiryRegistrationDate();
             }

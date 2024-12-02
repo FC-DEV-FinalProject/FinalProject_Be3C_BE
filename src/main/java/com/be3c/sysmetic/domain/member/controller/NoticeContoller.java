@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
+import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
 import com.be3c.sysmetic.domain.member.service.NoticeService;
@@ -211,21 +212,23 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice notice = noticeService.findNoticeById(noticeId);
             String previousNoticeTitle;
             LocalDateTime previousNoticeWriteDate;
-            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(null);
-            if (previousNotice == null) {
+            List<Notice> previousNoticeList = noticeService.findPreviousNotice(noticeId);
+            if (previousNoticeList.isEmpty()) {
                 previousNoticeTitle = null;
                 previousNoticeWriteDate = null;
             } else {
+                Notice previousNotice = previousNoticeList.get(0);
                 previousNoticeTitle = previousNotice.getNoticeTitle();
                 previousNoticeWriteDate = previousNotice.getWriteDate();
             }
             String nextNoticeTitle;
             LocalDateTime nextNoticeWriteDate;
-            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(null);
-            if (nextNotice == null) {
+            List<Notice> nextNoticeList = noticeService.findNextNotice(noticeId);
+            if (nextNoticeList.isEmpty()) {
                 nextNoticeTitle = null;
                 nextNoticeWriteDate = null;
             } else {
+                Notice nextNotice = nextNoticeList.get(0);
                 nextNoticeTitle = nextNotice.getNoticeTitle();
                 nextNoticeWriteDate = nextNotice.getWriteDate();
             }
@@ -567,21 +570,23 @@ public class NoticeContoller implements NoticeControllerDocs {
             Notice notice = noticeService.findNoticeById(noticeId);
             String previousNoticeTitle;
             LocalDateTime previousNoticeWriteDate;
-            Notice previousNotice = noticeRepository.findById(noticeId-1).orElse(null);
-            if (previousNotice == null) {
+            List<Notice> previousNoticeList = noticeService.findPreviousNotice(noticeId);
+            if (previousNoticeList.isEmpty()) {
                 previousNoticeTitle = null;
                 previousNoticeWriteDate = null;
             } else {
+                Notice previousNotice = previousNoticeList.get(0);
                 previousNoticeTitle = previousNotice.getNoticeTitle();
                 previousNoticeWriteDate = previousNotice.getWriteDate();
             }
             String nextNoticeTitle;
             LocalDateTime nextNoticeWriteDate;
-            Notice nextNotice = noticeRepository.findById(noticeId+1).orElse(null);
-            if (nextNotice == null) {
+            List<Notice> nextNoticeList = noticeService.findNextNotice(noticeId);
+            if (nextNoticeList.isEmpty()) {
                 nextNoticeTitle = null;
                 nextNoticeWriteDate = null;
             } else {
+                Notice nextNotice = nextNoticeList.get(0);
                 nextNoticeTitle = nextNotice.getNoticeTitle();
                 nextNoticeWriteDate = nextNotice.getWriteDate();
             }
