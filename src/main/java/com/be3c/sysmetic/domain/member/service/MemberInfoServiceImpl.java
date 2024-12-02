@@ -188,7 +188,13 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
         return true;
     }
-
+    
+    // 관리자 페이지 - 회원 강제탈퇴에서 사용하는 메서드
+    @Override
+    public void banUser(Long memberId) {
+        deleteUser(memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new));
+    }
+    
     private void deleteUser(Member member) {
         List<Strategy> strategyList = strategyRepository.findByTraderId(member.getId());
         List<Folder> folderList = folderRepository.findByMemberId(member.getId());
