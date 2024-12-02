@@ -40,7 +40,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         }
 
         // 검색 (전략명, 트레이더, 질문자)
-        if (searchText != null) {
+        if (searchText != null && !searchText.isEmpty()) {
             if (searchType.equals("strategy")) {
                 if (StringUtils.hasText(searchText)) {
                     predicate.and(inquiry.strategyName.contains(searchText));
