@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,7 +23,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             "WHERE m.nickname LIKE CONCAT('%', :nickname, '%') AND m.roleCode = 'UR001'")
     Page<Strategy> findByTraderNicknameContaining(@Param("nickname") String nickname, Pageable pageable);
 
-    Optional<Strategy> findByIdAndStatusCode(Long id, String statusCode);
+    @Query("SELECT s FROM Strategy s WHERE s.id = :id AND s.statusCode = 'PUBLIC'")
+    Optional<Strategy> findByIdAndOpenStatusCode(Long id);
 
     // 전략명 중복 확인
     boolean existsByName(String name);

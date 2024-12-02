@@ -23,6 +23,6 @@ public class NoticeListOneShowResponseDto {
     @Schema(description = "작성일시", example = "2023-11-21T10:15:30")
     private LocalDateTime writeDate;
 
-    @Schema(description = "첨부 파일 여부", example = "true")
-    private Boolean isAttachment;
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
+    private Boolean fileExists;
 }

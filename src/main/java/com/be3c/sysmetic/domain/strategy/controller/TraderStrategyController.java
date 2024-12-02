@@ -199,14 +199,13 @@ public class TraderStrategyController {
             summary = "실계좌이미지 삭제",
             description = "트레이더가 본인의 실계좌이미지 삭제"
     )
-    @DeleteMapping("/strategy/account-image/{accountImageId}")
+    @DeleteMapping("/strategy/account-image")
     // @PreAuthorize("hasRole('ROLE_TRADER')")
-    public ResponseEntity<APIResponse> deleteAccountImage(@PathVariable Long accountImageId) {
-        accountImageService.deleteAccountImage(accountImageId);
+    public ResponseEntity<APIResponse> deleteAccountImage(@RequestBody AccountImageDeleteRequestDto accountImageIdList) {
+        accountImageService.deleteAccountImage(accountImageIdList);
         return ResponseEntity.ok(APIResponse.success());
     }
 
-    // todo. 파일 관련 작업 필요. 예슬님이 이어서 작업해주실 예정입니다.
     // 실계좌이미지 등록
     @Operation(
             summary = "실계좌이미지 등록",
@@ -215,10 +214,11 @@ public class TraderStrategyController {
     @PostMapping(value = "/strategy/account-image/{strategyId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     // @PreAuthorize("hasRole('ROLE_TRADER')")
     public ResponseEntity<APIResponse> saveAccountImage(
-            @RequestPart List<AccountImageRequestDto> accountImages,
+            @RequestPart List<AccountImageRequestDto> requestDtoList,
+            @RequestPart List<MultipartFile> images,
             @PathVariable Long strategyId
     ) {
-        accountImageService.saveAccountImage(strategyId, accountImages);
+        accountImageService.saveAccountImage(strategyId, requestDtoList, images);
         return ResponseEntity.ok(APIResponse.success());
     }
 

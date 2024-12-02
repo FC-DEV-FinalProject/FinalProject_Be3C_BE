@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.AccountImageDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
@@ -20,9 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,13 +80,16 @@ public class AccountImageServiceImpl implements AccountImageService {
      */
     @Override
     public PageResponse<AccountImageResponseDto> findTraderAccountImages(Long strategyId, Integer page) {
+        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+
         Pageable pageable = PageRequest.of(page, size);
 
         String userRole = securityUtils.getUserRoleInSecurityContext();
 
         // trader일 경우, 본인의 전략인지 검증
         if(userRole.equals("TRADER")) {
-            validUser(strategyId);
+            validUser(exitingStrategy.getTrader().getId());
         }
 
         // member일 경우, 권한 없음 처리
@@ -97,7 +101,7 @@ public class AccountImageServiceImpl implements AccountImageService {
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
+        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
@@ -115,25 +119,35 @@ public class AccountImageServiceImpl implements AccountImageService {
     }
 
     // 실계좌이미지 삭제
-    public void deleteAccountImage(Long accountImageId) {
-        AccountImage accountImage = accountImageRepository.findById(accountImageId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+    @Transactional
+    public void deleteAccountImage(AccountImageDeleteRequestDto accountImageIdList) {
+        List<AccountImage> accountImageList = accountImageIdList.getAccountImageId().stream().map(accountImageId -> {
+            return accountImageRepository.findById(accountImageId).orElseThrow(() ->
+                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+        }).toList();
 
-        validUser(accountImage.getStrategy().getTrader().getId());
+        validUser(accountImageList.get(0).getStrategy().getTrader().getId());
 
         // 파일 삭제
-        fileServiceImpl.deleteFile(new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
+        accountImageIdList.getAccountImageId().stream().map(accountImageId -> {
+            return fileServiceImpl.deleteFile(new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageId));
+        });
 
-        accountImageRepository.deleteById(accountImageId);
+        // 실계좌이미지 삭제
+        accountImageRepository.deleteAll(accountImageList);
     }
 
     // 실계좌이미지 등록
     @Transactional
-    public void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList) {
+    public void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList, List<MultipartFile> images) {
         Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         validUser(savedStrategy.getTrader().getId());
+
+        if(requestDtoList.size() != images.size()) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVAILD_SIZE.getMessage(), ErrorCode.BAD_REQUEST);
+        }
 
         List<AccountImage> accountImageList = requestDtoList.stream().map(requestDto ->
                 AccountImage.builder()
@@ -146,7 +160,7 @@ public class AccountImageServiceImpl implements AccountImageService {
         // 파일 등록
         for(int i=0; i<accountImageList.size(); i++) {
             FileRequest fileRequest = new FileRequest(FileReferenceType.ACCOUNT_IMAGE, accountImageList.get(i).getId());
-            fileServiceImpl.uploadImage(requestDtoList.get(i).getImage(), fileRequest);
+            fileServiceImpl.uploadImage(images.get(i), fileRequest);
         }
     }
 

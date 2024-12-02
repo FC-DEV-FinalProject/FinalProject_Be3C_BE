@@ -30,8 +30,6 @@ public class MemberInfoController implements MemberInfoControllerDocs {
 
     private final EmailService emailService;
 
-
-
     /*
         회원 비밀번호 변경 api
         1. 비밀번호 변경에 성공했을 때 : OK
@@ -76,7 +74,7 @@ public class MemberInfoController implements MemberInfoControllerDocs {
     public ResponseEntity<APIResponse<String>> updateMemberInfo(
             @PathVariable Long id,
             @RequestPart MemberPatchInfoRequestDto memberPatchInfoRequestDto,
-            @RequestPart(name="file") MultipartFile file
+            @RequestPart(name="file", required = false) MultipartFile file
     ) {
         try {
             if(memberInfoService

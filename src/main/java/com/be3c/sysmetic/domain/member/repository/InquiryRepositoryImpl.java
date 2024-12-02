@@ -43,15 +43,15 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         if (searchText != null) {
             if (searchType.equals("strategy")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategy.name.contains(searchText));
+                    predicate.and(inquiry.strategyName.contains(searchText));
                 }
             } else if (searchType.equals("trader")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategy.trader.name.contains(searchText));
+                    predicate.and(inquiry.traderNickname.contains(searchText));
                 }
             } else if (searchType.equals("inquirer")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.inquirer.name.contains(searchText));
+                    predicate.and(inquiry.inquirerNickname.contains(searchText));
                 }
             }
         }
@@ -59,7 +59,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         QueryResults<Inquiry> results = jpaQueryFactory
                 .selectFrom(inquiry)
                 .where(predicate)
-                .orderBy(inquiry.inquiryRegistrationDate.desc()) // 따로 해서 최적화 가능
+                .orderBy(inquiry.id.desc()) // 따로 해서 최적화 가능
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();
@@ -87,7 +87,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
 
         // 트레이더 별
         if (traderId != null) {
-            predicate.and(inquiry.strategy.trader.id.eq(traderId));
+            predicate.and(inquiry.traderId.eq(traderId));
         }
 
         // 전체, 답변 대기, 답변 완료

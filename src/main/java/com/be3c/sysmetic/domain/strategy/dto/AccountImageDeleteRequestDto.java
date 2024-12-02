@@ -2,9 +2,9 @@ package com.be3c.sysmetic.domain.strategy.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Setter
 @Getter
@@ -12,10 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountImageRequestDto {
+public class AccountImageDeleteRequestDto {
 
-    @Schema(description = "실계좌 이미지 제목")
+    @Schema(description = "삭제할 실계좌 이미지 id 목록")
     @NotBlank
-    private String title;
+    List<Long> accountImageId;
 
 }
