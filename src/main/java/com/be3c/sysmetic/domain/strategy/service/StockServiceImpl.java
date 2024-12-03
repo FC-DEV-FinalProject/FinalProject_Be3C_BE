@@ -48,7 +48,6 @@ public class StockServiceImpl implements StockService {
         ).isEmpty();
     }
 
-
     /*
         단일 종목 찾기 메서드
         1. stockId + statusCode를 사용하여 종목 검색
@@ -81,7 +80,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public PageResponse<StockGetResponseDto> findItemPage(Integer page) {
         // Pageable 반환하는 메서드를 만들어서 사용하는 게 좋지 않을까?
-        Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
         Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
         if (stockPage.hasContent()) {
@@ -147,7 +146,12 @@ public class StockServiceImpl implements StockService {
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
-        if(!(findStock.getName().equals(stockPutRequestDto.getName()) && duplCheck(stockPutRequestDto.getName()))) {
+        /*
+            같은 이름이 존재 = true    같은 이름이 미존재 = false
+            원래 이름과 같음 = true    원래 이름과 같지 않음 = false
+         */
+        if(findStock.getName().equals(stockPutRequestDto.getName()) ||
+                duplCheck(stockPutRequestDto.getName())) {
             throw new ConflictException();
         }
 

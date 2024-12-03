@@ -40,7 +40,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
         Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(
                 id,
                 userId,
-                StrategyStatusCode.PRIVATE
+                StrategyStatusCode.PRIVATE.getCode()
         ).orElseThrow(EntityNotFoundException::new);
 
         if(dailyRepository.countByStrategyId(id) <= 2) {
