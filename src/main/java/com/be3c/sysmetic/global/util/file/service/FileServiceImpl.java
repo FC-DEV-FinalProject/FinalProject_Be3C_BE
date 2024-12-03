@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.global.util.file.service;
 
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import com.be3c.sysmetic.global.util.file.entity.File;
@@ -27,6 +28,9 @@ public class FileServiceImpl implements FileService {
 
     @Value("${file.max-size}")
     private long maxFileSize;
+
+    @Value("${default.profile.image.key}")
+    private String defaultProfileImageKey;
 
     /*
     ----------------------------------------------------------------------------------------
@@ -90,17 +94,24 @@ public class FileServiceImpl implements FileService {
     @Override
     public String getFilePath(@Valid FileRequest fileRequest) {
 
+        String key;
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
-            log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
-            throw new FileNotFoundException();
+
+            if(fileRequest.referenceType().equals(FileReferenceType.MEMBER)){
+                key = defaultProfileImageKey;
+            } else {
+                log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
+                throw new FileNotFoundException();
+            }
+        } else {
+            key = files.get(0).getPath();
         }
 
-        File file = files.get(0);
         if(files.size()>1)
             log.warn("파일이 한 개가 아닙니다. 파일 참조 정보: {}", fileRequest);
 
-        return s3Service.createPresignedGetUrl(file.getPath());
+        return s3Service.createPresignedGetUrl(key);
     }
 
     @Override
