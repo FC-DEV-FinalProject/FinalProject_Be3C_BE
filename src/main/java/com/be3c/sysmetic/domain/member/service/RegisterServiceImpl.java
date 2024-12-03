@@ -139,7 +139,7 @@ public class RegisterServiceImpl implements RegisterService {
     private Member saveMember(RegisterRequestDto dto) {
         try {
             Member member = Member.builder()
-                    .roleCode(dto.getRoleCode().getCode())
+                    .roleCode(dto.getRoleCode().toString())
                     .email(dto.getEmail())
                     .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                     .name(dto.getName())
