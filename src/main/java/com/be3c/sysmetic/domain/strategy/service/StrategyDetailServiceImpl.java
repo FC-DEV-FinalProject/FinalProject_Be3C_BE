@@ -12,6 +12,7 @@ import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,9 +78,9 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     // 분석 지표 그래프 데이터 요청
     @Override
     @Transactional
-    public StrategyAnalysisResponseDto getAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+    public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
-        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(id, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
 
         if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
 

@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -111,19 +112,18 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         findGraphAnalysis : 분석 그래프 데이터 - optionOne, optionTwo, period 에 해당하는 컬럼 반환
     */
     @Override
-    public StrategyAnalysisResponseDto findGraphAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
-
+    public StrategyAnalysisResponseDto findGraphAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
         LocalDate latestDate = jpaQueryFactory
                 .select(strategyGraphAnalysis.date.max())
                 .from(strategyGraphAnalysis)
-                .where(strategyGraphAnalysis.strategy.id.eq(id))
+                .where(strategyGraphAnalysis.strategy.id.eq(strategyId))
                 .fetchOne();
 
         LocalDate startDate = calculateStartDate(latestDate, period);
 
         List<StrategyGraphAnalysis> result = jpaQueryFactory
                 .selectFrom(strategyGraphAnalysis)
-                .where(strategyGraphAnalysis.strategy.id.eq(id),
+                .where(strategyGraphAnalysis.strategy.id.eq(strategyId),
                         strategyGraphAnalysis.date.between(startDate, latestDate))
                 .orderBy(strategyGraphAnalysis.date.asc())
                 .fetch();

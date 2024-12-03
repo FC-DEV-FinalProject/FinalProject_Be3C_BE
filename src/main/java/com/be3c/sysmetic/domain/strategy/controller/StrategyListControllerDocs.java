@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByNameDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +36,7 @@ public interface StrategyListControllerDocs {
                     @ApiResponse(responseCode = "400")
             }
     )
-    APIResponse<PageResponse<TraderNicknameListDto>> searchByTraderNickname(
+    APIResponse<PageResponse<TraderNickNameListResponseDto>> searchByTraderNickname(
             @RequestParam("nickname") String nickname,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum);
 
