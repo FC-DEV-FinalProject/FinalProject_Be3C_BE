@@ -42,7 +42,6 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
 
     @Override
     @Transactional
-    // 아이콘 / 프로필 이미지
     public StrategyDetailDto getDetail(Long id) {
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);

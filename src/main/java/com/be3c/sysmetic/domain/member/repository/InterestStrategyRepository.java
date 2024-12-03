@@ -19,19 +19,22 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
             (
             s.id,
             s.name,
+            m.id,
             m.name,
             null,
+            me.id,
             null,
             null,
             s.cycle,
             s.followerCount,
-            s.accumulatedProfitLossRate,
             s.smScore,
+            s.accumulatedProfitLossRate,
             s.mdd
             )
         FROM InterestStrategy i
         JOIN i.strategy s
         JOIN s.trader m
+        JOIN i.strategy.method me
         WHERE i.folder.member.id = :memberId AND i.folder.id = :folderId AND i.statusCode = :statusCode
         """)
     Page<InterestStrategyGetResponseDto> findPageByIdAndStatusCode(

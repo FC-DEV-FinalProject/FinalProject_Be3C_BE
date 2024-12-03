@@ -29,6 +29,7 @@ public class StrategyListDto {
     private Long strategyId;
     private Long traderId;
     private String traderNickname;
+    private String traderProfileImage;
     private Long methodId;
     private String methodIconPath;
     private String name;
@@ -38,11 +39,12 @@ public class StrategyListDto {
     private Double mdd;
     private Double smScore;
 
-    public static StrategyListDto getStrategyListDto(Strategy strategy, StockListDto stockList, String methodIconPath) {
+    public static StrategyListDto getStrategyListDto(Strategy strategy, StockListDto stockList, String traderProfileImage, String methodIconPath) {
         return StrategyListDto.builder()
                 .strategyId(strategy.getId())
                 .traderId(strategy.getTrader().getId())
                 .traderNickname(strategy.getTrader().getNickname())
+                .traderProfileImage(traderProfileImage)
                 .methodId(strategy.getMethod().getId())
                 .methodIconPath(methodIconPath)
                 .name(strategy.getName())

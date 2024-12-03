@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
@@ -39,7 +40,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
         Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(
                 id,
                 userId,
-                CLOSE_STRATEGY.getCode()
+                StrategyStatusCode.PRIVATE
         ).orElseThrow(EntityNotFoundException::new);
 
         if(dailyRepository.countByStrategyId(id) <= 2) {
