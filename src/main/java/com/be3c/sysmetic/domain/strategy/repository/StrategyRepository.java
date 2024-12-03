@@ -38,28 +38,6 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     @Query("SELECT s FROM Strategy s WHERE s.statusCode != 'NOT_USING_STATE'")
     List<Strategy> findAllUsingState();
 
-    @Query("""
-        SELECT new com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto
-            (
-            s.id,
-            s.name,
-            m.name,
-            null,
-            s.followerCount,
-            s.smScore,
-            ss.accumulatedProfitLossRate,
-            ss.maximumCapitalReductionRate
-            )
-        FROM InterestStrategy i
-        JOIN i.strategy s
-        JOIN s.trader m
-        JOIN StrategyStatistics ss on ss.strategy.id = s.id
-        WHERE i.member.id = :memberId AND i.folder.id = :folderId AND i.statusCode = :statusCode
-        """)
-    Page<MyStrategyGetResponseDto> findPageByIdAndStatusCode(
-            Long memberId, Long folderId, String statusCode, Pageable pageable
-    );
-
     // 전략 비공개 상태로 변환
     @Query("UPDATE Strategy s SET s.statusCode = 'PRIVATE' WHERE s.id = :strategyId")
     int updateStatusToPrivate(@Param("strategyId") Long strategyId);

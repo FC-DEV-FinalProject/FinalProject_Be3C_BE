@@ -10,10 +10,8 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "관리자 메인 페이지 유저 비율 반환 dto")
+@Schema(description = "관리자 구글 애널리틱스 반환 dto")
 public class RunReportResponseDto {
-    RunReportResponse dayReportResponse;
-    RunReportResponse weeklyReportResponse;
-    RunReportResponse monthlyReportResponse;
-    RunReportResponse allReportResponse;
+    String activeUser;
+    String avgSessionDuration;
 }

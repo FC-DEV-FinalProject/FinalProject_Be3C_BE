@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class AdminMainServiceImpl implements AdminMainService {
     @Override
     public AdminMainResponseDto getAdminMain() {
         return AdminMainResponseDto.builder()
-                .runReportResponseDto(getRunReportResponseDto())
+                .runReportResponseDto(getReport(LocalDate.of(2015, 8, 14), LocalDate.now())) // 전체 기간)
                 .strategyCount(getStrategyCount())
                 .memberCount(getMemberRatio())
                 .adminNoticeResponse(getAdminNoticeResponseDto())
@@ -51,32 +52,52 @@ public class AdminMainServiceImpl implements AdminMainService {
                 .build();
     }
 
-    private RunReportResponseDto getRunReportResponseDto() {
-        return RunReportResponseDto.builder()
-                .allReportResponse(getReport(LocalDate.of(2000, 1, 1), LocalDate.now())) // 전체 기간
-                .monthlyReportResponse(getReport(LocalDate.now().minusMonths(1), LocalDate.now())) // 최근 1개월
-                .weeklyReportResponse(getReport(LocalDate.now().minusWeeks(1), LocalDate.now())) // 최근 1주
-                .dayReportResponse(getReport(LocalDate.now().minusDays(1), LocalDate.now())) // 최근 1일
-                .build();
+    @Override
+    public RunReportResponseDto getAnalytics(String period) {
+        return switch (period) {
+            case "day" -> getReport(LocalDate.now().minusDays(1), LocalDate.now());
+            case "week" -> getReport(LocalDate.now().minusWeeks(1), LocalDate.now());
+            case "month" -> getReport(LocalDate.now().minusMonths(1), LocalDate.now());
+            case "year" -> getReport(LocalDate.now().minusYears(1), LocalDate.now());
+            case "all" -> getReport(LocalDate.of(2015, 8, 14), LocalDate.now());
+            default -> throw new IllegalArgumentException("Invalid period: " + period);
+        };
     }
 
-    private RunReportResponse getReport(LocalDate startDate, LocalDate endDate) {
+    private RunReportResponseDto getReport(LocalDate startDate, LocalDate endDate) {
+        // 요청 생성
         RunReportRequest request = RunReportRequest.newBuilder()
                 .setProperty("properties/" + propertyId) // Analytics 속성 ID
                 .addDateRanges(DateRange.newBuilder()
                         .setStartDate(startDate.toString())
                         .setEndDate(endDate.toString()))
-                .addDimensions(Dimension.newBuilder().setName("country"))
                 .addMetrics(Metric.newBuilder().setName("activeUsers"))
+                .addMetrics(Metric.newBuilder().setName("averageSessionDuration"))
                 .build();
+
         RunReportResponse runReportResponse = analyticsDataClient.runReport(request);
 
-        runReportResponse.getRowsList().forEach(row -> {
-            log.info("Country: {}", row.getDimensionValues(0).getValue());
-            log.info("Active Users: {}", row.getMetricValues(0).getValue());
-        });
+        Row row = runReportResponse.getRows(0);
+        String activeUsersRaw = row.getMetricValues(0).getValue(); // 활성 사용자 수
+        String avgSessionDurationRaw = row.getMetricValues(1).getValue(); // 초 단위
 
-        return analyticsDataClient.runReport(request); // 데이터 요청
+        double activeUsers = Double.parseDouble(activeUsersRaw);
+        double avgSessionDuration = Double.parseDouble(avgSessionDurationRaw);
+
+        double avgParticipationTimePerUserInSeconds = avgSessionDuration / activeUsers;
+
+        // 초 단위를 분과 초로 변환
+        int minutes = (int) avgParticipationTimePerUserInSeconds / 60;
+        int seconds = (int) avgParticipationTimePerUserInSeconds % 60;
+
+        // 포맷된 값 생성 (예: "2분 30초")
+        String formattedAvgParticipationTime = String.format("%d분 %d초", minutes, seconds);
+
+        // DTO 반환
+        return RunReportResponseDto.builder()
+                .activeUser(activeUsersRaw)
+                .avgSessionDuration(formattedAvgParticipationTime) // 사용자당 평균 참여 시간
+                .build();
     }
 
     private MemberCountResponseDto getMemberRatio() {
@@ -94,7 +115,7 @@ public class AdminMainServiceImpl implements AdminMainService {
 
     private AdminInquiryResponseDto getInquiryResponseDto() {
         Long inquiryCount = inquiryRepository.count();
-        Long answeredInquiry = inquiryRepository.findAnsweredInquiry();
+        Long answeredInquiry = inquiryRepository.countAnsweredInquiry();
 
         return AdminInquiryResponseDto.builder()
                 .inquiryCount(inquiryCount)

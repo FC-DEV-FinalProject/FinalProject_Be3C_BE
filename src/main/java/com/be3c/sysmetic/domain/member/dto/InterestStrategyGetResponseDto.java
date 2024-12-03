@@ -21,8 +21,17 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "트레이더 이름", example = "Jane Doe")
     private String traderName;
 
+    @Schema(description = "사용자 프로필 이미지")
+    private String traderProfilePath;
+
     @Schema(description = "아이콘 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
-    private List<String> iconPath;
+    private String methodIconPath;
+
+    @Schema(description = "종목 아이콘 경로")
+    private List<String> stockIconPath;
+
+    @Schema(description = "주기")
+    private Character cycle;
 
     @Schema(description = "팔로워 수", example = "1200")
     private Long followerCount;
@@ -36,13 +45,14 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "최대 낙폭(MDD)", example = "-12.34")
     private Double MDD;
 
-    // Hibernate에서 사용할 생성자
-    public InterestStrategyGetResponseDto(Long id, String strategyName, String traderName, List<String> iconPath,
-                                          Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
+    public InterestStrategyGetResponseDto(Long id, String strategyName, String traderName, String traderProfilePath, String methodIconPath, List<String> stockIconPath, Character cycle, Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
         this.id = id;
         this.strategyName = strategyName;
         this.traderName = traderName;
-        this.iconPath = iconPath;
+        this.traderProfilePath = traderProfilePath;
+        this.methodIconPath = methodIconPath;
+        this.stockIconPath = stockIconPath;
+        this.cycle = cycle;
         this.followerCount = followerCount;
         this.accumulatedProfitRatio = accumulatedProfitRatio;
         this.SMScore = SMScore;

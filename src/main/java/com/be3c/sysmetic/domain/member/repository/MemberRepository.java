@@ -16,13 +16,13 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'RC001'")
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'USER'")
     Long countUser();
 
-    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'RC002'")
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'TRADER'")
     Long countTrader();
 
-    @Query("SELECT count(m) FROM Member m WHERE m.roleCode IN ('RC003', 'RC004')")
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode IN ('USER_MANAGER', 'TRADER_MANAGER')")
     Long countManager();
 
     boolean existsByEmail(String email);
