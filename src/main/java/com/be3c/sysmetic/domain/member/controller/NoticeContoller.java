@@ -281,7 +281,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
-    @GetMapping("/admin/notice/{noticeId}/modify-page")
+    @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,

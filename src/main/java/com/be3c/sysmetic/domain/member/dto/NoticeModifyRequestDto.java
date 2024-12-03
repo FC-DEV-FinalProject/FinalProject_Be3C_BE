@@ -46,9 +46,25 @@ public class NoticeModifyRequestDto {
     @NotNull
     private Boolean isOpen;
 
-    @Schema(description = "지금 공지사항에 있는 파일의 id와 존재 유무 Map의 리스트", example = "[]")
+    @Schema(description = "지금 공지사항에 있는 파일의 id와 존재 유무 Map의 리스트",
+            example = "[{\n" +
+                    "        \"fileId\" : 1, \n" +
+                    "        \"exist\" : true\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "        \"fileId\" : 3, \n" +
+                    "        \"exist\" : false\n" +
+                    "    }]")
     private List<NoticeExistFileImageRequestDto> existFileDtoList;
 
-    @Schema(description = "지금 공지사항에 있는 이미지의 id와 존재 유무 Map의 리스트", example = "[]")
+    @Schema(description = "지금 공지사항에 있는 이미지의 id와 존재 유무 Map의 리스트",
+            example = "[{\n" +
+                    "        \"fileId\" : 1, \n" +
+                    "        \"exist\" : true\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "        \"fileId\" : 3, \n" +
+                    "        \"exist\" : false\n" +
+                    "    }]")
     private List<NoticeExistFileImageRequestDto> existImageDtoList;
 }

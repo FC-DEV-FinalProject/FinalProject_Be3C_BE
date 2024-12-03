@@ -38,7 +38,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -74,7 +75,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -124,7 +126,8 @@ public interface InquiryControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
@@ -132,15 +135,18 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 문의를 찾지 못함 (NOT_FOUND)"
+                    description = "해당 문의를 찾지 못함 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "207",
-                    description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)"
+                    description = "문의 중 일부만 삭제에 실패 (MULTI_STATUS)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminInquiryList(
@@ -196,8 +202,7 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "등록하는 질문자나 해당 전략의 정보를 찾지 못함 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    description = "등록하는 질문자나 해당 전략의 정보를 찾지 못함 (NOT_FOUND)"
             )
     })
     ResponseEntity<APIResponse<Long>> saveInquirerInquiry(
@@ -222,7 +227,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -257,7 +263,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
@@ -289,7 +296,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -390,8 +398,7 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "등록하는 문의 정보를 찾지 못했을 때 (NOT_FOUND)",
-                    content = @Content(schema = @Schema(implementation = APIResponse.class))
+                    description = "등록하는 문의 정보를 찾지 못했을 때 (NOT_FOUND)"
             )
     })
     ResponseEntity<APIResponse<Long>> saveTraderInquiryAnswer (
@@ -416,7 +423,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({
@@ -451,7 +459,8 @@ public interface InquiryControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     @Parameters({

@@ -62,7 +62,7 @@ public class NoticeServiceImpl implements NoticeService {
 
         if(imageExists) {
             for (MultipartFile image : imageList) {
-                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+                fileService.uploadImage(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
         }
 
@@ -119,7 +119,8 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
                                 Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                                List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
+                                List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList,
+                                List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
@@ -139,8 +140,13 @@ public class NoticeServiceImpl implements NoticeService {
                 countFile++;
             }
         }
-
-        countFile = countFile + newFileList.size();
+        int newFileListSize;
+        if (newFileList == null) {
+            newFileListSize = 0;
+        } else {
+            newFileListSize = newFileList.size();
+        }
+        countFile = countFile + newFileListSize;
         if (countFile > 3) {
             throw new IllegalArgumentException("파일이 3개 이상입니다.");
         }
@@ -156,7 +162,13 @@ public class NoticeServiceImpl implements NoticeService {
                 countImage++;
             }
         }
-        countImage = countImage + newImageList.size();
+        int newImageListSize;
+        if (newImageList == null) {
+            newImageListSize = 0;
+        } else {
+            newImageListSize = newImageList.size();
+        }
+        countImage = countImage + newImageListSize;
         if (countImage > 5) {
             throw new IllegalArgumentException("이미지가 5개 이상입니다.");
         }
@@ -165,15 +177,15 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
 
-        if(fileExists) {
+        if(!(newFileList == null || newFileList.isEmpty())) {
             for (MultipartFile file : newFileList) {
                 fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             }
         }
 
-        if(imageExists) {
+        if(!(newImageList == null || newImageList.isEmpty())) {
             for (MultipartFile image : newImageList) {
-                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+                fileService.uploadImage(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
         }
 

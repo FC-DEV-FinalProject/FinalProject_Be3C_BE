@@ -18,13 +18,26 @@ public class InquiryAdminListOneShowResponseDto {
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
 
+    @Schema(description = "트레이더 ID", example = "12345")
+    private String traderId;
+
     @Schema(description = "트레이더 닉네임", example = "TraderNick")
     private String traderNickname;
 
-    // 전략 위 아이콘들
+    @Schema(description = "매매방식명", example = "매매방식")
+    private Long methodId;
+
+    @Schema(description = "매매 유형 아이콘", example = "/path")
+    private String methodIconPath;
+
+    @Schema(description = "전략 ID", example = "12345")
+    private String strategyId;
 
     @Schema(description = "전략 이름", example = "Strategy A")
     private String strategyName;
+
+    @Schema(description = "주기", example = "Strategy A")
+    private Character cycle;
 
     @Schema(description = "문의 등록 일시", example = "2024-11-22T15:30:00")
     private LocalDateTime inquiryRegistrationDate;

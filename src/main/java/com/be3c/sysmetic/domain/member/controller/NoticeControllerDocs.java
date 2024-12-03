@@ -44,9 +44,9 @@ public interface NoticeControllerDocs {
                     description = "데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
             ),
             @ApiResponse(
-            responseCode = "404",
-            description = "등록하는 관리자 정보를 찾지 못함 (NOT_FOUND)"
-    )
+                    responseCode = "404",
+                    description = "등록하는 관리자 정보를 찾지 못함 (NOT_FOUND)"
+            )
     })
     ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestPart @Valid NoticeSaveRequestDto noticeSaveRequestDto,
@@ -71,7 +71,8 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
@@ -82,8 +83,8 @@ public interface NoticeControllerDocs {
 
     // 관리자 공지사항 목록 공개여부 수정 API
     @Operation(
-            summary = "관리자 공지사항 목록 공개여부 수정",
-            description = "관리자가 공지사항의 공개여부를 수정하는 API"
+            summary = "관리자 공지사항 목록에서 개별 공개여부 수정",
+            description = "관리자가 공지사항 목록에서 개별 공지사항의 공개여부를 수정하는 API"
     )
     @ApiResponses({
             @ApiResponse(
@@ -129,7 +130,8 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
@@ -161,7 +163,8 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
@@ -200,7 +203,7 @@ public interface NoticeControllerDocs {
     })
     ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable(name="noticeId") Long noticeId,
-            @RequestBody @Valid NoticeModifyRequestDto noticeModifyRequestDto,
+            @RequestPart(value = "NoticeModifyRequestDto") @Valid NoticeModifyRequestDto noticeModifyRequestDto,
             @RequestPart(value = "newFileList", required = false) List<MultipartFile> newFileList,
             @RequestPart(value = "newImageList", required = false) List<MultipartFile> newImageList);
 
@@ -240,7 +243,8 @@ public interface NoticeControllerDocs {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "403",
-                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "200",
@@ -248,11 +252,13 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)"
+                    description = "해당 공지사항을 찾지 못함 (NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             ),
             @ApiResponse(
                     responseCode = "207",
-                    description = "공지사항 중 삭제에 실패 (MULTI_STATUS)"
+                    description = "공지사항 중 삭제에 실패 (MULTI_STATUS)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<Map<Long, String>>> deleteAdminNoticeList(
@@ -271,7 +277,8 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
@@ -296,7 +303,8 @@ public interface NoticeControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)"
+                    description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
+                    content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(

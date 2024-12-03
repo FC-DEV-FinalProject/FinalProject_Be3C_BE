@@ -271,7 +271,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
-    @GetMapping("/strategy/{strategyId}/qna-page")
+    @GetMapping("/strategy/{strategyId}/qna")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable(value = "strategyId") Long strategyId) {
 
@@ -507,7 +507,7 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
-    @GetMapping("/member/qna/{qnaId}/modify-page")
+    @GetMapping("/member/qna/{qnaId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
