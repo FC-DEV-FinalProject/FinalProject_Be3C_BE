@@ -58,7 +58,7 @@ public class RedisUtils {
     public String getEmailAuthCode(String email) {
         if(redisTemplate1.opsForValue().get(email) == null) {
             // 인증코드 조회 실패 시 예외발생
-            throw new MemberBadRequestException(MemberExceptionMessage.REDIS_EMAIL_CODE_ERROR.getMessage());
+            throw new MemberBadRequestException(MemberExceptionMessage.ERROR_REDIS_EMAIL_CODE.getMessage());
         }
         return redisTemplate1.opsForValue().get(email);
     }

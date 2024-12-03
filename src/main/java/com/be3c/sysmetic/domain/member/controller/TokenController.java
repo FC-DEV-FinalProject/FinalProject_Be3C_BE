@@ -45,7 +45,7 @@ public class TokenController {
         // Access 토큰 추출
         String accessToken = jwtTokenProvider.extractToken(request);
         if(accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.fail(ErrorCode.UNAUTHORIZED, "토큰 미존재 또는 정상적이지 않은 토큰"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.fail(ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰이거나 토큰이 누락되었습니다."));
         }
 
         // 토큰에서 회원id 추출
