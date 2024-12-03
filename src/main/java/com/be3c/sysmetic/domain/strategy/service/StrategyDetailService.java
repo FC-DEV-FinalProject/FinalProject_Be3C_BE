@@ -13,7 +13,6 @@ public interface StrategyDetailService {
     // 전략 상세 페이지 기본 정보 요청
     StrategyDetailDto getDetail(Long id);
 
-
     // 분석 지표 그래프 데이터 요청
     StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period);
 

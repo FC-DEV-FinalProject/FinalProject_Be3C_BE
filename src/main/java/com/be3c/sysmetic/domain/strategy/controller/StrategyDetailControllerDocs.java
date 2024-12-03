@@ -28,10 +28,10 @@ public interface StrategyDetailControllerDocs {
     @Operation(
             summary = "전략 상세 페이지 - 분석 지표",
             description = "전략 분석 지표 <br><br> " +
-                "id - 전략 id <br><br> " +
-                "optionOne - defaultValue = ACCUMULATED_PROFIT_LOSS_RATE <br><br> " +
-                "optionTwo - defaultValue = PRINCIPAL <br><br><br> " +
-                "option 입력 값 : STANDARD_AMOUNT, CURRENT_BALANCE, PRINCIPAL, ACCUMULATED_DEPOSIT_WITHDRAWAL_AMOUNT, DEPOSIT_WITHDRAWAL_AMOUNT, DAILY_PROFIT_LOSS_AMOUNT, " +
+                    "id - 전략 id <br><br> " +
+                    "optionOne - defaultValue = ACCUMULATED_PROFIT_LOSS_RATE <br><br> " +
+                    "optionTwo - defaultValue = PRINCIPAL <br><br><br> " +
+                    "option 입력 값 : STANDARD_AMOUNT, CURRENT_BALANCE, PRINCIPAL, ACCUMULATED_DEPOSIT_WITHDRAWAL_AMOUNT, DEPOSIT_WITHDRAWAL_AMOUNT, DAILY_PROFIT_LOSS_AMOUNT, " +
                     "DAILY_PROFIT_LOSS_RATE, ACCUMULATED_PROFIT_LOSS_AMOUNT, CURRENT_CAPITAL_REDUCTION_AMOUNT, CURRENT_CAPITAL_REDUCTION_RATE, " +
                     "AVERAGE_PROFIT_LOSS_AMOUNT, AVERAGE_PROFIT_LOSS_RATE, WINNING_RATE, PROFIT_FACTOR, ROA",
             responses= {

@@ -16,9 +16,10 @@ import java.time.LocalDate;
 @Table(name = "strategy_graph_analysis")
 public class StrategyGraphAnalysis extends BaseEntity {
 
-    /*
-        StrategyGraphAnalysis : 전략 상세 페이지 내 그래프 데이터 & 메인 페이지 그래프 데이터 (날짜별 매 행 데이터 필요)
 
+    /*
+
+        StrategyGraphAnalysis : 전략 상세 페이지 내 그래프 데이터 & 메인 페이지 그래프 데이터 (날짜별 매 행 데이터 필요)
         id : id
         strategy : 전략
         daily : 일간 데이터
@@ -27,6 +28,10 @@ public class StrategyGraphAnalysis extends BaseEntity {
         currentBalance : 잔고
         principal : 원금
         accumulatedDepositWithdrawalAmount : 누적입출금액
+        depositWithdrawalAmount : 일별입출금액
+        profitLossAmount : 손익금
+        profitLossRate : 손익률
+        accumulatedProfitLossAmount : 누적손익금
         currentCapitalReductionAmount : 현재자본인하금액
         currentCapitalReductionRate : 현재자본인하율
         averageProfitLossAmount : 평균손익금액
@@ -36,7 +41,7 @@ public class StrategyGraphAnalysis extends BaseEntity {
         roa : ROA
         maximumCapitalReductionAmount : 최대자본인하금액
         totalProfit : 총이익
-        totalLoss : 총손실 
+        totalLoss : 총손실
     */
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
