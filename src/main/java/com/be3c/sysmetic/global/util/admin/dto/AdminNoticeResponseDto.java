@@ -13,10 +13,13 @@ import java.time.LocalDateTime;
 @Schema(description = "관리자 메인 페이지 전략 수 반환 dto")
 public class AdminNoticeResponseDto {
 
+    @Schema(description = "공지사항 ID")
     Long noticeId;
 
+    @Schema(description = "공지사항 제목")
     String noticeTitle;
 
+    @Schema(description = "공지사항 등록 날짜")
     LocalDate noticeRegistrationDate;
 
     public AdminNoticeResponseDto(Long noticeId, String noticeTitle, LocalDateTime noticeRegistrationDate) {
