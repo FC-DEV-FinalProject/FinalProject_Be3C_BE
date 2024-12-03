@@ -19,7 +19,7 @@ public class ExcelControllerImpl implements ExcelController {
 
     @Override
     @GetMapping("/daily")
-    public ResponseEntity<APIResponse<String>> getExcelExample() {
+    public ResponseEntity<APIResponse<String>> getExcelForm() {
 
         String url = excelService.getExcelFormUrl();
 

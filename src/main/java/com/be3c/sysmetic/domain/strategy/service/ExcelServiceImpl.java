@@ -36,12 +36,12 @@ public class ExcelServiceImpl implements ExcelService {
     final StrategyCalculator strategyCalculator;
     final S3Service s3Service;
 
-    @Value("${daily.excel.form.key}")
-    private String excelFormKey;
+    @Value("${daily.excel.form.path}")
+    private String excelFormPath;
 
     @Override
     public String getExcelFormUrl(){
-        return s3Service.createPresignedGetUrl(excelFormKey);
+        return s3Service.createPresignedGetUrl(excelFormPath+"(양식)_일간분석_데이터_입력.xlsx");
     }
 
     /**

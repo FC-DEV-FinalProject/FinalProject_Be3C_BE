@@ -36,7 +36,7 @@ public interface ExcelController {
             }
     )
     @GetMapping("/daily")
-    ResponseEntity<APIResponse<String>> getExcelExample();
+    ResponseEntity<APIResponse<String>> getExcelForm();
 
     @Operation(
             summary = "엑셀 파일 업로드",
