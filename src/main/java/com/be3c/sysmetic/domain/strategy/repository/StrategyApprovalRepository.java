@@ -135,6 +135,14 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
             Pageable pageable
     );
 
+    @Query("""
+    SELECT
+    count(*)
+    FROM StrategyApprovalHistory s
+    WHERE s.statusCode = 'SA001'
+    """)
+    Long countWaitingStrategyCount();
+
     @Modifying
     @Query("DELETE FROM StrategyApprovalHistory h WHERE h.strategy.id = :strategyId")
     void deleteByStrategyId(Long strategyId);

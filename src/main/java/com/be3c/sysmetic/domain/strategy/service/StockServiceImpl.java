@@ -153,9 +153,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
-        fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
-        fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
-        fileService.uploadImage(file, new FileRequest(FileReferenceType.STOCK, findStock.getId()));
+        fileService.updateImage(file, new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;
     }

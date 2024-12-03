@@ -35,6 +35,9 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "종목 아이콘 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
     private List<String> stockIconPath;
 
+    @Schema(description = "주기")
+    private Character cycle;
+
     @Schema(description = "팔로워 수", example = "1200")
     private Long followerCount;
 
@@ -47,7 +50,7 @@ public class InterestStrategyGetResponseDto {
     @Schema(description = "최대 낙폭(MDD)", example = "-12.34")
     private Double MDD;
 
-    public InterestStrategyGetResponseDto(Long id, String strategyName, Long traderId, String traderName, String traderProfileImage, Long methodId, String methodIconPath, List<String> stockIconPath, Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
+    public InterestStrategyGetResponseDto(Long id, String strategyName, Long traderId, String traderName, String traderProfileImage, Long methodId, String methodIconPath, List<String> stockIconPath, Character cycle, Long followerCount, Double accumulatedProfitRatio, Double SMScore, Double MDD) {
         this.id = id;
         this.strategyName = strategyName;
         this.traderId = traderId;
@@ -56,6 +59,7 @@ public class InterestStrategyGetResponseDto {
         this.methodId = methodId;
         this.methodIconPath = methodIconPath;
         this.stockIconPath = stockIconPath;
+        this.cycle = cycle;
         this.followerCount = followerCount;
         this.accumulatedProfitRatio = accumulatedProfitRatio;
         this.SMScore = SMScore;
