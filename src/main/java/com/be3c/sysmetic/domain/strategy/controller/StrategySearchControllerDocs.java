@@ -33,7 +33,7 @@ public interface StrategySearchControllerDocs {
                     "{ \"methods\": [\"메뉴얼\", \"시스템\", \"하이브리드\"], <br> " +
                     " \"cycle\": [\"D\", \"P\"], <br> " +
                     "\"stockNames\": [\"국내주식\", \"해외주식\", \"국내ETF\", \"해외ETF\", \"국내채권\", \"해외채권\", \"국내리츠\", \"해외리츠\"], <br> " +
-                    "\"accumulatedProfitLossRateRangeStart\": \"ALL\", \"LESS_THAN_YEAR\", \"ONE_TO_TWO_YEAR\", \"TWO_TO_THREE_YEAR\", \"THREE_YEAR_MORE\",  중 하나 <br> " +
+                    "\"period\": \"ALL\", \"LESS_THAN_YEAR\", \"ONE_TO_TWO_YEAR\", \"TWO_TO_THREE_YEAR\", \"THREE_YEAR_MORE\",  중 하나 <br> " +
                     " \"accumulatedProfitLossRateRangeStart\": \"90\", <br> " +
                     " \"accumulatedProfitLossRateRangeEnd\": \"100\" }",
             responses = {
