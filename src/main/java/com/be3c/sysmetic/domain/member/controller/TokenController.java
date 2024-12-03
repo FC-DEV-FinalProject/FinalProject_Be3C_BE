@@ -75,6 +75,8 @@ public class TokenController {
                 .nickname(member.getNickname())
                 .phoneNumber(member.getPhoneNumber())
                 .profileImage(profileImage)
+                .totalFollowerCount(member.getTotalFollow())
+                .totalStrategyCount(member.getTotalStrategyCount())
                 .build();
 
         // 회원 정보 반환

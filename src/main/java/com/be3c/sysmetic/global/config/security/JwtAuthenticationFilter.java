@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. Access 토큰 유효성 검증 (true- 유효한 토큰, false - 만료된 토큰, exception - 예외)
         // 초기화 안 해도 됩니다.
-        boolean accessTokenValidResult = false;
+        boolean accessTokenValidResult;
         try {
             accessTokenValidResult = jwtTokenProvider.validateToken(accessToken);
         } catch (AuthenticationCredentialsNotFoundException e) {

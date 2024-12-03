@@ -52,7 +52,7 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     Optional<Strategy> findByIdAndTraderIdAndStatusCode(
             @Param("id") Long id,
             @Param("userId") Long userId,
-            @Param("statusCode") StrategyStatusCode statusCode
+            @Param("statusCode") String statusCode
     );
 
     @Modifying

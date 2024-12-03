@@ -50,7 +50,7 @@ public class StockController implements StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stock/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @NotBlank @RequestParam String name
+            @RequestParam String name
     ) {
         if(stockService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)

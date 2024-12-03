@@ -104,7 +104,6 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
 
         strategyApprovalRepository.save(strategyApproval);
 
-        // TODO - 메일 발송 시스템 작성 필요
         return true;
     }
 
