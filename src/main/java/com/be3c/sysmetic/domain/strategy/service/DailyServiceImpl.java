@@ -325,12 +325,14 @@ public class DailyServiceImpl implements DailyService {
 
     private Double getAccumulatedProfitLossAmount(Long strategyId, Double profitLossAmount) {
         Double accumulatedProfitLossAmount = dailyRepository.findTotalProfitLossAmountByStrategyId(strategyId);
+        if(accumulatedProfitLossAmount == null) accumulatedProfitLossAmount = 0.0;
         accumulatedProfitLossAmount += profitLossAmount; // 현재 손익금 추가
         return accumulatedProfitLossAmount;
     }
 
     private Double getAccumulatedProfitLossRate(Long strategyId, Double profitLossRate) {
         Double accumulativeProfitLossRate = dailyRepository.findTotalProfitLossRateByStrategyId(strategyId);
+        if(accumulativeProfitLossRate == null) accumulativeProfitLossRate = 0.0;
         accumulativeProfitLossRate += profitLossRate; // 현재 손익률 추가
         return accumulativeProfitLossRate;
     }

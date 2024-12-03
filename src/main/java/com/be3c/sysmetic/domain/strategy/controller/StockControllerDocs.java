@@ -147,7 +147,7 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PostMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> saveitem(
-            @Valid @RequestBody StockPostRequestDto stockPostRequestDto,
+            @Valid @RequestPart StockPostRequestDto stockPostRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     );
 
@@ -180,7 +180,7 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @PutMapping("/admin/stock")
     public ResponseEntity<APIResponse<String>> updateItem(
-            @Valid @RequestBody StockPutRequestDto stockPutRequestDto,
+            @Valid @RequestPart StockPutRequestDto stockPutRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     );
 
