@@ -7,7 +7,7 @@ import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,7 +39,7 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         booleanBuilder.and(getMethodCond(strategySearchRequestDto));
         booleanBuilder.and(getCycleCond(strategySearchRequestDto));
         booleanBuilder.and(getStockCond(strategySearchRequestDto));
-        // TODO 운용기간 추가 booleanBuilder.and(getPeriodCond(strategy, strategySearchRequestDto));
+        booleanBuilder.and(getPeriodCond(strategySearchRequestDto));
         booleanBuilder.and(getAccumulatedProfitLossRateRange(strategySearchRequestDto));
         booleanBuilder.and(strategy.statusCode.eq(String.valueOf(StrategyStatusCode.PUBLIC)));
 
@@ -112,21 +112,20 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
     */
     @Override
     public StrategyAnalysisResponseDto findGraphAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
-        QStrategyGraphAnalysis analysis = QStrategyGraphAnalysis.strategyGraphAnalysis;
 
         LocalDate latestDate = jpaQueryFactory
-                .select(analysis.date.max())
-                .from(analysis)
-                .where(analysis.strategy.id.eq(id))
+                .select(strategyGraphAnalysis.date.max())
+                .from(strategyGraphAnalysis)
+                .where(strategyGraphAnalysis.strategy.id.eq(id))
                 .fetchOne();
 
         LocalDate startDate = calculateStartDate(latestDate, period);
 
         List<StrategyGraphAnalysis> result = jpaQueryFactory
-                .selectFrom(analysis)
-                .where(analysis.strategy.id.eq(id),
-                        analysis.date.between(startDate, latestDate))
-                .orderBy(analysis.date.asc())
+                .selectFrom(strategyGraphAnalysis)
+                .where(strategyGraphAnalysis.strategy.id.eq(id),
+                        strategyGraphAnalysis.date.between(startDate, latestDate))
+                .orderBy(strategyGraphAnalysis.date.asc())
                 .fetch();
 
         List<String> xAxis = result.stream()
@@ -248,28 +247,64 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         return booleanBuilder;
     }
 
-    // TODO 전략 통계 서비스 calculateOperationPeriod - 전략 통계 매핑해서 가져오기
-    // private BooleanBuilder getPeriodCond(QStrategy strategy, StrategySearchRequestDto strategySearchRequestDto) {
-    //     BooleanBuilder booleanBuilder = new BooleanBuilder();
-    //     List<String> periodCond = strategySearchRequestDto.getPeriods();
-    //
-    //     if (periodCond == null || periodCond.isEmpty())
-    //         return booleanBuilder;
-    //
-    //     for (String period : periodCond){
-    //         switch (period) {
-    //             case "Total" :
-    //                 break;
-    //
-    //             case "1 Year Or Less" :
-    //                 booleanBuilder.and(strategy.period.loe)
-    //                 break;
-    //
-    //         }
-    //     }
-    //
-    //     return null;
-    // }
+    // 운용 기간 조건
+    private BooleanBuilder getPeriodCond(StrategySearchRequestDto strategySearchRequestDto) {
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+
+        if (strategySearchRequestDto.getPeriod() == null || strategySearchRequestDto.getPeriod().isEmpty())
+            return booleanBuilder;
+
+        switch (strategySearchRequestDto.getPeriod())  {
+            case "ALL" :
+                return booleanBuilder;
+            case "LESS_THAN_YEAR" :
+                // 1년 이하 : StrategyGraphAnalysis의 개수가 365 이하인 경우
+                return booleanBuilder.and(
+                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                .from(strategyGraphAnalysis)
+                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                .loe(365L));
+
+            case "ONE_TO_TWO_YEAR" :
+                // 1~2년 : 개수가 366~730인 경우
+                return booleanBuilder.and(
+                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                .from(strategyGraphAnalysis)
+                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                .goe(366L)
+                                .and(
+                                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                                .from(strategyGraphAnalysis)
+                                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                                .loe(730L)
+                                ));
+
+            case "TWO_TO_THREE_YEAR":
+                // 2~3년 : 개수가 731 이상, 1095 이하인 경우
+                return booleanBuilder.and(
+                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                .from(strategyGraphAnalysis)
+                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                .goe(731L)
+                                .and(
+                                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                                .from(strategyGraphAnalysis)
+                                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                                .loe(1095L)
+                                ));
+
+            case "THREE_YEAR_MORE":
+                // 3년 이상 : 개수가 1095인 경우
+                return booleanBuilder.and(
+                        JPAExpressions.select(strategyGraphAnalysis.count())
+                                .from(strategyGraphAnalysis)
+                                .where(strategyGraphAnalysis.strategy.id.eq(strategy.id))
+                                .gt(1005L));
+            default :
+                return booleanBuilder;
+        }
+    }
+
 
     // 누적수익률 조건
     private BooleanBuilder getAccumulatedProfitLossRateRange(StrategySearchRequestDto strategySearchRequestDto) {
