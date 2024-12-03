@@ -10,10 +10,12 @@ import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
 import com.be3c.sysmetic.global.util.file.exception.InvalidFileFormatException;
+import com.be3c.sysmetic.global.util.file.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,15 @@ public class ExcelServiceImpl implements ExcelService {
     final StrategyRepository strategyRepository;
     final DoubleHandler doubleHandler;
     final StrategyCalculator strategyCalculator;
+    final S3Service s3Service;
+
+    @Value("${daily.excel.form.key}")
+    private String excelFormKey;
+
+    @Override
+    public String getExcelFormUrl(){
+        return s3Service.createPresignedGetUrl(excelFormKey);
+    }
 
     /**
      * 엑셀 파일을 읽어서 일간 데이터를 DB에 저장

@@ -1,6 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.dto.KpRatios;
+import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.member.dto.MyStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.apache.http.cookie.SM;
 import org.springframework.data.domain.Page;
@@ -18,6 +21,9 @@ import java.util.List;
 
 @Repository
 public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
+    @Query("SELECT count(*) FROM Strategy s WHERE s.statusCode = 'PUBLIC'")
+    Long countOpenStatus();
+
     List<Strategy> findByTraderId(Long traderId);
 
     // 닉네임으로 트레이더 조회, 일치한 닉네임, 전략 수 내림차순 정렬
@@ -60,10 +66,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     @Query("SELECT count (*) FROM Strategy s WHERE s.trader.id = :memberId")
     long countByMemberId(@Param("memberId") Long memberId);
 
-
     @Query("SELECT COUNT(*) FROM Strategy s WHERE s.trader.id = :traderId AND s.statusCode = 'PUBLIC'")
     Long countStrategyByOneTrader(@Param("traderId") Long traderId);
-
 
     // MDD 업데이트
     @Modifying(clearAutomatically = true)

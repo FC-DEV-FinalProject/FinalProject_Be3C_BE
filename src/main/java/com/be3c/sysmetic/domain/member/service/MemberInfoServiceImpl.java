@@ -128,8 +128,7 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         Member member = findMemberById(userId);
 
         if(file != null) {
-            fileService.deleteFile(new FileRequest(FileReferenceType.MEMBER, member.getId()));
-            fileService.uploadImage(file, new FileRequest(FileReferenceType.MEMBER, member.getId()));
+            fileService.updateImage(file, new FileRequest(FileReferenceType.MEMBER, member.getId()));
         }
 
         if(memberPatchInfoRequestDto.getNicknameDuplCheck() &&

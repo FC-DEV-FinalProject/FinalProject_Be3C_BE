@@ -54,6 +54,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .traderId(strategy.getTrader().getId())
                         .traderNickname(strategy.getTrader().getNickname())
                         .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .methodId(strategy.getMethod().getId())
                         .methodName(strategy.getMethod().getName())
                         .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))

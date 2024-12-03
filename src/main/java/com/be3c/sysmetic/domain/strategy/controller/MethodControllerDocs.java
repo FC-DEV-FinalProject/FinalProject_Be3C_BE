@@ -147,7 +147,7 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> postMethod(
-            @Valid @RequestBody MethodPostRequestDto methodPostRequestDto,
+            @Valid @RequestPart MethodPostRequestDto methodPostRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
     );
 
@@ -191,8 +191,8 @@ public interface MethodControllerDocs {
             )
     })
     public ResponseEntity<APIResponse<String>> putMethod(
-            @Valid @RequestBody MethodPutRequestDto methodPutRequestDto,
-            @RequestPart(value = "file") MultipartFile file
+            @Valid @RequestPart MethodPutRequestDto methodPutRequestDto,
+            @RequestPart(name = "file", required = false) MultipartFile file
     );
 
     /*

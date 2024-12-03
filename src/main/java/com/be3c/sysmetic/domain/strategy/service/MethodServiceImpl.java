@@ -141,21 +141,20 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        if(duplCheck(methodPutRequestDto.getName())) {
-            throw new ConflictException();
-        }
-
         Method method = methodRepository.findByIdAndStatusCode(
                         methodPutRequestDto.getId(),
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
+        if(!(method.getName().equals(methodPutRequestDto.getName()) && duplCheck(methodPutRequestDto.getName()))) {
+            throw new ConflictException();
+        }
+
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
-        /*
-            업로드 파일 유무 확인
-            업로드 파일 업데이트
-         */
+
+        fileService.updateImage(file, new FileRequest(FileReferenceType.METHOD, method.getId()));
+
         return true;
     }
 
@@ -174,6 +173,8 @@ public class MethodServiceImpl implements MethodService {
 
         method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
+
+        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
         return true;
     }
 
