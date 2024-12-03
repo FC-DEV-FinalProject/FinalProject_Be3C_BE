@@ -18,8 +18,9 @@ public class StrategyDetailDto {
         traderId : 트레이더 PK
         traderNickname : 트레이더 닉네임
         traderProfileImage : 트레이더 프로필 이미지
-        methodName : 매매 유형 이름
-        methodIconPath : 매매 유형 아이콘 경로
+        methodId : 매매방식 id
+        methodName : 매매방식 이름
+        methodIconPath : 매매방식 아이콘 경로
         stockName : 종목 이름
         stockIconPath : 종목 아이콘 경로
         name : 전략명
@@ -41,6 +42,7 @@ public class StrategyDetailDto {
     private Long traderId;
     private String traderNickname;
     private String traderProfileImage;
+    private Long methodId;
     private String methodName;
     private String methodIconPath;
     private StockListDto stockList;
