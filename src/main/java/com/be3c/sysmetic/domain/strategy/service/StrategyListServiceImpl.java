@@ -52,26 +52,14 @@ public class StrategyListServiceImpl implements StrategyListService {
 
         Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE);
 
-        Page<Strategy> strategyListPage = strategyListRepository.findStrategiesOrderByAccumulatedProfitLossRate(pageable);
-
-        if (!strategyListPage.hasContent()) throw new NoSuchElementException("전략 목록이 없습니다.");
-
-        Page<StrategyListDto> result = strategyListPage.map(strategy ->
-                StrategyListDto.getStrategyListDto(
-                        strategy,
-                        stockGetter.getStocks(strategy.getId()),
-                        fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
-                        fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
-                ));
-
-        // Page<StrategyListDto> strategyListPage = strategyListRepository.findAllByStatusCode(String.valueOf(StrategyStatusCode.PUBLIC), pageable)
-        //         .map(strategy -> StrategyListDto.getStrategyListDto(
-        //                         strategy,
-        //                         stockGetter.getStocks(strategy.getId()),
-        //                         fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
-        //                         fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
-        //                 )
-        //         );
+        Page<StrategyListDto> result = strategyListRepository.findStrategiesOrderByAccumulatedProfitLossRate(pageable)
+                .map(strategy -> StrategyListDto.getStrategyListDto(
+                                strategy,
+                                stockGetter.getStocks(strategy.getId()),
+                                fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
+                                fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
+                        )
+                );
 
         return PageResponse.<StrategyListDto>builder()
                  .currentPage(result.getNumber())
@@ -151,8 +139,8 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .strategyListDto(PageResponse.<TraderStrategyListDto>builder()
                         .totalElement(strategies.getTotalElements())
                         .totalPages(strategies.getTotalPages())
-                        .pageSize(PAGE_SIZE)
-                        .currentPage(pageNum)
+                        .pageSize(strategies.getSize())
+                        .currentPage(strategies.getNumber())
                         .content(arrayList)
                         .build())
                 .build();
