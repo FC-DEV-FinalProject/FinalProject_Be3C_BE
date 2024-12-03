@@ -14,6 +14,31 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ExcelController {
 
     @Operation(
+            summary = "엑셀 파일 양식 URL 조회",
+            description = "엑셀 파일 양식 URL을 반환합니다. 이 URL을 사용하여 엑셀 파일을 다운로드할 수 있습니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "엑셀 파일 양식 URL 반환 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = APIResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 오류",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = APIResponse.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/daily")
+    ResponseEntity<APIResponse<String>> getExcelExample();
+
+    @Operation(
             summary = "엑셀 파일 업로드",
             description = "전략 ID에 해당하는 일간 데이터를 엑셀 파일로 업로드하여 저장합니다. " +
                     "Excel 2007 이상의 .xlsx만 가능하며, 한 개의 시트만 읽습니다. " +
