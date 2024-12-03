@@ -23,7 +23,7 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
             "t.id, t.nickname, t.roleCode, t.totalFollow, " +
             "COUNT(CASE WHEN s.statusCode = 'PUBLIC' THEN 1 END)) " +
             "FROM Member t JOIN Strategy s ON s.trader.id = t.id " +
-            "WHERE t.nickname LIKE concat('%', :nickname, '%') AND t.roleCode = 'trader' " +
+            "WHERE t.nickname LIKE CONCAT('%', :nickname, '%') AND t.roleCode = 'TRADER' " +
             "GROUP BY t.id, t.nickname, t.roleCode, t.totalFollow " +
             "ORDER BY COUNT(CASE WHEN s.statusCode ='PUBLIC' THEN 1 END) DESC")
     Page<TraderNicknameListDto> findDistinctByTraderNickname(@Param("nickname") String nickname, Pageable pageable);
@@ -32,6 +32,6 @@ public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
     Page<Strategy> findAllByTraderAndStatusCode(Member trader, String statusCode, Pageable pageable);
 
     // 전략명으로 검색
-    @Query("SELECT s FROM Strategy s WHERE s.name LIKE %:keyword% AND s.statusCode = 'PUBLIC'")
+    @Query("SELECT s FROM Strategy s WHERE s.name LIKE CONCAT('%', :keyword, '%') AND s.statusCode = 'PUBLIC'")
     Page<Strategy> findAllByContainingName(@Param("keyword") String keyword, Pageable pageable);
 }

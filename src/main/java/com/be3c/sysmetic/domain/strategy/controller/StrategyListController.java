@@ -80,6 +80,7 @@ public class StrategyListController implements StrategyListControllerDocs {
 
     /*
         getStrategiesByName : 전략명으로 검색
+
     */
     @Override
     @GetMapping("/name")
