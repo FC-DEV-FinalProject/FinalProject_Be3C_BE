@@ -12,7 +12,6 @@ import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
-import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +51,10 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .id(strategy.getId())
                         .traderId(strategy.getTrader().getId())
                         .traderNickname(strategy.getTrader().getNickname())
-                        .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
                         .methodId(strategy.getMethod().getId())
                         .methodName(strategy.getMethod().getName())
-                        .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
+                        .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))
                         .name(strategy.getName())
                         .statusCode(strategy.getStatusCode())
@@ -74,6 +73,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .build())
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
+
 
     // 분석 지표 그래프 데이터 요청
     @Override

@@ -335,8 +335,6 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         if (Double.parseDouble(accumulatedProfitLossRateRangeStartCond) > Double.parseDouble(accumulatedProfitLossRateRangeEndCond)) {
             return false;
         }
-
         return true;
     }
-
 }

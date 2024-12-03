@@ -34,17 +34,18 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
 
 
     /*
-        getAnalysis : 전략 상세 페이지 그래프 데이터 요청
+
+       getAnalysis : 전략 상세 페이지 그래프 데이터 요청
     */
     @Override
     @GetMapping("/analysis")
     public APIResponse<StrategyAnalysisResponseDto> getAnalysis(
-            @RequestParam("strategyId") Long strategyId,
+            @RequestParam("id") Long id,
             @RequestParam(name = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_RATE") StrategyAnalysisOption optionOne,
             @RequestParam(name = "optionTwo", defaultValue = "PRINCIPAL") StrategyAnalysisOption optionTwo,
             @RequestParam(name = "period", defaultValue = "ALL") String period) {
 
-        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(strategyId, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(id, optionOne, optionTwo, period);
 
         return APIResponse.success(analysis);
     }

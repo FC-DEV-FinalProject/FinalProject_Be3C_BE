@@ -30,7 +30,12 @@ public interface StrategySearchControllerDocs {
             summary = "전략 상세 조건 검색",
             description = "전략 목록에서 항목별 상세 조건을 검색합니다.<br><br>" +
                     "Request Body 예시: <br><br><br>" +
-                    "{ \"methods\": [\"메뉴얼\", \"시스템\", \"하이브리드\"], \"cycle\": [\"D\", \"P\"], \"stockNames\": [\"국내주식\", \"해외주식\", \"국내ETF\", \"해외ETF\", \"국내채권\", \"해외채권\", \"국내리츠\", \"해외리츠\"], \"accumulatedProfitLossRateRangeStart\": \"90\",  \"accumulatedProfitLossRateRangeEnd\": \"100\" }",
+                    "{ \"methods\": [\"메뉴얼\", \"시스템\", \"하이브리드\"], <br> " +
+                    " \"cycle\": [\"D\", \"P\"], <br> " +
+                    "\"stockNames\": [\"국내주식\", \"해외주식\", \"국내ETF\", \"해외ETF\", \"국내채권\", \"해외채권\", \"국내리츠\", \"해외리츠\"], <br> " +
+                    "\"accumulatedProfitLossRateRangeStart\": \"ALL\", \"LESS_THAN_YEAR\", \"ONE_TO_TWO_YEAR\", \"TWO_TO_THREE_YEAR\", \"THREE_YEAR_MORE\",  중 하나 <br> " +
+                    " \"accumulatedProfitLossRateRangeStart\": \"90\", <br> " +
+                    " \"accumulatedProfitLossRateRangeEnd\": \"100\" }",
             responses = {
                     @ApiResponse(
                             responseCode = "200"
