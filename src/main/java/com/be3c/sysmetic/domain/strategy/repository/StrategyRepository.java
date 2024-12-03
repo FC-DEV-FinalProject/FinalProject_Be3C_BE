@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.dto.KpRatios;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import org.apache.http.cookie.SM;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import java.util.List;
@@ -86,4 +88,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     // SM Score 계산 시 필요한 KP Ratio 조회
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.KpRatios(s.id, s.kpRatio) FROM Strategy s WHERE s.statusCode = :statusCode")
     List<KpRatios> findKpRatios(String statusCode);
+
+    // TODO SM Score 1위 전략 찾기
+    @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
+    String findTop1SmScore();
 }

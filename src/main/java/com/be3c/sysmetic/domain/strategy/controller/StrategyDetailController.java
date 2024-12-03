@@ -20,6 +20,7 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
 
     /*
         getDetailPage : 전략 상세 페이지 기본 정보 요청
+        http://localhost:8080/v1/strategy/detail/1
     */
     @Override
     @GetMapping("/{id}")
@@ -38,12 +39,12 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
     @Override
     @GetMapping("/analysis")
     public APIResponse<StrategyAnalysisResponseDto> getAnalysis(
-            @RequestParam("id") Long id,
+            @RequestParam("strategyId") Long strategyId,
             @RequestParam(name = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_RATE") StrategyAnalysisOption optionOne,
             @RequestParam(name = "optionTwo", defaultValue = "PRINCIPAL") StrategyAnalysisOption optionTwo,
             @RequestParam(name = "period", defaultValue = "ALL") String period) {
 
-        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(id, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(strategyId, optionOne, optionTwo, period);
 
         return APIResponse.success(analysis);
     }

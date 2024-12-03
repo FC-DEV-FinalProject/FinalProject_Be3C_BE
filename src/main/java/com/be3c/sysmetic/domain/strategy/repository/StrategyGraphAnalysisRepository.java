@@ -32,4 +32,7 @@ public interface StrategyGraphAnalysisRepository extends JpaRepository<StrategyG
     Double findMaximumCapitalReductionAmountBeforeDate(@Param("strategyId") Long strategyId, @Param("date") LocalDate date);
 
     void deleteAllByStrategyId(Long strategyId);
+
+    @Query("SELECT s.date FROM StrategyGraphAnalysis s WHERE s.date >= : startDate")
+    List<String> findDates(@Param("startDate") LocalDate startDate);
 }
