@@ -38,6 +38,13 @@ public interface FileService {
     String getFilePath(FileRequest fileRequest);
 
     /**
+     * presignedUrl 혹은 null 반환
+     * @param fileRequest ReferenceType(참조 테이블명)과 ReferenceId(참조 id) 입력
+     * @return 파일 url 혹은 null
+     */
+    String getFilePathNullable(FileRequest fileRequest);
+
+    /**
      * presignedUrl 리스트 제공
      * @param fileRequest ReferenceType(참조 테이블명)과 ReferenceId(참조 id) 입력
      * @return 파일 url 리스트
