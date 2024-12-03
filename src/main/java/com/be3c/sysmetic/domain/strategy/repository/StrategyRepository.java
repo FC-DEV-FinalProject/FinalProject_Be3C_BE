@@ -1,10 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.KpRatios;
-import com.be3c.sysmetic.domain.strategy.dto.MyStrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.MyStrategyListResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +52,7 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     Optional<Strategy> findByIdAndTraderIdAndStatusCode(
             @Param("id") Long id,
             @Param("userId") Long userId,
-            @Param("statusCode") String statusCode
+            @Param("statusCode") StrategyStatusCode statusCode
     );
 
     @Modifying
