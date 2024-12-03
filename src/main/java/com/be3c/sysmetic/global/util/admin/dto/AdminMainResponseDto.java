@@ -16,9 +16,18 @@ import java.util.List;
 @AllArgsConstructor
 @Schema(description = "관리자 메인 페이지 반환 dto")
 public class AdminMainResponseDto {
+    @Schema(description = "보고서 응답 DTO")
     RunReportResponseDto runReportResponseDto;
+
+    @Schema(description = "회원 수 정보 DTO")
     MemberCountResponseDto memberCount;
+
+    @Schema(description = "전략 수 정보 DTO")
     StrategyCountResponseDto strategyCount;
+
+    @Schema(description = "문의 수 정보 DTO")
     AdminInquiryResponseDto adminInquiryResponseDto;
+
+    @Schema(description = "관리자 공지 리스트")
     List<AdminNoticeResponseDto> adminNoticeResponse;
 }
