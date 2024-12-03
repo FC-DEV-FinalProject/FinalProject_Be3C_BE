@@ -75,6 +75,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
 
     // 분석 지표 그래프 데이터 요청
     @Override
+    @Transactional
     public StrategyAnalysisResponseDto getAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
         StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(id, optionOne, optionTwo, period);
