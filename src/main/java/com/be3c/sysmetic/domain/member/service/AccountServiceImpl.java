@@ -1,5 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,29 +38,40 @@ public class AccountServiceImpl implements AccountService {
         // 이름+휴대번호로 DB 조회 후 회원정보가 있으면 이메일 반환
         List<String> emailList = memberRepository.findEmailByNameAndPhoneNumber(name, phoneNumber);
         if(emailList == null || emailList.isEmpty()) {
-            throw new EntityNotFoundException("일치하는 회원 정보를 찾을 수 없습니다.");
+            throw new MemberBadRequestException(MemberExceptionMessage.NOT_FOUND_MEMBER.getMessage());
         }
-
         return String.join(", ", emailList);
     }
 
-
     // 4. 이메일 확인
+    @Override
     public boolean isPresentEmail(String email) {
-        return memberRepository.existsByEmail(email);
+        if(!memberRepository.existsByEmail(email)) {
+            throw new MemberBadRequestException(MemberExceptionMessage.NOT_FOUND_MEMBER.getMessage());
+        }
+        return true;
     }
 
     // 5. 비밀번호 일치 여부 확인
+    @Override
     public boolean isPasswordMatch(String password, String rewritePassword) {
-        return Objects.equals(password, rewritePassword);
+        if(!Objects.equals(password, rewritePassword)) {
+            throw new MemberBadRequestException(MemberExceptionMessage.PASSWORD_MISMATCH.getMessage());
+        }
+        return true;
     }
 
     // 6. 비밀번호 재설정
+    @Override
     @Transactional
     public boolean resetPassword(String email, String password) {
         String encodedPassword = bCryptPasswordEncoder.encode(password);
         int updatedRows = memberRepository.updatePasswordByEmail(email, encodedPassword);
-        return updatedRows == 1;
+
+        if(updatedRows != 1) {
+            throw new MemberBadRequestException(MemberExceptionMessage.FAIL_PASSWORD_CHANGE.getMessage());
+        }
+        return true;
     }
 
 }

@@ -15,6 +15,7 @@ import com.be3c.sysmetic.global.util.email.service.EmailService;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -31,6 +32,7 @@ import java.util.Optional;
 
 import static com.be3c.sysmetic.global.util.file.dto.FileReferenceType.MEMBER;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class RegisterServiceImpl implements RegisterService {
@@ -83,7 +85,7 @@ public class RegisterServiceImpl implements RegisterService {
         Optional<Member> member = memberRepository.findByEmail(email);
         if(member.isPresent()) {
             // 이메일 사용 불가능(중복O) -> 예외 발생
-            throw new MemberBadRequestException(MemberExceptionMessage.EMAIL_ALREADY_IN_USE.getMessage());
+            throw new MemberBadRequestException(MemberExceptionMessage.ALREADY_USE_EMAIL.getMessage());
         }
         // 이메일 사용 가능 (중복X)
         return true;
@@ -96,7 +98,7 @@ public class RegisterServiceImpl implements RegisterService {
             emailService.sendAndSaveAuthCode(email).subscribe();
         } catch (Exception e) {
             // 이메일 관련 예외 발생 시
-            throw new MemberBadRequestException(MemberExceptionMessage.EMAIL_ERROR.getMessage());
+            throw new MemberBadRequestException(MemberExceptionMessage.ERROR_EMAIL.getMessage());
         }
         // 이메일 인증코드 발송 및 저장 성공
         return true;
@@ -152,13 +154,17 @@ public class RegisterServiceImpl implements RegisterService {
             memberRepository.save(member);
             return member;
         } catch (DateTimeParseException e) {
-            throw new MemberBadRequestException("잘못된 날짜 형식으로 인해 회원 저장 실패", e);
+            log.error("잘못된 날짜 형식으로 인해 회원가입 실패");
+            throw new MemberBadRequestException(MemberExceptionMessage.REGISTRATION_FAILED.getMessage(), e);
         } catch (DataIntegrityViolationException e) {
-            throw new MemberBadRequestException("데이터 무결성 위반으로 인해 회원 저장 실패", e);
+            log.error("데이터 무결성 위반으로 인해 회원가입 실패");
+            throw new MemberBadRequestException(MemberExceptionMessage.REGISTRATION_FAILED.getMessage(), e);
         } catch (InvalidDataAccessApiUsageException e) {
-            throw new MemberBadRequestException("잘못된 데이터 접근으로 인해 회원 저장 실패", e);
+            log.error("잘못된 데이터 접근으로 인해 회원가입 실패");
+            throw new MemberBadRequestException(MemberExceptionMessage.REGISTRATION_FAILED.getMessage(), e);
         } catch (Exception e) {
-            throw new MemberBadRequestException("회원 저장 중 알 수 없는 오류 발생", e);
+            log.error("회원가입 중 알 수 없는 오류 발생");
+            throw new MemberBadRequestException(MemberExceptionMessage.REGISTRATION_FAILED.getMessage(), e);
         }
     }
 
