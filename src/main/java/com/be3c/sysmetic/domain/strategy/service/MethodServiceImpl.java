@@ -152,10 +152,9 @@ public class MethodServiceImpl implements MethodService {
 
         method.setName(methodPutRequestDto.getName());
         methodRepository.save(method);
-        /*
-            업로드 파일 유무 확인
-            업로드 파일 업데이트
-         */
+
+        fileService.updateImage(file, new FileRequest(FileReferenceType.METHOD, method.getId()));
+
         return true;
     }
 
@@ -174,6 +173,8 @@ public class MethodServiceImpl implements MethodService {
 
         method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
+
+        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
         return true;
     }
 

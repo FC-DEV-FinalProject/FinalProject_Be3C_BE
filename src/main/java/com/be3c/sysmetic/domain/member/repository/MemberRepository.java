@@ -15,6 +15,16 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'USER'")
+    Long countUser();
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode = 'TRADER'")
+    Long countTrader();
+
+    @Query("SELECT count(m) FROM Member m WHERE m.roleCode IN ('USER_MANAGER', 'TRADER_MANAGER')")
+    Long countManager();
+
     boolean existsByEmail(String email);
 
     Optional<Member> findByEmail(String email);
@@ -75,6 +85,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "LEFT JOIN FETCH m.replies " +
             "WHERE m.id = :memberId")
     Optional<Member> findMemberByIdWithStrategiesAndFolderAndReply(Long memberId);
+
     Optional<Member> findDistinctByNickname(String nickname);
 
     Optional<Member> findByPassword(String email);
