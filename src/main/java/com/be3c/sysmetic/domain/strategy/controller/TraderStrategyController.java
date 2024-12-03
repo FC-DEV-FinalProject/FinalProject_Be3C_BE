@@ -97,8 +97,8 @@ public class TraderStrategyController {
             @PathVariable Long strategyId,
             @Valid @RequestBody List<DailyRequestDto> requestDtoList
     ) {
-        DailyPostResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
         dailyService.saveDaily(strategyId, requestDtoList);
+        DailyPostResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(responseDto));

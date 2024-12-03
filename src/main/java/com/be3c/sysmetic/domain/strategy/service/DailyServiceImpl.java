@@ -253,6 +253,10 @@ public class DailyServiceImpl implements DailyService {
             // 일간분석 등록이면서 이미 존재하는 일자일 경우 미저장
             if(dailyId == null && existingDaily != null) continue;
 
+            if(dailyList.stream().map(daily -> daily.getDate()).toList().contains(requestDto.getDate())) {
+                continue;
+            }
+
             if(dailyList.isEmpty()) {
                 if(beforeDaily == null) {
                     // DB 데이터 미존재
