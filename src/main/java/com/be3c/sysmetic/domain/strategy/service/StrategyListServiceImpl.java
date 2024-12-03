@@ -7,6 +7,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
+import com.be3c.sysmetic.domain.strategy.util.PathGetter;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
@@ -40,6 +41,7 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final DoubleHandler doubleHandler;
     private final StrategyRepository strategyRepository;
     private final FileService fileService;
+    private final PathGetter pathGetter;
     private final int PAGE_SIZE = 10;
 
     /*
@@ -55,6 +57,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .map(strategy -> StrategyListDto.getStrategyListDto(
                                 strategy,
                                 stockGetter.getStocks(strategy.getId()),
+                                fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
                                 fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
                         )
                 );
@@ -108,7 +111,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                             TraderStrategyListDto.builder()
                                     .strategyId(strategy.getId())
                                     .strategyName(strategy.getName())
-                                    .methodIconPath(getMethodIconPath(strategy.getMethod().getId()))
+                                    .methodIconPath(pathGetter.getMethodIconPath(strategy.getMethod().getId()))
                                     .stockList(stockGetter.getStocks(strategy.getId()))
                                     .cycle(strategy.getCycle())
                                     .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
@@ -121,7 +124,7 @@ public class StrategyListServiceImpl implements StrategyListService {
         return StrategyListByTraderDto.builder()
                 .traderId(trader.getId())
                 .traderNickname(trader.getNickname())
-                .traderProfileImage(getMemberProfilePath(trader.getId()))
+                .traderProfileImage(pathGetter.getMemberProfilePath(trader.getId()))
                 .followerCount(trader.getTotalFollow())
                 .strategyCount(trader.getTotalStrategyCount())
                 .strategyListDto(PageResponse.<TraderStrategyListDto>builder()
@@ -150,6 +153,7 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .map(strategy -> StrategyListDto.getStrategyListDto(
                         strategy,
                         stockGetter.getStocks(strategy.getId()),
+                        fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())),
                         fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
                         )
         );
@@ -161,21 +165,5 @@ public class StrategyListServiceImpl implements StrategyListService {
                 .totalPages(resultPage.getTotalPages())
                 .content(resultPage.getContent())
                 .build();
-    }
-
-    private String getMethodIconPath(Long methodId) {
-        try {
-            return fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
-        } catch (FileNotFoundException e) {
-            return null;
-        }
-    }
-
-    private String getMemberProfilePath(Long memberId) {
-        try {
-            return fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
-        } catch (FileNotFoundException e) {
-            return null;
-        }
     }
 }

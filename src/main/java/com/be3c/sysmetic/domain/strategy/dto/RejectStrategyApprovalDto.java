@@ -1,6 +1,8 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -11,9 +13,10 @@ import lombok.*;
 @AllArgsConstructor
 public class RejectStrategyApprovalDto {
 
-    @NotBlank
+    @NotNull
     private Long approvalId;
 
     @NotBlank
+    @Max(50)
     private String rejectReason;
 }

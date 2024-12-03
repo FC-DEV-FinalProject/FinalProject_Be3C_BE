@@ -7,6 +7,8 @@ import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.*;
+import com.be3c.sysmetic.domain.strategy.util.PathGetter;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -15,6 +17,10 @@ import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +43,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
     private final FileServiceImpl fileService;
     private final SecurityUtils securityUtils;
+    private final StockGetter stockGetter;
+    private final PathGetter pathGetter;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
 
     // 전략 등록
@@ -252,5 +260,35 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
                 .firstRegistrationDate(LocalDate.now())
                 .lastRegistrationDate(LocalDate.now())
                 .build());
+    }
+
+    @Override
+    public MyStrategyListResponseDto getMyStrategyList(Integer page) {
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        Member member = findMember(userId);
+
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt"));
+
+        Page<MyStrategyListDto> findPage = strategyRepository.findPageMyStrategy(member.getId(), pageable);
+
+        findPage.getContent().forEach(strategy -> {
+            strategy.setMethodIconPath(pathGetter.getMethodIconPath(strategy.getMethodId()));
+            strategy.setStockList(stockGetter.getStocks(strategy.getStrategyId()));
+        });
+
+        return MyStrategyListResponseDto.builder()
+                .traderId(member.getId())
+                .traderNickname(member.getNickname())
+                .traderProfileImage(pathGetter.getMemberProfilePath(member.getId()))
+                .totalfollowers(member.getTotalFollow())
+                .strategyList(PageResponse.<MyStrategyListDto>builder()
+                        .totalElement(findPage.getTotalElements())
+                        .totalPages(findPage.getTotalPages())
+                        .currentPage(findPage.getNumber())
+                        .pageSize(findPage.getSize())
+                        .content(findPage.getContent())
+                        .build())
+                .build();
     }
 }

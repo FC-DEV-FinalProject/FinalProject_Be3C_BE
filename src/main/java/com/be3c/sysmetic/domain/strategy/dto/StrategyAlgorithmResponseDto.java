@@ -3,6 +3,8 @@ package com.be3c.sysmetic.domain.strategy.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class StrategyAlgorithmResponseDto {
@@ -13,9 +15,9 @@ public class StrategyAlgorithmResponseDto {
         id : 전략 id
         traderId : 트레이더 id
         traderNickname : 트레이더 닉네임
-        methodId : 매매방식 id
-        methodName : 매매방식명
-        stockListDto : 종목 리스트
+        traderProfileImage : 트레이더 프로필 사진 경로
+        methodIconPath : 매매 방식 아이콘 경로
+        stockIconPath : 종목 아이콘 경로
         name : 전략명
         cycle : 주기
         accumulatedProfitLossRate : 누적수익률
@@ -26,9 +28,9 @@ public class StrategyAlgorithmResponseDto {
     private Long id;
     private Long traderId;
     private String traderNickname;
-    private Long methodId;
-    private String methodName;
-    private StockListDto stockList;
+    private String traderProfileImage;
+    private String methodIconPath;
+    private List<String> stockIconPath;
     private String name;
     private Character cycle;
     private Double accumulatedProfitLossRate;
