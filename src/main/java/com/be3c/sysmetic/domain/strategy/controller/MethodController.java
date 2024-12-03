@@ -122,7 +122,7 @@ public class MethodController implements MethodControllerDocs {
         4. 중복된 매매 유형명이 존재할 때 : CONFLICT
      */
     @Override
-    @PostMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/admin/method", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> postMethod(
             @Valid @RequestPart MethodPostRequestDto methodPostRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file
@@ -154,10 +154,10 @@ public class MethodController implements MethodControllerDocs {
         5. 동일한 매매 유형명이 존재할 때 : CONFLICT
      */
     @Override
-    @PutMapping(value = "/admin/method", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/admin/method", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> putMethod(
             @Valid @RequestPart MethodPutRequestDto methodPutRequestDto,
-            @RequestPart(value = "file") MultipartFile file
+            @RequestPart(name = "file", required = false) MultipartFile file
     ) {
         try {
             if(methodService.updateMethod(methodPutRequestDto, file)) {
