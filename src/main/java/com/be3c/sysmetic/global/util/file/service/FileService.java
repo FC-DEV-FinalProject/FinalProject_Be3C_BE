@@ -110,4 +110,12 @@ public interface FileService {
      * @return 삭제 여부
      */
     boolean deleteFiles(FileRequest fileRequest);
+
+    /**
+     * 아이디로 파일 삭제
+     * @param fileId 삭제할 파일 아이디
+     * @return 삭제 여부
+     */
+    boolean deleteFileById(Long fileId);
+
 }

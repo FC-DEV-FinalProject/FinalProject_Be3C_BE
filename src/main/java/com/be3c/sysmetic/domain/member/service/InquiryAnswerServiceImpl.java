@@ -26,7 +26,7 @@ public class InquiryAnswerServiceImpl implements InquiryAnswerService {
     // 문의답변 단건 조회
     @Override
     public InquiryAnswer findOneInquiryAnswer(Long inquiryAnswerId) {
-        return inquiryAnswerRepository.findById(inquiryAnswerId).orElseThrow(EntityNotFoundException::new);
+        return inquiryAnswerRepository.findById(inquiryAnswerId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
     }
 
     // 문의답변 전체 조회
@@ -38,7 +38,7 @@ public class InquiryAnswerServiceImpl implements InquiryAnswerService {
     // 문의별 문의답변 조회
     @Override
     public InquiryAnswer findThatInquiryAnswer(Long inquiryId) {
-        return inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(EntityNotFoundException::new);
+        return inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
     }
 
     //등록
@@ -46,7 +46,7 @@ public class InquiryAnswerServiceImpl implements InquiryAnswerService {
     @Transactional
     public boolean registerInquiryAnswer(Long inquiryId, String answerTitle, String answerContent) {
 
-        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(EntityNotFoundException::new);
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
         InquiryAnswer inquiryAnswer = InquiryAnswer.createInquiryAnswer(inquiry, answerTitle, answerContent);
         inquiryAnswerRepository.save(inquiryAnswer);

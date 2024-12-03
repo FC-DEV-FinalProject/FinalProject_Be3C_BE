@@ -1,8 +1,11 @@
 package com.be3c.sysmetic.domain.member.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -13,10 +16,12 @@ import lombok.*;
 public class InquiryDetailSaveRequestDto {
 
     @Schema(description = "답변 제목", example = "Strategy Inquiry Answer")
-    @NotNull
+    @Size(max = 100)
+    @NotBlank
     private String answerTitle;
 
     @Schema(description = "답변 내용", example = "Here is the detailed answer to your inquiry.")
-    @NotNull
+    @Size(max = 1000)
+    @NotBlank
     private String answerContent;
 }

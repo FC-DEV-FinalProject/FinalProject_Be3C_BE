@@ -85,6 +85,10 @@ public class StockServiceImpl implements StockService {
         Page<StockGetResponseDto> stockPage = stockRepository.findAllByStatusCode(USING_STATE.getCode(), pageable);
 
         if (stockPage.hasContent()) {
+            stockPage.getContent().forEach(stock -> {
+                stock.setFilePath(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stock.getId())));
+            });
+
             return PageResponse.<StockGetResponseDto>builder()
                     .totalPages(stockPage.getTotalPages())
                     .totalElement(stockPage.getTotalElements())
@@ -149,6 +153,7 @@ public class StockServiceImpl implements StockService {
 
         findStock.setName(stockPutRequestDto.getName());
 
+        fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
         fileService.updateImage(file, new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
         return true;

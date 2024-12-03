@@ -3,6 +3,8 @@ package com.be3c.sysmetic.domain.member.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
@@ -30,9 +32,18 @@ public class NoticeShowModifyPageResponseDto {
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 여부 (0: 없음, 1: 있음)", example = "1")
-    private Integer isAttatchment;
+    @Schema(description = "첨부 파일 존재 여부", example = "true")
+    private Boolean fileExist;
 
-    @Schema(description = "공개 여부 (0: 비공개, 1: 공개)", example = "1")
-    private Integer isOpen;
+    @Schema(description = "이미지 파일 존재 여부", example = "true")
+    private Boolean imageExist;
+
+    @Schema(description = "공개 여부", example = "true")
+    private Boolean isOpen;
+
+    @Schema(description = "이 공지사항의 파일 정보를 담은 리스트", example = "[]")
+    private List<NoticeDetailFileShowResponseDto> fileDtoList;
+
+    @Schema(description = "이 공지사항의 이미지 정보를 담은 리스트", example = "[]")
+    private List<NoticeDetailImageShowResponseDto> imageDtoList;
 }

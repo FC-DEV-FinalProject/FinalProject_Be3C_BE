@@ -10,9 +10,12 @@ import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyStatisticsRepository;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyStatisticsServiceImpl implements StrategyStatisticsService {
 
@@ -28,6 +32,7 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
     private final SecurityUtils securityUtils;
+    private final StrategyViewAuthorize strategyViewAuthorize;
 
     // 전략통계 DB 저장 - SchedulerConfiguration 에서 호출하는 메서드
     public void runStrategyStatistics(Long strategyId) {
@@ -36,6 +41,8 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         final Daily recentDaily = dailyRepository.findTopByStrategyIdOrderByDateDesc(strategyId);
 
         // 최근 통계 조회
+        // 2. 전략 등록 시 StrategyStatistics 테이블에서 strategyId로 찾기를 시도했을 때, 당연히 존재하지 않음 ( 전략 등록 후 첫 날의 경우 )
+        // 3. 이 부분에서 Exception이 발생할 가능성이 존재함.
         final StrategyStatistics savedStatistics = strategyStatisticsRepository.findByStrategyId(strategyId);
 
         if(recentDaily == null) {
@@ -98,15 +105,18 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
     // 전략통계 조회 - PUBLIC 상태인 전략의 통계 조회
     public StrategyStatisticsGetResponseDto findStrategyStatistics(Long strategyId) {
+        // 만약 통계 정보가 존재하지 않는다면 Exception이 발생할 가능성이 존재한다.
+        // Optional로 변경할까?
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+//        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId)
+//                .orElseThrow(() ->
+//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        if(!strategy.getStatusCode().equals(StrategyStatusCode.PUBLIC.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
-        }
+        strategyViewAuthorize.Authorize(strategy);
 
         return StrategyStatisticsGetResponseDto.builder()
                 .currentBalance(statistics.getCurrentBalance())
@@ -158,16 +168,16 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         }
 
         // member일 경우, 권한 없음 처리
-        if(userRole.equals("MEMBER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+        if(userRole.equals("USER")) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
         if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
 
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
@@ -212,14 +222,14 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
         Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
 
         if(!uploadedTraderId.equals(userId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
     }
 
     // find strategy by id
     private Strategy findStrategyById(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
     }
 
     // 잔고 -> 가장 최근 일간분석 데이터의 잔고

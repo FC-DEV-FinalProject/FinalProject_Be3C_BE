@@ -30,7 +30,7 @@ public class InquiryAnswer extends BaseEntity {
     @Column(name = "answer_content", length = 1000, nullable = false)
     private String answerContent;
 
-    @Column(name = "answer_registration_date")
+    @Column(name = "answer_registration_date", nullable = false)
     private LocalDateTime answerRegistrationDate;
 
     //==생성 메서드==//

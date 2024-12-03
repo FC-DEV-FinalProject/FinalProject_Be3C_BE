@@ -1,5 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyDetailService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
@@ -17,7 +19,7 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
     private final StrategyDetailService strategyDetailService;
 
     /*
-        getDetailPage : 전략 상세 보기 페이지 요청
+        getDetailPage : 전략 상세 페이지 기본 정보 요청
     */
     @Override
     @GetMapping("/{id}")
@@ -29,12 +31,20 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
         return APIResponse.success(strategyDetailDto);
     }
 
-    // TODO : 엔드 포인트 나눠서 개발
-    // @Override
-    // @GetMapping("/analysis")
-    // public APIResponse<StrategyAnalysisResponseDto> getAnalysis(
-    //         @RequestParam("optionOne") StrategyAnalysisOption optionOne,
-    //         @RequestParam("optionTwo") StrategyAnalysisOption optionTwo) {
-    //     return null;
-    // }
+
+    /*
+        getAnalysis : 전략 상세 페이지 그래프 데이터 요청
+    */
+    @Override
+    @GetMapping("/analysis")
+    public APIResponse<StrategyAnalysisResponseDto> getAnalysis(
+            @RequestParam("id") Long id,
+            @RequestParam(name = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_RATE") StrategyAnalysisOption optionOne,
+            @RequestParam(name = "optionTwo", defaultValue = "PRINCIPAL") StrategyAnalysisOption optionTwo,
+            @RequestParam(name = "period", defaultValue = "ALL") String period) {
+
+        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(id, optionOne, optionTwo, period);
+
+        return APIResponse.success(analysis);
+    }
 }

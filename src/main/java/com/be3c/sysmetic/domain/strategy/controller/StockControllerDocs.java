@@ -48,7 +48,7 @@ public interface StockControllerDocs {
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @NotBlank @RequestParam String name
+            @RequestParam String name
     );
 
     /*
@@ -76,7 +76,7 @@ public interface StockControllerDocs {
     )
 //    @PreAuthorize(("hasRole('MANAGER')"))
     public ResponseEntity<APIResponse<StockGetResponseDto>> getItem(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     );
 
     /*
@@ -111,7 +111,7 @@ public interface StockControllerDocs {
 //    @PreAuthorize(("hasRole('MANAGER')"))
     @GetMapping("/admin/stocklist/{page}")
     public ResponseEntity<APIResponse<PageResponse<StockGetResponseDto>>> getStockPage(
-            @NotBlank @PathVariable Integer page
+            @PathVariable Integer page
     );
 
     /*
@@ -213,6 +213,6 @@ public interface StockControllerDocs {
     //    @PreAuthorize(("hasRole('MANAGER')"))
     @DeleteMapping("/admin/stock/{id}")
     public ResponseEntity<APIResponse<String>> deleteItem(
-            @NotBlank @PathVariable Long id
+            @PathVariable Long id
     );
 }

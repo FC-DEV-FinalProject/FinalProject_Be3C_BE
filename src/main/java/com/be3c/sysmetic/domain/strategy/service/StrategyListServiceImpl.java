@@ -3,11 +3,16 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyListRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -32,15 +39,8 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final StrategyRepository strategyRepository;
-
-    // /*
-    //     getTotalPageNumber : 특정 statusCode에 따른 전체 페이지 수 계산
-    // */
-    // @Override
-    // public int getTotalPageNumber(String statusCode, int pageSize) {
-    //     long totalStrategyCount = strategyListRepository.countByStatusCode(statusCode);
-    //     return (int) Math.ceil((double) totalStrategyCount / pageSize);
-    // }
+    private final FileService fileService;
+    private final int PAGE_SIZE = 10;
 
     /*
         findStrategyPage : 메인 전략 목록 페이지 (수익률순 조회)
@@ -49,27 +49,15 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<StrategyListDto> findStrategyPage(Integer pageNum) {
 
-        log.info("StrategyListServiceImpl findStrategyPage requested, pageNum = {}", pageNum);
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
 
         Page<StrategyListDto> strategies = strategyListRepository.findAllByStatusCode(String.valueOf(StrategyStatusCode.PUBLIC), pageable)
-                .map(strategy -> new StrategyListDto(
-                        strategy.getId(),
-                        strategy.getTrader().getId(),
-                        strategy.getTrader().getNickname(),
-                        strategy.getMethod().getId(),
-                        strategy.getMethod().getName(),
-                        strategy.getName(),
-                        strategy.getCycle(),
-                        stockGetter.getStocks(strategy.getId()),
-                        doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
-                        doubleHandler.cutDouble(strategy.getMdd()),
-                        doubleHandler.cutDouble(strategy.getSmScore())
-                ));
-
-        log.info("StrategyListServiceImpl strategies has content true / false = {}", strategies.hasContent());
+                .map(strategy -> StrategyListDto.getStrategyListDto(
+                                strategy,
+                                stockGetter.getStocks(strategy.getId()),
+                                fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
+                        )
+                );
 
         return PageResponse.<StrategyListDto>builder()
                  .currentPage(strategies.getNumber())
@@ -87,14 +75,9 @@ public class StrategyListServiceImpl implements StrategyListService {
     @Override
     public PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum) {
 
-        log.info("StrategyListServiceImpl findTraderNickname requested, nickname = {} , pageNum = {}", nickname, pageNum);
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize);            // 팔로우 수 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE);            // 팔로우 수 내림차순 정렬
 
         Page<TraderNicknameListDto> traders = strategyListRepository.findDistinctByTraderNickname(nickname, pageable);
-
-        log.info("StrategyListServiceImpl traders has content true / false = {} ", traders.hasContent());
 
         return PageResponse.<TraderNicknameListDto>builder()
                 .currentPage(traders.getNumber())
@@ -110,41 +93,89 @@ public class StrategyListServiceImpl implements StrategyListService {
         findStrategiesByTrader : 트레이더 별 전략 목록 - 전략 목록 내에서는 똑같이 수익률순 내림차순
     */
     @Override
-    public PageResponse<StrategyListByTraderDto> findStrategiesByTrader(Long traderId, Integer pageNum) {
+    public StrategyListByTraderDto findStrategiesByTrader(Long traderId, Integer pageNum) {
 
-        log.info("StrategyListServiceImpl findStrategiesByTrader requested traderId = {}, pageNum = {}", traderId, pageNum);
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
 
         Member trader = memberRepository.findById(traderId)
                 .orElseThrow(() -> new NoSuchElementException("해당 트레이더가 존재하지 않습니다."));
 
-        Page<StrategyListByTraderDto> strategiesByTrader = strategyListRepository.findAllByTraderAndStatusCode(trader, String.valueOf(StrategyStatusCode.PUBLIC), pageable)
-                .map(strategy -> new StrategyListByTraderDto(
-                        strategy.getTrader().getId(),
-                        strategy.getTrader().getNickname(),
-                        strategy.getMethod().getId(),
-                        strategy.getMethod().getName(),
-                        stockGetter.getStocks(strategy.getId()),
-                        strategy.getId(),
-                        strategy.getName(),
-                        strategy.getCycle(),
-                        strategy.getFollowerCount(),
-                        strategyRepository.countStrategyByOneTrader(strategy.getTrader().getId()),
-                        doubleHandler.cutDouble(strategy.getAccumulatedProfitLossRate()),
-                        doubleHandler.cutDouble(strategy.getMdd()),
-                        doubleHandler.cutDouble(strategy.getSmScore())
-                ));
+        ArrayList<TraderStrategyListDto> arrayList = new ArrayList<>();
 
-        log.info("StrategyListServiceImpl strategiesByTrader has content true / false = {} ", strategiesByTrader.hasContent());
+        Page<Strategy> strategies = strategyListRepository.findAllByTraderAndStatusCode(trader, String.valueOf(StrategyStatusCode.PUBLIC), pageable);
+        strategies.getContent().forEach(strategy -> {
+                    arrayList.add(
+                            TraderStrategyListDto.builder()
+                                    .strategyId(strategy.getId())
+                                    .strategyName(strategy.getName())
+                                    .methodIconPath(getMethodIconPath(strategy.getMethod().getId()))
+                                    .stockList(stockGetter.getStocks(strategy.getId()))
+                                    .cycle(strategy.getCycle())
+                                    .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                                    .mdd(strategy.getMdd())
+                                    .smScore(strategy.getSmScore())
+                                    .build()
+                    );
+                });
 
-        return PageResponse.<StrategyListByTraderDto>builder()
-                .currentPage(strategiesByTrader.getNumber())
-                .pageSize(strategiesByTrader.getSize())
-                .totalElement(strategiesByTrader.getTotalElements())
-                .totalPages(strategiesByTrader.getTotalPages())
-                .content(strategiesByTrader.getContent())
+        return StrategyListByTraderDto.builder()
+                .traderId(trader.getId())
+                .traderNickname(trader.getNickname())
+                .traderProfileImage(getMemberProfilePath(trader.getId()))
+                .followerCount(trader.getTotalFollow())
+                .strategyCount(trader.getTotalStrategyCount())
+                .strategyListDto(PageResponse.<TraderStrategyListDto>builder()
+                        .totalElement(strategies.getTotalElements())
+                        .totalPages(strategies.getTotalPages())
+                        .pageSize(PAGE_SIZE)
+                        .currentPage(pageNum)
+                        .content(arrayList)
+                        .build())
                 .build();
+    }
+
+
+    /*
+        findStrategiesByName : 전략명으로 검색
+    */
+    @Override
+    public PageResponse<StrategyListDto> findStrategiesByName(String keyword, Integer pageNum) {
+
+        Pageable pageable = PageRequest.of(pageNum, PAGE_SIZE, Sort.by(Sort.Order.desc("accumulatedProfitLossRate")));
+
+        Page<Strategy> strategies = strategyListRepository.findAllByContainingName(keyword, pageable);
+
+        // Strategy 엔티티를 DTO로 매핑
+        Page<StrategyListDto> resultPage = strategies
+                .map(strategy -> StrategyListDto.getStrategyListDto(
+                        strategy,
+                        stockGetter.getStocks(strategy.getId()),
+                        fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
+                        )
+        );
+
+        return PageResponse.<StrategyListDto>builder()
+                .currentPage(resultPage.getNumber())
+                .pageSize(resultPage.getSize())
+                .totalElement(resultPage.getTotalElements())
+                .totalPages(resultPage.getTotalPages())
+                .content(resultPage.getContent())
+                .build();
+    }
+
+    private String getMethodIconPath(Long methodId) {
+        try {
+            return fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    private String getMemberProfilePath(Long memberId) {
+        try {
+            return fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, memberId));
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 }

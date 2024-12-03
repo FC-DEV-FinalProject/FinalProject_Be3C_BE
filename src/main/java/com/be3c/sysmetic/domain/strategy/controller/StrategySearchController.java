@@ -27,11 +27,11 @@ public class StrategySearchController implements StrategySearchControllerDocs {
         HTTP Method : POST
         Request Body : JSON
         {
-             "methods": ["Manual"],
-             "cycle": ["D"],
-             "stockNames": [],
-             "accumulatedProfitLossRateRangeStart": 10,
-             "accumulatedProfitLossRateRangeEnd": 100
+             "methods": ["MANUAL", "SYSTEM", "HYBRID"],
+             "cycle": ["D", "P"],
+             "stockNames": ["국내주식", "해외주식", "국내ETF", "해외ETF", "국내채권", "해외채권", "국내리츠, "해외리츠"],
+             "accumulatedProfitLossRateRangeStart": "10",
+             "accumulatedProfitLossRateRangeEnd": "100"
         }
     */
     @Override

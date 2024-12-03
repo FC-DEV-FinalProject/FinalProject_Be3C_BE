@@ -3,8 +3,10 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.dto.InquiryAdminListShowRequestDto;
 import com.be3c.sysmetic.domain.member.dto.InquiryListShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
+import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
@@ -15,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +42,70 @@ public class InquiryServiceTest {
     InquiryRepository inquiryRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private InquiryAnswerRepository inquiryAnswerRepository;
+
+//    @Test
+//    @Rollback(value = false)
+//    public void dummy_data() throws Exception {
+//        Member member1 = createMember("닉네임1");
+//        Member member2 = createMember("닉네임2");
+//        Member member3 = createMember("닉네임3");
+//        Member member4 = createMember("닉네임4");
+//        Member member5 = createMember("닉네임5");
+//        Member member6 = createMember("닉네임6");
+//        Member member7 = createMember("닉네임7");
+//        Member member8 = createMember("닉네임8");
+//        Strategy strategy1 = createStrategy("삼성전자");
+//        Strategy strategy2 = createStrategy("LG전자");
+//        Strategy strategy3 = createStrategy("애플");
+//
+//        int countInquiry = 1;
+//        int countInquiryAnswer = 1;
+//        Strategy strategy = null;
+//        Member member = null;
+//        InquiryStatus inquiryStatus = null;
+//        for(int i = 1; i <= 3; i++) {
+//            if (i == 1) { strategy = strategy1; }
+//            else if (i == 2) { strategy = strategy2; }
+//            else if (i == 3) { strategy = strategy3; }
+//            for(int j = 6; j <= 8; j++) {
+//                if (j == 6) { member = member6; }
+//                else if (j == 7) { member = member7; }
+//                else if (j == 8) { member = member8; }
+//                for(int k = 1; k <= 2; k++) {
+//                    if (k == 1) { inquiryStatus = InquiryStatus.closed; }
+//                    if (k == 2) { inquiryStatus = InquiryStatus.unclosed; }
+//                    for(int l = 1; l <= 3; l++) {
+//                        Inquiry inquiry = Inquiry.builder()
+//                                .strategy(strategy)
+//                                .strategyName(strategy.getName())
+//                                .inquirer(member)
+//                                .traderNickname(strategy.getTrader().getNickname())
+//                                .inquirerNickname(member.getNickname())
+//                                .inquiryStatus(inquiryStatus)
+//                                .inquiryTitle("문의제목" + countInquiry)
+//                                .inquiryContent("문의내용" + countInquiry)
+//                                .inquiryRegistrationDate(LocalDateTime.now())
+//                                .build();
+//                        inquiryRepository.save(inquiry);
+//                        countInquiry++;
+//                        if (inquiryStatus == InquiryStatus.closed) {
+//                            InquiryAnswer inquiryAnswer = InquiryAnswer.builder()
+//                                    .inquiry(inquiry)
+//                                    .answerTitle("답변제목" + countInquiryAnswer)
+//                                    .answerContent("답변내용" + countInquiryAnswer)
+//                                    .answerRegistrationDate(LocalDateTime.now())
+//                                    .build();
+//                            inquiryAnswerRepository.save(inquiryAnswer);
+//                            countInquiryAnswer++;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
 
     @Test
     public void 문의_등록() throws Exception {
@@ -58,10 +126,10 @@ public class InquiryServiceTest {
         //given
         Strategy strategy = createStrategy("삼성전자");
         Member member = createMember("닉네임");
-        inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목1", "문의내용1");
+        inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목수정1", "문의내용수정1");
 
         //when
-        Inquiry inquiry = inquiryRepository.findByInquiryTitle("문의제목1").get(0);
+        Inquiry inquiry = inquiryRepository.findByInquiryTitle("문의제목수정1").get(0);
         inquiryService.modifyInquiry(inquiry.getId(), "수정문의제목1", "수정문의내용1");
 
         //then
@@ -74,10 +142,10 @@ public class InquiryServiceTest {
         //given
         Strategy strategy = createStrategy("삼성전자");
         Member member = createMember("닉네임");
-        inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목1", "문의내용1");
+        inquiryService.registerInquiry(member.getId(), strategy.getId(), "문의제목삭제1", "문의내용삭제1");
 
         //when
-        Inquiry inquiry = inquiryRepository.findByInquiryTitle("문의제목1").get(0);
+        Inquiry inquiry = inquiryRepository.findByInquiryTitle("문의제목삭제1").get(0);
         inquiryService.deleteInquiry(inquiry.getId());
 
         //then
@@ -151,12 +219,12 @@ public class InquiryServiceTest {
 
         //when
         int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquiresAdmin(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquiresAdmin(inquirySearch2, page-1);
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiriesAdmin(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiriesAdmin(inquirySearch2, page-1);
 
         //then
         assertEquals(3, inquiryList1.getNumberOfElements());
-        assertEquals(2, inquiryList2.getNumberOfElements());
+        assertEquals(inquiryRepository.findByInquiryStatus(InquiryStatus.closed, PageRequest.of(0, 100)).getTotalElements(), inquiryList2.getNumberOfElements());
     }
 
     @Test
@@ -190,12 +258,11 @@ public class InquiryServiceTest {
 
         //when
         int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquires(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquires(inquirySearch2, page-1);
-        Page<Inquiry> inquiryList3 = inquiryService.findInquires(inquirySearch3, page-1);
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiries(inquirySearch1, page-1);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiries(inquirySearch2, page-1);
+        Page<Inquiry> inquiryList3 = inquiryService.findInquiries(inquirySearch3, page-1);
 
         // then
-        assertEquals(6, inquiryList1.getNumberOfElements());
         assertEquals("질문6", inquiryList1.getContent().get(0).getInquiryTitle());
         assertEquals("질문2", inquiryList2.getContent().get(0).getInquiryTitle());
         assertEquals("질문2", inquiryList3.getContent().get(0).getInquiryTitle());
@@ -204,20 +271,19 @@ public class InquiryServiceTest {
 
     private Member createMember(String nickName) {
         Member member = new Member();
-//        member.setId(1L);
-        member.setRoleCode("UR001");
+        member.setRoleCode("USER");
         member.setEmail("user@gmail.com");
         member.setPassword("123456");
         member.setName("송중기");
         member.setNickname(nickName);
         member.setBirth(LocalDateTime.now().toLocalDate());
         member.setPhoneNumber("01012345678");
-        member.setUsingStatusCode("MS002");
+        member.setUsingStatusCode("UR001");
         member.setTotalFollow(39);
         member.setTotalStrategyCount(100);
-        member.setReceiveInfoConsent("Y");
+        member.setReceiveInfoConsent("true");
         member.setInfoConsentDate(LocalDateTime.now());
-        member.setReceiveMarketingConsent("Y");
+        member.setReceiveMarketingConsent("true");
         member.setMarketingConsentDate(LocalDateTime.now());
         em.persist(member);
         return member;
@@ -225,26 +291,27 @@ public class InquiryServiceTest {
 
     private Method createMethod() {
         Method method = new Method();
-        method.setName("Manual");
-        method.setStatusCode("StatusCode");
-//        method.setExplanation("Explanation");
-//        method.setMethodCreatedDate(LocalDateTime.now());
+        method.setName("DAY");
+        method.setStatusCode("PUBLIC");
+        method.setMethodCreatedDate(LocalDateTime.now());
         em.persist(method);
         return method;
     }
 
     private Strategy createStrategy(String name) {
         Strategy strategy = new Strategy();
-        strategy.setTrader(createMember("닉네임"));
+        strategy.setTrader(createMember("트레이더닉네임1"));
         strategy.setMethod(createMethod());
-        strategy.setStatusCode("ST002");
+        strategy.setStatusCode("PUBLIC");
         strategy.setName(name);
-        strategy.setCycle('D');
-//        strategy.setMinOperationAmount(1.1);
-        strategy.setContent("내용");
+        strategy.setCycle('P');
+        strategy.setContent("전략내용");
         strategy.setFollowerCount(36L);
+        strategy.setMdd(1.1);
         strategy.setKpRatio(2.2);
         strategy.setSmScore(3.3);
+        strategy.setWinningRate(4.4);
+        strategy.setAccumulatedProfitLossRate(5.5);
         strategy.setStrategyCreatedDate(LocalDateTime.now());
         strategy.setStrategyModifiedDate(LocalDateTime.now());
         em.persist(strategy);

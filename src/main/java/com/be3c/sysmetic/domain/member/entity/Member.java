@@ -1,11 +1,16 @@
 package com.be3c.sysmetic.domain.member.entity;
 
+import com.be3c.sysmetic.domain.strategy.entity.Reply;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,6 +32,7 @@ public class Member extends BaseEntity {
         phoneNumber : 휴대폰 번호
         usingStatusCode : 회원상태코드
         totalFollow : 총 팔로워 수
+        totalStrategyCount : 총 전략 수
         receiveInfoConsent : 정보성 수신 동의 여부
         infoConsentDate : 정보성 수신 동의일
         receiveMarketingConsent : 마케팅 수신 동의 여부
@@ -37,6 +43,7 @@ public class Member extends BaseEntity {
     public void prePersist() {
         usingStatusCode = "US001";  // 유효: US001, 휴면: US002
         totalFollow = 0;
+        totalStrategyCount = 0;
     }
 
     @Id
@@ -70,6 +77,7 @@ public class Member extends BaseEntity {
     @Column(name = "total_follow", nullable = false)
     private Integer totalFollow;
 
+    // 전략에서 사용!
     @Column(name = "total_strategy_count", nullable = false)
     private Integer totalStrategyCount;
 
@@ -84,4 +92,16 @@ public class Member extends BaseEntity {
 
     @Column(name = "marketing_consent_date", nullable = false)
     private LocalDateTime marketingConsentDate;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Folder> folders;
+
+    @OneToMany(mappedBy = "trader", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Strategy> strategies;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Reply> replies;
 }

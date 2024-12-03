@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyListByNameDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
 import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
@@ -28,8 +29,8 @@ public interface StrategyListControllerDocs {
 
 
     @Operation(
-            summary = "전략명 검색 API",
-            description = "전략명 검색 API - 검색 키워드를 포함하는 전략, 공개 전략 개수 내림차순 정렬. (동일한 트레이더가 중복 조회되면 DM 부탁드립니다!) <br>" +
+            summary = "트레이더 닉네임 검색 API",
+            description = "트레이더 닉네임 검색 API - 공개 전략 개수 내림차순 정렬. (동일한 트레이더가 중복 조회되면 DM 부탁드립니다!) <br>" +
                             "Request Param : <br>" +
                             "nickname - 검색할 닉네임 <br>" +
                             "pageNum - defaultValue 0",
@@ -54,7 +55,24 @@ public interface StrategyListControllerDocs {
                     @ApiResponse(responseCode = "400")
             }
     )
-    APIResponse<PageResponse<StrategyListByTraderDto>> getStrategiesByTraderId(
+    APIResponse<StrategyListByTraderDto> getStrategiesByTraderId(
             @RequestParam("traderId") Long traderId,
             @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum);
+
+
+    @Operation(
+            summary = "전략명 검색 API",
+            description = "전략명 검색 후 목록 API - 공개인 전략에 한해서 검색, 누적수익률순 내림차순 정렬 <br> " +
+                    "Request Param : <br> " +
+                    "name - 검색할 전략명 " +
+                    "pageNum - defaultValue 0",
+            responses = {
+                    @ApiResponse(responseCode = "200") ,
+                    @ApiResponse(responseCode = "400")
+            }
+    )
+    APIResponse<PageResponse<StrategyListDto>> getStrategiesByName(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(name = "pageNum", defaultValue = "0") Integer pageNum);
+
 }

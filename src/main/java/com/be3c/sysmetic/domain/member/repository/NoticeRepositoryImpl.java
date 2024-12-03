@@ -26,7 +26,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         BooleanBuilder predicate = new BooleanBuilder();
 
         // 검색 (제목, 내용, 제목+내용, 작성자)
-        if (searchText != null) {
+        if (searchText != null && !searchText.isEmpty()) {
             if (searchType.equals("title")) {
                 if (StringUtils.hasText(searchText)) {
                     predicate.and(notice.noticeTitle.contains(searchText));
@@ -41,7 +41,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 }
             } else if (searchType.equals("writer")) {
                 if (StringUtils.hasText(searchText)) {
-                    predicate.and(notice.writer.name.contains(searchText));
+                    predicate.and(notice.writerNickname.contains(searchText));
                 }
             }
         }
@@ -49,7 +49,7 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         QueryResults<Notice> results = jpaQueryFactory
                 .selectFrom(notice)
                 .where(predicate)
-                .orderBy(notice.writeDate.desc()) // 따로 해서 최적화 가능
+                .orderBy(notice.id.desc()) // 따로 해서 최적화 가능
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();
@@ -66,14 +66,16 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
 
         BooleanBuilder predicate = new BooleanBuilder();
 
-        if (StringUtils.hasText(searchText)) {
-            predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+        if (searchText != null && !searchText.isEmpty()) {
+            if (StringUtils.hasText(searchText)) {
+                predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
+            }
         }
 
         QueryResults<Notice> results = jpaQueryFactory
                 .selectFrom(notice)
                 .where(predicate)
-                .orderBy(notice.writeDate.desc()) // 따로 해서 최적화 가능
+                .orderBy(notice.id.desc()) // 따로 해서 최적화 가능
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();

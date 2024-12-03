@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,12 +23,13 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     // 모든 일간분석데이터 목록 조회 - 오래된순 정렬
 //    List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);
 
-    // 일간분석데이터 목록 조회 - 기간 검색
+    // 일간분석데이터 목록 조회 - 기간 검색, 최신순 정렬
     @Query("""
         SELECT d FROM Daily d
         WHERE d.strategy.id = :strategyId
         AND (:startDate IS NULL OR d.date >= :startDate)
         AND (:endDate IS NULL OR d.date <= :endDate)
+        ORDER BY d.date DESC
     """)
     Page<Daily> findAllByStrategyIdAndDateBetween(
             @Param("strategyId") Long strategyId,
@@ -285,4 +287,8 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.KpRatioParametersDto(d.date, d.profitLossRate, d.accumulatedProfitLossRate) "
             + "FROM Daily d WHERE d.strategy.id = :strategyId ORDER BY d.date DESC")
     List<KpRatioParametersDto> findKpRatioParameters(@Param("strategyId") Long strategyId);
+
+    @Modifying
+    @Query("DELETE FROM Daily d WHERE d.strategy.id = :strategyId")
+    int deleteByStrategyId(Long strategyId);
 }

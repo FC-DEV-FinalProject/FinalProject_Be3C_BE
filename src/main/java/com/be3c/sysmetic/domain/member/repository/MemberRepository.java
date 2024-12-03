@@ -41,7 +41,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query(value = "SELECT m.email FROM Member m WHERE m.name = :name AND m.phoneNumber = :phoneNumber")
     List<String> findEmailByNameAndPhoneNumber(@Param("name") String name, @Param("phoneNumber") String phoneNumber);
 
-
     @Modifying
     @Query("UPDATE Member m SET m.roleCode = :roleCode WHERE m.id = :memberId")
     int updateRoleCode(@Param("memberId") Long memberId, @Param("roleCode") String roleCode);
@@ -52,23 +51,23 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         )
         FROM Member m
         WHERE (
-            (:role = 'ALL' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004')) OR
-            (:role = 'USER' AND m.roleCode = 'RC001') OR
-            (:role = 'TRADER' AND m.roleCode = 'RC002') OR
-            (:role = 'MANAGER' AND m.roleCode IN ('RC003', 'RC004'))
+            (:role = 'ALL' AND m.roleCode IN ('RC001', 'RC002', 'RC003', 'RC004', 'USER', 'TRADER', 'USER_MANAGER', 'TRADER_MANAGER')) OR
+            (:role = 'USER' AND m.roleCode IN ('RC001', 'USER')) OR
+            (:role = 'TRADER' AND m.roleCode IN ('RC002', 'TRADER')) OR
+            (:role = 'MANAGER' AND m.roleCode IN ('RC003', 'RC004', 'USER_MANAGER', 'TRADER_MANAGER'))
         )
         AND (
-            :searchType IS NULL OR
-            (:searchType = 'EMAIL' AND m.email LIKE %:searchKeyword%) OR
-            (:searchType = 'NAME' AND m.name LIKE %:searchKeyword%) OR
-            (:searchType = 'NICKNAME' AND m.nickname LIKE %:searchKeyword%) OR
-            (:searchType = 'PHONENUMBER' AND m.phoneNumber LIKE %:searchKeyword%) OR
-            (
-                m.email LIKE %:searchKeyword% OR
-                m.name LIKE %:searchKeyword% OR
-                m.nickname LIKE %:searchKeyword% OR
-                m.phoneNumber LIKE %:searchKeyword%
-            )
+                (:searchType = 'NICKNAME' AND m.nickname LIKE CONCAT('%', :searchKeyword, '%')) OR
+                (:searchType = 'EMAIL' AND m.email LIKE CONCAT('%', :searchKeyword, '%')) OR
+                (:searchType = 'NAME' AND m.name LIKE CONCAT('%', :searchKeyword, '%')) OR
+                (:searchType = 'PHONENUMBER' AND m.phoneNumber LIKE CONCAT('%', :searchKeyword, '%')) OR
+                ((:searchType IS NULL OR :searchType = 'ALL') AND (
+                    (:searchKeyword IS NULL OR m.email LIKE CONCAT('%', :searchKeyword, '%')) OR
+                    (:searchKeyword IS NULL OR m.name LIKE CONCAT('%', :searchKeyword, '%')) OR
+                    (:searchKeyword IS NULL OR m.nickname LIKE CONCAT('%', :searchKeyword, '%')) OR
+                    (:searchKeyword IS NULL OR m.phoneNumber LIKE CONCAT('%', :searchKeyword, '%'))
+                    )
+                )
         )
         ORDER BY m.id DESC
     """
@@ -80,6 +79,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             Pageable pageable
     );
 
+    @Query("SELECT DISTINCT m FROM Member m " +
+            "LEFT JOIN FETCH m.folders " +
+            "LEFT JOIN FETCH m.strategies " +
+            "LEFT JOIN FETCH m.replies " +
+            "WHERE m.id = :memberId")
+    Optional<Member> findMemberByIdWithStrategiesAndFolderAndReply(Long memberId);
+
     Optional<Member> findDistinctByNickname(String nickname);
+
+    Optional<Member> findByPassword(String email);
+
+    // 메인 페이지에서 사용!
+    Long countAllByRoleCode(String roleCode);
 
 }
