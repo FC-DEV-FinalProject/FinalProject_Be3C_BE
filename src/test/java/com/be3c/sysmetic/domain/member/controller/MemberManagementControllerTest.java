@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.controller;
 import com.be3c.sysmetic.domain.member.dto.MemberGetResponseDto;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchRole;
 import com.be3c.sysmetic.domain.member.entity.MemberSearchType;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.service.MemberManagementServiceImpl;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -37,11 +38,11 @@ class MemberManagementControllerTest {
     void findMemberPage_ShouldReturnPagedMembers_WhenValidInputsProvided() {
         // Given
         MemberSearchRole role = MemberSearchRole.USER;
-        Integer page = 1;
+        Integer page = 0;
         MemberSearchType searchType = MemberSearchType.NAME;
         String searchKeyword = "John";
 
-        Pageable pageable = PageRequest.of(page - 1, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         List<MemberGetResponseDto> memberList = List.of(
                  MemberGetResponseDto.builder().id(1L).name("John Doe").roleCode("USER").build(),
                 MemberGetResponseDto.builder().id(2L).name("Jane Doe").roleCode("USER").build()
@@ -58,7 +59,7 @@ class MemberManagementControllerTest {
         assertEquals(1, response.getTotalPages());
         assertEquals(2, response.getTotalElement());
         assertEquals(2, response.getPageSize());
-        assertEquals(1, response.getCurrentPage());
+        assertEquals(0, response.getCurrentPage());
         assertEquals("John Doe", response.getContent().get(0).getName());
         assertEquals("Jane Doe", response.getContent().get(1).getName());
     }
@@ -68,11 +69,11 @@ class MemberManagementControllerTest {
     void findMemberPage_ShouldReturnEmptyPage_WhenNoMembersFound() {
         // Given
         MemberSearchRole role = MemberSearchRole.USER;
-        Integer page = 1;
+        Integer page = 0;
         MemberSearchType searchType = MemberSearchType.NAME;
         String searchKeyword = "NonExistent";
 
-        Pageable pageable = PageRequest.of(page - 1, 10);
+        Pageable pageable = PageRequest.of(page, 10);
         Page<MemberGetResponseDto> emptyPage = Page.empty(pageable);
 
         when(memberRepository.findMembers(role.getCode(), searchType.getCode(), searchKeyword, pageable))
@@ -88,16 +89,15 @@ class MemberManagementControllerTest {
     }
 
     @Test
-    @DisplayName("잘못된 페이지 번호 입력 시 IllegalArgumentException 발생")
+    @DisplayName("잘못된 페이지 번호 입력 시 MemberBadRequestException 발생")
     void findMemberPage_ShouldThrowException_WhenPageIsInvalid() {
         // Given
         MemberSearchRole role = MemberSearchRole.USER;
-        Integer invalidPage = 0;
+        Integer invalidPage = -1;
         MemberSearchType searchType = MemberSearchType.NAME;
         String searchKeyword = "John";
 
         // When & Then
-        assertThrows(IllegalArgumentException.class,
-                () -> memberService.findMemberPage(role, invalidPage, searchType, searchKeyword));
+        assertThrows(MemberBadRequestException.class, () -> memberService.findMemberPage(role, invalidPage, searchType, searchKeyword));
     }
 }

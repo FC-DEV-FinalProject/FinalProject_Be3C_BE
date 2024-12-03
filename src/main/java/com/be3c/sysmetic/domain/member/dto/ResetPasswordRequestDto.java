@@ -15,17 +15,17 @@ import lombok.*;
 public class ResetPasswordRequestDto {
 
     @NotBlank
-    @Email(message = "유효한 이메일 형식이 아닙니다.")
+    @Email(message = "{Invalid.email}")
     @JsonProperty("email")
     private String email; // 이메일
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$", message = "비밀번호는 영문자(대, 소문자), 숫자, 특수문자를 포함하여 6~20자로 입력해야 합니다.")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$", message = "{Invalid.password}")
     @JsonProperty("password")
     private String password; // 새로운 비밀번호
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$", message = "비밀번호는 영문자(대, 소문자), 숫자, 특수문자를 포함하여 6~20자로 입력해야 합니다.")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$", message = "{Invalid.password}")
     @JsonProperty("rewritePassword")
     private String rewritePassword; // 새로운 비밀번호 재입력
 }

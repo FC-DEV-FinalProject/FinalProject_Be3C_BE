@@ -7,9 +7,6 @@ import com.be3c.sysmetic.domain.member.validation.RegisterValidator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -21,10 +18,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,7 +47,7 @@ public class RegisterController {
             description = "이메일 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-duplicate-email")
-    public ResponseEntity<APIResponse<String>> checkDuplicateEmail(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
+    public ResponseEntity<APIResponse<String>> checkDuplicateEmail(@Email(message = "{Invalid.email}") @RequestParam String email) {
         registerService.checkEmailDuplication(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -64,7 +58,7 @@ public class RegisterController {
             description = "사용자에게 이메일 인증코드를 전송하는 API"
     )
     @GetMapping("/auth/email-code")
-    public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
+    public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "{Invalid.email}") @RequestParam String email) {
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -86,7 +80,7 @@ public class RegisterController {
             description = "닉네임 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-nickname")
-    public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@NotNull @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "닉네임은 한글 또는 숫자로 3자 이상 10자 이내로 입력해야 합니다.") @RequestParam String nickname) {
+    public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@NotNull @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "{Invalid.nickname}") @RequestParam String nickname) {
         registerService.checkNicknameDuplication(nickname);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
