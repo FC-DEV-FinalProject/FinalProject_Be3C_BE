@@ -114,7 +114,7 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        if(!duplCheck(methodPostRequestDto.getName())) {
+        if(duplCheck(methodPostRequestDto.getName())) {
             throw new ConflictException();
         }
 
@@ -148,7 +148,7 @@ public class MethodServiceImpl implements MethodService {
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
-        if(!(method.getName().equals(methodPutRequestDto.getName()) && duplCheck(methodPutRequestDto.getName()))) {
+        if(method.getName().equals(methodPutRequestDto.getName()) && !duplCheck(methodPutRequestDto.getName())) {
             throw new ConflictException();
         }
 

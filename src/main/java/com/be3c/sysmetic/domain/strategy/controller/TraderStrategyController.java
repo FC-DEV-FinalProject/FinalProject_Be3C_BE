@@ -212,6 +212,4 @@ public class TraderStrategyController {
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
-
 }
-
