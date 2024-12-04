@@ -20,7 +20,7 @@ public class NoticeSaveRequestDto {
     private String noticeTitle;
 
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
-    @Size(max = 1000)
+    @Size(max = 2000)
     @NotBlank
     private String noticeContent;
 

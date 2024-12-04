@@ -47,15 +47,15 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -73,7 +73,7 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryAdminListShowRequestDto.setSearchType(searchType);
         inquiryAdminListShowRequestDto.setSearchText(searchText);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiriesAdmin(inquiryAdminListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiriesAdmin(inquiryAdminListShowRequestDto, page);
 
         List<InquiryAdminListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(inquiryService::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
@@ -103,15 +103,15 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/admin/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -272,14 +272,14 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -299,7 +299,7 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
@@ -329,14 +329,14 @@ public class InquiryController implements InquiryControllerDocs {
      @GetMapping("/member/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerInquirerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
          InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-         if (page <= 0) {
+         if (page < 0) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
          }
 
          if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -379,15 +379,15 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/member/qna/{qnaId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
         try {
-            if (page <= 0) {
+            if (page < 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
             }
 
             if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -560,14 +560,14 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -587,7 +587,7 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
                 .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
@@ -617,14 +617,14 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/trader/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerTraderShowResponseDto>> showTraderInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {

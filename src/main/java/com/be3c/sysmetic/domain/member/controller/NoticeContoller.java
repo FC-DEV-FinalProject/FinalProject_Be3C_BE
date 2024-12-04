@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,7 +50,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
-    @PostMapping("/admin/notice")
+    @PostMapping(value = "/admin/notice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<Long>> saveAdminNotice(
             @RequestPart(value = "NoticeSaveRequestDto") @Valid NoticeSaveRequestDto noticeSaveRequestDto,
             @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
@@ -98,21 +99,21 @@ public class NoticeContoller implements NoticeControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
-        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("titlecontent") || searchType.equals("writer"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
 
-        Page<Notice> noticeList = noticeService.findNoticeAdmin(searchType, searchText, page-1);
+        Page<Notice> noticeList = noticeService.findNoticeAdmin(searchType, searchText, page);
 
         List<NoticeAdminListOneShowResponseDto> noticeAdminDtoList = noticeList.stream()
                 .map(noticeService::noticeToNoticeAdminListOneShowResponseDto).collect(Collectors.toList());
@@ -171,16 +172,16 @@ public class NoticeContoller implements NoticeControllerDocs {
     @GetMapping("/admin/notice/{noticeId}")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
-        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("titlecontent") || searchType.equals("writer"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
@@ -211,16 +212,16 @@ public class NoticeContoller implements NoticeControllerDocs {
     @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
-        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("all") || searchType.equals("writer"))) {
+        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("titlecontent") || searchType.equals("writer"))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
         }
@@ -250,7 +251,7 @@ public class NoticeContoller implements NoticeControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
-    @PutMapping("/admin/notice/{noticeId}")
+    @PutMapping(value = "/admin/notice/{noticeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<Long>> modifyAdminNotice(
             @PathVariable(name="noticeId") Long noticeId,
             @RequestPart(value = "NoticeModifyRequestDto") @Valid NoticeModifyRequestDto noticeModifyRequestDto,
@@ -372,15 +373,15 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
     @GetMapping("/notice")
     public ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
-        Page<Notice> noticeList = noticeService.findNotice(searchText, page-1);
+        Page<Notice> noticeList = noticeService.findNotice(searchText, page);
 
         List<NoticeListOneShowResponseDto> noticeDtoList = noticeList.stream()
                 .map(NoticeContoller::noticeToNoticeListOneShowResponseDto).collect(Collectors.toList());
@@ -418,12 +419,12 @@ public class NoticeContoller implements NoticeControllerDocs {
     @GetMapping("/notice/{noticeId}")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText) {
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         try {

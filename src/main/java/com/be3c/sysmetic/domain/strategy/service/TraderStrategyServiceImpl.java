@@ -146,9 +146,6 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         if(!fileService.getFilePath(fileRequest).isEmpty()) {
             fileService.deleteFile(fileRequest);
         }
-
-        inquiryAnswerRepository.deleteByStrategyId(strategyId);
-        inquiryRepository.deleteByStrategyId(strategyId);
     }
 
     // 전략명 중복 여부 검증

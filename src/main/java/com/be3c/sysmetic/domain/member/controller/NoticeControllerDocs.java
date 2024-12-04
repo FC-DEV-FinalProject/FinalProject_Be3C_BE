@@ -5,6 +5,8 @@ import com.be3c.sysmetic.domain.strategy.dto.StrategyStatisticsGetResponseDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -75,6 +77,10 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
+    @Parameters({
+            @Parameter(name = "searchType", description = "검색 유형 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)"),
+            @Parameter(name = "searchText", description = "검색 텍스트")
+    })
     ResponseEntity<APIResponse<PageResponse<NoticeAdminListOneShowResponseDto>>> showAdminNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
@@ -134,6 +140,10 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
+    @Parameters({
+            @Parameter(name = "searchType", description = "검색 유형 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)"),
+            @Parameter(name = "searchText", description = "검색 텍스트")
+    })
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
             @PathVariable(name="noticeId") Long noticeId,
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -166,6 +176,10 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
+    })
+    @Parameters({
+            @Parameter(name = "searchType", description = "검색 유형 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)"),
+            @Parameter(name = "searchText", description = "검색 텍스트")
     })
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
             @PathVariable(name="noticeId") Long noticeId,
@@ -281,6 +295,9 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
+    @Parameters({
+            @Parameter(name = "searchText", description = "검색 텍스트")
+    })
     ResponseEntity<APIResponse<PageResponse<NoticeListOneShowResponseDto>>> showNotice(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "searchText", required = false) String searchText);
@@ -306,6 +323,9 @@ public interface NoticeControllerDocs {
                     description = "파라미터 데이터의 형식이 올바르지 않음 (BAD_REQUEST)",
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
+    })
+    @Parameters({
+            @Parameter(name = "searchText", description = "검색 텍스트")
     })
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
             @PathVariable(name="noticeId") Long noticeId,

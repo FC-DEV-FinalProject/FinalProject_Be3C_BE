@@ -44,8 +44,8 @@ public class NoticeServiceImpl implements NoticeService {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
 
-        Boolean fileExists = !fileList.isEmpty();
-        Boolean imageExists = !imageList.isEmpty();
+        Boolean fileExists = (fileList != null);
+        Boolean imageExists = (imageList != null);
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, fileExists, imageExists, isOpen);
 
@@ -68,7 +68,7 @@ public class NoticeServiceImpl implements NoticeService {
 
 
     // 관리자 검색 조회
-    // 검색 (사용: title, content, all, writer) (설명: 제목, 내용, 제목+내용, 작성자)
+    // 검색 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)
     @Override
     public Page<Notice> findNoticeAdmin(String searchType, String searchText, Integer page) {
 
@@ -120,57 +120,67 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
-        List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
-        List<Long> nowFileIdList = new ArrayList<>();
-        for (FileWithInfoResponse file : nowFileDtoList) {
-            nowFileIdList.add(file.id());
-        }
-        int countFile = nowFileDtoList.size();
-        for (Long fileId : deleteFileIdList) {
-            if (nowFileIdList.contains(fileId)) {
-                fileService.deleteFileById(fileId);
-                countFile--;
-            } else {
-                throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+        Boolean fileExists = notice.getFileExists();
+        if (fileExists) {
+            if (deleteFileIdList != null) {
+                List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+                List<Long> nowFileIdList = new ArrayList<>();
+                for (FileWithInfoResponse file : nowFileDtoList) {
+                    nowFileIdList.add(file.id());
+                }
+                int countFile = nowFileDtoList.size();
+                for (Long fileId : deleteFileIdList) {
+                    if (nowFileIdList.contains(fileId)) {
+                        fileService.deleteFileById(fileId);
+                        countFile--;
+                    } else {
+                        throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+                    }
+                }
+                int newFileListSize;
+                if (newFileList == null) {
+                    newFileListSize = 0;
+                } else {
+                    newFileListSize = newFileList.size();
+                }
+                countFile = countFile + newFileListSize;
+                if (countFile > 3) {
+                    throw new IllegalArgumentException("파일이 3개 이상입니다.");
+                }
+                fileExists = countFile > 0;
             }
         }
-        int newFileListSize;
-        if (newFileList == null) {
-            newFileListSize = 0;
-        } else {
-            newFileListSize = newFileList.size();
-        }
-        countFile = countFile + newFileListSize;
-        if (countFile > 3) {
-            throw new IllegalArgumentException("파일이 3개 이상입니다.");
-        }
-        Boolean fileExists = countFile > 0;
 
-        List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
-        List<Long> nowImageIdList = new ArrayList<>();
-        for (FileWithInfoResponse image : nowImageDtoList) {
-            nowImageIdList.add(image.id());
-        }
-        int countImage = nowFileDtoList.size();
-        for (Long imageId : deleteImageIdList) {
-            if (nowImageIdList.contains(imageId)) {
-                fileService.deleteFileById(imageId);
-                countFile--;
-            } else {
-                throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
+        Boolean imageExists = notice.getImageExists();
+        if (imageExists) {
+            if (deleteImageIdList != null) {
+                List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+                List<Long> nowImageIdList = new ArrayList<>();
+                for (FileWithInfoResponse image : nowImageDtoList) {
+                    nowImageIdList.add(image.id());
+                }
+                int countImage = nowImageDtoList.size();
+                for (Long imageId : deleteImageIdList) {
+                    if (nowImageIdList.contains(imageId)) {
+                        fileService.deleteFileById(imageId);
+                        countImage--;
+                    } else {
+                        throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
+                    }
+                }
+                int newImageListSize;
+                if (newImageList == null) {
+                    newImageListSize = 0;
+                } else {
+                    newImageListSize = newImageList.size();
+                }
+                countImage = countImage + newImageListSize;
+                if (countImage > 5) {
+                    throw new IllegalArgumentException("이미지가 5개 이상입니다.");
+                }
+                imageExists = countImage > 0;
             }
         }
-        int newImageListSize;
-        if (newImageList == null) {
-            newImageListSize = 0;
-        } else {
-            newImageListSize = newImageList.size();
-        }
-        countImage = countImage + newImageListSize;
-        if (countImage > 5) {
-            throw new IllegalArgumentException("이미지가 5개 이상입니다.");
-        }
-        Boolean imageExists = countImage > 0;
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
@@ -180,13 +190,13 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setImageExists(imageExists);
         notice.setIsOpen(isOpen);
 
-        if(!(newFileList == null || newFileList.isEmpty())) {
+        if(newFileList != null) {
             for (MultipartFile file : newFileList) {
                 fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             }
         }
 
-        if(!(newImageList == null || newImageList.isEmpty())) {
+        if(newImageList != null) {
             for (MultipartFile image : newImageList) {
                 fileService.uploadImage(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
@@ -214,7 +224,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public Map<Long, String> deleteAdminNoticeList(List<Long> noticeIdList) {
 
-        if (noticeIdList == null || noticeIdList.isEmpty()) {
+        if (noticeIdList == null) {
             throw new IllegalArgumentException("공지가 한 개도 선택되지 않았습니다.");
         }
 

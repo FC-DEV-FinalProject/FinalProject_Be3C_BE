@@ -17,7 +17,7 @@ public interface NoticeService {
                            List<MultipartFile> fileLists, List<MultipartFile> imageList);
 
     // 관리자 검색 조회
-    // 검색 (사용: title, content, all, writer) (설명: 제목, 내용, 제목+내용, 작성자)
+    // 검색 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)
     Page<Notice> findNoticeAdmin(String searchType, String searchText, Integer page);
 
     // 관리자 공지사항 목록 공개여부 수정

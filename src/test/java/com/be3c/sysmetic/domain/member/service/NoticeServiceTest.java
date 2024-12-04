@@ -96,12 +96,12 @@ class NoticeServiceTest {
     public void 공지사항_수정() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false,  new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "공지제목1", "공지내용1", false, null, null);
 
         //when
         List<Notice> noticeList = noticeRepository.findByNoticeTitle("공지제목1");
         Notice notice = noticeList.get(0);
-        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, false,  new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        noticeService.modifyNotice(notice.getId(), "수정공지제목1", "수정공지내용1", 10L, false, null, null, null, null);
 
         //then
         assertEquals("수정공지제목1", notice.getNoticeTitle());

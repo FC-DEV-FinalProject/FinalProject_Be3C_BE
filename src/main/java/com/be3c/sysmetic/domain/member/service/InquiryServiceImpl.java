@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_INQUIRY;
 
@@ -169,7 +170,7 @@ public class InquiryServiceImpl implements InquiryService {
     @Transactional
     public Map<Long, String> deleteAdminInquiryList(List<Long> inquiryIdList) {
 
-        if (inquiryIdList == null || inquiryIdList.isEmpty()) {
+        if (inquiryIdList == null) {
             throw new EntityNotFoundException("문의가 한 개도 선택되지 않았습니다.");
         }
 
@@ -237,21 +238,45 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
 
+        Long methodId;
+        String methodIconPath;
+        Character cycle;
+        StockListDto stockList;
+        Long strategyId;
+        String strategyName;
+        String statusCode;
+
+        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+            methodId = inquiry.getStrategy().getMethod().getId();
+            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            cycle = inquiry.getStrategy().getCycle();
+            stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+            strategyId = inquiry.getStrategy().getId();
+            strategyName = inquiry.getStrategy().getName();
+            statusCode = inquiry.getStrategy().getStatusCode();
+        } else {
+            methodId = null;
+            methodIconPath = null;
+            cycle = null;
+            stockList = null;
+            strategyId = null;
+            strategyName = null;
+            statusCode = null;
+        }
+
         String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
-        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
 
         return InquiryAdminListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .traderId(inquiry.getTraderId())
                 .traderNickname(traderNickname)
-                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodId(methodId)
                 .methodIconPath(methodIconPath)
-                .cycle(inquiry.getStrategy().getCycle())
+                .cycle(cycle)
                 .stockList(stockList)
-                .strategyId(inquiry.getStrategy().getId())
-                .strategyName(inquiry.getStrategy().getName())
-                .statusCode(inquiry.getStrategy().getStatusCode())
+                .strategyId(strategyId)
+                .strategyName(strategyName)
+                .statusCode(statusCode)
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
                 .inquirerNickname(inquiry.getInquirer().getNickname())
                 .inquiryStatus(inquiry.getInquiryStatus())
@@ -262,10 +287,9 @@ public class InquiryServiceImpl implements InquiryService {
     public InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (
             Long inquiryId, Integer page, String closed, String searchType, String searchText) {
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
-        List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
+        List<Inquiry> previousInquiryList = inquiryRepository.adminFindPreviousInquiry(inquiryId, PageRequest.of(0, 1));
 
         String previousInquiryTitle;
         LocalDateTime previousInquiryWriteDate;
@@ -278,7 +302,7 @@ public class InquiryServiceImpl implements InquiryService {
             previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
         }
 
-        List<Inquiry> nextInquiryList = inquiryRepository.traderFindNextInquiry(inquiryId, userId, PageRequest.of(0, 1));
+        List<Inquiry> nextInquiryList = inquiryRepository.adminFindNextInquiry(inquiryId, PageRequest.of(0, 1));
 
         String nextInquiryTitle;
         LocalDateTime nextInquiryWriteDate;
@@ -291,7 +315,6 @@ public class InquiryServiceImpl implements InquiryService {
             nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
         }
 
-        InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
         Long inquiryAnswerId;
         String answerTitle;
         LocalDateTime answerRegistrationDate;
@@ -302,16 +325,41 @@ public class InquiryServiceImpl implements InquiryService {
             answerRegistrationDate = null;
             answerContent = null;
         } else {
+            InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
             inquiryAnswerId = inquiryAnswer.getId();
             answerTitle = inquiryAnswer.getAnswerTitle();
             answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
             answerContent = inquiryAnswer.getAnswerContent();
         }
 
+        Long methodId;
+        String methodIconPath;
+        Character cycle;
+        StockListDto stockList;
+        Long strategyId;
+        String strategyName;
+        String statusCode;
+
+        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+            methodId = inquiry.getStrategy().getMethod().getId();
+            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            cycle = inquiry.getStrategy().getCycle();
+            stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+            strategyId = inquiry.getStrategy().getId();
+            strategyName = inquiry.getStrategy().getName();
+            statusCode = inquiry.getStrategy().getStatusCode();
+        } else {
+            methodId = null;
+            methodIconPath = null;
+            cycle = null;
+            stockList = null;
+            strategyId = null;
+            strategyName = null;
+            statusCode = null;
+        }
+
         String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
         String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
-        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
 
         return InquiryAnswerAdminShowResponseDto.builder()
                 .page(page)
@@ -327,13 +375,13 @@ public class InquiryServiceImpl implements InquiryService {
                 .inquirerNickname(inquiry.getInquirer().getNickname())
                 .inquiryStatus(inquiry.getInquiryStatus())
 
-                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodId(methodId)
                 .methodIconPath(methodIconPath)
-                .cycle(inquiry.getStrategy().getCycle())
+                .cycle(cycle)
                 .stockList(stockList)
-                .strategyId(inquiry.getStrategy().getId())
-                .strategyName(inquiry.getStrategy().getName())
-                .statusCode(inquiry.getStrategy().getStatusCode())
+                .strategyId(strategyId)
+                .strategyName(strategyName)
+                .statusCode(statusCode)
 
                 .inquiryContent(inquiry.getInquiryContent())
 
@@ -376,20 +424,43 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
 
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
-        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+        Long methodId;
+        String methodIconPath;
+        Character cycle;
+        StockListDto stockList;
+        Long strategyId;
+        String strategyName;
+        String statusCode;
+
+        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+            methodId = inquiry.getStrategy().getMethod().getId();
+            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            cycle = inquiry.getStrategy().getCycle();
+            stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+            strategyId = inquiry.getStrategy().getId();
+            strategyName = inquiry.getStrategy().getName();
+            statusCode = inquiry.getStrategy().getStatusCode();
+        } else {
+            methodId = null;
+            methodIconPath = null;
+            cycle = null;
+            stockList = null;
+            strategyId = null;
+            strategyName = null;
+            statusCode = null;
+        }
 
         return InquiryListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
                 .inquiryTitle(inquiry.getInquiryTitle())
 
-                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodId(methodId)
                 .methodIconPath(methodIconPath)
-                .cycle(inquiry.getStrategy().getCycle())
+                .cycle(cycle)
                 .stockList(stockList)
-                .strategyId(inquiry.getStrategy().getId())
-                .strategyName(inquiry.getStrategy().getName())
-                .statusCode(inquiry.getStrategy().getStatusCode())
+                .strategyId(strategyId)
+                .strategyName(strategyName)
+                .statusCode(statusCode)
 
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
                 .inquiryStatus(inquiry.getInquiryStatus())
@@ -449,10 +520,34 @@ public class InquiryServiceImpl implements InquiryService {
             answerContent = inquiryAnswer.getAnswerContent();
         }
 
+        Long methodId;
+        String methodIconPath;
+        Character cycle;
+        StockListDto stockList;
+        Long strategyId;
+        String strategyName;
+        String statusCode;
+
+        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+            methodId = inquiry.getStrategy().getMethod().getId();
+            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            cycle = inquiry.getStrategy().getCycle();
+            stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+            strategyId = inquiry.getStrategy().getId();
+            strategyName = inquiry.getStrategy().getName();
+            statusCode = inquiry.getStrategy().getStatusCode();
+        } else {
+            methodId = null;
+            methodIconPath = null;
+            cycle = null;
+            stockList = null;
+            strategyId = null;
+            strategyName = null;
+            statusCode = null;
+        }
+
         String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
         String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
-        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
 
         return InquiryAnswerInquirerShowResponseDto.builder()
                 .page(page)
@@ -466,13 +561,13 @@ public class InquiryServiceImpl implements InquiryService {
                 .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
                 .inquiryStatus(inquiry.getInquiryStatus())
 
-                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodId(methodId)
                 .methodIconPath(methodIconPath)
-                .cycle(inquiry.getStrategy().getCycle())
+                .cycle(cycle)
                 .stockList(stockList)
-                .strategyId(inquiry.getStrategy().getId())
-                .strategyName(inquiry.getStrategy().getName())
-                .statusCode(inquiry.getStrategy().getStatusCode())
+                .strategyId(strategyId)
+                .strategyName(strategyName)
+                .statusCode(statusCode)
 
                 .traderId(inquiry.getTraderId())
                 .traderNickname(traderNickname)
@@ -544,10 +639,34 @@ public class InquiryServiceImpl implements InquiryService {
             answerContent = inquiryAnswer.getAnswerContent();
         }
 
+        Long methodId;
+        String methodIconPath;
+        Character cycle;
+        StockListDto stockList;
+        Long strategyId;
+        String strategyName;
+        String statusCode;
+
+        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+            methodId = inquiry.getStrategy().getMethod().getId();
+            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            cycle = inquiry.getStrategy().getCycle();
+            stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+            strategyId = inquiry.getStrategy().getId();
+            strategyName = inquiry.getStrategy().getName();
+            statusCode = inquiry.getStrategy().getStatusCode();
+        } else {
+            methodId = null;
+            methodIconPath = null;
+            cycle = null;
+            stockList = null;
+            strategyId = null;
+            strategyName = null;
+            statusCode = null;
+        }
+
         String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
         String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
-        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
 
         return InquiryAnswerTraderShowResponseDto.builder()
                 .page(page)
@@ -562,13 +681,13 @@ public class InquiryServiceImpl implements InquiryService {
                 .inquirerNickname(inquiry.getInquirer().getNickname())
                 .inquiryStatus(inquiry.getInquiryStatus())
 
-                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodId(methodId)
                 .methodIconPath(methodIconPath)
-                .cycle(inquiry.getStrategy().getCycle())
+                .cycle(cycle)
                 .stockList(stockList)
-                .strategyId(inquiry.getStrategy().getId())
-                .strategyName(inquiry.getStrategy().getName())
-                .statusCode(inquiry.getStrategy().getStatusCode())
+                .strategyId(strategyId)
+                .strategyName(strategyName)
+                .statusCode(statusCode)
 
                 .traderId(inquiry.getTraderId())
                 .traderNickname(traderNickname)

@@ -20,7 +20,6 @@ import java.util.Map;
 @Tag(name = "문의 API", description = "관리자, 트레이더, 투자자 문의 API")
 public interface InquiryControllerDocs {
 
-
     // 관리자 문의 조회 / 검색 API
     @Operation(
             summary = "관리자 문의 조회 / 검색",
@@ -44,7 +43,8 @@ public interface InquiryControllerDocs {
     })
     @Parameters({
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
-            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
+            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)"),
+            @Parameter(name = "searchText", description = "검색 텍스트")
     })
     ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
@@ -81,7 +81,8 @@ public interface InquiryControllerDocs {
     })
     @Parameters({
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
-            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)")
+            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)"),
+            @Parameter(name = "searchText", description = "검색 텍스트")
     })
     ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
