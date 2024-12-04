@@ -26,9 +26,6 @@ public interface NoticeService {
     // 공지사항 조회 후 조회수 상승
     void upHits(Long noticeId);
 
-    // 문의 아이디로 문의 조회
-    Notice findNoticeById(Long noticeId);
-
     // 관리자 문의 수정
     boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
                          List<Long> deleteFileIdList, List<Long> deleteImageIdList,

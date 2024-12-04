@@ -103,14 +103,6 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setHits(notice.getHits() + 1);
     }
 
-
-    // 문의 아이디로 문의 조회
-    @Override
-    public Notice findNoticeById(Long noticeId) {
-        return noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
-    }
-
-
     // 관리자 공지사항 수정
     @Override
     @Transactional

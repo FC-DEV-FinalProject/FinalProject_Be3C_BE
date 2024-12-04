@@ -11,28 +11,8 @@ import java.util.Map;
 
 public interface InquiryService {
 
-    Long saveInquiry(Inquiry inquiry);
-
     // 문의 단건 조회
     Inquiry findOneInquiry(Long inquiryId);
-
-    // 문의 전체 조회
-    Page<Inquiry> findInquiryAll(Integer page);
-
-    // 상태별 문의 조회
-    Page<Inquiry> findInquiryByInquiryStatus(InquiryStatus inquiryStatus, Integer page);
-
-    // 일반회원별 문의 조회
-    Page<Inquiry> findInquiryByInquirerId(Long inquirerId, Integer page);
-
-    // 일반회원별 상태별 문의 조회
-    Page<Inquiry> findInquiryByInquirerIdAndInquiryStatus(Long inquirerId, InquiryStatus inquiryStatus, Integer page);
-
-    // 트레이더별 문의 조회
-    Page<Inquiry> findInquiryByTraderId(Long traderId, Integer page);
-
-    // 트레이더별 상태별 문의 조회
-    Page<Inquiry> findInquiryByTraderIdAndInquiryStatus(Long traderId, InquiryStatus inquiryStatus, Integer page);
 
     // 전략 문의 등록 화면 조회
     Strategy findStrategyForInquiryPage(Long strategyId);
@@ -51,12 +31,6 @@ public interface InquiryService {
 
     // 관리자 목록 삭제
     Map<Long, String> deleteAdminInquiryList(List<Long> inquiryIdList);
-
-    // 트레이더별 문의id로 조회
-    Inquiry findInquiryByTraderIdAndInquiryId(Long inquiryId, Long traderId);
-
-    // 질문자별 문의id로 조회
-    Inquiry findInquiryByInquirerIdAndInquiryId(Long inquiryId, Long inquirerId);
 
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
