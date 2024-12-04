@@ -20,11 +20,22 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
     // 특정 년월의 월간분석 데이터 조회
     // year, month null일 경우 전체 조회
     @Query("""
-        SELECT m FROM Monthly m WHERE m.strategy.id = :strategyId 
-        AND (:startYearMonth IS NULL OR (m.yearNumber > :#{#startYearMonth?.year} 
-        OR (m.yearNumber = :#{#startYearMonth?.year} AND m.monthNumber >= :#{#startYearMonth?.monthValue})))
-        AND (:endYearMonth IS NULL OR (m.yearNumber < :#{#endYearMonth?.year} 
-        OR (m.yearNumber = :#{#endYearMonth?.year} AND m.monthNumber <= :#{#endYearMonth?.monthValue})))
+        SELECT m FROM Monthly m 
+        WHERE m.strategy.id = :strategyId 
+        AND (
+            :startYearMonth IS NULL OR 
+            (
+                m.yearNumber > :#{#startYearMonth?.year} OR 
+                (m.yearNumber = :#{#startYearMonth?.year} AND m.monthNumber >= :#{#startYearMonth?.monthValue})
+            )
+        )
+        AND (
+            :endYearMonth IS NULL OR 
+            (
+                m.yearNumber < :#{#endYearMonth?.year} OR 
+                (m.yearNumber = :#{#endYearMonth?.year} AND m.monthNumber <= :#{#endYearMonth?.monthValue})
+            )
+        )
         ORDER BY m.yearNumber DESC, m.monthNumber DESC
     """)
     Page<Monthly> findAllByStrategyIdAndDateBetween(
@@ -33,6 +44,7 @@ public interface MonthlyRepository extends JpaRepository<Monthly, Long> {
             @Param("endYearMonth") YearMonth endYearMonth,
             Pageable pageable
     );
+
 
     // 특정 전략의 월간분석 데이터 삭제
     void deleteAllByStrategyId(@Param("strategyId") Long strategyId);

@@ -48,12 +48,11 @@ public class AccountImageServiceImpl implements AccountImageService {
     private final FileServiceImpl fileServiceImpl;
     private final StrategyViewAuthorize strategyViewAuthorize;
 
-    // 실계좌이미지 조회 - PUBLIC 상태인 전략의 실계좌이미지 조회
+    // 실계좌이미지 조회
     @Override
     public PageResponse<AccountImageResponseDto> findAccountImages(Long strategyId, Integer page) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
@@ -74,53 +73,6 @@ public class AccountImageServiceImpl implements AccountImageService {
         }
 
         throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
-    }
-
-    /*
-    실계좌이미지 조회
-    1) 트레이더
-    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
-    2) 관리자
-    모든 상태의 전략 조회 가능
-     */
-    @Override
-    public PageResponse<AccountImageResponseDto> findTraderAccountImages(Long strategyId, Integer page) {
-        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        // trader일 경우, 본인의 전략인지 검증
-        if(userRole.equals("TRADER")) {
-            validUser(exitingStrategy.getTrader().getId());
-        }
-
-        // member일 경우, 권한 없음 처리
-        if(userRole.equals("USER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.FORBIDDEN);
-        }
-
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
-
-        Page<AccountImageResponseDto> accountImageResponseDtoPage = accountImageRepository
-                .findAllByStrategyIdOrderByAccountImageCreatedAt(strategyId, pageable)
-                .map(this::entityToDto);
-
-        return PageResponse.<AccountImageResponseDto>builder()
-                .currentPage(accountImageResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(accountImageResponseDtoPage.getPageable().getPageSize())
-                .totalElement(accountImageResponseDtoPage.getTotalElements())
-                .totalPages(accountImageResponseDtoPage.getTotalPages())
-                .content(accountImageResponseDtoPage.getContent())
-                .build();
     }
 
     // 실계좌이미지 삭제

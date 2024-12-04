@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -135,4 +136,38 @@ public class StrategyStatisticsGetResponseDto {
     @NotNull
     private Long highPointRenewalProgress;
 
+    public static StrategyStatisticsGetResponseDto getResponseDto(StrategyStatistics statistics, String operationPeriod) {
+        return StrategyStatisticsGetResponseDto.builder()
+                .currentBalance(statistics.getCurrentBalance())
+                .accumulatedDepositWithdrawalAmount(statistics.getAccumulatedDepositWithdrawalAmount())
+                .principal(statistics.getPrincipal())
+                .operationPeriod(operationPeriod)
+                .startDate(statistics.getFirstRegistrationDate())
+                .endDate(statistics.getLastRegistrationDate())
+                .accumulatedProfitLossAmount(statistics.getAccumulatedProfitLossAmount())
+                .accumulatedProfitLossRate(statistics.getAccumulatedProfitLossRate())
+                .maximumAccumulatedProfitLossAmount(statistics.getMaximumAccumulatedProfitLossAmount())
+                .maximumAccumulatedProfitLossRate(statistics.getMaximumAccumulatedProfitLossRate())
+                .currentCapitalReductionAmount(statistics.getCurrentCapitalReductionAmount())
+                .currentCapitalReductionRate(statistics.getCurrentCapitalReductionRate())
+                .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
+                .maximumCapitalReductionRate(statistics.getMaximumCapitalReductionRate())
+                .averageProfitLossAmount(statistics.getAverageProfitLossAmount())
+                .averageProfitLossRate(statistics.getAverageProfitLossRate())
+                .maximumDailyProfitAmount(statistics.getMaximumDailyProfitAmount())
+                .maximumDailyProfitRate(statistics.getMaximumDailyProfitRate())
+                .maximumDailyLossAmount(statistics.getMaximumDailyLossAmount())
+                .maximumDailyLossRate(statistics.getMaximumDailyLossRate())
+                .totalTradingDays(statistics.getTotalTradingDays())
+                .totalProfitDays(statistics.getTotalProfitDays())
+                .totalLossDays(statistics.getTotalLossDays())
+                .currentContinuousProfitLossDays(statistics.getCurrentContinuousProfitLossDays())
+                .maxContinuousProfitDays(statistics.getMaximumContinuousProfitDays())
+                .maxContinuousLossDays(statistics.getMaximumContinuousLossDays())
+                .winningRate(statistics.getWinningRate())
+                .profitFactor(statistics.getProfitFactor())
+                .roa(statistics.getRoa())
+                .highPointRenewalProgress(statistics.getHighPointRenewalProgress())
+                .build();
+    }
 }

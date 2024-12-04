@@ -76,16 +76,17 @@ public class TraderStrategyController {
     // 전략 삭제
     @Operation(
             summary = "전략 삭제",
-            description = "트레이더가 본인의 전략을 삭제"
+            description = "트레이더가 본인의 전략 목록을 삭제"
     )
-    @DeleteMapping("/strategy/{strategyId}")
+    @DeleteMapping("/strategy")
     // @PreAuthorize("hasRole('ROLE_TRADER')")
-    public ResponseEntity<APIResponse> deleteStrategy(@PathVariable Long strategyId) {
-        traderStrategyService.deleteStrategy(strategyId);
+    public ResponseEntity<APIResponse> deleteStrategy(@RequestBody StrategyDeleteRequestDto requestDto) {
+        traderStrategyService.deleteStrategy(requestDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success());
     }
 
+    // todo. batch insert, delete
     // 일간분석 등록
     @Operation(
             summary = "일간분석 등록",

@@ -69,14 +69,13 @@ public class MonthlyServiceImpl implements MonthlyService {
         });
     }
 
-    // 월간분석 조회 - PUBLIC 상태인 전략의 월간분석 데이터 조회
+    // 월간분석 조회
     @Override
     public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
         YearMonth start = parseYearMonth(startYearMonth);
         YearMonth end = parseYearMonth(endYearMonth);
 
-        // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
@@ -101,52 +100,6 @@ public class MonthlyServiceImpl implements MonthlyService {
         throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
 
-    /*
-    월간분석 조회 - 트레이더 또는 관리자의 월간분석 데이터 조회
-    1) 트레이더
-    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
-    2) 관리자
-    모든 상태의 전략 조회 가능
-     */
-    @Override
-    public PageResponse<MonthlyGetResponseDto> findTraderMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
-        Pageable pageable = PageRequest.of(page, 10);
-        YearMonth start = parseYearMonth(startYearMonth);
-        YearMonth end = parseYearMonth(endYearMonth);
-
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        // trader일 경우, 본인의 전략인지 검증
-        if(userRole.equals("TRADER")) {
-            validUser(strategyId);
-        }
-
-        // member일 경우, 권한 없음 처리
-        if(userRole.equals("USER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.FORBIDDEN);
-        }
-
-        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
-
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
-                .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
-                .map(this::entityToDto);
-
-        return PageResponse.<MonthlyGetResponseDto>builder()
-                .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(monthlyResponseDtoPage.getTotalElements())
-                .totalPages(monthlyResponseDtoPage.getTotalPages())
-                .content(monthlyResponseDtoPage.getContent())
-                .build();
-    }
-
     @Override
     public Monthly calculateMonthlyData(Long strategyId, int year, int month) {
         List<Daily> dailyList = dailyRepository.findAllByStrategyIdAndYearAndMonth(strategyId, year, month);
@@ -168,16 +121,6 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .accumulatedProfitLossAmount(accumulatedProfitLossAmount)
                 .accumulatedProfitLossRate(accumulatedProfitLossRate)
                 .build();
-    }
-
-    // 현재 로그인한 유저와 전략 업로드한 유저가 일치하는지 검증
-    private void validUser(Long strategyId) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
-        Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
-
-        if(!uploadedTraderId.equals(userId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
-        }
     }
 
     private MonthlyGetResponseDto entityToDto(Monthly monthly) {

@@ -5,11 +5,14 @@ import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyGraphAnalysis;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
@@ -93,7 +96,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Transactional
     public APIResponse<String> saveAnalysis(Long strategyId, LocalDate date) {
         Daily daily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
-        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
         Double accumulatedProfitLossAmount = daily.getAccumulatedProfitLossAmount();
         Double standardAmount = daily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
@@ -130,7 +134,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Transactional
     public APIResponse<String> updateAnalysis(Long strategyId, Long dailyId, LocalDate date) {
         Daily newDaily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
-        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
         Double accumulatedProfitLossAmount = statistics.getAccumulatedProfitLossAmount();
         Double standardAmount = newDaily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();

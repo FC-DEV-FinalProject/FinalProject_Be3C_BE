@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -145,9 +146,10 @@ public class DailyServiceImpl implements DailyService {
         }
 
         if(countDaily == 0) {
-            // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제
+            // 모든 일간분석 데이터 삭제시 월간분석 데이터 삭제
             monthlyRepository.deleteAllByStrategyId(strategyId);
-            statisticsRepository.deleteByStrategyId(strategyId);
+            // 전략 통계 데이터 초기화
+            statisticsRepository.save(new StrategyStatistics(exitingStrategy));
             // 분석 그래프 데이터 삭제
             strategyGraphAnalysisRepository.deleteAllByStrategyId(strategyId);
         }
@@ -181,55 +183,6 @@ public class DailyServiceImpl implements DailyService {
         // 페이지 안에 데이터가 하나라도 존재하지 않는다면 ( 잘못된 페이지 요청 )
         throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
     }
-
-    /*
-    해당 부분 미사용으로 인한 삭제
-    
-    일간분석 조회 - 트레이더 또는 관리자의 일간분석 데이터 조회
-    1) 트레이더
-    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
-    2) 관리자
-    모든 상태의 전략 조회 가능
-     */
-//    @Override
-//    public PageResponse<DailyGetResponseDto> findTraderDaily(Long strategyId, Integer page, LocalDate startDate, LocalDate endDate) {
-//        Strategy exitingStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-//
-//        Pageable pageable = PageRequest.of(page, 10);
-//
-//        String userRole = securityUtils.getUserRoleInSecurityContext();
-//
-//        // trader일 경우, 본인의 전략인지 검증
-//        if(userRole.equals("TRADER")) {
-//           validUser(exitingStrategy.getTrader().getId());
-//        }
-//
-//        // member일 경우, 권한 없음 처리
-//        if(userRole.equals("USER")) {
-//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
-//        }
-//
-//        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-//        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-//                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-//
-//        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-//            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-//        }
-//
-//        Page<DailyGetResponseDto> dailyResponseDtoPage = dailyRepository
-//                .findAllByStrategyIdAndDateBetween(strategyId, startDate, endDate, pageable)
-//                .map(this::entityToDto);
-//
-//        return PageResponse.<DailyGetResponseDto>builder()
-//                .currentPage(dailyResponseDtoPage.getPageable().getPageNumber())
-//                .pageSize(dailyResponseDtoPage.getPageable().getPageSize())
-//                .totalElement(dailyResponseDtoPage.getTotalElements())
-//                .totalPages(dailyResponseDtoPage.getTotalPages())
-//                .content(dailyResponseDtoPage.getContent())
-//                .build();
-//    }
 
     // 중복 여부 조회
     @Override
@@ -378,54 +331,4 @@ public class DailyServiceImpl implements DailyService {
         // DB 업데이트
         dailyRepository.saveAll(dailyList);
     }
-
-// kp ratio, sm score 갱신
-//    public void updateKpRatioAndSmScore(Long strategyId) {
-//        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() -> new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage()));
-//        savedStrategy.setKpRatio(getKpRatio(strategyId));
-//        savedStrategy.setSmScore(getSmScore(strategyId, savedStrategy.getKpRatio()));
-//        strategyRepository.save(savedStrategy);
-//    }
-//    private Double getKpRatio(Long strategyId) {
-//        List<Daily> dailyList = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
-//
-//        Double highProfitLossRate = 0.0;
-//        Double minDrawDown = 0.0;
-//        Double sumDrawDown = 0.0;
-//        Long sumDrawDownPeriod = 0L;
-//
-//        for(int i=0; i<dailyList.size(); i++) {
-//            Double currentProfitLossRate = dailyList.get(i).getAccumulatedProfitLossRate();
-//
-//            if(highProfitLossRate > currentProfitLossRate) {
-//                // 손익률 인하되는 시점
-//                sumDrawDownPeriod++;
-//                if(currentProfitLossRate - highProfitLossRate < minDrawDown) {
-//                    // DD 갱신
-//                    minDrawDown = currentProfitLossRate - highProfitLossRate;
-//                }
-//            } else {
-//                highProfitLossRate = currentProfitLossRate;
-//                sumDrawDown += minDrawDown;
-//                minDrawDown = 0.0;
-//            }
-//        }
-//
-//        return strategyCalculator.getKpRatio(dailyList.stream().findFirst().get().getAccumulatedProfitLossRate(), sumDrawDown, sumDrawDownPeriod, Long.valueOf(dailyList.stream().toList().size()));
-//    }
-//
-//    private Double getSmScore(Long strategyId, Double kpRatio) {
-//        List<Strategy> strategyList = strategyRepository.findAllUsingState();
-//
-//        List<Double> kpRatioList = strategyList.stream()
-//                .map(Strategy::getKpRatio)
-//                .collect(Collectors.toList());
-//
-//        // kp ratio 평균
-//        Double averageKpRatio = strategyCalculator.calculateAverage(kpRatioList);
-//        // kp ratio 표준편차
-//        Double standardDeviationKpRatio = strategyCalculator.calculateStandardDeviation(kpRatioList, averageKpRatio);
-//
-//        return StrategyCalculator.getSmScore(kpRatio, averageKpRatio, standardDeviationKpRatio);
-//    }
 }
