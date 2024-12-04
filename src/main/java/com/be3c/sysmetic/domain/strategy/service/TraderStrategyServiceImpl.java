@@ -26,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -137,7 +135,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
             savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
 
             // 파일 존재할 경우 제안서 삭제
-            // todo. 파일 수정 필요
+            // todo. 파일 : 제안서 필수 x 적용 필요
 //            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
 //
 //            if(fileService.getFilePath(fileRequest) != null) {

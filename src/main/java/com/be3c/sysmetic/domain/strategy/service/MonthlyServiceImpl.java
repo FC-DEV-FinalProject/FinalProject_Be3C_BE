@@ -69,7 +69,7 @@ public class MonthlyServiceImpl implements MonthlyService {
         });
     }
 
-    // 월간분석 조회 - PUBLIC 상태인 전략의 월간분석 데이터 조회
+    // 월간분석 조회
     @Override
     public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
@@ -121,16 +121,6 @@ public class MonthlyServiceImpl implements MonthlyService {
                 .accumulatedProfitLossAmount(accumulatedProfitLossAmount)
                 .accumulatedProfitLossRate(accumulatedProfitLossRate)
                 .build();
-    }
-
-    // 현재 로그인한 유저와 전략 업로드한 유저가 일치하는지 검증
-    private void validUser(Long strategyId) {
-        Long userId = securityUtils.getUserIdInSecurityContext();
-        Long uploadedTraderId = strategyRepository.findById(strategyId).get().getTrader().getId();
-
-        if(!uploadedTraderId.equals(userId)) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
-        }
     }
 
     private MonthlyGetResponseDto entityToDto(Monthly monthly) {

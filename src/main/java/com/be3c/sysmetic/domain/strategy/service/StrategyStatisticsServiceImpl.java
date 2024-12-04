@@ -31,7 +31,6 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
     private final StrategyStatisticsRepository strategyStatisticsRepository;
     private final StrategyRepository strategyRepository;
     private final DoubleHandler doubleHandler;
-    private final SecurityUtils securityUtils;
     private final StrategyViewAuthorize strategyViewAuthorize;
 
     // 전략통계 DB 저장 - SchedulerConfiguration 에서 호출하는 메서드
@@ -309,7 +308,6 @@ public class StrategyStatisticsServiceImpl implements StrategyStatisticsService 
 
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / maximumCapitalReductionAmount * -1);
     }
-
 
     // 운용기간 -> 첫번째 일간분석 데이터의 등록일시, 마지막 일간분석 데이터의 등록일시 차이 - m년 n개월
     private String calculateOperationPeriod(LocalDate startDate, LocalDate endDate) {

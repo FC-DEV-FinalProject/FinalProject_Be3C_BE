@@ -11,7 +11,6 @@ import java.util.List;
 
 public interface AccountImageService {
     PageResponse<AccountImageResponseDto> findAccountImages(Long strategyId, Integer page);
-    PageResponse<AccountImageResponseDto> findTraderAccountImages(Long strategyId, Integer page);
     void deleteAccountImage(AccountImageDeleteRequestDto accountImageIdList);
     void saveAccountImage(Long strategyId, List<AccountImageRequestDto> requestDtoList, List<MultipartFile> images);
 }
