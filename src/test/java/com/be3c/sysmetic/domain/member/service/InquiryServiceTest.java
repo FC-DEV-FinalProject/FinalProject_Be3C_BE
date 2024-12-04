@@ -59,6 +59,7 @@ public class InquiryServiceTest {
 //        Strategy strategy1 = createStrategy("삼성전자");
 //        Strategy strategy2 = createStrategy("LG전자");
 //        Strategy strategy3 = createStrategy("애플");
+//        Strategy strategy3 = createStrategy("테슬라");
 //
 //        int countInquiry = 1;
 //        int countInquiryAnswer = 1;

@@ -5,18 +5,18 @@ import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
-import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
-import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
@@ -25,17 +25,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_INQUIRY;
 
@@ -53,6 +48,8 @@ public class InquiryServiceImpl implements InquiryService {
 
     private final FileService fileService;
     private final StockGetter stockGetter;
+
+    private final Integer pageSize = 10; // 한 페이지 크기
 
     // 문의 단건 조회
     @Override
@@ -89,7 +86,7 @@ public class InquiryServiceImpl implements InquiryService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
         if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
@@ -111,7 +108,7 @@ public class InquiryServiceImpl implements InquiryService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
         if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
@@ -169,16 +166,6 @@ public class InquiryServiceImpl implements InquiryService {
     public Page<Inquiry> findInquiriesAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page) {
 
         return inquiryRepository.adminInquirySearchWithBooleanBuilder(inquiryAdminListShowRequestDto, PageRequest.of(page, 10));
-    }
-
-
-    // 문의자, 트레이더 검색 조회
-    // 정렬 순 셀렉트 박스 (최신순, 전략명)
-    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
-    @Override
-    public Page<Inquiry> findInquiries(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page) {
-
-        return inquiryRepository.inquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
     }
 
     @Override
@@ -432,7 +419,7 @@ public class InquiryServiceImpl implements InquiryService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
         if (!userId.equals(inquiry.getInquirer().getId())) {
-            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         List<Inquiry> previousInquiryList = inquiryRepository.inquirerFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
@@ -557,7 +544,7 @@ public class InquiryServiceImpl implements InquiryService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
         if (!userId.equals(inquiry.getTraderId())) {
-            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
 
         List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
@@ -674,5 +661,163 @@ public class InquiryServiceImpl implements InquiryService {
                 .nextTitle(nextInquiryTitle)
                 .nextWriteDate(nextInquiryWriteDate)
                 .build();
+    }
+
+    // 문의자 검색 조회
+    // 정렬 순 셀렉트 박스 (최신순, 전략명)
+    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    @Override
+    public PageResponse<InquiryListOneShowResponseDto> showInquirerInquiry(Integer page, String sort, InquiryStatus inquiryStatus) {
+
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
+        inquiryListShowRequestDto.setInquirerId(userId);
+        inquiryListShowRequestDto.setTab(inquiryStatus);
+
+        List<InquiryListOneShowResponseDto> inquiryDtoList;
+        PageResponse<InquiryListOneShowResponseDto> inquiryPage;
+
+        if (sort.equals("registrationDate")) {
+
+            Page<Inquiry> inquiryList = inquiryRepository.pageInquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
+
+            inquiryDtoList = inquiryList.stream()
+                    .map(this::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+
+            inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                    .currentPage(page)
+                    .pageSize(pageSize)
+                    .totalElement(inquiryList.getTotalElements())
+                    .totalPages(inquiryList.getTotalPages())
+                    .content(inquiryDtoList)
+                    .build();
+
+        } else if (sort.equals("strategyName")) {
+
+            List<Inquiry> inquiryList = inquiryRepository.listInquirySearchWithBooleanBuilder(inquiryListShowRequestDto);
+            int totalCountInquiry = inquiryList.size(); // 전체 데이터 수
+
+            int totalPageCount; // 전체 페이지 수
+            int pageStart = page * pageSize; // 페이지 시작 위치
+            int pageEnd;
+
+            if (totalCountInquiry == 0) {
+                totalPageCount = 0;
+                inquiryDtoList = null;
+            } else {
+                if (totalCountInquiry % pageSize == 0) {
+                    totalPageCount = (int) (totalCountInquiry / (double) pageSize);
+                } else {
+                    totalPageCount = (int) (totalCountInquiry / (double) pageSize) + 1;
+                }
+
+                if (page + 1 != totalPageCount) {
+                    pageEnd = (page + 1) * pageSize - 1;
+                } else {
+                    pageEnd = totalCountInquiry - 1;
+                }
+
+                List<Inquiry> inquiryListCut = new ArrayList<>();
+                for (int i = pageStart; i <= pageEnd; i++) {
+                    System.out.println("i: " + i);
+                    inquiryListCut.add(inquiryList.get(i));
+                }
+
+                inquiryDtoList = inquiryListCut.stream()
+                        .map(this::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+            }
+
+            inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                    .currentPage(page) // 현재 페이지
+                    .pageSize(pageSize) // 한 페이지 크기
+                    .totalElement(totalCountInquiry) // 전체 데이터 수
+                    .totalPages(totalPageCount) // 전체 페이지 수
+                    .content(inquiryDtoList)
+                    .build();
+        } else {
+            throw new IllegalArgumentException("정렬순을 지정하세요");
+        }
+
+        return inquiryPage;
+    }
+
+    // 트레이더 검색 조회
+    // 정렬 순 셀렉트 박스 (최신순, 전략명)
+    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    @Override
+    public PageResponse<InquiryListOneShowResponseDto> showTraderInquiry(Integer page, String sort, InquiryStatus inquiryStatus) {
+
+        Long userId = securityUtils.getUserIdInSecurityContext();
+
+        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
+        inquiryListShowRequestDto.setTraderId(userId);
+        inquiryListShowRequestDto.setTab(inquiryStatus);
+
+        List<InquiryListOneShowResponseDto> inquiryDtoList;
+        PageResponse<InquiryListOneShowResponseDto> inquiryPage;
+
+        if (sort.equals("registrationDate")) {
+
+            Page<Inquiry> inquiryList = inquiryRepository.pageInquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
+
+            inquiryDtoList = inquiryList.stream()
+                    .map(this::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+
+            inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                    .currentPage(page)
+                    .pageSize(pageSize)
+                    .totalElement(inquiryList.getTotalElements())
+                    .totalPages(inquiryList.getTotalPages())
+                    .content(inquiryDtoList)
+                    .build();
+
+        } else if (sort.equals("strategyName")) {
+
+            List<Inquiry> inquiryList = inquiryRepository.listInquirySearchWithBooleanBuilder(inquiryListShowRequestDto);
+            int totalCountInquiry = inquiryList.size(); // 전체 데이터 수
+
+            int totalPageCount; // 전체 페이지 수
+            int pageStart = page * pageSize; // 페이지 시작 위치
+            int pageEnd;
+
+            if (totalCountInquiry == 0) {
+                totalPageCount = 0;
+                inquiryDtoList = null;
+            } else {
+                if (totalCountInquiry % pageSize == 0) {
+                    totalPageCount = (int) (totalCountInquiry / (double) pageSize);
+                } else {
+                    totalPageCount = (int) (totalCountInquiry / (double) pageSize) + 1;
+                }
+
+                if (page + 1 != totalPageCount) {
+                    pageEnd = (page + 1) * pageSize - 1;
+                } else {
+                    pageEnd = totalCountInquiry - 1;
+                }
+
+                List<Inquiry> inquiryListCut = new ArrayList<>();
+                for (int i = pageStart; i <= pageEnd; i++) {
+                    System.out.println("i: " + i);
+                    inquiryListCut.add(inquiryList.get(i));
+                }
+
+                inquiryDtoList = inquiryListCut.stream()
+                        .map(this::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+            }
+
+            inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
+                    .currentPage(page) // 현재 페이지
+                    .pageSize(pageSize) // 한 페이지 크기
+                    .totalElement(totalCountInquiry) // 전체 데이터 수
+                    .totalPages(totalPageCount) // 전체 페이지 수
+                    .content(inquiryDtoList)
+                    .build();
+        } else {
+            throw new IllegalArgumentException("정렬순을 지정하세요");
+        }
+
+        return inquiryPage;
     }
 }

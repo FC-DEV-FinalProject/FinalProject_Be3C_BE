@@ -211,10 +211,10 @@ public interface InquiryControllerDocs {
             @RequestBody InquirySaveRequestDto inquirySaveRequestDto);
 
 
-    // 질문자 문의 조회 / 검색 API
+    // 질문자 문의 조회 API
     @Operation(
-            summary = "질문자 문의 조회 / 검색",
-            description = "질문자가 자신의 문의를 조회하거나 검색하는 API"
+            summary = "질문자 문의 조회",
+            description = "질문자가 자신의 문의를 조회하는 API"
     )
     @ApiResponses({
             @ApiResponse(
