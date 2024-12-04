@@ -14,6 +14,8 @@ import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
+import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
@@ -23,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,53 +53,10 @@ public class InquiryServiceImpl implements InquiryService {
     private final FileService fileService;
     private final StockGetter stockGetter;
 
-    @Override
-    @Transactional
-    public Long saveInquiry(Inquiry inquiry) {
-        inquiryRepository.save(inquiry);
-        return inquiry.getId();
-    }
-
     // 문의 단건 조회
     @Override
     public Inquiry findOneInquiry(Long inquiryId) {
         return inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
-    }
-
-    // 문의 전체 조회
-    @Override
-    public Page<Inquiry> findInquiryAll(Integer page) {
-        return inquiryRepository.findAll(PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
-    }
-
-    // 상태별 문의 조회
-    @Override
-    public Page<Inquiry> findInquiryByInquiryStatus(InquiryStatus inquiryStatus, Integer page) {
-        return inquiryRepository.findByInquiryStatus(inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
-    }
-
-    // 일반회원별 문의 조회
-    @Override
-    public Page<Inquiry> findInquiryByInquirerId(Long inquirerId, Integer page) {
-        return inquiryRepository.findByInquirerId(inquirerId, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
-    }
-
-    // 일반회원별 상태별 문의 조회
-    @Override
-    public Page<Inquiry> findInquiryByInquirerIdAndInquiryStatus(Long inquirerId, InquiryStatus inquiryStatus, Integer page) {
-        return inquiryRepository.findByInquirerIdAndInquiryStatus(inquirerId, inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
-    }
-
-    // 트레이더별 문의 조회
-    @Override
-    public Page<Inquiry> findInquiryByTraderId(Long traderId, Integer page) {
-        return inquiryRepository.findByTraderId(traderId, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
-    }
-
-    // 트레이더별 상태별 문의 조회
-    @Override
-    public Page<Inquiry> findInquiryByTraderIdAndInquiryStatus(Long traderId, InquiryStatus inquiryStatus, Integer page) {
-        return inquiryRepository.findByTraderIdAndInquiryStatus(traderId, inquiryStatus, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "inquiryRegistrationDate")));
     }
 
     // 전략 문의 등록 화면 조회
@@ -125,6 +86,11 @@ public class InquiryServiceImpl implements InquiryService {
     public boolean modifyInquiry(Long inquiryId, String inquiryTitle, String inquiryContent) {
 
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+        if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
             inquiry.setInquiryTitle(inquiryTitle);
             inquiry.setInquiryContent(inquiryContent);
@@ -142,6 +108,10 @@ public class InquiryServiceImpl implements InquiryService {
     public boolean deleteInquiry(Long inquiryId) {
 
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+        if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+        }
 
         if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
             inquiryRepository.delete(inquiry);
@@ -191,31 +161,6 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
 
-    // 트레이더별 문의id로 조회
-    @Override
-    public Inquiry findInquiryByTraderIdAndInquiryId(Long inquiryId, Long traderId) {
-        List<Inquiry> inquiryList = inquiryRepository.findInquiryByTraderIdAndInquiryId(inquiryId, traderId, PageRequest.of(0, 1));
-
-        if (inquiryList.isEmpty()) {
-            throw new EntityNotFoundException("문의를 찾을 수 없습니다.");
-        } else {
-            return inquiryList.get(0);
-        }
-    }
-
-    // 질문자별 문의id로 조회
-    @Override
-    public Inquiry findInquiryByInquirerIdAndInquiryId(Long inquiryId, Long inquirerId) {
-        List<Inquiry> inquiryList = inquiryRepository.findInquiryByInquirerIdAndInquiryId(inquiryId, inquirerId, PageRequest.of(0, 1));
-
-        if (inquiryList.isEmpty()) {
-            throw new EntityNotFoundException("문의를 찾을 수 없습니다.");
-        } else {
-            return inquiryList.get(0);
-        }
-    }
-
-
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
     // 검색 (전략명, 트레이더, 질문자)
@@ -248,7 +193,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
             methodId = inquiry.getStrategy().getMethod().getId();
-            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
             stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
             strategyId = inquiry.getStrategy().getId();
@@ -264,7 +209,13 @@ public class InquiryServiceImpl implements InquiryService {
             statusCode = null;
         }
 
-        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
+        Member trader = memberRepository.findById(inquiry.getTraderId()).orElse(null);
+        String traderNickname;
+        if (trader == null) {
+            traderNickname = null;
+        } else {
+            traderNickname = trader.getNickname();
+        }
 
         return InquiryAdminListOneShowResponseDto.builder()
                 .inquiryId(inquiry.getId())
@@ -342,7 +293,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
             methodId = inquiry.getStrategy().getMethod().getId();
-            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
             stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
             strategyId = inquiry.getStrategy().getId();
@@ -358,8 +309,14 @@ public class InquiryServiceImpl implements InquiryService {
             statusCode = null;
         }
 
-        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
-        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        Member trader = memberRepository.findById(inquiry.getTraderId()).orElse(null);
+        String traderNickname;
+        if (trader == null) {
+            traderNickname = null;
+        } else {
+            traderNickname = trader.getNickname();
+        }
+        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerAdminShowResponseDto.builder()
                 .page(page)
@@ -403,8 +360,8 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy) {
 
-        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
-        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getId()));
+        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
+        String methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getId()));
         StockListDto stockList = stockGetter.getStocks(strategy.getId());
 
         return InquirySavePageShowResponseDto.builder()
@@ -434,7 +391,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
             methodId = inquiry.getStrategy().getMethod().getId();
-            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
             stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
             strategyId = inquiry.getStrategy().getId();
@@ -530,7 +487,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
             methodId = inquiry.getStrategy().getMethod().getId();
-            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
             stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
             strategyId = inquiry.getStrategy().getId();
@@ -546,8 +503,14 @@ public class InquiryServiceImpl implements InquiryService {
             statusCode = null;
         }
 
-        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
-        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        Member trader = memberRepository.findById(inquiry.getTraderId()).orElse(null);
+        String traderNickname;
+        if (trader == null) {
+            traderNickname = null;
+        } else {
+            traderNickname = trader.getNickname();
+        }
+        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerInquirerShowResponseDto.builder()
                 .page(page)
@@ -649,7 +612,7 @@ public class InquiryServiceImpl implements InquiryService {
 
         if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
             methodId = inquiry.getStrategy().getMethod().getId();
-            methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, methodId));
+            methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
             stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
             strategyId = inquiry.getStrategy().getId();
@@ -665,8 +628,14 @@ public class InquiryServiceImpl implements InquiryService {
             statusCode = null;
         }
 
-        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
-        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        Member trader = memberRepository.findById(inquiry.getTraderId()).orElse(null);
+        String traderNickname;
+        if (trader == null) {
+            traderNickname = null;
+        } else {
+            traderNickname = trader.getNickname();
+        }
+        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerTraderShowResponseDto.builder()
                 .page(page)
