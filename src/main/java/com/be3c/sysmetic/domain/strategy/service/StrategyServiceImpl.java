@@ -35,7 +35,7 @@ public class StrategyServiceImpl implements StrategyService {
     @Override
     public boolean privateStrategy(Long id) {
         Long userId = securityUtils.getUserIdInSecurityContext();
-        Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(id, userId, StrategyStatusCode.PUBLIC.getCode()).orElseThrow(EntityNotFoundException::new);
+        Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(id, userId).orElseThrow(EntityNotFoundException::new);
 
         strategy.setStatusCode(StrategyStatusCode.PRIVATE.getCode());
         strategyRepository.save(strategy);

@@ -222,6 +222,10 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
                         folderId,
                         Code.USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new))
+                .member(memberRepository.findByIdAndUsingStatusCode(
+                        userId,
+                        Code.USING_STATE.getCode()
+                ).orElseThrow(EntityNotFoundException::new))
                 .strategy(strategy)
                 .statusCode(FOLLOW.getCode())
                 .build();
