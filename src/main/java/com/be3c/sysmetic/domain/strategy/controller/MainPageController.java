@@ -33,7 +33,6 @@ public class MainPageController implements MainPageControllerDocs {
     }
 
 
-    // TODO 대표전략 평균 지표
     @Override
     public APIResponse<MainPageAnalysisDto> getMainGraph(@RequestParam(name = "period", defaultValue = "ALL") String period) {
 
