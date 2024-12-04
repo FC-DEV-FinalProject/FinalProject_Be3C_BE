@@ -1,9 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
-import com.be3c.sysmetic.domain.strategy.dto.KpRatios;
 import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.member.dto.MyStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -90,4 +88,31 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     // SM Score 계산 시 필요한 KP Ratio 조회
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.KpRatios(s.id, s.kpRatio) FROM Strategy s WHERE s.statusCode = :statusCode")
     List<KpRatios> findKpRatios(String statusCode);
+
+    @Query("""
+        SELECT new com.be3c.sysmetic.domain.strategy.dto.MyStrategyListDto
+            (
+            s.id,
+            me.id,
+            null,
+            s.cycle,
+            null,
+            s.name,
+            s.accumulatedProfitLossRate,
+            s.mdd,
+            s.smScore
+            )
+        FROM Strategy s
+        JOIN s.trader m
+        JOIN s.method me
+        LEFT JOIN StrategyStatistics ss on ss.strategy.id = s.id
+        WHERE s.trader.id = :memberId AND s.statusCode <> 'NOT_USING_STATE'
+        """)
+    Page<MyStrategyListDto> findPageMyStrategy(
+            Long memberId, Pageable pageable
+    );
+
+    // TODO SM Score 1위 전략 찾기
+    @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
+    String findTop1SmScore();
 }

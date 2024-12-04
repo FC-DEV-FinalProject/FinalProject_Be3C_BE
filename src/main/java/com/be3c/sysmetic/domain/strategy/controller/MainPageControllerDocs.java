@@ -1,11 +1,16 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.MainPageAnalysisDto;
 import com.be3c.sysmetic.domain.strategy.dto.MainPageDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "메인 페이지 API", description = "메인 페이지 조회")
 public interface MainPageControllerDocs {
@@ -20,6 +25,19 @@ public interface MainPageControllerDocs {
                     @ApiResponse(responseCode = "400")
             }
     )
-    @GetMapping("/main")
-    APIResponse<MainPageDto> getMainPage() throws Exception;
+    APIResponse<MainPageDto> getMainPage();
+
+
+    @Operation(
+            summary = "메인 페이지 대표전략 분석 지표 API",
+            description = "메인 페이지 대표전략 분석 지표 요청, 디폴트 기간 ALL <br><br>" +
+                "period - defaultValue ALL <br> " +
+                "입력 가능한 옵션 - ALL, ",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "400")
+            }
+    )
+    APIResponse<MainPageAnalysisDto> getMainGraph(
+            @RequestParam(name = "period", defaultValue ="ALL") String period);
 }

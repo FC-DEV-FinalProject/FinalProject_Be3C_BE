@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,13 +25,14 @@ public class RedisUtils {
         2. 인증코드 조회 메서드
         3. 인증코드 삭제 메서드 (인증 완료 시)
      */
-
+    @Qualifier("redisTemplate0")
     private final RedisTemplate<String, String> redisTemplate0; // 토큰
+    @Qualifier("redisTemplate1")
     private final RedisTemplate<String, String> redisTemplate1; // 이메일
 
     // [토큰]
 
-    // 1. Redis에 토큰 저장 메서드 (성공 여부를 확인하기 위해 boolean으로 바꾸고 싶다)
+    // 1. Redis에 토큰 저장 메서드
     public void saveToken(String accessToken, String refreshToken) {
         redisTemplate0.opsForValue().set("refreshToken:" + accessToken, refreshToken);
     }
@@ -40,7 +42,7 @@ public class RedisUtils {
         return redisTemplate0.opsForValue().get("refreshToken:" + accessToken);
     }
 
-    // 3. Redis에 저장된 토큰 삭제 메서드 (성공 여부를 확인하기 위해 boolean으로 바꾸고 싶다)
+    // 3. Redis에 저장된 토큰 삭제 메서드
     public void deleteToken(String accessToken) {
         redisTemplate0.delete("refreshToken:" + accessToken);
     }
@@ -58,7 +60,7 @@ public class RedisUtils {
     public String getEmailAuthCode(String email) {
         if(redisTemplate1.opsForValue().get(email) == null) {
             // 인증코드 조회 실패 시 예외발생
-            throw new MemberBadRequestException(MemberExceptionMessage.REDIS_EMAIL_CODE_ERROR.getMessage());
+            throw new MemberBadRequestException(MemberExceptionMessage.ERROR_REDIS_EMAIL_CODE.getMessage());
         }
         return redisTemplate1.opsForValue().get(email);
     }

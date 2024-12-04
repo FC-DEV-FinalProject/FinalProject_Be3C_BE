@@ -42,7 +42,6 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
 
     @Override
     @Transactional
-    // 아이콘 / 프로필 이미지
     public StrategyDetailDto getDetail(Long id) {
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
@@ -52,9 +51,10 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .id(strategy.getId())
                         .traderId(strategy.getTrader().getId())
                         .traderNickname(strategy.getTrader().getNickname())
-                        .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .methodId(strategy.getMethod().getId())
                         .methodName(strategy.getMethod().getName())
-                        .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
+                        .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))
                         .name(strategy.getName())
                         .statusCode(strategy.getStatusCode())
@@ -74,12 +74,13 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
 
+
     // 분석 지표 그래프 데이터 요청
     @Override
     @Transactional
-    public StrategyAnalysisResponseDto getAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+    public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
-        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(id, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
 
         if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
 
@@ -94,6 +95,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Daily daily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
         Double accumulatedProfitLossAmount = daily.getAccumulatedProfitLossAmount();
+        Double standardAmount = daily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
@@ -109,6 +111,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .profitLossRate(daily.getProfitLossRate())
                 .accumulatedProfitLossAmount(daily.getAccumulatedProfitLossAmount())
                 .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .currentCapitalReductionRate(strategyIndicatorsCalculator.calCurrentCapitalReductionRate(strategyId, standardAmount))
                 .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
                 .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
                 .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))
@@ -129,6 +132,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Daily newDaily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
         Double accumulatedProfitLossAmount = statistics.getAccumulatedProfitLossAmount();
+        Double standardAmount = newDaily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
@@ -144,6 +148,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .profitLossRate(newDaily.getProfitLossRate())
                 .accumulatedProfitLossAmount(newDaily.getAccumulatedProfitLossAmount())
                 .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .currentCapitalReductionRate(strategyIndicatorsCalculator.calCurrentCapitalReductionRate(strategyId, standardAmount))
                 .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
                 .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
                 .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))

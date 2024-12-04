@@ -44,13 +44,9 @@ public class AccountController {
             description = "사용자가 입력한 이메일의 유효성을 확인하고 인증 코드를 발송하는 API"
     )
     @GetMapping("/auth/reset-password")
-    public ResponseEntity<APIResponse<String>> checkEmailAndSendCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
-        if(!accountService.isPresentEmail(email)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST));
-        }
-        if(!registerService.sendVerifyEmailCode(email)) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        }
+    public ResponseEntity<APIResponse<String>> checkEmailAndSendCode(@Email(message = "{Invalid.email}") @RequestParam String email) {
+        accountService.isPresentEmail(email);
+        registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
 
@@ -60,14 +56,10 @@ public class AccountController {
             description = "사용자가 새로운 비밀번호를 설정하는 API"
     )
     @PostMapping("/auth/reset-password")
-    public ResponseEntity<APIResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDto requestDto,
+    public ResponseEntity<APIResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDto resetPasswordRequestDtoRequestDto,
                                                              HttpServletRequest request) {
-        if(!accountService.isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "비밀번호 불일치"));
-        }
-        if(!accountService.resetPassword(requestDto.getEmail(), requestDto.getPassword())) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-        }
+        accountService.isPasswordMatch(resetPasswordRequestDtoRequestDto.getPassword(), resetPasswordRequestDtoRequestDto.getRewritePassword());
+        accountService.resetPassword(resetPasswordRequestDtoRequestDto.getEmail(), resetPasswordRequestDtoRequestDto.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
         // todo: 2차 개발 고려(request는 ResetPasswordLg 구현 시 사용될 예정)
     }

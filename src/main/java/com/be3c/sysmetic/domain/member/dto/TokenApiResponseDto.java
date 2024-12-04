@@ -16,5 +16,7 @@ public class TokenApiResponseDto {
     private String nickname;
     private String phoneNumber;
     private String profileImage;
+    private Integer totalFollowerCount;
+    private Integer totalStrategyCount;
 
 }

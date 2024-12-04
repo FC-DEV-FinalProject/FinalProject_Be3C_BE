@@ -1,11 +1,11 @@
 package com.be3c.sysmetic.global.util.file.service;
 
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import com.be3c.sysmetic.global.util.file.entity.File;
 import com.be3c.sysmetic.global.util.file.exception.*;
 import com.be3c.sysmetic.global.util.file.repository.FileRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,13 +28,16 @@ public class FileServiceImpl implements FileService {
     @Value("${file.max-size}")
     private long maxFileSize;
 
+    @Value("${default.profile.image.key}")
+    private String defaultProfileImageKey;
+
     /*
     ----------------------------------------------------------------------------------------
     upload 업로드
      */
 
     @Override
-    public void uploadImage(MultipartFile file, @Valid FileRequest fileRequest) {
+    public void uploadImage(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
         checkFileExtension(file, List.of("jpeg", "png", "gif"));
@@ -45,7 +48,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void uploadPdf(MultipartFile file, @Valid FileRequest fileRequest) {
+    public void uploadPdf(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
         checkFileExtension(file, List.of("pdf"));
@@ -56,7 +59,7 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public void uploadAnyFile(MultipartFile file, @Valid FileRequest fileRequest) {
+    public void uploadAnyFile(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
 
@@ -88,23 +91,45 @@ public class FileServiceImpl implements FileService {
 
 
     @Override
-    public String getFilePath(@Valid FileRequest fileRequest) {
+    public String getFilePath(FileRequest fileRequest) {
 
+        String key;
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
-            log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
-            throw new FileNotFoundException();
+
+            if(fileRequest.referenceType().equals(FileReferenceType.MEMBER)){
+                key = defaultProfileImageKey;
+            } else {
+                log.error("파일을 찾을 수 없습니다. 파일 참조 정보: {}", fileRequest);
+                throw new FileNotFoundException();
+            }
+        } else {
+            key = files.get(0).getPath();
         }
 
-        File file = files.get(0);
         if(files.size()>1)
             log.warn("파일이 한 개가 아닙니다. 파일 참조 정보: {}", fileRequest);
 
-        return s3Service.createPresignedGetUrl(file.getPath());
+        return s3Service.createPresignedGetUrl(key);
     }
 
     @Override
-    public List<String> getFilePaths(@Valid FileRequest fileRequest) {
+    public String getFilePathNullable(FileRequest fileRequest){
+
+        List<File> files = fileRepository.findFilesByFileReference(fileRequest);
+
+        if (files.isEmpty()) {
+            return null;
+        } else {
+            if(files.size()>1)
+                log.warn("파일이 한 개가 아닙니다. 파일 참조 정보: {}", fileRequest);
+
+            return s3Service.createPresignedGetUrl(files.get(0).getPath());
+        }
+    }
+
+    @Override
+    public List<String> getFilePaths(FileRequest fileRequest) {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         checkFilesNotEmpty(files, fileRequest);
@@ -117,7 +142,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<FileWithInfoResponse> getFileWithInfos(@Valid FileRequest fileRequest) {
+    public List<FileWithInfoResponse> getFileWithInfos(FileRequest fileRequest) {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         checkFilesNotEmpty(files, fileRequest);
@@ -144,7 +169,7 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public void updateImage(MultipartFile file,@Valid FileRequest fileRequest) {
+    public void updateImage(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
         checkFileExtension(file, List.of("jpeg", "png", "gif"));
@@ -155,7 +180,7 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public void updatePdf(MultipartFile file,@Valid FileRequest fileRequest) {
+    public void updatePdf(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
         checkFileExtension(file, List.of("pdf"));
@@ -165,7 +190,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void updateAnyFile(MultipartFile file,@Valid FileRequest fileRequest) {
+    public void updateAnyFile(MultipartFile file, FileRequest fileRequest) {
 
         checkFileSize(file);
 
@@ -232,7 +257,7 @@ public class FileServiceImpl implements FileService {
   */
 
     @Override
-    public boolean deleteFile(@Valid FileRequest fileRequest) {
+    public boolean deleteFile( FileRequest fileRequest) {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
         if (files.isEmpty()) {
@@ -260,7 +285,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public boolean deleteFiles(@Valid FileRequest fileRequest) {
+    public boolean deleteFiles( FileRequest fileRequest) {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
 
@@ -314,7 +339,7 @@ public class FileServiceImpl implements FileService {
      * @param fileRequest 파일을 사용할 곳의 정보
      *                    referenceType 참조할 테이블명 referenceId 참조id
      */
-    private void fileEntityBuilderAndSaver(MultipartFile file, String s3KeyName, @Valid FileRequest fileRequest) {
+    private void fileEntityBuilderAndSaver(MultipartFile file, String s3KeyName, FileRequest fileRequest) {
         try {
             File fileEntity = File.builder()
                     .path(s3KeyName)
@@ -356,7 +381,7 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    private void checkFilesNotEmpty(List<File> files,@Valid FileRequest fileRequest){
+    private void checkFilesNotEmpty(List<File> files, FileRequest fileRequest){
         if (files.isEmpty()) {
             log.error("파일이 비어 있습니다. 파일 참조 정보: {}", fileRequest);
             throw new InvalidFileFormatException("파일이 비어 있습니다.");
