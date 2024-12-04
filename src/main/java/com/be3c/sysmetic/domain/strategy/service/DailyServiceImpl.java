@@ -124,6 +124,9 @@ public class DailyServiceImpl implements DailyService {
         // user 검증
         validUser(exitingStrategy.getTrader().getId());
 
+        // StrategyGraphAnalysis 분석 그래프 데이터 삭제 (삭제하는 existingDaily 전달)
+        strategyDetailService.deleteAnalysis(strategyId, dailyId, exitingDaily);
+
         // DB 삭제
         dailyRepository.deleteById(dailyId);
 
@@ -136,9 +139,6 @@ public class DailyServiceImpl implements DailyService {
         // 월간분석 갱신
         List<LocalDate> updatedDateList = List.of(exitingDaily.getDate());
         monthlyService.updateMonthly(strategyId, updatedDateList);
-
-        // StrategyGraphAnalysis 분석 그래프 데이터 삭제 (삭제하는 existingDaily 전달)
-        strategyDetailService.deleteAnalysis(strategyId, dailyId, exitingDaily);
 
         if(countDaily < 3) {
             // 일간분석 데이터 수가 3 미만일 경우 비공개 전환
