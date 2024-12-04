@@ -5,6 +5,7 @@ import com.be3c.sysmetic.domain.member.dto.InquiryListShowRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.QInquiry;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -46,7 +47,7 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         if (StringUtils.hasText(searchText)) {
             if (searchType.equals("strategy")) {
                 predicate.and(inquiry.strategy.name.contains(searchText));
-                predicate.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE").not());
+                predicate.and(inquiry.strategy.statusCode.eq(StrategyStatusCode.PUBLIC.getCode()));
             } else if (searchType.equals("trader")) {
                 predicate.and(inquiry.strategy.trader.nickname.contains(searchText));
             } else if (searchType.equals("inquirer")) {
@@ -105,8 +106,8 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
             predicate2.and(inquiry.inquiryStatus.eq(tab));
         }
 
-        predicate1.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE").not());
-        predicate2.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE"));
+        predicate1.and(inquiry.strategy.statusCode.eq(StrategyStatusCode.PUBLIC.getCode()));
+        predicate2.and(inquiry.strategy.statusCode.eq(StrategyStatusCode.PUBLIC.getCode()).not());
 
         List<Inquiry> content = new ArrayList<>();
         long total;

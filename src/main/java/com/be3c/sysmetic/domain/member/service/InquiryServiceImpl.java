@@ -11,6 +11,7 @@ import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
@@ -191,7 +192,7 @@ public class InquiryServiceImpl implements InquiryService {
         String strategyName;
         String statusCode;
 
-        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+        if (Objects.equals(inquiry.getStrategy().getStatusCode(), StrategyStatusCode.PUBLIC.getCode())) {
             methodId = inquiry.getStrategy().getMethod().getId();
             methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
@@ -291,7 +292,7 @@ public class InquiryServiceImpl implements InquiryService {
         String strategyName;
         String statusCode;
 
-        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+        if (Objects.equals(inquiry.getStrategy().getStatusCode(), StrategyStatusCode.PUBLIC.getCode())) {
             methodId = inquiry.getStrategy().getMethod().getId();
             methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
@@ -389,7 +390,7 @@ public class InquiryServiceImpl implements InquiryService {
         String strategyName;
         String statusCode;
 
-        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+        if (Objects.equals(inquiry.getStrategy().getStatusCode(), StrategyStatusCode.PUBLIC.getCode())) {
             methodId = inquiry.getStrategy().getMethod().getId();
             methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
@@ -485,7 +486,7 @@ public class InquiryServiceImpl implements InquiryService {
         String strategyName;
         String statusCode;
 
-        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+        if (Objects.equals(inquiry.getStrategy().getStatusCode(), StrategyStatusCode.PUBLIC.getCode())) {
             methodId = inquiry.getStrategy().getMethod().getId();
             methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
@@ -610,7 +611,7 @@ public class InquiryServiceImpl implements InquiryService {
         String strategyName;
         String statusCode;
 
-        if (!Objects.equals(inquiry.getStrategy().getStatusCode(), "NOT_USING_STATE")) {
+        if (Objects.equals(inquiry.getStrategy().getStatusCode(), StrategyStatusCode.PUBLIC.getCode())) {
             methodId = inquiry.getStrategy().getMethod().getId();
             methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, methodId));
             cycle = inquiry.getStrategy().getCycle();
