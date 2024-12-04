@@ -1,10 +1,12 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,6 +31,8 @@ public class StrategySearchServiceImpl implements StrategySearchService {
     private final StrategyRepository strategyRepository;
     private final StockGetter stockGetter;
     private final FileService fileService;
+    private final SecurityUtils securityUtils;
+    private final InterestStrategyRepository interestStrategyRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -59,12 +65,27 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                                     .stockIconPath(stockIconPaths)
                                     .name(s.getName())
                                     .cycle(s.getCycle())
+                                    .isFollow(false)
                                     .stockList(stockGetter.getStocks(s.getId()))
                                     .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
                                     .mdd(s.getMdd())
                                     .smScore(s.getSmScore())
                                     .build();
     }).toList();
+
+        try {
+            Long userId = securityUtils.getUserIdInSecurityContext();
+
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+
+            strategyList.forEach(strategy -> {
+                        if(interestStrategyList.contains(strategy.getStrategyId())) {
+                            strategy.setIsFollow(true);
+                        }
+                    }
+            );
+        } catch (UsernameNotFoundException | AuthenticationCredentialsNotFoundException e) {
+        }
 
         return PageResponse.<StrategySearchResponseDto>builder()
                 .currentPage(sPage.getNumber())
@@ -110,6 +131,20 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                             .smScore(s.getSmScore())
                             .build();
                 }).toList();
+
+        try {
+            Long userId = securityUtils.getUserIdInSecurityContext();
+
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+
+            strategyList.forEach(strategy -> {
+                        if(interestStrategyList.contains(strategy.getId())) {
+                            strategy.setIsFollow(true);
+                        }
+                    }
+            );
+        } catch (UsernameNotFoundException | AuthenticationCredentialsNotFoundException e) {
+        }
 
         return PageResponse.<StrategyAlgorithmResponseDto>builder()
                 .currentPage(sPage.getNumber())

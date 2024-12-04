@@ -151,7 +151,7 @@ public class StockServiceImpl implements StockService {
             원래 이름과 같음 = true    원래 이름과 같지 않음 = false
          */
         if(findStock.getName().equals(stockPutRequestDto.getName()) ||
-                duplCheck(stockPutRequestDto.getName())) {
+                !duplCheck(stockPutRequestDto.getName())) {
             throw new ConflictException();
         }
 

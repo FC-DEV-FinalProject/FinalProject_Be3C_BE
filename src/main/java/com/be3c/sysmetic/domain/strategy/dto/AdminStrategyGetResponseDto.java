@@ -33,6 +33,12 @@ public class AdminStrategyGetResponseDto {
     @Schema(description = "전략 생성 날짜", example = "2024-11-20T14:23:45")
     private LocalDateTime strategyCreateDate;
 
-    @Schema(description = "아이콘 파일 경로 리스트", example = "[\"/path/to/icon1.png\", \"/path/to/icon2.png\"]")
-    private List<String> iconFilePath;
+    @Schema(description = "매매유형 아이디")
+    private Long methodId;
+
+    @Schema(description = "매매유형 아이콘 경로")
+    private String methodIconPath;
+
+    @Schema(description = "종목 아이콘 경로")
+    private StockListDto stockList;
 }

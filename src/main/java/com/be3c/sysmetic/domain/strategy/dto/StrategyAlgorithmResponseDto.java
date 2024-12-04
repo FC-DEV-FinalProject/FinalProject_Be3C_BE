@@ -2,10 +2,12 @@ package com.be3c.sysmetic.domain.strategy.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 public class StrategyAlgorithmResponseDto {
     /*
@@ -20,6 +22,7 @@ public class StrategyAlgorithmResponseDto {
         stockIconPath : 종목 아이콘 경로
         name : 전략명
         cycle : 주기
+        isFollow : 관심전략 추가 여부
         accumulatedProfitLossRate : 누적수익률
         mdd : MDD
         smScore : SM Score
@@ -33,6 +36,7 @@ public class StrategyAlgorithmResponseDto {
     private List<String> stockIconPath;
     private String name;
     private Character cycle;
+    private Boolean isFollow;
     private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
