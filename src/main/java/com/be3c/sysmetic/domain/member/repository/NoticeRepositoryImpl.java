@@ -26,23 +26,15 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
         BooleanBuilder predicate = new BooleanBuilder();
 
         // 검색 (제목, 내용, 제목+내용, 작성자)
-        if (searchText != null && !searchText.isEmpty()) {
+        if (StringUtils.hasText(searchText)) {
             if (searchType.equals("title")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(notice.noticeTitle.contains(searchText));
-                }
+                predicate.and(notice.noticeTitle.contains(searchText));
             } else if (searchType.equals("content")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(notice.noticeContent.contains(searchText));
-                }
+                predicate.and(notice.noticeContent.contains(searchText));
             } else if (searchType.equals("all")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
-                }
+                predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
             } else if (searchType.equals("writer")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(notice.writerNickname.contains(searchText));
-                }
+                predicate.and(notice.writerNickname.contains(searchText));
             }
         }
 
@@ -66,10 +58,8 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
 
         BooleanBuilder predicate = new BooleanBuilder();
 
-        if (searchText != null && !searchText.isEmpty()) {
-            if (StringUtils.hasText(searchText)) {
-                predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
-            }
+        if (StringUtils.hasText(searchText)) {
+            predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
         }
 
         QueryResults<Notice> results = jpaQueryFactory

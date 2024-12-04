@@ -42,11 +42,11 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         // 검색 (전략명, 트레이더, 질문자)
         if (StringUtils.hasText(searchText)) {
             if (searchType.equals("strategy")) {
-                predicate.and(inquiry.strategyName.contains(searchText));
+                predicate.and(inquiry.strategy.name.contains(searchText));
             } else if (searchType.equals("trader")) {
-                predicate.and(inquiry.traderNickname.contains(searchText));
+                predicate.and(inquiry.strategy.trader.nickname.contains(searchText));
             } else if (searchType.equals("inquirer")) {
-                predicate.and(inquiry.inquirerNickname.contains(searchText));
+                predicate.and(inquiry.inquirer.nickname.contains(searchText));
             }
         }
 

@@ -1,6 +1,9 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
+import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.*;
@@ -38,6 +41,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     private final FileServiceImpl fileService;
     private final SecurityUtils securityUtils;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
+    private final InquiryRepository inquiryRepository;
+    private final InquiryAnswerRepository inquiryAnswerRepository;
 
     // 전략 등록
     @Override
@@ -133,6 +138,9 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         if(!fileService.getFilePath(fileRequest).isEmpty()) {
             fileService.deleteFile(fileRequest);
         }
+
+        inquiryAnswerRepository.deleteByStrategyId(strategyId);
+        inquiryRepository.deleteByStrategyId(strategyId);
     }
 
     // 전략명 중복 여부 검증
