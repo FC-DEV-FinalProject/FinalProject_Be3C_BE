@@ -144,6 +144,24 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public FileWithInfoResponse getFileWithInfoNullable(FileRequest fileRequest){
+        List<File> files = fileRepository.findFilesByFileReference(fileRequest);
+
+        if(files.isEmpty()){
+            return null;
+        }
+
+        File f = files.get(0);
+        if(files.size()>1)
+            log.warn("파일이 한 개가 아닙니다. 파일 참조 정보: {}", fileRequest);
+
+        return new FileWithInfoResponse(f.getId(),
+                s3Service.createPresignedGetUrl(f.getPath()),
+                f.getOriginalName(),
+                f.getSize());
+    }
+
+    @Override
     public List<FileWithInfoResponse> getFileWithInfos(FileRequest fileRequest) {
 
         List<File> files = fileRepository.findFilesByFileReference(fileRequest);
@@ -159,7 +177,6 @@ public class FileServiceImpl implements FileService {
 
         return fileWithInfoResponses;
     }
-
 
 
   /*

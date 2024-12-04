@@ -70,6 +70,9 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
                         .winningRate(strategy.getWinningRate())
                         .monthlyRecord(getMonthlyRecords(strategy.getId()))
+                        .fileWithInfoResponse(
+                                fileService.getFileWithInfoNullable(new FileRequest(FileReferenceType.STRATEGY, strategy.getId()))
+                        )
                         .build())
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
