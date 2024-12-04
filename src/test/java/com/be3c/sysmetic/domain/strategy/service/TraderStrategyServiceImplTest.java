@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
@@ -130,7 +131,9 @@ public class TraderStrategyServiceImplTest {
         assertNotNull(savedStrategy);
         assertNotNull(savedStrategyStockReference);
 
-        traderStrategyService.deleteStrategy(savedStrategy.getId());
+        StrategyDeleteRequestDto strategyDeleteRequestDto = StrategyDeleteRequestDto.builder().strategyIdList(List.of(savedStrategy.getId())).build();
+
+        traderStrategyService.deleteStrategy(strategyDeleteRequestDto);
 
         Strategy findStrategy = strategyRepository.findAll().stream().findFirst().orElse(null);
 

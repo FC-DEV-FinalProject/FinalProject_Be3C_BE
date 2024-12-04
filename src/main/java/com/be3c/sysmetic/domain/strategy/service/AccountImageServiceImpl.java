@@ -48,12 +48,11 @@ public class AccountImageServiceImpl implements AccountImageService {
     private final FileServiceImpl fileServiceImpl;
     private final StrategyViewAuthorize strategyViewAuthorize;
 
-    // 실계좌이미지 조회 - PUBLIC 상태인 전략의 실계좌이미지 조회
+    // 실계좌이미지 조회
     @Override
     public PageResponse<AccountImageResponseDto> findAccountImages(Long strategyId, Integer page) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 

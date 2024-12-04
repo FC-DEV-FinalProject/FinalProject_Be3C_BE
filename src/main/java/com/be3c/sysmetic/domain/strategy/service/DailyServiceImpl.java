@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.strategy.dto.DailyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.DailyPostResponseDto;
+import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -145,9 +146,10 @@ public class DailyServiceImpl implements DailyService {
         }
 
         if(countDaily == 0) {
-            // 모든 일간분석 데이터 삭제시 전략 통계, 월간분석 데이터 삭제
+            // 모든 일간분석 데이터 삭제시 월간분석 데이터 삭제
             monthlyRepository.deleteAllByStrategyId(strategyId);
-            statisticsRepository.deleteByStrategyId(strategyId);
+            // 전략 통계 데이터 초기화
+            statisticsRepository.save(new StrategyStatistics(exitingStrategy));
             // 분석 그래프 데이터 삭제
             strategyGraphAnalysisRepository.deleteAllByStrategyId(strategyId);
         }

@@ -147,4 +147,36 @@ public class StrategyStatistics extends BaseEntity {
     @Column(name = "last_registration_date", nullable = false)
     private LocalDate lastRegistrationDate; // 최종등록일
 
+    public StrategyStatistics(Strategy strategy) {
+        this.strategy = strategy;
+        this.currentBalance = 0.0;
+        this.principal = 0.0;
+        this.accumulatedDepositWithdrawalAmount = 0.0;
+        this.accumulatedProfitLossAmount = 0.0;
+        this.accumulatedProfitLossRate = 0.0;
+        this.maximumAccumulatedProfitLossAmount = 0.0;
+        this.maximumAccumulatedProfitLossRate = 0.0;
+        this.currentCapitalReductionAmount = 0.0;
+        this.currentCapitalReductionRate = 0.0;
+        this.maximumCapitalReductionAmount = 0.0;
+        this.maximumCapitalReductionRate = 0.0;
+        this.averageProfitLossAmount = 0.0;
+        this.averageProfitLossRate = 0.0;
+        this.maximumDailyProfitAmount = 0.0;
+        this.maximumDailyProfitRate = 0.0;
+        this.maximumDailyLossAmount = 0.0;
+        this.maximumDailyLossRate = 0.0;
+        this.totalTradingDays = 0L;
+        this.currentContinuousProfitLossDays = 0L;
+        this.totalProfitDays = 0L;
+        this.maximumContinuousProfitDays = 0L;
+        this.totalLossDays = 0L;
+        this.maximumContinuousLossDays = 0L;
+        this.winningRate = 0.0;
+        this.highPointRenewalProgress = 0L;
+        this.profitFactor = 0.0;
+        this.roa = 0.0;
+        this.firstRegistrationDate = LocalDate.now();
+        this.lastRegistrationDate = LocalDate.now();
+    }
 }

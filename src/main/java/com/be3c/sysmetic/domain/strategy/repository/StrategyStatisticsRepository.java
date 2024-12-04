@@ -9,13 +9,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StrategyStatisticsRepository extends JpaRepository<StrategyStatistics, Long> {
 
     /* 주석 처리된 메서드 삭제 ======================== 12월 3일 */
 
-    StrategyStatistics findByStrategyId(Long strategyId);
+    Optional<StrategyStatistics> findByStrategyId(Long strategyId);
 
     @Modifying
     void deleteByStrategyId(Long strategyId);

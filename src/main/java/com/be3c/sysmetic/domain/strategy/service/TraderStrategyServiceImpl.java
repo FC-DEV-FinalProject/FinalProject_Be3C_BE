@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.entity.MemberRole;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.*;
@@ -78,8 +79,8 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
 
-        // 1. 현재 기본 통계 정보를 전략 등록 시 등록하지 않고 있음
-        insertBasicStrategyStatistics(saveStrategy);
+        // 기본 전략 통계 저장
+        strategyStatisticsRepository.save(new StrategyStatistics(saveStrategy));
 
         return StrategyPostResponseDto.builder().strategyId(saveStrategy.getId()).build();
     }
@@ -123,23 +124,25 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     // 전략 삭제
     @Override
     @Transactional
-    public void deleteStrategy(Long strategyId) {
-        Strategy existingStrategy = findStrategy(strategyId);
-        checkTrader(existingStrategy.getTrader().getId());
+    public void deleteStrategy(StrategyDeleteRequestDto requestDto) {
 
-        // 미사용 상태로 변경
-        Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
+        Strategy existingStrategy = findStrategy(requestDto.getStrategyIdList().stream().findFirst().get());
+        checkAllowDelete(existingStrategy.getTrader().getId());
 
-        savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
+        for(Long strategyId : requestDto.getStrategyIdList()) {
+            // 미사용 상태로 변경
+            Strategy savedStrategy = strategyRepository.findById(strategyId).orElseThrow(() ->
+                    new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
-        strategyRepository.save(savedStrategy);
+            savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
 
-        // 파일 존재할 경우 제안서 삭제
-        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
-
-        if(!fileService.getFilePath(fileRequest).isEmpty()) {
-            fileService.deleteFile(fileRequest);
+            // 파일 존재할 경우 제안서 삭제
+            // todo. 파일 수정 필요
+//            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+//
+//            if(fileService.getFilePath(fileRequest) != null) {
+//                fileService.deleteFile(fileRequest);
+//            }
         }
     }
 
@@ -154,6 +157,18 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     private void checkStatus(String status) {
         if(!status.equals(StrategyStatusCode.PRIVATE.name())) {
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
+        }
+    }
+
+    private void checkAllowDelete(Long traderId) {
+        if(!(
+                securityUtils.getUserRoleInSecurityContext().equals(MemberRole.ADMIN.name()) ||
+                securityUtils.getUserRoleInSecurityContext().equals(MemberRole.USER_MANAGER.name()) ||
+                securityUtils.getUserRoleInSecurityContext().equals(MemberRole.TRADER_MANAGER.name()) ||
+                securityUtils.getUserIdInSecurityContext().equals(traderId)
+            )
+        ) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
         }
     }
 
@@ -224,42 +239,6 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
             strategyStockReferenceRepository.saveAll(addList);
         }
-    }
-
-    // 4. 따라서 전략 등록 시 기본적인 전략 통계 row도 같이 생성해주는 게 현재로써는 수정하기 가장 쉬운 방법으로 판단.
-    private void insertBasicStrategyStatistics(Strategy strategy) {
-        strategyStatisticsRepository.save(StrategyStatistics.builder()
-                .strategy(strategy)
-                .currentBalance(0.0)
-                .principal(0.0)
-                .accumulatedDepositWithdrawalAmount(0.0)
-                .accumulatedProfitLossAmount(0.0)
-                .accumulatedProfitLossRate(0.0)
-                .maximumAccumulatedProfitLossAmount(0.0)
-                .maximumAccumulatedProfitLossRate(0.0)
-                .currentCapitalReductionAmount(0.0)
-                .currentCapitalReductionRate(0.0)
-                .maximumCapitalReductionAmount(0.0)
-                .maximumCapitalReductionRate(0.0)
-                .averageProfitLossAmount(0.0)
-                .averageProfitLossRate(0.0)
-                .maximumDailyProfitAmount(0.0)
-                .maximumDailyProfitRate(0.0)
-                .maximumDailyLossAmount(0.0)
-                .maximumDailyLossRate(0.0)
-                .totalTradingDays(0L)
-                .currentContinuousProfitLossDays(0L)
-                .totalProfitDays(0L)
-                .maximumContinuousProfitDays(0L)
-                .totalLossDays(0L)
-                .maximumContinuousLossDays(0L)
-                .winningRate(0.0)
-                .highPointRenewalProgress(0L)
-                .profitFactor(0.0)
-                .roa(0.0)
-                .firstRegistrationDate(LocalDate.now())
-                .lastRegistrationDate(LocalDate.now())
-                .build());
     }
 
     @Override
