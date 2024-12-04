@@ -118,10 +118,12 @@ public class MethodServiceImpl implements MethodService {
             throw new ConflictException();
         }
 
-        methodRepository.save(Method.builder()
+        Method method = methodRepository.save(Method.builder()
                 .name(methodPostRequestDto.getName())
                 .statusCode(USING_STATE.getCode())
                 .build());
+
+        fileService.uploadImage(file, new FileRequest(FileReferenceType.METHOD, method.getId()));
 
         return true;
     }

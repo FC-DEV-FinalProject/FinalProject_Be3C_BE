@@ -39,8 +39,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
 
         Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(
                 id,
-                userId,
-                StrategyStatusCode.PRIVATE.getCode()
+                userId
         ).orElseThrow(EntityNotFoundException::new);
 
         if(dailyRepository.countByStrategyId(id) <= 2) {
@@ -57,6 +56,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
                 .statusCode(APPROVE_WAIT.getCode())
                 .build();
 
+        strategy.setStatusCode(StrategyStatusCode.PENDING_APPROVAL.getCode());
         strategyApprovalRepository.save(strategyApprovalHistory);
 
         return true;
@@ -70,6 +70,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
                 ).orElseThrow(EntityNotFoundException::new);
 
         strategyApprovalHistory.setStatusCode(APPROVE_CANCEL.getCode());
+        strategyApprovalHistory.getStrategy().setStatusCode(StrategyStatusCode.PRIVATE.getCode());
 
         strategyApprovalRepository.save(strategyApprovalHistory);
 

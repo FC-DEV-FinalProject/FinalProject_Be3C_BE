@@ -47,12 +47,11 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
         WHERE
             s.id = :id
         AND s.trader.id = :userId
-        AND s.statusCode = :statusCode
+        AND s.statusCode IN ('PRIVATE', 'REJECT')
     """)
     Optional<Strategy> findByIdAndTraderIdAndStatusCode(
             @Param("id") Long id,
-            @Param("userId") Long userId,
-            @Param("statusCode") String statusCode
+            @Param("userId") Long userId
     );
 
     @Modifying

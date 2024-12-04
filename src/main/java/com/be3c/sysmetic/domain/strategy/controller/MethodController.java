@@ -54,7 +54,7 @@ public class MethodController implements MethodControllerDocs {
     @Override
     @GetMapping("/admin/method/availability")
     public ResponseEntity<APIResponse<String>> getCheckDupl(
-            @NotBlank @RequestParam String name
+            @RequestParam String name
     ) {
         if(methodService.duplCheck(name)) {
             return ResponseEntity.status(HttpStatus.OK)
