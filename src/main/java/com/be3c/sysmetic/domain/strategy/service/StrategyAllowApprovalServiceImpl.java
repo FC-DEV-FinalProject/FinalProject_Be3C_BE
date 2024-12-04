@@ -56,7 +56,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
                 .statusCode(APPROVE_WAIT.getCode())
                 .build();
 
-        strategy.setStatusCode(StrategyStatusCode.PENDING_APPROVAL.getCode());
+        strategy.setStatusCode(StrategyStatusCode.REQUEST.getCode());
         strategyApprovalRepository.save(strategyApprovalHistory);
 
         return true;

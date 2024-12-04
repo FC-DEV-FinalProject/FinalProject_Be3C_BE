@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum StrategyStatusCode {
     PRIVATE("PRIVATE"),
     PUBLIC("PUBLIC"),
-    PENDING_APPROVAL("PENDING_APPROVAL"),
+    REQUEST("REQUEST"),
     REJECTED("REJECTED"),
     NOT_USING_STATE("NOT_USING_STATE");
 
