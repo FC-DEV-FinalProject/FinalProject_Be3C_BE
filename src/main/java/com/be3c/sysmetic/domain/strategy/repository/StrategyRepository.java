@@ -53,6 +53,19 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             @Param("userId") Long userId
     );
 
+    @Query("""
+        SELECT
+            s
+        FROM Strategy s
+        WHERE
+            s.id = :id
+        AND s.trader.id = :userId
+    """)
+    Optional<Strategy> findPrivateByIdAndTraderId(
+            @Param("id") Long id,
+            @Param("userId") Long userId
+    );
+
     @Modifying
     @Query("DELETE FROM Strategy s WHERE s.trader.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
