@@ -24,6 +24,7 @@ public class MainPageController implements MainPageControllerDocs {
     /*
         getMainPage : 메인 페이지 요청
     */
+    @Override
     @GetMapping("/info")
     public APIResponse<MainPageDto> getMainPage() {
 
@@ -34,6 +35,7 @@ public class MainPageController implements MainPageControllerDocs {
 
 
     @Override
+    @GetMapping("/analysis")
     public APIResponse<MainPageAnalysisDto> getMainGraph(@RequestParam(name = "period", defaultValue = "ALL") String period) {
 
         MainPageAnalysisDto analysis = mainPageService.getAnalysis(period);
