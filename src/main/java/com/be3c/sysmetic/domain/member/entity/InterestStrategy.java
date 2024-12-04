@@ -27,6 +27,10 @@ public class InterestStrategy extends BaseEntity {
     private Folder folder;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 

@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.AdminStrategyGetResponseDto;
-import com.be3c.sysmetic.domain.strategy.dto.AdminStrategySearchGetDto;
-import com.be3c.sysmetic.domain.strategy.dto.AllowApprovalRequestDto;
-import com.be3c.sysmetic.domain.strategy.dto.RejectStrategyApprovalDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
 import com.be3c.sysmetic.global.common.Code;
@@ -76,7 +73,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
 
         for(Long id : requestDtoList.getApprovalId()) {
             try {
-                allowApproval(id, requestDtoList.getApprovalCode());
+                allowApproval(id);
             } catch (EntityNotFoundException e) {
                 resultMap.put(id, e.getMessage());
             }
@@ -101,19 +98,21 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
 
         strategyApproval.setStatusCode(Code.APPROVE_REJECT.getCode());
         strategyApproval.setRejectReason(rejectStrategyApprovalDto.getRejectReason());
+        strategyApproval.getStrategy().setStatusCode(StrategyStatusCode.REJECTED.getCode());
 
         strategyApprovalRepository.save(strategyApproval);
 
         return true;
     }
 
-    private void allowApproval(Long id, String statusCode) {
+    private void allowApproval(Long id) {
         StrategyApprovalHistory approvalRequest =
                 strategyApprovalRepository.
                         findByStrategyIdNotApproval(
                                 id
                         ).orElseThrow(EntityNotFoundException::new);
 
-        approvalRequest.setStatusCode(statusCode);
+        approvalRequest.setStatusCode(Code.APPROVE_SUCCESS.getCode());
+        approvalRequest.getStrategy().setStatusCode(StrategyStatusCode.PUBLIC.getCode());
     }
 }

@@ -12,6 +12,6 @@ import java.util.Optional;
 @Repository
 public interface StrategyDetailRepository extends JpaRepository<Strategy, Long> {
 
-    @Query("SELECT s FROM Strategy s WHERE s.id = :id AND s.statusCode = 'PUBLIC'")
+    @Query("SELECT s FROM Strategy s WHERE s.id = :id")
     Optional<Strategy> findPublicStrategy(@Param("id") Long id);
 }

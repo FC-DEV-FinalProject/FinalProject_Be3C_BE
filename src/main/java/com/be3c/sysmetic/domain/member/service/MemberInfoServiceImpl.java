@@ -171,6 +171,20 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     @Override
     public boolean changeMemberConsent(Long userId, MemberPatchConsentRequestDto memberPatchInfoRequestDto) {
+        Long requestId = securityUtils.getUserIdInSecurityContext();
+
+        if(userId.equals(requestId)) {
+            Member member = memberRepository.findByIdAndUsingStatusCode(
+                    userId,
+                    Code.USING_STATE.getCode()
+            ).orElseThrow(EntityNotFoundException::new);
+
+            member.setReceiveMarketingConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveMarketingConsent()));
+            member.setReceiveInfoConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveInfoConsent()));
+
+            return true;
+        }
+
         return false;
     }
 

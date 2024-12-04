@@ -47,12 +47,23 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
         WHERE
             s.id = :id
         AND s.trader.id = :userId
-        AND s.statusCode = :statusCode
     """)
-    Optional<Strategy> findByIdAndTraderIdAndStatusCode(
+    Optional<Strategy> findByIdAndTraderId(
             @Param("id") Long id,
-            @Param("userId") Long userId,
-            @Param("statusCode") String statusCode
+            @Param("userId") Long userId
+    );
+
+    @Query("""
+        SELECT
+            s
+        FROM Strategy s
+        WHERE
+            s.id = :id
+        AND s.trader.id = :userId
+    """)
+    Optional<Strategy> findPrivateByIdAndTraderId(
+            @Param("id") Long id,
+            @Param("userId") Long userId
     );
 
     @Modifying
@@ -112,7 +123,6 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             Long memberId, Pageable pageable
     );
 
-    // TODO SM Score 1위 전략 찾기
     @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
-    String findTop1SmScore();
+    Optional<String> findTop1SmScore();
 }

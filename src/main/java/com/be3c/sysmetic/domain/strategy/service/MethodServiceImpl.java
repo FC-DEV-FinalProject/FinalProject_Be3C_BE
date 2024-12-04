@@ -114,14 +114,16 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        if(!duplCheck(methodPostRequestDto.getName())) {
+        if(duplCheck(methodPostRequestDto.getName())) {
             throw new ConflictException();
         }
 
-        methodRepository.save(Method.builder()
+        Method method = methodRepository.save(Method.builder()
                 .name(methodPostRequestDto.getName())
                 .statusCode(USING_STATE.getCode())
                 .build());
+
+        fileService.uploadImage(file, new FileRequest(FileReferenceType.METHOD, method.getId()));
 
         return true;
     }
@@ -146,7 +148,7 @@ public class MethodServiceImpl implements MethodService {
                         USING_STATE.getCode())
                 .orElseThrow(EntityNotFoundException::new);
 
-        if(!(method.getName().equals(methodPutRequestDto.getName()) && duplCheck(methodPutRequestDto.getName()))) {
+        if(method.getName().equals(methodPutRequestDto.getName()) && !duplCheck(methodPutRequestDto.getName())) {
             throw new ConflictException();
         }
 
