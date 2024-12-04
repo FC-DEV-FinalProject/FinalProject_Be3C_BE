@@ -2,7 +2,6 @@ package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.MainPageAnalysisDto;
 import com.be3c.sysmetic.domain.strategy.dto.MainPageDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.service.MainPageService;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import lombok.RequiredArgsConstructor;

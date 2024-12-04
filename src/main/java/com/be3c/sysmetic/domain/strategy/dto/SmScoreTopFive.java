@@ -14,17 +14,19 @@ public class SmScoreTopFive {
 
         id : 전략 id
         traderId : 트레이더 id
+        traderProfileImage : 트레이더 프로필 이미지
         nickname : 트레이더 닉네임
         name : 전략명
         stocks : 종목
         smScore : SM Score
-        // TODO 전일대비
+        accumulatedProfitLossRate : 누적 손익률
     */
     private Long id;
     private Long traderId;
+    private String traderProfileImage;
     private String nickname;
     private String name;
-    private HashSet<StockListDto> stocks;
+    private StockListDto stocks;
     private Double smScore;
-    // TODO 전일대비
+    private Double accumulatedProfitLossRate;
 }

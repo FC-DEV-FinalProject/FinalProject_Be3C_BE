@@ -2,10 +2,12 @@ package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
-import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
-import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
 import com.be3c.sysmetic.domain.strategy.repository.*;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,10 +30,11 @@ public class MainPageServiceImpl implements MainPageService {
 
     private final MainPageRepository mainPageRepository;
     private final MemberRepository memberRepository;
-    private final StrategyStockReferenceRepository strategyStockReferenceRepository;
     private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
     private final StrategyRepository strategyRepository;
     private final DailyRepository dailyRepository;
+    private final FileService fileService;
+    private final StockGetter stockGetter;
 
     @Override
     @Transactional
@@ -40,7 +42,7 @@ public class MainPageServiceImpl implements MainPageService {
 
         return MainPageDto.builder()
                 .rankedTrader(setTop3FollowerTrader())
-                .totalTraderCount(memberRepository.countAllByRoleCode("TRADER").orElse(null))
+                .totalTraderCount(memberRepository.countAllByRoleCode("TRADER").orElse(0L))
                 .totalStrategyCount(mainPageRepository.count())
                 .smScoreTopFives(setTop5SmScore())
                 .build();
@@ -54,14 +56,12 @@ public class MainPageServiceImpl implements MainPageService {
         LocalDate currentDate = LocalDate.now();
         LocalDate startDate = calculateStartDate(currentDate, period);
 
-        MainPageAnalysisDto analysisDto = MainPageAnalysisDto.builder()
+        return MainPageAnalysisDto.builder()
                 .smScoreTopStrategyName(strategyRepository.findTop1SmScore().orElse(null))
                 .xAxis(strategyGraphAnalysisRepository.findDates(startDate).orElse(null))
                 .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts(startDate).orElse(null))
                 .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates(startDate).orElse(null))
                 .build();
-
-        return analysisDto;
     }
 
     private LocalDate calculateStartDate(LocalDate currentDate, String period) {
@@ -90,7 +90,6 @@ public class MainPageServiceImpl implements MainPageService {
         Page<Strategy> strategyPage = mainPageRepository.findTop3ByFollowerCount(pageable);
 
         if (strategyPage.isEmpty())
-            // 데이터가 없어도 메인 페이지 접속은 가능해야 함
             return new ArrayList<>();
 
         for (Strategy s : strategyPage.getContent()) {
@@ -101,6 +100,7 @@ public class MainPageServiceImpl implements MainPageService {
             traders.add(TraderRankingDto.builder()
                     .id(s.getId())
                     .nickname((s.getTrader().getNickname()))
+                    .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, s.getId())))
                     .followerCount(s.getFollowerCount())
                     .accumProfitLossRate(s.getAccumulatedProfitLossRate())
                     .build()
@@ -114,41 +114,22 @@ public class MainPageServiceImpl implements MainPageService {
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        List<SmScoreTopFive> topFives = new ArrayList<>();
         Page<Strategy> strategyPage = mainPageRepository.findTop5SmScore(pageable);
 
         if (strategyPage.isEmpty())
-            // 데이터가 없어도 메인 페이지 접속은 가능해야 함
             return new ArrayList<>();
 
-        for (Strategy s : strategyPage) {
-            HashSet<Long> idSet = new HashSet<>();
-            HashSet<String> nameSet = new HashSet<>();
-
-            List<StrategyStockReference> references = strategyStockReferenceRepository.findByStrategyId(s.getId());
-
-            for (StrategyStockReference ref : references) {
-                Stock stock = ref.getStock();
-                idSet.add(stock.getId());
-                nameSet.add(stock.getName());
-            }
-
-            StockListDto stockListDto = StockListDto.builder()
-                    .stockIds(idSet)
-                    .stockNames(nameSet)
-                    .build();
-
-            SmScoreTopFive element = SmScoreTopFive.builder()
-                    .id(s.getId())
-                    .traderId(s.getTrader().getId())
-                    .nickname(s.getTrader().getNickname())
-                    .name(s.getName())
-                    .stocks(new HashSet<>(List.of(stockListDto)))
-                    .smScore(s.getSmScore())
-                    .build();
-
-            topFives.add(element);
-        }
-        return topFives;
+        return strategyPage.stream()
+                .map(strategy -> SmScoreTopFive.builder()
+                        .id(strategy.getId())
+                        .traderId(strategy.getTrader().getId())
+                        .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .nickname(strategy.getTrader().getNickname())
+                        .name(strategy.getName())
+                        .stocks(stockGetter.getStocks(strategy.getId()))
+                        .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                        .smScore(strategy.getSmScore())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
