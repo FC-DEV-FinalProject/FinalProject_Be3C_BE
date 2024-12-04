@@ -127,7 +127,21 @@ public class StrategyIndicatorsCalculator {
     public Double calCurrentCapitalReductionAmount(Long strategyId, Double accumulatedProfitLossAmount) {
         Double maxAccumulatedProfitLossAmount = dailyRepository.findTopByStrategyIdOrderByProfitLossAmountDesc(strategyId).getAccumulatedProfitLossAmount();
 
-        return accumulatedProfitLossAmount > 0 ? doubleHandler.cutDouble(accumulatedProfitLossAmount - maxAccumulatedProfitLossAmount) : 0;
+        if(maxAccumulatedProfitLossAmount == null || maxAccumulatedProfitLossAmount == 0.0 || accumulatedProfitLossAmount == null)
+            return 0.0;
+
+        return accumulatedProfitLossAmount > 0 ? doubleHandler.cutDouble(accumulatedProfitLossAmount - maxAccumulatedProfitLossAmount) : 0.0;
+    }
+
+    // currentCapitalReductionRate 현재자본인하율 - StrategyGraphAnalysis 사용
+    public Double calCurrentCapitalReductionRate(Long strategyId, Double standardAmount) {
+
+        Double maxStandardAmount = dailyRepository.findTopByStrategyIdOrderByStandardAmountDesc(strategyId).getStandardAmount();
+
+        if (standardAmount == null || standardAmount == 0.0 || maxStandardAmount == null) return 0.0;
+
+        // 현재자본인하율 -> 기준가 - 1000 > 0 ? (기준가 - 최대 기준가) / 기준가 : 0
+        return standardAmount - 1000 > 0 ? doubleHandler.cutDouble((standardAmount - maxStandardAmount) / standardAmount) : 0.0;
     }
 
     // averageProfitLossAmount 평균손익률 - StrategyGraphAnalysis에서 사용
@@ -135,7 +149,7 @@ public class StrategyIndicatorsCalculator {
 
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
 
-        if(totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+        if(totalTradingDays == null || totalTradingDays.equals(0L) || accumulatedProfitLossAmount == null) return 0.0;
 
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays);
     }
@@ -144,7 +158,7 @@ public class StrategyIndicatorsCalculator {
     public Double calAverageProfitLossRate(Long strategyId, Double accumulatedProfitLossAmount){
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
 
-        if(totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+        if(totalTradingDays == null || totalTradingDays.equals(0L) || accumulatedProfitLossAmount == null) return 0.0;
 
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays * 100);
     }
@@ -154,7 +168,8 @@ public class StrategyIndicatorsCalculator {
         Long totalProfitDays = dailyRepository.countProfitDays(strategyId);
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
 
-        if(totalProfitDays == null || totalProfitDays == 0L || totalTradingDays == null || totalTradingDays == 0L) return 0.0;
+        if(totalTradingDays == null || totalTradingDays.equals(0L) || totalProfitDays == null)
+            return 0.0;
 
         return doubleHandler.cutDouble((double) (totalProfitDays / totalTradingDays));
     }
@@ -164,14 +179,15 @@ public class StrategyIndicatorsCalculator {
         Double totalProfitAmount = dailyRepository.findTotalProfitAmountByStrategyId(strategyId);
         Double totalLossAmount = dailyRepository.findTotalLossAmountByStrategyId(strategyId);
 
-        if(totalProfitAmount == null || totalLossAmount == null || totalLossAmount == 0) return 0.0;
+        if(totalProfitAmount == null || totalProfitAmount == 0.0 || totalLossAmount == null || totalLossAmount == 0.0) return 0.0;
 
         return totalLossAmount < 0 ? doubleHandler.cutDouble(totalProfitAmount / (totalLossAmount * -1)) : 0.0;
     }
 
     // ROA - StrategyGraphAnalysis에서 사용
     public Double calRoa(Double accumulatedProfitLossAmount, Double maximumCapitalReductionAmount) {
-        if (maximumCapitalReductionAmount == null || maximumCapitalReductionAmount == 0.0) return 0.0;
+        if (maximumCapitalReductionAmount == null || maximumCapitalReductionAmount == 0.0 || accumulatedProfitLossAmount == null)
+            return 0.0;
 
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / maximumCapitalReductionAmount * -1);
     }
