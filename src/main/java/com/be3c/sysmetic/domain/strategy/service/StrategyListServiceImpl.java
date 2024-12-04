@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -10,6 +11,7 @@ import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.PathGetter;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.exception.FileNotFoundException;
@@ -21,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,8 @@ public class StrategyListServiceImpl implements StrategyListService {
     private final FileService fileService;
     private final StockGetter stockGetter;
     private final PathGetter pathGetter;
+    private final SecurityUtils securityUtils;
+    private final InterestStrategyRepository interestStrategyRepository;
     private final int PAGE_SIZE = 10;
 
     /*
@@ -60,6 +66,20 @@ public class StrategyListServiceImpl implements StrategyListService {
                                 fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()))
                         )
                 );
+
+        try {
+            Long userId = securityUtils.getUserIdInSecurityContext();
+
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+
+            result.getContent().forEach(strategy -> {
+                        if(interestStrategyList.contains(strategy.getStrategyId())) {
+                            strategy.setIsFollow(true);
+                        }
+                    }
+            );
+        } catch (UsernameNotFoundException | AuthenticationCredentialsNotFoundException e) {
+        }
 
         return PageResponse.<StrategyListDto>builder()
                  .currentPage(result.getNumber())
@@ -124,11 +144,26 @@ public class StrategyListServiceImpl implements StrategyListService {
                                     .stockList(stockGetter.getStocks(strategy.getId()))
                                     .cycle(strategy.getCycle())
                                     .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                                    .isFollow(false)
                                     .mdd(strategy.getMdd())
                                     .smScore(strategy.getSmScore())
                                     .build()
                     );
                 });
+
+        try {
+            Long userId = securityUtils.getUserIdInSecurityContext();
+
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+
+            arrayList.forEach(strategy -> {
+                        if(interestStrategyList.contains(strategy.getStrategyId())) {
+                            strategy.setIsFollow(true);
+                        }
+                    }
+            );
+        } catch (UsernameNotFoundException | AuthenticationCredentialsNotFoundException e) {
+        }
 
         return StrategyListByTraderDto.builder()
                 .traderId(trader.getId())

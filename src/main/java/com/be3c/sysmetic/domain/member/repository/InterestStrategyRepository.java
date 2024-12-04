@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -75,4 +76,6 @@ public interface InterestStrategyRepository extends JpaRepository<InterestStrate
     @Query("DELETE FROM InterestStrategy i WHERE i.folder.id = :folderId")
     void deleteByFolderId(Long folderId);
 
+    @Query("SELECT i.strategy.id FROM InterestStrategy i WHERE i.member.id = :userId AND i.statusCode = 'FS001'")
+    List<Long> findAllByMemberId(Long userId);
 }
