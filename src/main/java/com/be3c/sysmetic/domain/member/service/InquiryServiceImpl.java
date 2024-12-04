@@ -555,7 +555,7 @@ public class InquiryServiceImpl implements InquiryService {
         Long userId = securityUtils.getUserIdInSecurityContext();
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
 
-        if (!userId.equals(inquiry.getInquirer().getId())) {
+        if (!userId.equals(inquiry.getTraderId())) {
             throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
         }
 
