@@ -43,24 +43,21 @@ public class ExcelControllerImpl implements ExcelController {
 
     @Override
     @GetMapping("/daily/{strategyId}")
-    public ResponseEntity<APIResponse<InputStreamResource>> downloadDailyExcel(
+    public ResponseEntity<InputStreamResource> downloadDailyExcel(
             @PathVariable Long strategyId) {
 
         InputStream inputStream = excelService.downloadDailyExcel(strategyId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=Daily_Data.xlsx");
-        headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .headers(headers)
-                .body(APIResponse.success(new InputStreamResource(inputStream)));
+                .header(HttpHeaders.CONTENT_DISPOSITION)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(inputStream));
     }
 
     @Override
     @GetMapping("/daily/statistics/{strategyId}")
-    public ResponseEntity<APIResponse<InputStreamResource>> downloadDailyExcelWithStatistics(
+    public ResponseEntity<InputStreamResource> downloadDailyExcelWithStatistics(
             @PathVariable Long strategyId) {
 
         InputStream inputStream = excelService.downloadDailyExcelWithStatistics(strategyId);
@@ -72,12 +69,12 @@ public class ExcelControllerImpl implements ExcelController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .headers(headers)
-                .body(APIResponse.success(new InputStreamResource(inputStream)));
+                .body(new InputStreamResource(inputStream));
     }
 
     @Override
     @GetMapping("/monthly/{strategyId}")
-    public ResponseEntity<APIResponse<InputStreamResource>> downloadMonthlyExcel(
+    public ResponseEntity<InputStreamResource> downloadMonthlyExcel(
             @PathVariable Long strategyId) {
 
         InputStream inputStream = excelService.downloadMonthlyExcel(strategyId);
@@ -89,6 +86,6 @@ public class ExcelControllerImpl implements ExcelController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .headers(headers)
-                .body(APIResponse.success(new InputStreamResource(inputStream)));
+                .body(new InputStreamResource(inputStream));
     }
 }
