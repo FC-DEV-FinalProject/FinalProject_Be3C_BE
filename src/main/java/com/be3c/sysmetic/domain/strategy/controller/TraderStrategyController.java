@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "트레이더 전략 API", description = "트레이더 전략 관리 및 조회")
 @RequestMapping("/v1/trader")
@@ -95,8 +97,8 @@ public class TraderStrategyController {
             @PathVariable Long strategyId,
             @Valid @RequestBody List<DailyRequestDto> requestDtoList
     ) {
-        DailyPostResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
         dailyService.saveDaily(strategyId, requestDtoList);
+        DailyPostResponseDto responseDto = dailyService.getIsDuplicate(strategyId, requestDtoList);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(responseDto));
@@ -172,6 +174,23 @@ public class TraderStrategyController {
                 .body(APIResponse.success(strategyService.findMethodAndStock()));
     }
 
+    @Operation(
+            summary = "나의 전략 목록 조회",
+            description = "자신이 등록한 전략 목록 조회"
+    )
+    @GetMapping("/member/strategy/{page}")
+    public ResponseEntity<APIResponse<MyStrategyListResponseDto>> getMyStrategyList(
+            @PathVariable Integer page
+    ) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(traderStrategyService.getMyStrategyList(page)));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+        }
+    }
+
     // 비공개 전환
     @Operation(
             summary = "비공개 전환",
@@ -179,7 +198,7 @@ public class TraderStrategyController {
     )
     @PatchMapping("/strategy/{id}/visibility")
     public ResponseEntity<APIResponse<String>> patchStrategy(
-            @NotBlank @PathVariable Long id
+            @NotNull @PathVariable Long id
     ) {
         try {
             if(strategyService.privateStrategy(id)) {
@@ -193,6 +212,4 @@ public class TraderStrategyController {
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
         }
     }
-
 }
-

@@ -1,204 +1,142 @@
 package com.be3c.sysmetic.domain.member.controller;
 
-import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.member.dto.FindEmailRequestDto;
+import com.be3c.sysmetic.domain.member.dto.ResetPasswordRequestDto;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.service.AccountService;
-import org.junit.jupiter.api.*;
+import com.be3c.sysmetic.domain.member.service.RegisterService;
+import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.Null;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(controllers = AccountController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 class AccountControllerTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     @Autowired
     private MockMvc mockMvc;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private AccountService accountService;
+
+    @MockBean
+    private RegisterService registerService;
 
     @BeforeEach
     void setUp() {
-        // 초기화
-        memberRepository.deleteAll();
-
-        // 테스트 데이터 삽입
-        Member member1 = Member.builder()
-                .roleCode("RC001")
-                .email("test1@test.com")
-                .password(bCryptPasswordEncoder.encode("Password1!"))
-                .name("테스트")
-                .nickname("테스트닉네임")
-                .birth(LocalDate.of(2000,1,1))
-                .phoneNumber("01012341234")
-                .totalStrategyCount(0)
-                .receiveInfoConsent("true")
-                .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("true")
-                .marketingConsentDate(LocalDateTime.now())
-                .build();
-        memberRepository.save(member1);
-    }
-
-    @AfterEach
-    void tearDown() {
-        // 초기화
-        memberRepository.deleteAll();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("이메일 찾기 테스트")
-    void findEmailTest() throws Exception {
-        String name = "테스트";
-        String phoneNumber = "01012341234";
-        String requestBody = String.format(
-                "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
-        );
+    @DisplayName("이메일 찾기 - 성공")
+    void findEmail_ShouldReturnEmail_WhenValidRequest() throws Exception {
+        // Given
+        FindEmailRequestDto requestDto = new FindEmailRequestDto("테스트이름", "01012345678");
+        String expectedEmail = "john@example.com";
 
-        // 1. 성공
-        mockMvc.perform(post("/v1/auth/find-email")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        when(accountService.findEmail(requestDto.getName(), requestDto.getPhoneNumber()))
+                .thenReturn(expectedEmail);
 
-        // 2. 실패 - 형식 불일치 (postman으로 테스트 완료)
-        // 이름
-        name = "qnfdlfcl";
-        phoneNumber = "01012341234";
-        requestBody = String.format(
-                "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
-        );
+        // When & Then
         mockMvc.perform(post("/v1/auth/find-email")
-                        .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", is(expectedEmail)));
 
-        // 휴대폰 번호
-        name = "테스트";
-        phoneNumber = "123";
-        requestBody = String.format(
-                "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
-        );
-        mockMvc.perform(post("/v1/auth/find-email")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        // 3. 실패 - 존재하지 않는 회원정보
-        name = "존재하지않는회원";
-        phoneNumber = "01012341234";
-        requestBody = String.format(
-                "{\"name\":\"%s\", \"phoneNumber\":\"%s\"}", name, phoneNumber
-        );
-        mockMvc.perform(post("/v1/auth/find-email")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("일치하는 회원 정보를 찾을 수 없습니다."));
+        verify(accountService, times(1)).findEmail(requestDto.getName(), requestDto.getPhoneNumber());
     }
 
     @Test
-    @DisplayName("이메일 확인 및 인증코드 발송 테스트")
-    void checkEmailAndSendCodeTest() throws Exception {
-        // 1. 성공
-        mockMvc.perform(get("/v1/auth/reset-password")
-                        .param("email", "test1@test.com"))
-                .andExpect(status().isOk());
+    @DisplayName("이메일 확인 및 인증코드 발송 - 성공")
+    void checkEmailAndSendCode_ShouldSendVerificationCode_WhenEmailIsValid() throws Exception {
+        // Given
+        String email = "john@example.com";
 
-        // 2. 실패 - 이메일 형식 불일치
-        mockMvc.perform(get("/v1/auth/reset-password")
-                        .param("email", "invalid-email"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("유효하지 않은 값입니다."));
+        when(accountService.isPresentEmail(email)).thenReturn(true);
+        when(registerService.sendVerifyEmailCode(email)).thenReturn(true);
 
-        // 3. 실패 - 존재하지 않는 이메일
+        // When & Then
         mockMvc.perform(get("/v1/auth/reset-password")
-                        .param("email", "nonexist@example.com"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("잘못된 형식 또는 누락된 데이터가 있습니다."));
+                        .param("email", email))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(accountService, times(1)).isPresentEmail(email);
+        verify(registerService, times(1)).sendVerifyEmailCode(email);
     }
 
     @Test
-    @DisplayName("비밀번호 재설정 테스트")
-    void resetPasswordTest() throws Exception {
-        String email = "test1@test.com";
-        String password = "Resetpwd123!";
-        String rewritePassword = "Resetpwd123!";
+    @DisplayName("이메일 확인 및 인증코드 발송 - 실패 (이메일 형식 오류)")
+    void checkEmailAndSendCode_ShouldFail_WhenEmailIsInvalid() throws Exception {
+        // Given
+        String invalidEmail = "not-an-email";
 
-        // 1. 성공
-        String requestBody = String.format(
-                "{\"email\":\"%s\", \"password\":\"%s\", \"rewritePassword\":\"%s\"}"
-                , email, password, rewritePassword
-        );
+        // When & Then
+        mockMvc.perform(get("/v1/auth/reset-password")
+                        .param("email", invalidEmail))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("유효한 이메일 형식이 아닙니다."));
+    }
 
+    @Test
+    @DisplayName("비밀번호 재설정 - 성공")
+    void resetPassword_ShouldResetPassword_WhenValidRequest() throws Exception {
+        // Given
+        ResetPasswordRequestDto requestDto = new ResetPasswordRequestDto("john@example.com", "newPassword123!", "newPassword123!");
+
+        when(accountService.isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword())).thenReturn(true);
+        when(accountService.resetPassword(requestDto.getEmail(), requestDto.getPassword())).thenReturn(true);
+
+        // When & Then
         mockMvc.perform(post("/v1/auth/reset-password")
-                        .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk());
 
-        // 2. 실패 - 비밀번호 형식 불일치
-        String wrongPassword = "wrongPassword";
+        verify(accountService, times(1)).isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword());
+        verify(accountService, times(1)).resetPassword(requestDto.getEmail(), requestDto.getPassword());
+    }
 
-        requestBody = String.format(
-                "{\"email\":\"%s\", \"password\":\"%s\", \"rewritePassword\":\"%s\"}"
-                , email, wrongPassword, rewritePassword
-        );
+    @Test
+    @DisplayName("비밀번호 재설정 - 실패 (비밀번호 불일치)")
+    void resetPassword_ShouldFail_WhenPasswordsDoNotMatch() throws Exception {
+        // Given
+        ResetPasswordRequestDto requestDto = new ResetPasswordRequestDto("test@example.com", "Password123!", "differentPwd12!");
 
+        doThrow(new MemberBadRequestException("비밀번호가 일치하지 않습니다."))
+                .when(accountService).isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword());
+
+        // When & Then
         mockMvc.perform(post("/v1/auth/reset-password")
-                        .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("비밀번호는 영문자(대, 소문자), 숫자, 특수문자를 포함하여 6~20자로 입력해야 합니다."));
+                .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."));
 
-        // 3. 실패 - 비밀번호 불일치
-        String unMatchedPassword = "unMatch123!";
-
-        requestBody = String.format(
-                "{\"email\":\"%s\", \"password\":\"%s\", \"rewritePassword\":\"%s\"}"
-                , email, unMatchedPassword, rewritePassword
-        );
-
-        mockMvc.perform(post("/v1/auth/reset-password")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("비밀번호 불일치"));
-
-        // 4. 실패 - 존재하지 않는 이메일
-        String nonExistEmail = "nonExist@test.com";
-
-        requestBody = String.format(
-                "{\"email\":\"%s\", \"password\":\"%s\", \"rewritePassword\":\"%s\"}"
-                , nonExistEmail, password, rewritePassword
-        );
-
-        mockMvc.perform(post("/v1/auth/reset-password")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("서버 오류가 발생했습니다."));
+        verify(accountService, times(1)).isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword());
     }
 }

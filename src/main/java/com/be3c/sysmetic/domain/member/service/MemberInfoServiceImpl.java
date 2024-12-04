@@ -159,7 +159,8 @@ public class MemberInfoServiceImpl implements MemberInfoService {
             */
         }
 
-        if(!memberPatchInfoRequestDto.getPhoneNumber().isEmpty()) {
+        if((memberPatchInfoRequestDto.getPhoneNumber() != null &&
+                !memberPatchInfoRequestDto.getPhoneNumber().isEmpty())) {
             member.setPhoneNumber(memberPatchInfoRequestDto.getPhoneNumber());
         }
 
@@ -170,6 +171,20 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     @Override
     public boolean changeMemberConsent(Long userId, MemberPatchConsentRequestDto memberPatchInfoRequestDto) {
+        Long requestId = securityUtils.getUserIdInSecurityContext();
+
+        if(userId.equals(requestId)) {
+            Member member = memberRepository.findByIdAndUsingStatusCode(
+                    userId,
+                    Code.USING_STATE.getCode()
+            ).orElseThrow(EntityNotFoundException::new);
+
+            member.setReceiveMarketingConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveMarketingConsent()));
+            member.setReceiveInfoConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveInfoConsent()));
+
+            return true;
+        }
+
         return false;
     }
 
@@ -187,13 +202,13 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
         return true;
     }
-    
+
     // 관리자 페이지 - 회원 강제탈퇴에서 사용하는 메서드
     @Override
     public void banUser(Long memberId) {
         deleteUser(memberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new));
     }
-    
+
     private void deleteUser(Member member) {
         List<Strategy> strategyList = strategyRepository.findByTraderId(member.getId());
         List<Folder> folderList = folderRepository.findByMemberId(member.getId());

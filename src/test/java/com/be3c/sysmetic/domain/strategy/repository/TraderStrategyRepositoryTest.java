@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyPostRequestDto;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -51,7 +52,7 @@ public class TraderStrategyRepositoryTest {
         Strategy requestSaveStrategy = Strategy.builder()
                 .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
-                .statusCode("PRIVATE")
+                .statusCode(StrategyStatusCode.PRIVATE.getCode())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
                 .content(requestDto.getContent())
@@ -83,7 +84,7 @@ public class TraderStrategyRepositoryTest {
         Strategy requestSaveStrategy = Strategy.builder()
                 .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
-                .statusCode("PRIVATE")
+                .statusCode(StrategyStatusCode.PRIVATE.getCode())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
                 .content(requestDto.getContent())
@@ -137,7 +138,7 @@ public class TraderStrategyRepositoryTest {
         Strategy requestSaveStrategy = Strategy.builder()
                 .trader(memberRepository.findById(findMember().getId()).orElse(null)) // todo. security 적용 후 제거 필요
                 .method(methodRepository.findById(requestDto.getMethodId()).orElse(null))
-                .statusCode("PRIVATE")
+                .statusCode(StrategyStatusCode.PRIVATE.getCode())
                 .name(requestDto.getName())
                 .cycle(requestDto.getCycle())
                 .content(requestDto.getContent())

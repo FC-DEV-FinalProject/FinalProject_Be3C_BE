@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InquiryRepository extends JpaRepository<Inquiry, Long>, InquiryRepositoryCustom {
 
@@ -68,6 +69,14 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
     // 질문자 다음 문의 조회
     @Query("select i from Inquiry i where i.id > :inquiryId and i.inquirer.id = :inquirerId order by i.id asc")
     List<Inquiry> inquirerFindNextInquiry(@Param("inquiryId") Long inquiryId, @Param("inquirerId") Long inquirerId, Pageable pageable);
+
+    // 이전 문의 조회
+    @Query("select i from Inquiry i where i.id < :inquiryId order by i.id desc")
+    List<Inquiry> findPreviousInquiry(@Param("inquiryId") Long inquiryId, Pageable pageable);
+
+    // 다음 문의 조회
+    @Query("select i from Inquiry i where i.id > :inquiryId order by i.id asc")
+    List<Inquiry> findNextInquiry(@Param("inquiryId") Long inquiryId, Pageable pageable);
 
     @Modifying
     @Query("DELETE FROM Inquiry i WHERE i.strategy.id = :strategyId")

@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -25,16 +26,23 @@ public class MemberExceptionHandler {
 
     // Valid 실패 (개별)
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<APIResponse> handleValidationException(HandlerMethodValidationException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, "유효하지 않은 값입니다.")
+    public ResponseEntity<APIResponse> handleValidationException(HandlerMethodValidationException e) {
+        // Validation 실패 메시지 추출
+        String errorMessage = e.getAllErrors()
+                .stream()
+                .findFirst()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .orElse("입력한 값의 형식이 유효하지 않습니다.");
+        // 에러 응답 반환
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, errorMessage)
         );
     }
 
     // @Valid 실패
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<APIResponse> handleValidationException(MethodArgumentNotValidException exception) {
+    public ResponseEntity<APIResponse> handleValidationException(MethodArgumentNotValidException e) {
         // 첫 번째 FieldError 추출
-        FieldError firstError = exception.getBindingResult().getFieldErrors().get(0);
+        FieldError firstError = e.getBindingResult().getFieldErrors().get(0);
         String errorMessage = firstError.getDefaultMessage();
 
         // 첫 번째 에러 메시지 반환
@@ -50,23 +58,17 @@ public class MemberExceptionHandler {
 
         // 첫 번째 에러 메시지 반환
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, errorMessage));
-//        StringBuilder errorMessages = new StringBuilder();
-//        for (FieldError error : exception.getBindingResult().getFieldErrors()) {
-//            errorMessages.append(error.getDefaultMessage());
-//        }
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, errorMessages.toString())
-//        );
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<APIResponse> handleEntityNotFoundException(EntityNotFoundException exception) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.fail(ErrorCode.NOT_FOUND, exception.getMessage())
+    public ResponseEntity<APIResponse> handleEntityNotFoundException(EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage())
         );
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<APIResponse> handleIllegalArgumentException(IllegalArgumentException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, exception.getMessage())
+    public ResponseEntity<APIResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage())
         );
     }
 

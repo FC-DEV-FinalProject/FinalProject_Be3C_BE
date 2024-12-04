@@ -33,7 +33,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
         FROM
             StrategyApprovalHistory s
         WHERE
-            s.id = :id
+            s.strategy.id = :id
         AND s.statusCode = 'SA001'
     """)
     Optional<StrategyApprovalHistory> findByStrategyIdNotApproval(Long id);

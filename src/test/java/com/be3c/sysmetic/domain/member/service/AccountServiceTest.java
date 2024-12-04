@@ -1,104 +1,152 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
-@SpringBootTest
-@Transactional
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
 class AccountServiceTest {
 
-    @Autowired
+    @Mock
     private MemberRepository memberRepository;
 
-    @Autowired
-    private AccountService accountService;
-
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    @InjectMocks
+    private AccountServiceImpl accountService;
 
     @BeforeEach
     void setUp() {
-        // 초기화
-        memberRepository.deleteAll();
-
-        // 테스트 데이터 삽입
-        Member member1 = Member.builder()
-                .roleCode("RC001")
-                .email("test1@test.com")
-                .password(bCryptPasswordEncoder.encode("Password1!"))
-                .name("테스트")
-                .nickname("테스트닉네임")
-                .birth(LocalDate.of(2000,1,1))
-                .phoneNumber("01012341234")
-                .totalStrategyCount(0)
-                .receiveInfoConsent("true")
-                .infoConsentDate(LocalDateTime.now())
-                .receiveMarketingConsent("true")
-                .marketingConsentDate(LocalDateTime.now())
-                .build();
-        memberRepository.save(member1);
-    }
-
-    @AfterEach
-    void tearDown() {
-        // 초기화
-        memberRepository.deleteAll();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("이메일 찾기 테스트")
-    void findEmailTest() {
-        // 1. 성공
-        String name = "테스트";
-        String phoneNumber = "01012341234";
-        Assertions.assertEquals("test1@test.com",accountService.findEmail(name, phoneNumber));
+    @DisplayName("이메일 반환 - 성공")
+    void findEmail_ShouldReturnEmail_WhenValidNameAndPhoneNumber() {
+        // Given
+        String name = "John";
+        String phoneNumber = "01012345678";
+        List<String> emailList = List.of("john@example.com");
+        when(memberRepository.findEmailByNameAndPhoneNumber(name, phoneNumber)).thenReturn(emailList);
 
-        // 2. 실패 - 존재하지 않는 회원정보
-        Assertions.assertThrows(EntityNotFoundException.class, () -> accountService.findEmail("존재하지않는회원", phoneNumber));
+        // When
+        String result = accountService.findEmail(name, phoneNumber);
+
+        // Then
+        assertThat(result).isEqualTo("john@example.com");
+        verify(memberRepository, times(1)).findEmailByNameAndPhoneNumber(name, phoneNumber);
     }
 
     @Test
-    @DisplayName("이메일 확인 테스트")
-    void isPresentEmailTest() {
-        // 1. 성공 - true
-        Assertions.assertTrue(accountService.isPresentEmail("test1@test.com"));
-        // 2. 실패 - false
-        Assertions.assertFalse(accountService.isPresentEmail("wrong@test.com"));
+    @DisplayName("이메일 반환 - 실패 (회원 정보 없음)")
+    void findEmail_ShouldThrowException_WhenNoMatchingMember() {
+        // Given
+        String name = "Jane";
+        String phoneNumber = "01087654321";
+        when(memberRepository.findEmailByNameAndPhoneNumber(name, phoneNumber)).thenReturn(Collections.emptyList());
+
+        // When & Then
+        assertThatThrownBy(() -> accountService.findEmail(name, phoneNumber))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.NOT_FOUND_MEMBER.getMessage());
+        verify(memberRepository, times(1)).findEmailByNameAndPhoneNumber(name, phoneNumber);
     }
 
     @Test
-    @DisplayName("비밀번호 일치 여부 확인 테스트")
-    void isPasswordMatchTest() {
-        String password = "123456";
-        String rewritePassword = "123456";
-        String worngPassword = "asdf1234";
-        // 1. 성공
-        Assertions.assertTrue(accountService.isPasswordMatch(password, rewritePassword));
-        // 2. 실패
-        Assertions.assertFalse(accountService.isPasswordMatch(password, worngPassword));
+    @DisplayName("이메일 존재 확인 - 성공")
+    void isPresentEmail_ShouldReturnTrue_WhenEmailExists() {
+        // Given
+        String email = "john@example.com";
+        when(memberRepository.existsByEmail(email)).thenReturn(true);
+
+        // When
+        boolean result = accountService.isPresentEmail(email);
+
+        // Then
+        assertThat(result).isTrue();
+        verify(memberRepository, times(1)).existsByEmail(email);
     }
 
     @Test
-    @DisplayName("비밀번호 재설정 테스트")
-    void resetPasswordTest() {
-        // 1. 성공
-        String email = "test1@test.com";
-        String password = "RePassword12@";
-        Assertions.assertTrue(accountService.resetPassword(email, password));
-        // 2. 실패 - 존재하지 않는 이메일
-        email = "wrong@test.com";
-        Assertions.assertFalse(accountService.resetPassword(email, password));
+    @DisplayName("이메일 존재 확인 - 실패 (이메일 없음)")
+    void isPresentEmail_ShouldThrowException_WhenEmailDoesNotExist() {
+        // Given
+        String email = "nonexistent@example.com";
+        when(memberRepository.existsByEmail(email)).thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> accountService.isPresentEmail(email))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.NOT_FOUND_MEMBER.getMessage());
+        verify(memberRepository, times(1)).existsByEmail(email);
     }
 
+    @Test
+    @DisplayName("비밀번호 일치 여부 확인 - 성공")
+    void isPasswordMatch_ShouldReturnTrue_WhenPasswordsMatch() {
+        // Given
+        String password = "password123";
+        String rewritePassword = "password123";
 
+        // When
+        boolean result = accountService.isPasswordMatch(password, rewritePassword);
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("비밀번호 일치 여부 확인 - 실패")
+    void isPasswordMatch_ShouldThrowException_WhenPasswordsDoNotMatch() {
+        // Given
+        String password = "password123";
+        String rewritePassword = "differentPassword";
+
+        // When & Then
+        assertThatThrownBy(() -> accountService.isPasswordMatch(password, rewritePassword))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.PASSWORD_MISMATCH.getMessage());
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 - 성공")
+    void resetPassword_ShouldReturnTrue_WhenPasswordIsUpdated() {
+        // Given
+        String email = "john@example.com";
+        String password = "newPassword123";
+        when(memberRepository.updatePasswordByEmail(eq(email), anyString())).thenReturn(1);
+
+        // When
+        boolean result = accountService.resetPassword(email, password);
+
+        // Then
+        assertThat(result).isTrue();
+        verify(memberRepository, times(1)).updatePasswordByEmail(eq(email), anyString());
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 - 실패")
+    void resetPassword_ShouldThrowException_WhenPasswordUpdateFails() {
+        // Given
+        String email = "john@example.com";
+        String password = "newPassword123";
+        when(memberRepository.updatePasswordByEmail(eq(email), anyString())).thenReturn(0);
+
+        // When & Then
+        assertThatThrownBy(() -> accountService.resetPassword(email, password))
+                .isInstanceOf(MemberBadRequestException.class)
+                .hasMessage(MemberExceptionMessage.FAIL_PASSWORD_CHANGE.getMessage());
+        verify(memberRepository, times(1)).updatePasswordByEmail(eq(email), anyString());
+    }
 }

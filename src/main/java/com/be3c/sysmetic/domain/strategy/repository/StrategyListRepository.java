@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 public interface StrategyListRepository extends JpaRepository<Strategy, Long> {
 
     // 공개중인 전략을 수익률 내림차순으로 페이징 조회
-    Page<Strategy> findAllByStatusCode(String statusCode, Pageable pageable);
+    @Query("SELECT s FROM Strategy s WHERE s.statusCode = 'PUBLIC' ORDER BY s.accumulatedProfitLossRate DESC")
+    Page<Strategy> findStrategiesOrderByAccumulatedProfitLossRate(Pageable pageable);
 
 
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto(" +

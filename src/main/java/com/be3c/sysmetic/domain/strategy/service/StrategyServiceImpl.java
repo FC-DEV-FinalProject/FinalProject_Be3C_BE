@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.dto.MethodAndStockGetResponseDto;
@@ -34,9 +35,9 @@ public class StrategyServiceImpl implements StrategyService {
     @Override
     public boolean privateStrategy(Long id) {
         Long userId = securityUtils.getUserIdInSecurityContext();
-        Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(id, userId, OPEN_STRATEGY.getCode()).orElseThrow(EntityNotFoundException::new);
+        Strategy strategy = strategyRepository.findByIdAndTraderId(id, userId).orElseThrow(EntityNotFoundException::new);
 
-        strategy.setStatusCode(Code.CLOSE_STRATEGY.getCode());
+        strategy.setStatusCode(StrategyStatusCode.PRIVATE.getCode());
         strategyRepository.save(strategy);
         return true;
     }

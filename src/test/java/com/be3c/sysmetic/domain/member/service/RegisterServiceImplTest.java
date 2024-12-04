@@ -156,6 +156,6 @@ class RegisterServiceImplTest {
         // When & Then
         MemberBadRequestException exception = assertThrows(MemberBadRequestException.class,
                 () -> registerService.registerMember(dto, null));
-        assertEquals("잘못된 날짜 형식으로 인해 회원 저장 실패", exception.getMessage());
+        assertEquals("회원가입에 실패했습니다. 관리자에게 문의해 주세요.", exception.getMessage());
     }
 }

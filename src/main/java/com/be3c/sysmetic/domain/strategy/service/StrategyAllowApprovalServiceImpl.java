@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
@@ -36,10 +37,9 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
     public boolean approveOpen(Long id) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(
+        Strategy strategy = strategyRepository.findPrivateByIdAndTraderId(
                 id,
-                userId,
-                CLOSE_STRATEGY.getCode()
+                userId
         ).orElseThrow(EntityNotFoundException::new);
 
         if(dailyRepository.countByStrategyId(id) <= 2) {
@@ -56,6 +56,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
                 .statusCode(APPROVE_WAIT.getCode())
                 .build();
 
+        strategy.setStatusCode(StrategyStatusCode.PENDING_APPROVAL.getCode());
         strategyApprovalRepository.save(strategyApprovalHistory);
 
         return true;
@@ -69,6 +70,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
                 ).orElseThrow(EntityNotFoundException::new);
 
         strategyApprovalHistory.setStatusCode(APPROVE_CANCEL.getCode());
+        strategyApprovalHistory.getStrategy().setStatusCode(StrategyStatusCode.PRIVATE.getCode());
 
         strategyApprovalRepository.save(strategyApprovalHistory);
 

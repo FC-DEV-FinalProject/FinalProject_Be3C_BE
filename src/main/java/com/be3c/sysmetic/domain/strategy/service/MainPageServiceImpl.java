@@ -5,8 +5,7 @@ import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
-import com.be3c.sysmetic.domain.strategy.repository.MainPageRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.domain.strategy.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,19 +27,54 @@ public class MainPageServiceImpl implements MainPageService {
     private final MainPageRepository mainPageRepository;
     private final MemberRepository memberRepository;
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
+    private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
+    private final StrategyRepository strategyRepository;
+    private final DailyRepository dailyRepository;
 
     @Override
     @Transactional
     public MainPageDto getMain() {
 
-        MainPageDto mainPageDto = MainPageDto.builder()
+        return MainPageDto.builder()
                 .rankedTrader(setTop3FollowerTrader())
-                .totalTraderCount(memberRepository.countAllByRoleCode("trader"))
+                .totalTraderCount(memberRepository.countAllByRoleCode("TRADER").orElse(null))
                 .totalStrategyCount(mainPageRepository.count())
-                // TODO  .mainPageAverageIndicator(setMainPageAverageIndicator())
                 .smScoreTopFives(setTop5SmScore())
                 .build();
-        return mainPageDto;
+    }
+
+
+    @Override
+    @Transactional
+    public MainPageAnalysisDto getAnalysis(String period) {
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startDate = calculateStartDate(currentDate, period);
+
+        MainPageAnalysisDto analysisDto = MainPageAnalysisDto.builder()
+                .smScoreTopStrategyName(strategyRepository.findTop1SmScore().orElse(null))
+                .xAxis(strategyGraphAnalysisRepository.findDates(startDate).orElse(null))
+                .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts(startDate).orElse(null))
+                .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates(startDate).orElse(null))
+                .build();
+
+        return analysisDto;
+    }
+
+    private LocalDate calculateStartDate(LocalDate currentDate, String period) {
+        switch (period) {
+            case "ONE_MONTH":
+                return currentDate.minusMonths(1);
+            case "THREE_MONTH":
+                return currentDate.minusMonths(3);
+            case "SIX_MONTH":
+                return currentDate.minusMonths(6);
+            case "ONE_YEAR":
+                return currentDate.minusYears(1);
+            case "ALL":
+            default:
+                return LocalDate.of(2000, 1, 1);        // 2000년 1월 1일 이후의 기간
+        }
     }
 
 
@@ -113,16 +148,4 @@ public class MainPageServiceImpl implements MainPageService {
         }
         return topFives;
     }
-
-    // TODO setMainPageAverageIndicator : 대표전략 평균 지표
-    // private MainPageAverageIndicator setMainPageAverageIndicator(){
-    //     StrategyStatusCode statusCode = StrategyStatusCode.valueOf("PUBLIC");
-    //     List<Strategy> strategies = mainPageRepository.findAllByStatusCode(statusCode.toString());
-    //
-    //     MainPageAverageIndicator m;
-    //
-    //     for (Strategy s : strategies) {
-    //
-    //     }
-    // }
 }

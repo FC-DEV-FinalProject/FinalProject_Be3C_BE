@@ -20,6 +20,7 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
 
     /*
         getDetailPage : 전략 상세 페이지 기본 정보 요청
+        http://localhost:8080/v1/strategy/detail/1
     */
     @Override
     @GetMapping("/{id}")
@@ -33,7 +34,8 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
 
 
     /*
-        getAnalysis : 전략 상세 페이지 그래프 데이터 요청
+
+       getAnalysis : 전략 상세 페이지 그래프 데이터 요청
     */
     @Override
     @GetMapping("/analysis")

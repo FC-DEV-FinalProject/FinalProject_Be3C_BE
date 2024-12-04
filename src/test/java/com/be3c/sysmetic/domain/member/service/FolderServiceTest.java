@@ -52,7 +52,7 @@ public class FolderServiceTest {
     private SecurityUtils securityUtils;
 
     @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {

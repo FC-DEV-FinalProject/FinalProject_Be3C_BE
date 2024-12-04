@@ -18,7 +18,18 @@ public class ExcelControllerImpl implements ExcelController {
     final ExcelService excelService;
 
     @Override
-    @PostMapping("/daily/{strategyId}")
+    @GetMapping("/daily")
+    public ResponseEntity<APIResponse<String>> getExcelForm() {
+
+        String url = excelService.getExcelFormUrl();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(APIResponse.success(url));
+    }
+
+    @Override
+    @PostMapping(value = "/daily/{strategyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> uploadExcel(
             @RequestParam("file") MultipartFile file,
             @PathVariable Long strategyId) {
