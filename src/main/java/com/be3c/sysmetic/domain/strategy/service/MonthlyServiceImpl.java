@@ -73,8 +73,17 @@ public class MonthlyServiceImpl implements MonthlyService {
     @Override
     public PageResponse<MonthlyGetResponseDto> findMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
         Pageable pageable = PageRequest.of(page, 10);
-        YearMonth start = parseYearMonth(startYearMonth);
-        YearMonth end = parseYearMonth(endYearMonth);
+
+        YearMonth start = null;
+        YearMonth end = null;
+
+        if(!startYearMonth.isEmpty() && startYearMonth != null) {
+            start = YearMonth.parse(startYearMonth);
+        }
+
+        if(!endYearMonth.isEmpty() && endYearMonth != null) {
+            end = YearMonth.parse(endYearMonth);
+        }
 
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
@@ -138,14 +147,6 @@ public class MonthlyServiceImpl implements MonthlyService {
     private Strategy findStrategy(Long strategyId) {
         return strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-    }
-
-    private YearMonth parseYearMonth(String yearMonth) {
-        try {
-            return yearMonth != null ? YearMonth.parse(yearMonth) : null;
-        } catch (DateTimeParseException e) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_DATE.getMessage(), ErrorCode.BAD_REQUEST);
-        }
     }
 
 }
