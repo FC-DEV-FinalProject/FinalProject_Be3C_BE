@@ -76,7 +76,6 @@ public class MonthlyServiceImpl implements MonthlyService {
         YearMonth start = parseYearMonth(startYearMonth);
         YearMonth end = parseYearMonth(endYearMonth);
 
-        // 전략 상태 PUBLIC 여부 검증
         Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
                 new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
 
@@ -99,52 +98,6 @@ public class MonthlyServiceImpl implements MonthlyService {
 
         // 페이지 내부에 데이터가 하나라도 존재하지 않는다면 ( 비정상 페이지 요청 )
         throw new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
-    }
-
-    /*
-    월간분석 조회 - 트레이더 또는 관리자의 월간분석 데이터 조회
-    1) 트레이더
-    본인의 전략이면서 공개, 비공개, 승인대기 상태의 전략 조회 가능
-    2) 관리자
-    모든 상태의 전략 조회 가능
-     */
-    @Override
-    public PageResponse<MonthlyGetResponseDto> findTraderMonthly(Long strategyId, Integer page, String startYearMonth, String endYearMonth) {
-        Pageable pageable = PageRequest.of(page, 10);
-        YearMonth start = parseYearMonth(startYearMonth);
-        YearMonth end = parseYearMonth(endYearMonth);
-
-        String userRole = securityUtils.getUserRoleInSecurityContext();
-
-        // trader일 경우, 본인의 전략인지 검증
-        if(userRole.equals("TRADER")) {
-            validUser(strategyId);
-        }
-
-        // member일 경우, 권한 없음 처리
-        if(userRole.equals("USER")) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.FORBIDDEN);
-        }
-
-        // 전략 상태 NOT_USING_STATE 일 경우 예외 처리
-        Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() ->
-                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
-
-        if(strategy.getStatusCode().equals(StrategyStatusCode.NOT_USING_STATE.name())) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
-        }
-
-        Page<MonthlyGetResponseDto> monthlyResponseDtoPage = monthlyRepository
-                .findAllByStrategyIdAndDateBetween(strategyId, start, end, pageable)
-                .map(this::entityToDto);
-
-        return PageResponse.<MonthlyGetResponseDto>builder()
-                .currentPage(monthlyResponseDtoPage.getPageable().getPageNumber())
-                .pageSize(monthlyResponseDtoPage.getPageable().getPageSize())
-                .totalElement(monthlyResponseDtoPage.getTotalElements())
-                .totalPages(monthlyResponseDtoPage.getTotalPages())
-                .content(monthlyResponseDtoPage.getContent())
-                .build();
     }
 
     @Override
