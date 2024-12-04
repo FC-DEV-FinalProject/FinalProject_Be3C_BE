@@ -33,21 +33,12 @@ public class Inquiry extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    @Column(name = "strategy_name", nullable = false)
-    private String strategyName;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member inquirer;
 
     @Column(name = "trader_id", nullable = false)
     private Long traderId;
-
-    @Column(name = "trader_nickname", nullable = false)
-    private String traderNickname;
-
-    @Column(name = "inquirer_nickname", nullable = false)
-    private String inquirerNickname;
 
     // enum (all, unclosed, closed)
     @Enumerated(EnumType.STRING)
@@ -67,11 +58,8 @@ public class Inquiry extends BaseEntity {
     public static Inquiry createInquiry(Strategy strategy, Member member, String inquiryTitle, String inquiryContent) {
         Inquiry inquiry = new Inquiry();
         inquiry.setStrategy(strategy);
-        inquiry.setStrategyName(strategy.getName());
         inquiry.setInquirer(member);
         inquiry.setTraderId(strategy.getTrader().getId());
-        inquiry.setTraderNickname(strategy.getTrader().getNickname());
-        inquiry.setInquirerNickname(member.getNickname());
 
         inquiry.setInquiryStatus(InquiryStatus.unclosed);
         inquiry.setInquiryTitle(inquiryTitle);

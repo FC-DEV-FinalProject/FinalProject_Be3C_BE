@@ -30,25 +30,17 @@ public class NoticeModifyRequestDto {
     private String noticeTitle;
 
     @Schema(description = "공지사항 내용", example = "공지사항 내용 예시입니다.")
-    @Size(max = 1000)
+    @Size(max = 2000)
     @NotBlank
     private String noticeContent;
-
-    @Schema(description = "첨부 파일 존재 여부", example = "true")
-    @NotNull
-    private Boolean fileExists;
-
-    @Schema(description = "이미지 파일 존재 여부", example = "true")
-    @NotNull
-    private Boolean imageExists;
 
     @Schema(description = "공개 여부", example = "true")
     @NotNull
     private Boolean isOpen;
 
-    @Schema(description = "지금 공지사항에 있는 파일의 id와 존재 유무 Map의 리스트", example = "[]")
-    private List<NoticeExistFileImageRequestDto> existFileDtoList;
+    @Schema(description = "공지사항에서 삭제된 파일의 id 리스트", example = "[1,2,3]")
+    private List<Long> deletFileIdList;
 
-    @Schema(description = "지금 공지사항에 있는 이미지의 id와 존재 유무 Map의 리스트", example = "[]")
-    private List<NoticeExistFileImageRequestDto> existImageDtoList;
+    @Schema(description = "공지사항에서 삭제된 이미지의 id 리스트", example = "[1,2,3]")
+    private List<Long> deleteImageIdList;
 }
