@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,4 +62,6 @@ public class StrategyDetailDto {
     private Double winningRate;
     private List<MonthlyRecord> monthlyRecord;
     private StrategyAnalysisResponseDto analysis;
+
+    private FileWithInfoResponse fileWithInfoResponse;
 }

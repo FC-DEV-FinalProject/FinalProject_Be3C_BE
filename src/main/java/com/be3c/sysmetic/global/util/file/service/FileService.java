@@ -52,7 +52,14 @@ public interface FileService {
     List<String> getFilePaths(FileRequest fileRequest);
 
     /**
-     * presignedUrl과 파일 정보를 제공
+     * presignedUrl과 파일 정보 한 개를 제공하거나 null 제공
+     * @param fileRequest ReferenceType(참조 테이블명)과 ReferenceId(참조 id) 입력
+     * @return 파일 url과 파일 메타 정보 1개 혹은 null
+     */
+    FileWithInfoResponse getFileWithInfoNullable(FileRequest fileRequest);
+
+    /**
+     * presignedUrl과 파일 정보 리스트를 제공
      * @param fileRequest ReferenceType(참조 테이블명)과 ReferenceId(참조 id) 입력
      * @return 파일 url과 파일 메타 정보 리스트
      */
