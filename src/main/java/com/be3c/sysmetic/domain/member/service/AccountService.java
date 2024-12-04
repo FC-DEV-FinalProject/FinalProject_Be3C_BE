@@ -7,5 +7,5 @@ public interface AccountService {
 
     boolean isPasswordMatch(String password, String rewritePassword);
 
-    boolean resetPassword(String email, String password);
+    boolean resetPassword(String email, String password, String rewritePassword);
 }

@@ -47,7 +47,7 @@ public class RegisterController {
             description = "이메일 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-duplicate-email")
-    public ResponseEntity<APIResponse<String>> checkDuplicateEmail(@Email(message = "{Invalid.email}") @RequestParam String email) {
+    public ResponseEntity<APIResponse<String>> checkDuplicateEmail(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
         registerService.checkEmailDuplication(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -58,7 +58,7 @@ public class RegisterController {
             description = "사용자에게 이메일 인증코드를 전송하는 API"
     )
     @GetMapping("/auth/email-code")
-    public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "{Invalid.email}") @RequestParam String email) {
+    public ResponseEntity<APIResponse<String>> sendVerificationCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }
@@ -80,7 +80,7 @@ public class RegisterController {
             description = "닉네임 중복 여부를 확인하는 API"
     )
     @GetMapping("/auth/check-nickname")
-    public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@NotNull @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "{Invalid.nickname}") @RequestParam String nickname) {
+    public ResponseEntity<APIResponse<String>> checkDuplicateNickname(@RequestParam @Pattern(regexp = "^[가-힣0-9]{3,10}$", message = "닉네임은 한글 또는 숫자로 3자 이상 10자 이내로 입력해야 합니다.") String nickname) {
         registerService.checkNicknameDuplication(nickname);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
     }

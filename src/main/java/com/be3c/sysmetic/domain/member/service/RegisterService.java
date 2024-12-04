@@ -1,6 +1,7 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
+import com.be3c.sysmetic.domain.member.entity.Member;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,9 @@ public interface RegisterService {
 
     // 4. 닉네임 중복확인
     boolean checkNicknameDuplication(String nickname);
+
+    // 0. 회원가입/비밀번호 재설정 - 이메일 인증 더블 체크 메서드
+    void emailDoubleCheck(String email);
 
     // 5. 회원가입
     @Transactional

@@ -48,8 +48,8 @@ class MemberManagementServiceImplTest {
 
         Pageable pageable = PageRequest.of(page - 1, 10);
         List<MemberGetResponseDto> content = List.of(
-                new MemberGetResponseDto(1L, "RC001", "test1@test.com", "Test1", "Nickname1", null, "01012345678"),
-                new MemberGetResponseDto(2L, "RC002", "test2@test.com", "Test2", "Nickname2", null, "01098765432")
+                new MemberGetResponseDto(1L, "USER", "test1@test.com", "Test1", "Nickname1", null, "01012345678"),
+                new MemberGetResponseDto(2L, "TRADER", "test2@test.com", "Test2", "Nickname2", null, "01098765432")
         );
 
         Page<MemberGetResponseDto> membersPage = new PageImpl<>(content, pageable, content.size());
@@ -73,17 +73,17 @@ class MemberManagementServiceImplTest {
 
         Member member = Member.builder()
                 .id(memberId)
-                .roleCode("RC001") // 일반 회원
+                .roleCode("USER") // 일반 회원
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(memberRepository.updateRoleCode(anyLong(), eq("RC003"))).thenReturn(1); // RC001 -> RC003 변경 성공
+        when(memberRepository.updateRoleCode(anyLong(), eq("USER_MANAGER"))).thenReturn(1); // RC001 -> RC003 변경 성공
 
         // When
         memberManagementService.changeRoleCode(memberId, hasManagerRights);
 
         // Then
-        verify(memberRepository, times(1)).updateRoleCode(memberId, "RC003");
+        verify(memberRepository, times(1)).updateRoleCode(memberId, "USER_MANAGER");
     }
 
     @Test
@@ -109,16 +109,16 @@ class MemberManagementServiceImplTest {
 
         Member member = Member.builder()
                 .id(memberId)
-                .roleCode("RC003") // 관리자
+                .roleCode("USER_MANAGER") // 관리자
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(memberRepository.updateRoleCode(anyLong(), eq("RC001"))).thenReturn(0); // RC003 -> RC001 실패
+        when(memberRepository.updateRoleCode(anyLong(), eq("USER"))).thenReturn(0); // RC003 -> RC001 실패
 
         // When & Then
         assertThatThrownBy(() -> memberManagementService.changeRoleCode(memberId, hasManagerRights))
                 .isInstanceOf(MemberBadRequestException.class)
                 .hasMessageContaining("회원 ID: " + memberId);
-        verify(memberRepository, times(1)).updateRoleCode(memberId, "RC001");
+        verify(memberRepository, times(1)).updateRoleCode(memberId, "USER");
     }
 }

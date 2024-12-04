@@ -109,7 +109,7 @@ class AccountControllerTest {
         ResetPasswordRequestDto requestDto = new ResetPasswordRequestDto("john@example.com", "newPassword123!", "newPassword123!");
 
         when(accountService.isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword())).thenReturn(true);
-        when(accountService.resetPassword(requestDto.getEmail(), requestDto.getPassword())).thenReturn(true);
+        when(accountService.resetPassword(requestDto.getEmail(), requestDto.getPassword(), requestDto.getRewritePassword())).thenReturn(true);
 
         // When & Then
         mockMvc.perform(post("/v1/auth/reset-password")
@@ -118,7 +118,7 @@ class AccountControllerTest {
                 .andExpect(status().isOk());
 
         verify(accountService, times(1)).isPasswordMatch(requestDto.getPassword(), requestDto.getRewritePassword());
-        verify(accountService, times(1)).resetPassword(requestDto.getEmail(), requestDto.getPassword());
+        verify(accountService, times(1)).resetPassword(requestDto.getEmail(), requestDto.getPassword(), requestDto.getRewritePassword());
     }
 
     @Test
