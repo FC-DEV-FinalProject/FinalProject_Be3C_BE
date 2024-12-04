@@ -77,11 +77,11 @@ public class MonthlyServiceImpl implements MonthlyService {
         YearMonth start = null;
         YearMonth end = null;
 
-        if(!startYearMonth.isEmpty() && startYearMonth != null) {
+        if(startYearMonth != null && !startYearMonth.isEmpty()) {
             start = YearMonth.parse(startYearMonth);
         }
 
-        if(!endYearMonth.isEmpty() && endYearMonth != null) {
+        if(endYearMonth != null && !endYearMonth.isEmpty()) {
             end = YearMonth.parse(endYearMonth);
         }
 
