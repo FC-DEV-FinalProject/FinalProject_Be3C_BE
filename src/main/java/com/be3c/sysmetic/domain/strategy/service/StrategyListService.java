@@ -1,9 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByNameDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListByTraderDto;
-import com.be3c.sysmetic.domain.strategy.dto.StrategyListDto;
-import com.be3c.sysmetic.domain.strategy.dto.TraderNicknameListDto;
+import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 
 public interface StrategyListService {
@@ -12,7 +9,7 @@ public interface StrategyListService {
     PageResponse<StrategyListDto> findStrategyPage(Integer pageNum);
 
     // findTraderNickname : 트레이더 닉네임으로 조회
-    PageResponse<TraderNicknameListDto> findTraderNickname(String nickname, Integer pageNum);
+    PageResponse<TraderNickNameListResponseDto> findTraderNickname(String nickname, Integer pageNum);
 
     // findStrategyPageByTrader : 트리이더 전략 목록
     StrategyListByTraderDto findStrategiesByTrader(Long traderId, Integer pageNum);

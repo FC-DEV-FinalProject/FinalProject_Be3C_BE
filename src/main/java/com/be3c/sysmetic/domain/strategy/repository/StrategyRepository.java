@@ -52,7 +52,7 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     Optional<Strategy> findByIdAndTraderIdAndStatusCode(
             @Param("id") Long id,
             @Param("userId") Long userId,
-            @Param("statusCode") StrategyStatusCode statusCode
+            @Param("statusCode") String statusCode
     );
 
     @Modifying
@@ -111,4 +111,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     Page<MyStrategyListDto> findPageMyStrategy(
             Long memberId, Pageable pageable
     );
+
+    // TODO SM Score 1위 전략 찾기
+    @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
+    String findTop1SmScore();
 }

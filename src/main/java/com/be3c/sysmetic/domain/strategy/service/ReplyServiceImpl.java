@@ -72,7 +72,7 @@ public class ReplyServiceImpl implements ReplyService{
     @Override
     public PageResponse<PageReplyResponseDto> getReplyPage(Long strategyId, Integer page) {
         Pageable pageable = PageRequest.of(
-                page - 1,
+                page,
                 10,
                 Sort.by("createdAt").descending()
         );
