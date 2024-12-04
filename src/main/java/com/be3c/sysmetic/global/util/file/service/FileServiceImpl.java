@@ -43,8 +43,8 @@ public class FileServiceImpl implements FileService {
         checkFileExtension(file, List.of("jpeg", "png", "gif"));
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
-
+        File fileEntity = buildFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
     @Override
@@ -54,7 +54,8 @@ public class FileServiceImpl implements FileService {
         checkFileExtension(file, List.of("pdf"));
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
+        File fileEntity = buildFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
     @Transactional
@@ -76,7 +77,8 @@ public class FileServiceImpl implements FileService {
         }
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
+        File fileEntity = buildFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
 
@@ -175,7 +177,8 @@ public class FileServiceImpl implements FileService {
         checkFileExtension(file, List.of("jpeg", "png", "gif"));
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
+        File fileEntity = buildUpdatedFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
     @Transactional
@@ -186,7 +189,8 @@ public class FileServiceImpl implements FileService {
         checkFileExtension(file, List.of("pdf"));
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
+        File fileEntity = buildUpdatedFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
     @Override
@@ -195,7 +199,8 @@ public class FileServiceImpl implements FileService {
         checkFileSize(file);
 
         String path = s3Service.upload(file, fileRequest);
-        fileEntityBuilderAndSaver(file, path, fileRequest);
+        File fileEntity = buildUpdatedFileEntity(file, path, fileRequest);
+        saveFileOrRollback(fileEntity, path, fileRequest);
     }
 
     @Override
@@ -267,7 +272,6 @@ public class FileServiceImpl implements FileService {
 
         try {
             fileRepository.delete(files.get(0));
-            log.info("file delete : {}", files.get(0).getId());
         } catch (DataAccessException e) {
             log.error("파일 삭제 실패 - DB 오류 발생. 파일 참조 정보: {}", fileRequest, e);
             throw new FileDeleteException();
@@ -330,35 +334,67 @@ public class FileServiceImpl implements FileService {
   custom common private methods
   */
 
+    /**
+     * 새로 저장할 파일 엔티티를 생성 후 반환
+     * @param file
+     * @param s3KeyName
+     * @param fileRequest
+     * @return
+     */
+    private File buildFileEntity(MultipartFile file, String s3KeyName, FileRequest fileRequest){
+        return File.builder()
+                .path(s3KeyName)
+                .type(file.getContentType())
+                .size(file.getSize())
+                .originalName(file.getOriginalFilename())
+                .referenceType(fileRequest.referenceType())
+                .referenceId(fileRequest.referenceId())
+                .build();
+    }
 
     /**
-     * 파일 정보를 DB에 저장하는 메소드
-     * S3 업로드 이후에 사용해야 합니다. (롤백 로직 있음)
-     * @param file        업로드 할 파일
-     * @param s3KeyName   S3에 저장된 path
-     * @param fileRequest 파일을 사용할 곳의 정보
-     *                    referenceType 참조할 테이블명 referenceId 참조id
+     * 업데이트 할 파일 엔티티를 찾아서 수정 후 반환
+     * @param file
+     * @param s3KeyName
+     * @param fileRequest
+     * @return
      */
-    private void fileEntityBuilderAndSaver(MultipartFile file, String s3KeyName, FileRequest fileRequest) {
+    private File buildUpdatedFileEntity(MultipartFile file, String s3KeyName, FileRequest fileRequest) {
+
+        List<File> existingEntities = fileRepository.findFilesByFileReference(fileRequest);
+
+        checkFilesNotEmpty(existingEntities, fileRequest);
+
+        return File.builder()
+                .id(existingEntities.get(0).getId())
+                .path(s3KeyName)
+                .type(file.getContentType())
+                .size(file.getSize())
+                .originalName(file.getOriginalFilename())
+                .referenceType(fileRequest.referenceType())
+                .referenceId(fileRequest.referenceId())
+                .build();
+    }
+
+    /**
+     * s3 파일 저장 이후 사용
+     * 파일 정보를 db에 저장하고 실패 시 s3에서 삭제
+     * @param fileEntity
+     * @param s3KeyName
+     * @param fileRequest
+     */
+    private void saveFileOrRollback(File fileEntity, String s3KeyName, FileRequest fileRequest){
         try {
-            File fileEntity = File.builder()
-                    .path(s3KeyName)
-                    .type(file.getContentType())
-                    .size(file.getSize())
-                    .originalName(file.getOriginalFilename())
-                    .referenceType(fileRequest.referenceType())
-                    .referenceId(fileRequest.referenceId())
-                    .build();
             fileRepository.save(fileEntity);
         } catch (DataAccessException e) {
             s3Service.deleteObject(s3KeyName);
-            log.error("파일 정보 DB 저장 실패. 파일 이름: {}, 참조 ID: {}, 참조 타입: {}.",
-                    file.getOriginalFilename(), fileRequest.referenceId(), fileRequest.referenceType(), e);
+            log.error("파일 정보 DB 저장 실패. 참조 ID: {}, 참조 타입: {}.",
+                    fileRequest.referenceId(), fileRequest.referenceType(), e);
             throw new FileUploadException("파일 정보 저장 중 오류가 발생했습니다.");
         } catch (Exception e) {
             s3Service.deleteObject(s3KeyName);
-            log.error("파일 엔티티 저장 실패. 파일 이름: {}, 참조 ID: {}, 참조 타입: {}.",
-                    file.getOriginalFilename(), fileRequest.referenceId(), fileRequest.referenceType(), e);
+            log.error("파일 엔티티 저장 실패. 참조 ID: {}, 참조 타입: {}.",
+                    fileRequest.referenceId(), fileRequest.referenceType(), e);
             throw new FileUploadException("파일 업로드 중 오류가 발생했습니다.");
         }
     }
