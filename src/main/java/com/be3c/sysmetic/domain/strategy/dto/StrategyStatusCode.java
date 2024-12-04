@@ -9,7 +9,7 @@ public enum StrategyStatusCode {
     PRIVATE("PRIVATE"),
     PUBLIC("PUBLIC"),
     REQUEST("REQUEST"),
-    REJECTED("REJECTED"),
+    RETURN("RETURN"),
     NOT_USING_STATE("NOT_USING_STATE");
 
     String code;
