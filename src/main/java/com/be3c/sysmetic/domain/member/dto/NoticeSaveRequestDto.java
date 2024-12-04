@@ -24,14 +24,6 @@ public class NoticeSaveRequestDto {
     @NotBlank
     private String noticeContent;
 
-    @Schema(description = "첨부 파일 존재 여부", example = "true")
-    @NotNull
-    private Boolean fileExists;
-
-    @Schema(description = "이미지 파일 존재 여부", example = "true")
-    @NotNull
-    private Boolean imageExists;
-
     @Schema(description = "공개 여부", example = "true")
     @NotNull
     private Boolean isOpen;

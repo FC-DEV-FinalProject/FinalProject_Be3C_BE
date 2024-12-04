@@ -72,8 +72,6 @@ public class NoticeContoller implements NoticeControllerDocs {
                     userId,
                     noticeSaveRequestDto.getNoticeTitle(),
                     noticeSaveRequestDto.getNoticeContent(),
-                    noticeSaveRequestDto.getFileExists(),
-                    noticeSaveRequestDto.getImageExists(),
                     noticeSaveRequestDto.getIsOpen(),
                     fileList,
                     imageList)) {
@@ -86,10 +84,6 @@ public class NoticeContoller implements NoticeControllerDocs {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
-        }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
@@ -386,11 +380,9 @@ public class NoticeContoller implements NoticeControllerDocs {
                     noticeModifyRequestDto.getNoticeTitle(),
                     noticeModifyRequestDto.getNoticeContent(),
                     userId,
-                    noticeModifyRequestDto.getFileExists(),
-                    noticeModifyRequestDto.getImageExists(),
                     noticeModifyRequestDto.getIsOpen(),
-                    noticeModifyRequestDto.getExistFileDtoList(),
-                    noticeModifyRequestDto.getExistImageDtoList(),
+                    noticeModifyRequestDto.getDeletFileIdList(),
+                    noticeModifyRequestDto.getDeleteImageIdList(),
                     newFileList,
                     newImageList)) {
                 return ResponseEntity.status(HttpStatus.OK)

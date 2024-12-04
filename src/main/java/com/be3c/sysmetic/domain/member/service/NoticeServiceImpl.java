@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,22 +39,17 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent,
-                                  Boolean fileExists, Boolean imageExists, Boolean isOpen,
+                                  Boolean isOpen,
                                   List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
 
+        Boolean fileExists = !fileList.isEmpty();
+        Boolean imageExists = !imageList.isEmpty();
+
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, fileExists, imageExists, isOpen);
 
         noticeRepository.save(notice);
-
-        if (fileList.isEmpty() == fileExists) {
-            throw new IllegalArgumentException("파일 리스트와 fileExist 값이 맞지 않습니다.");
-        }
-
-        if (imageList.isEmpty() == imageExists) {
-            throw new IllegalArgumentException("이미지 리스트와 imageExist 값이 맞지 않습니다.");
-        }
 
         if(fileExists) {
             for (MultipartFile file : fileList) {
@@ -117,27 +114,24 @@ public class NoticeServiceImpl implements NoticeService {
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
-                                Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                                List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList,
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
+                                List<Long> deleteFileIdList, List<Long> deleteImageIdList,
                                 List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
-        notice.setNoticeTitle(noticeTitle);
-        notice.setNoticeContent(noticeContent);
-        notice.setCorrectorId(correctorId);
-        notice.setCorrectDate(LocalDateTime.now());
-        notice.setFileExists(fileExists);
-        notice.setImageExists(imageExists);
-        notice.setIsOpen(isOpen);
-
-        int countFile = 0;
-        for (NoticeExistFileImageRequestDto n : existFileDtoList) {
-            if (!n.getExist()) {
-                fileService.deleteFileById(n.getFileId());
+        List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+        List<Long> nowFileIdList = new ArrayList<>();
+        for (FileWithInfoResponse file : nowFileDtoList) {
+            nowFileIdList.add(file.id());
+        }
+        int countFile = nowFileDtoList.size();
+        for (Long fileId : deleteFileIdList) {
+            if (nowFileIdList.contains(fileId)) {
+                fileService.deleteFileById(fileId);
+                countFile--;
             } else {
-                countFile++;
+                throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
             }
         }
         int newFileListSize;
@@ -150,16 +144,20 @@ public class NoticeServiceImpl implements NoticeService {
         if (countFile > 3) {
             throw new IllegalArgumentException("파일이 3개 이상입니다.");
         }
-        if ((countFile == 0) == fileExists) {
-            throw new IllegalArgumentException("이미지 리스트와 fileExists 값이 맞지 않습니다.");
-        }
+        Boolean fileExists = countFile > 0;
 
-        int countImage = 0;
-        for (NoticeExistFileImageRequestDto n : existImageDtoList) {
-            if (!n.getExist()) {
-                fileService.deleteFileById(n.getFileId());
+        List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+        List<Long> nowImageIdList = new ArrayList<>();
+        for (FileWithInfoResponse image : nowImageDtoList) {
+            nowImageIdList.add(image.id());
+        }
+        int countImage = nowFileDtoList.size();
+        for (Long imageId : deleteImageIdList) {
+            if (nowImageIdList.contains(imageId)) {
+                fileService.deleteFileById(imageId);
+                countFile--;
             } else {
-                countImage++;
+                throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
             }
         }
         int newImageListSize;
@@ -172,10 +170,15 @@ public class NoticeServiceImpl implements NoticeService {
         if (countImage > 5) {
             throw new IllegalArgumentException("이미지가 5개 이상입니다.");
         }
-        if ((countImage == 0) == imageExists) {
-            throw new IllegalArgumentException("이미지 리스트와 imageExists 값이 맞지 않습니다.");
-        }
+        Boolean imageExists = countImage > 0;
 
+        notice.setNoticeTitle(noticeTitle);
+        notice.setNoticeContent(noticeContent);
+        notice.setCorrectorId(correctorId);
+        notice.setCorrectDate(LocalDateTime.now());
+        notice.setFileExists(fileExists);
+        notice.setImageExists(imageExists);
+        notice.setIsOpen(isOpen);
 
         if(!(newFileList == null || newFileList.isEmpty())) {
             for (MultipartFile file : newFileList) {

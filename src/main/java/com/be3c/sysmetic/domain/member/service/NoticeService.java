@@ -14,8 +14,7 @@ import java.util.Map;
 public interface NoticeService {
 
     // 등록
-    boolean registerNotice(Long writerId, String noticeTitle, String noticeContent,
-                           Boolean fileExists, Boolean imageExist, Boolean isOpen,
+    boolean registerNotice(Long writerId, String noticeTitle, String noticeContent, Boolean isOpen,
                            List<MultipartFile> fileLists, List<MultipartFile> imageList);
 
     // 관리자 검색 조회
@@ -32,9 +31,8 @@ public interface NoticeService {
     Notice findNoticeById(Long noticeId);
 
     // 관리자 문의 수정
-    boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
-                         Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                         List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList,
+    boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
+                         List<Long> deleteFileIdList, List<Long> deleteImageIdList,
                          List<MultipartFile> newFileList, List<MultipartFile> newImageList);
 
     // 관리자 문의 삭제
