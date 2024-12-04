@@ -18,8 +18,8 @@ public class RejectStrategyApprovalDto {
     @JsonProperty("strategyId")
     private Long strategyId;
 
-    @NotBlank
-    @JsonProperty("strategy")
+    @NotNull
+    @JsonProperty("rejectReason")
     @Max(50)
     private String rejectReason;
 }
