@@ -5,10 +5,7 @@ import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStockReference;
-import com.be3c.sysmetic.domain.strategy.repository.MainPageRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyGraphAnalysisRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
-import com.be3c.sysmetic.domain.strategy.repository.StrategyStockReferenceRepository;
+import com.be3c.sysmetic.domain.strategy.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,37 +29,36 @@ public class MainPageServiceImpl implements MainPageService {
     private final StrategyStockReferenceRepository strategyStockReferenceRepository;
     private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
     private final StrategyRepository strategyRepository;
+    private final DailyRepository dailyRepository;
 
     @Override
     @Transactional
     public MainPageDto getMain() {
 
-        MainPageDto mainPageDto = MainPageDto.builder()
+        return MainPageDto.builder()
                 .rankedTrader(setTop3FollowerTrader())
-                .totalTraderCount(memberRepository.countAllByRoleCode("trader"))
+                .totalTraderCount(memberRepository.countAllByRoleCode("TRADER").orElse(null))
                 .totalStrategyCount(mainPageRepository.count())
                 .smScoreTopFives(setTop5SmScore())
                 .build();
-        return mainPageDto;
     }
 
 
-    // TODO
     @Override
     @Transactional
     public MainPageAnalysisDto getAnalysis(String period) {
-    //
-    //     LocalDate currentDate = LocalDate.now();
-    //     LocalDate startDate = calculateStartDate(currentDate, period);
-    //
-    //     MainPageAnalysisDto analysisDto = MainPageAnalysisDto.builder()
-    //             .smScoreTopStrategyName(strategyRepository.findTop1SmScore())
-    //             .xAxis(strategyGraphAnalysisRepository.findDates(startDate))
-    //             .averageStandardAmount()
-    //             .accumProfitLossRate()
-    //             .build();
-    //
-        return null;
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startDate = calculateStartDate(currentDate, period);
+
+        MainPageAnalysisDto analysisDto = MainPageAnalysisDto.builder()
+                .smScoreTopStrategyName(strategyRepository.findTop1SmScore().orElse(null))
+                .xAxis(strategyGraphAnalysisRepository.findDates(startDate).orElse(null))
+                .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts(startDate).orElse(null))
+                .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates(startDate).orElse(null))
+                .build();
+
+        return analysisDto;
     }
 
     private LocalDate calculateStartDate(LocalDate currentDate, String period) {

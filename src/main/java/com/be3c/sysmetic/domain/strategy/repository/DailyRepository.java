@@ -291,4 +291,8 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     @Modifying
     @Query("DELETE FROM Daily d WHERE d.strategy.id = :strategyId")
     int deleteByStrategyId(Long strategyId);
+
+    // 메인 페이지 평균 통합 누적 손익률
+    @Query("SELECT SUM(d.accumulatedProfitLossRate) / COUNT(d.date) FROM Daily d WHERE d.date >= :startDate GROUP BY d.date")
+    Optional<List<Double>> findAccumulatedProfitLossRates(@Param("startDate") LocalDate startDate);
 }
