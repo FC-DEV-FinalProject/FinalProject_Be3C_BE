@@ -1,21 +1,28 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.member.repository.InterestStrategyRepository;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyGraphAnalysis;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyStatistics;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
 import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
 import com.be3c.sysmetic.global.common.response.APIResponse;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
+import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +36,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor(onConstructor_ = @__(@Autowired))
 public class StrategyDetailServiceImpl implements StrategyDetailService {
 
+    private final InterestStrategyRepository interestStrategyRepository;
     private final StrategyRepository strategyRepository;
     private final StrategyDetailRepository strategyDetailRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
@@ -38,6 +46,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final FileService fileService;
+    private final SecurityUtils securityUtils;
     private final StrategyIndicatorsCalculator strategyIndicatorsCalculator;
 
     @Override
@@ -45,8 +54,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     public StrategyDetailDto getDetail(Long id) {
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
-
-        return strategyDetailRepository.findPublicStrategy(id)
+        StrategyDetailDto detailDto = strategyDetailRepository.findPublicStrategy(id)
                 .map(strategy -> StrategyDetailDto.builder()
                         .id(strategy.getId())
                         .traderId(strategy.getTrader().getId())
@@ -56,6 +64,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .methodName(strategy.getMethod().getName())
                         .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))
+                        .isFollow(false)
                         .name(strategy.getName())
                         .statusCode(strategy.getStatusCode())
                         .cycle(strategy.getCycle())
@@ -70,8 +79,24 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
                         .winningRate(strategy.getWinningRate())
                         .monthlyRecord(getMonthlyRecords(strategy.getId()))
+                        .fileWithInfoResponse(
+                                fileService.getFileWithInfoNullable(new FileRequest(FileReferenceType.STRATEGY, strategy.getId()))
+                        )
                         .build())
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
+
+        try {
+            Long userId = securityUtils.getUserIdInSecurityContext();
+
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+
+            if(interestStrategyList.contains(detailDto.getId())) {
+                detailDto.setIsFollow(true);
+            }
+        } catch (UsernameNotFoundException | AuthenticationCredentialsNotFoundException e) {
+        }
+
+        return detailDto;
     }
 
 
@@ -93,13 +118,14 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Transactional
     public APIResponse<String> saveAnalysis(Long strategyId, LocalDate date) {
         Daily daily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
-        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
         Double accumulatedProfitLossAmount = daily.getAccumulatedProfitLossAmount();
         Double standardAmount = daily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
-                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .strategy(strategyRepository.findById(strategyId).orElseThrow())
                 .daily(daily)
                 .date(daily.getDate())
                 .standardAmount(daily.getStandardAmount())
@@ -130,13 +156,17 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Transactional
     public APIResponse<String> updateAnalysis(Long strategyId, Long dailyId, LocalDate date) {
         Daily newDaily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
-        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
+        StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId).orElseThrow(() ->
+                new StrategyBadRequestException(StrategyExceptionMessage.DATA_NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND));
         Double accumulatedProfitLossAmount = statistics.getAccumulatedProfitLossAmount();
         Double standardAmount = newDaily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
+        StrategyGraphAnalysis strategyGraphAnalysis = strategyGraphAnalysisRepository.findByDailyId(dailyId);
+
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
-                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .id(strategyGraphAnalysis.getId())
+                .strategy(strategyRepository.findById(strategyId).orElseThrow())
                 .daily(newDaily)
                 .date(newDaily.getDate())
                 .standardAmount(newDaily.getStandardAmount())

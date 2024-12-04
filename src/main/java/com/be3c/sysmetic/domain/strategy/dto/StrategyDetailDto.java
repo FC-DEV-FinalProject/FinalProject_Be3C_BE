@@ -1,12 +1,15 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @Builder
 public class StrategyDetailDto {
@@ -23,6 +26,7 @@ public class StrategyDetailDto {
         methodIconPath : 매매방식 아이콘 경로
         stockName : 종목 이름
         stockIconPath : 종목 아이콘 경로
+        isFollow : 관심전략 추가 여부
         name : 전략명
         content : 전략 소개
         cycle : 주기
@@ -46,6 +50,7 @@ public class StrategyDetailDto {
     private String methodName;
     private String methodIconPath;
     private StockListDto stockList;
+    private Boolean isFollow;
     private String name;
     private String statusCode;
     private Character cycle;
@@ -61,4 +66,6 @@ public class StrategyDetailDto {
     private Double winningRate;
     private List<MonthlyRecord> monthlyRecord;
     private StrategyAnalysisResponseDto analysis;
+
+    private FileWithInfoResponse fileWithInfoResponse;
 }

@@ -36,10 +36,12 @@ public interface StrategyGraphAnalysisRepository extends JpaRepository<StrategyG
     void deleteAllByStrategyId(Long strategyId);
 
     // 시작 날짜 찾기
-    @Query("SELECT s.date FROM StrategyGraphAnalysis s WHERE s.date >= : startDate")
-    Optional<List<String>> findDates(@Param("startDate") LocalDate startDate);
+    @Query("SELECT s.date FROM StrategyGraphAnalysis s WHERE s.date >= :startDate")
+    Optional<List<LocalDate>> findDates(@Param("startDate") LocalDate startDate);
 
     // 시작 날짜부터 통합 평균 기준가 찾기
     @Query("SELECT SUM(s.standardAmount) / COUNT(s.date) FROM StrategyGraphAnalysis s WHERE s.date >= :startDate GROUP BY s.date")
     Optional<List<Double>> findAverageStandardAmounts(@Param("startDate") LocalDate startDate);
+
+    StrategyGraphAnalysis findByDailyId(Long dailyId);
 }

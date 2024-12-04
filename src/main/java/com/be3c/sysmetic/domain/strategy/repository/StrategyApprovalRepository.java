@@ -22,7 +22,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
         FROM
             StrategyApprovalHistory s
         WHERE
-            s.id = :id
+            s.strategy.id = :id
         AND s.statusCode = 'SA001'
     """)
     Optional<StrategyApprovalHistory> findByStrategyIdAndStatusCodeNotApproval(Long id);
@@ -53,6 +53,8 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
                 s.statusCode,
                 COALESCE(sa.statusCode, 'SA001'),
                 s.createdAt,
+                s.method.id,
+                null,
                 null
             )
             FROM Strategy s

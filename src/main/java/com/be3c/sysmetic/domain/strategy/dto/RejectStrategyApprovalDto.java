@@ -1,8 +1,10 @@
 package com.be3c.sysmetic.domain.strategy.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -14,9 +16,11 @@ import lombok.*;
 public class RejectStrategyApprovalDto {
 
     @NotNull
-    private Long approvalId;
+    @JsonProperty("strategyId")
+    private Long strategyId;
 
     @NotBlank
-    @Max(50)
+    @JsonProperty("rejectReason")
+    @Size(max = 50)
     private String rejectReason;
 }

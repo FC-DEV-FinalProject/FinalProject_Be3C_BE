@@ -37,6 +37,7 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     List<Strategy> findAllUsingState();
 
     // 전략 비공개 상태로 변환
+    @Modifying
     @Query("UPDATE Strategy s SET s.statusCode = 'PRIVATE' WHERE s.id = :strategyId")
     int updateStatusToPrivate(@Param("strategyId") Long strategyId);
 
