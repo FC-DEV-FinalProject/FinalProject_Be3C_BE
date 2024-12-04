@@ -70,13 +70,13 @@ public interface InquiryService {
 
     InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry);
 
-    InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (Long inquiryId, int page, String closed, String searchType, String searchText);
+    InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (Long inquiryId, Integer page, String closed, String searchType, String searchText);
 
     InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy);
 
     InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry);
 
-    InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, int page, String sort, String closed);
+    InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, Integer page, String sort, String closed);
 
-    InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, int page, String sort, String closed);
+    InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, Integer page, String sort, String closed);
 }

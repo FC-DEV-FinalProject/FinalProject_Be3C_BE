@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.NoticeAdminListShowRequestDto;
-import com.be3c.sysmetic.domain.member.dto.NoticeExistFileImageRequestDto;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import org.springframework.data.domain.Page;
@@ -45,15 +44,11 @@ public interface NoticeService {
     // 검색 (조건: 제목+내용)
     Page<Notice> findNotice(String searchText, Integer page);
 
-    // 이전글 제목 조회
-    String findPreviousNoticeTitle(Long noticeId);
+    NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice);
 
-    // 이전글 작성일 조회
-    LocalDateTime findPreviousNoticeWriteDate(Long noticeId);
+    NoticeDetailAdminShowResponseDto noticeIdToNoticeDetailAdminShowResponseDto(Long noticeId, Integer page, String searchType, String searchText);
 
-    // 다음글 제목 조회
-    String findNextNoticeTitle(Long noticeId);
+    NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId, Integer page, String searchText);
 
-    // 다음글 제목 조회
-    LocalDateTime findNextNoticeWriteDate(Long noticeId);
+    NoticeShowModifyPageResponseDto noticeIdTonoticeShowModifyPageResponseDto(Long noticeId, Integer page, String searchType, String searchText);
 }

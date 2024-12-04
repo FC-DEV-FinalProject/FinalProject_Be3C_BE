@@ -260,7 +260,7 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (
-            Long inquiryId, int page, String closed, String searchType, String searchText) {
+            Long inquiryId, Integer page, String closed, String searchType, String searchText) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
@@ -397,7 +397,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, int page, String sort, String closed) {
+    public InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, Integer page, String sort, String closed) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
@@ -492,7 +492,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, int page, String sort, String closed) {
+    public InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, Integer page, String sort, String closed) {
 
         Long userId = securityUtils.getUserIdInSecurityContext();
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));

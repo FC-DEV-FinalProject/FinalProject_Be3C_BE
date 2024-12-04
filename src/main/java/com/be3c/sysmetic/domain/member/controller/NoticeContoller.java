@@ -115,7 +115,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         Page<Notice> noticeList = noticeService.findNoticeAdmin(searchType, searchText, page-1);
 
         List<NoticeAdminListOneShowResponseDto> noticeAdminDtoList = noticeList.stream()
-                .map(NoticeContoller::noticeToNoticeAdminListOneShowResponseDto).collect(Collectors.toList());
+                .map(noticeService::noticeToNoticeAdminListOneShowResponseDto).collect(Collectors.toList());
 
         PageResponse<NoticeAdminListOneShowResponseDto> adminNoticePage = PageResponse.<NoticeAdminListOneShowResponseDto>builder()
                 .currentPage(page)
@@ -127,19 +127,6 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(adminNoticePage));
-    }
-
-    public static NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice) {
-
-        return NoticeAdminListOneShowResponseDto.builder()
-                .noticeId(notice.getId())
-                .noticeTitle(notice.getNoticeTitle())
-                .writerNickname(notice.getWriterNickname())
-                .writeDate(notice.getWriteDate())
-                .hits(notice.getHits())
-                .fileExist(notice.getFileExists())
-                .isOpen(notice.getIsOpen())
-                .build();
     }
 
 
@@ -200,61 +187,7 @@ public class NoticeContoller implements NoticeControllerDocs {
 
         try {
 
-            Notice notice = noticeService.findNoticeById(noticeId);
-            String previousNoticeTitle = noticeService.findPreviousNoticeTitle(noticeId);
-            LocalDateTime previousNoticeWriteDate = noticeService.findPreviousNoticeWriteDate(noticeId);
-            String nextNoticeTitle = noticeService.findNextNoticeTitle(noticeId);
-            LocalDateTime nextNoticeWriteDate = noticeService.findNextNoticeWriteDate(noticeId);
-
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            if (notice.getFileExists()) {
-                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-
-                for (FileWithInfoResponse f : fileList) {
-                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                            .fileId(f.id())
-                            .fileSize(f.fileSize())
-                            .originalName(f.originalName())
-                            .path(f.url())
-                            .build();
-                    fileDtoList.add(noticeDetailFileShowResponseDto);
-                }
-            }
-
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            if (notice.getImageExists()) {
-                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
-
-                for (FileWithInfoResponse f : imageList) {
-                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                            .fileId(f.id())
-                            .path(f.url())
-                            .build();
-                    imageDtoList.add(noticeDetailImageShowResponseDto);
-                }
-            }
-
-            NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = NoticeDetailAdminShowResponseDto.builder()
-                    .page(page)
-                    .searchType(searchType)
-                    .searchText(searchText)
-                    .noticeId(notice.getId())
-                    .noticeTitle(notice.getNoticeTitle())
-                    .noticeContent(notice.getNoticeContent())
-                    .writeDate(notice.getWriteDate())
-                    .correctDate(notice.getCorrectDate())
-                    .writerNickname(notice.getWriterNickname())
-                    .hits(notice.getHits())
-                    .fileExist(notice.getFileExists())
-                    .imageExist(notice.getImageExists())
-                    .isOpen(notice.getIsOpen())
-                    .fileDtoList(fileDtoList)
-                    .imageDtoList(imageDtoList)
-                    .previousTitle(previousNoticeTitle)
-                    .previousWriteDate(previousNoticeWriteDate)
-                    .nextTitle(nextNoticeTitle)
-                    .nextWriteDate(nextNoticeWriteDate)
-                    .build();
+            NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = noticeService.noticeIdToNoticeDetailAdminShowResponseDto(noticeId, page, searchType, searchText);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeDetailAdminShowResponseDto));
@@ -293,49 +226,8 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
 
         try {
-            Notice notice = noticeService.findNoticeById(noticeId);
 
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            if (notice.getFileExists()) {
-                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-
-                for (FileWithInfoResponse f : fileList) {
-                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                            .fileId(f.id())
-                            .fileSize(f.fileSize())
-                            .originalName(f.originalName())
-                            .path(f.url())
-                            .build();
-                    fileDtoList.add(noticeDetailFileShowResponseDto);
-                }
-            }
-
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            if (notice.getImageExists()) {
-                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
-
-                for (FileWithInfoResponse f : imageList) {
-                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                            .fileId(f.id())
-                            .path(f.url())
-                            .build();
-                    imageDtoList.add(noticeDetailImageShowResponseDto);
-                }
-            }
-
-            NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
-                    .page(page)
-                    .searchType(searchType)
-                    .searchText(searchText)
-                    .noticeId(notice.getId())
-                    .noticeTitle(notice.getNoticeTitle())
-                    .noticeContent(notice.getNoticeContent())
-                    .fileExist(notice.getFileExists())
-                    .imageExist(notice.getImageExists())
-                    .isOpen(notice.getIsOpen())
-                    .fileDtoList(fileDtoList)
-                    .imageDtoList(imageDtoList)
-                    .build();
+            NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = noticeService.noticeIdTonoticeShowModifyPageResponseDto(noticeId, page, searchType, searchText);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeShowModifyPageResponseDto));
@@ -537,54 +429,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         try {
             noticeService.upHits(noticeId);
 
-            Notice notice = noticeService.findNoticeById(noticeId);
-            String previousNoticeTitle = noticeService.findPreviousNoticeTitle(noticeId);
-            LocalDateTime previousNoticeWriteDate = noticeService.findPreviousNoticeWriteDate(noticeId);
-            String nextNoticeTitle = noticeService.findNextNoticeTitle(noticeId);
-            LocalDateTime nextNoticeWriteDate = noticeService.findNextNoticeWriteDate(noticeId);
-
-            List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
-            if (notice.getFileExists()) {
-                List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
-
-                for (FileWithInfoResponse f : fileList) {
-                    NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
-                            .fileId(f.id())
-                            .fileSize(f.fileSize())
-                            .originalName(f.originalName())
-                            .path(f.url())
-                            .build();
-                    fileDtoList.add(noticeDetailFileShowResponseDto);
-                }
-            }
-
-            List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
-            if (notice.getImageExists()) {
-                List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
-
-                for (FileWithInfoResponse f : imageList) {
-                    NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
-                            .fileId(f.id())
-                            .path(f.url())
-                            .build();
-                    imageDtoList.add(noticeDetailImageShowResponseDto);
-                }
-            }
-
-            NoticeDetailShowResponseDto noticeDetailShowResponseDto = NoticeDetailShowResponseDto.builder()
-                    .page(page)
-                    .searchText(searchText)
-                    .noticeId(notice.getId())
-                    .noticeTitle(notice.getNoticeTitle())
-                    .noticeContent(notice.getNoticeContent())
-                    .writeDate(notice.getWriteDate())
-                    .fileDtoList(fileDtoList)
-                    .imageDtoList(imageDtoList)
-                    .previousTitle(previousNoticeTitle)
-                    .previousWriteDate(previousNoticeWriteDate)
-                    .nextTitle(nextNoticeTitle)
-                    .nextWriteDate(nextNoticeWriteDate)
-                    .build();
+            NoticeDetailShowResponseDto noticeDetailShowResponseDto = noticeService.noticeIdToticeDetailShowResponseDto(noticeId, page, searchText);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeDetailShowResponseDto));

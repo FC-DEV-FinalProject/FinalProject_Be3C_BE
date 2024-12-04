@@ -103,7 +103,7 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/admin/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
@@ -272,7 +272,7 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
@@ -329,7 +329,7 @@ public class InquiryController implements InquiryControllerDocs {
      @GetMapping("/member/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerInquirerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
          InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
@@ -379,7 +379,7 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/member/qna/{qnaId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
@@ -560,7 +560,7 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
@@ -617,7 +617,7 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/trader/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerTraderShowResponseDto>> showTraderInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
