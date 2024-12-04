@@ -12,12 +12,14 @@ public class TraderRankingDto {
 
         id : 트레이더 id
         nickname : 트레이더 닉네임
+        traderProfileImage : 트레이더 프로필 이미지
         followerCount : 총 팔로우 수
         accumProfitLossRate : 누적손익률
     */
 
     private Long id;
     private String nickname;
+    private String traderProfileImage;
     private Long followerCount;
     private Double accumProfitLossRate;
 }
