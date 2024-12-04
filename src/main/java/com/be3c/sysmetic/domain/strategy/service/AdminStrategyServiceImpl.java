@@ -60,7 +60,6 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
         }
 
         findPage.getContent().forEach(strategy -> {
-            log.info("strategy Id : {}, method Id : {}", strategy.getStrategyId(), strategy.getMethodId());
             strategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethodId())));
             strategy.setStockList(stockGetter.getStocks(strategy.getStrategyId()));
         });
