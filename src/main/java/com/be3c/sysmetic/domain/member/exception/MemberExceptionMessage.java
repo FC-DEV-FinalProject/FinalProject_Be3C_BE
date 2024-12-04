@@ -19,9 +19,10 @@ public enum MemberExceptionMessage {
     REDIS_EMAIL_CODE_ERROR("Redis 이메일 인증코드 관련 오류 발생"),
 
     // 이메일 관련 오류
-    EMAIL_ERROR("이메일 관련 오류 발생")
-    ;
+    EMAIL_ERROR("이메일 관련 오류 발생"),
 
+    // 로그인한 사람이 권한이 없는 글에 접근할 때
+    INVALID_MEMBER("유효하지 않은 회원입니다.");
 
     private final String message;
 

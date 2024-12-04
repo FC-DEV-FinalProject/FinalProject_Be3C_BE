@@ -14,19 +14,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "관리자 문의 답변 조회 응답 DTO")
-public class InquiryAnswerAdminShowResponseDto {
+public class InquiryAnswerInquirerShowResponseDto {
 
     @Schema(description = "이 공지사항이 있던 페이지", example = "1")
     private int page;
 
+    @Schema(description = "지정했던 정렬순", example = "searchType")
+    private String sort;
+
     @Schema(description = "지정했던 답변상태", example = "searchType")
     private String closed;
-
-    @Schema(description = "검색했던 검색 조건", example = "searchType")
-    private String searchType;
-
-    @Schema(description = "검색했던 검색 단어", example = "searchText")
-    private String searchText;
 
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
@@ -39,9 +36,6 @@ public class InquiryAnswerAdminShowResponseDto {
 
     @Schema(description = "문의 등록 일시", example = "2024-11-22T15:30:00")
     private LocalDateTime inquiryRegistrationDate;
-
-    @Schema(description = "질문자 닉네임", example = "InquirerNick")
-    private String inquirerNickname;
 
     @Schema(description = "문의 상태", example = "closed")
     private InquiryStatus inquiryStatus;

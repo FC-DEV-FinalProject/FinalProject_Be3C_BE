@@ -40,19 +40,13 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         }
 
         // 검색 (전략명, 트레이더, 질문자)
-        if (searchText != null && !searchText.isEmpty()) {
+        if (StringUtils.hasText(searchText)) {
             if (searchType.equals("strategy")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategyName.contains(searchText));
-                }
+                predicate.and(inquiry.strategyName.contains(searchText));
             } else if (searchType.equals("trader")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.traderNickname.contains(searchText));
-                }
+                predicate.and(inquiry.traderNickname.contains(searchText));
             } else if (searchType.equals("inquirer")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.inquirerNickname.contains(searchText));
-                }
+                predicate.and(inquiry.inquirerNickname.contains(searchText));
             }
         }
 

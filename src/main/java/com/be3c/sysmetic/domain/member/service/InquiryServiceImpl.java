@@ -1,14 +1,23 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.InquiryAdminListShowRequestDto;
-import com.be3c.sysmetic.domain.member.dto.InquiryListShowRequestDto;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
+import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.member.entity.Member;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
+import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
+import com.be3c.sysmetic.domain.member.repository.InquiryAnswerRepository;
 import com.be3c.sysmetic.domain.member.repository.InquiryRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
+import com.be3c.sysmetic.domain.strategy.dto.StockListDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
+import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,16 +32,21 @@ import java.util.List;
 import java.util.Map;
 
 import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_INQUIRY;
-import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_NOTICE;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class InquiryServiceImpl implements InquiryService {
 
+    private final SecurityUtils securityUtils;
+
     private final InquiryRepository inquiryRepository;
+    private final InquiryAnswerRepository inquiryAnswerRepository;
     private final MemberRepository memberRepository;
     private final StrategyRepository strategyRepository;
+
+    private final FileService fileService;
+    private final StockGetter stockGetter;
 
     @Override
     @Transactional
@@ -200,202 +214,11 @@ public class InquiryServiceImpl implements InquiryService {
         }
     }
 
-    // 관리자 이전 문의 제목 조회
-    @Override
-    public String adminFindPreviousInquiryTitle(Long inquiryId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.adminFindPreviousInquiry(inquiryId, PageRequest.of(0, 1));
-
-        String previousInquiryTitle;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return previousInquiryTitle;
-    }
-
-    // 관리자 이전 문의 작성일 조회
-    @Override
-    public LocalDateTime adminFindPreviousInquiryWriteDate(Long inquiryId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.adminFindPreviousInquiry(inquiryId, PageRequest.of(0, 1));
-
-        LocalDateTime previousInquiryWriteDate;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return previousInquiryWriteDate;
-    }
-
-    // 관리자 다음 문의 제목 조회
-    @Override
-    public String adminFindNextInquiryTitle(Long inquiryId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.adminFindNextInquiry(inquiryId, PageRequest.of(0, 1));
-
-        String nextInquiryTitle;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return nextInquiryTitle;
-    }
-
-    // 관리자 다음 문의 제목 조회
-    @Override
-    public LocalDateTime adminFindNextInquiryWriteDate(Long inquiryId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.adminFindNextInquiry(inquiryId, PageRequest.of(0, 1));
-
-        LocalDateTime nextInquiryWriteDate;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return nextInquiryWriteDate;
-    }
-
-    // 트레이더 이전 문의 제목 조회
-    @Override
-    public String traderFindPreviousInquiryTitle(Long inquiryId, Long traderId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, traderId, PageRequest.of(0, 1));
-
-        String previousInquiryTitle;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return previousInquiryTitle;
-    }
-
-    // 트레이더 이전 문의 작성일 조회
-    @Override
-    public LocalDateTime traderFindPreviousInquiryWriteDate(Long inquiryId, Long traderId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, traderId, PageRequest.of(0, 1));
-
-        LocalDateTime previousInquiryWriteDate;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return previousInquiryWriteDate;
-    }
-
-    // 트레이더 다음 문의 제목 조회
-    @Override
-    public String traderFindNextInquiryTitle(Long inquiryId, Long traderId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.traderFindNextInquiry(inquiryId, traderId, PageRequest.of(0, 1));
-
-        String nextInquiryTitle;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return nextInquiryTitle;
-    }
-
-    // 트레이더 다음 문의 제목 조회
-    @Override
-    public LocalDateTime traderFindNextInquiryWriteDate(Long inquiryId, Long traderId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.traderFindNextInquiry(inquiryId, traderId, PageRequest.of(0, 1));
-
-        LocalDateTime nextInquiryWriteDate;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return nextInquiryWriteDate;
-    }
-
-    // 질문자 이전 문의 제목 조회
-    @Override
-    public String inquirerFindPreviousInquiryTitle(Long inquiryId, Long inquirerId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.inquirerFindPreviousInquiry(inquiryId, inquirerId, PageRequest.of(0, 1));
-
-        String previousInquiryTitle;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return previousInquiryTitle;
-    }
-
-    // 질문자 이전 문의 작성일 조회
-    @Override
-    public LocalDateTime inquirerFindPreviousInquiryWriteDate(Long inquiryId, Long inquirerId) {
-        List<Inquiry> previousInquiryList = inquiryRepository.inquirerFindPreviousInquiry(inquiryId, inquirerId, PageRequest.of(0, 1));
-
-        LocalDateTime previousInquiryWriteDate;
-        if (previousInquiryList.isEmpty()) {
-            previousInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = previousInquiryList.get(0);
-            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return previousInquiryWriteDate;
-    }
-
-    // 질문자 다음 문의 제목 조회
-    @Override
-    public String inquirerFindNextInquiryTitle(Long inquiryId, Long inquirerId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.inquirerFindNextInquiry(inquiryId, inquirerId, PageRequest.of(0, 1));
-
-        String nextInquiryTitle;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryTitle = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryTitle = previousInquiry.getInquiryTitle();
-        }
-
-        return nextInquiryTitle;
-    }
-
-    // 질문자 다음 문의 제목 조회
-    @Override
-    public LocalDateTime inquirerFindNextInquiryWriteDate(Long inquiryId, Long inquirerId) {
-        List<Inquiry> nextInquiryList = inquiryRepository.inquirerFindNextInquiry(inquiryId, inquirerId, PageRequest.of(0, 1));
-
-        LocalDateTime nextInquiryWriteDate;
-        if (nextInquiryList.isEmpty()) {
-            nextInquiryWriteDate = null;
-        } else {
-            Inquiry previousInquiry = nextInquiryList.get(0);
-            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
-        }
-
-        return nextInquiryWriteDate;
-    }
-
 
     // 관리자 검색 조회
     // 전체, 답변 대기, 답변 완료
     // 검색 (전략명, 트레이더, 질문자)
+    @Override
     public Page<Inquiry> findInquiriesAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page) {
 
         return inquiryRepository.adminInquirySearchWithBooleanBuilder(inquiryAdminListShowRequestDto, PageRequest.of(page, 10));
@@ -405,8 +228,362 @@ public class InquiryServiceImpl implements InquiryService {
     // 문의자, 트레이더 검색 조회
     // 정렬 순 셀렉트 박스 (최신순, 전략명)
     // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    @Override
     public Page<Inquiry> findInquiries(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page) {
 
         return inquiryRepository.inquirySearchWithBooleanBuilder(inquiryListShowRequestDto, PageRequest.of(page, 10));
+    }
+
+    @Override
+    public InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
+
+        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
+        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+
+        return InquiryAdminListOneShowResponseDto.builder()
+                .inquiryId(inquiry.getId())
+                .traderId(inquiry.getTraderId())
+                .traderNickname(traderNickname)
+                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(inquiry.getStrategy().getCycle())
+                .stockList(stockList)
+                .strategyId(inquiry.getStrategy().getId())
+                .strategyName(inquiry.getStrategy().getName())
+                .statusCode(inquiry.getStrategy().getStatusCode())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquiryStatus(inquiry.getInquiryStatus())
+                .build();
+    }
+
+    @Override
+    public InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (
+            Long inquiryId, int page, String closed, String searchType, String searchText) {
+
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+        List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String previousInquiryTitle;
+        LocalDateTime previousInquiryWriteDate;
+        if (previousInquiryList.isEmpty()) {
+            previousInquiryTitle = null;
+            previousInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = previousInquiryList.get(0);
+            previousInquiryTitle = previousInquiry.getInquiryTitle();
+            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        List<Inquiry> nextInquiryList = inquiryRepository.traderFindNextInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String nextInquiryTitle;
+        LocalDateTime nextInquiryWriteDate;
+        if (nextInquiryList.isEmpty()) {
+            nextInquiryTitle = null;
+            nextInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = nextInquiryList.get(0);
+            nextInquiryTitle = previousInquiry.getInquiryTitle();
+            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
+        Long inquiryAnswerId;
+        String answerTitle;
+        LocalDateTime answerRegistrationDate;
+        String answerContent;
+        if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+            inquiryAnswerId = null;
+            answerTitle = null;
+            answerRegistrationDate = null;
+            answerContent = null;
+        } else {
+            inquiryAnswerId = inquiryAnswer.getId();
+            answerTitle = inquiryAnswer.getAnswerTitle();
+            answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+            answerContent = inquiryAnswer.getAnswerContent();
+        }
+
+        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
+        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+
+        return InquiryAnswerAdminShowResponseDto.builder()
+                .page(page)
+                .closed(closed)
+                .searchType(searchType)
+                .searchText(searchText)
+
+                .inquiryId(inquiryId)
+                .inquiryAnswerId(inquiryAnswerId)
+
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquiryStatus(inquiry.getInquiryStatus())
+
+                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(inquiry.getStrategy().getCycle())
+                .stockList(stockList)
+                .strategyId(inquiry.getStrategy().getId())
+                .strategyName(inquiry.getStrategy().getName())
+                .statusCode(inquiry.getStrategy().getStatusCode())
+
+                .inquiryContent(inquiry.getInquiryContent())
+
+                .traderId(inquiry.getTraderId())
+                .traderNickname(traderNickname)
+                .traderProfileImagePath(traderProfileImagePath)
+
+                .answerTitle(answerTitle)
+                .answerRegistrationDate(answerRegistrationDate)
+                .answerContent(answerContent)
+
+                .previousTitle(previousInquiryTitle)
+                .previousWriteDate(previousInquiryWriteDate)
+                .nextTitle(nextInquiryTitle)
+                .nextWriteDate(nextInquiryWriteDate)
+                .build();
+    }
+
+    @Override
+    public InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy) {
+
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getId()));
+        StockListDto stockList = stockGetter.getStocks(strategy.getId());
+
+        return InquirySavePageShowResponseDto.builder()
+                .methodId(strategy.getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(strategy.getCycle())
+                .stockList(stockList)
+                .strategyId(strategy.getId())
+                .strategyName(strategy.getName())
+                .statusCode(strategy.getStatusCode())
+                .traderId(strategy.getTrader().getId())
+                .traderNickname(strategy.getTrader().getNickname())
+                .traderProfileImagePath(traderProfileImagePath)
+                .build();
+    }
+
+    @Override
+    public InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
+
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
+        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+
+        return InquiryListOneShowResponseDto.builder()
+                .inquiryId(inquiry.getId())
+                .inquiryTitle(inquiry.getInquiryTitle())
+
+                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(inquiry.getStrategy().getCycle())
+                .stockList(stockList)
+                .strategyId(inquiry.getStrategy().getId())
+                .strategyName(inquiry.getStrategy().getName())
+                .statusCode(inquiry.getStrategy().getStatusCode())
+
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquiryStatus(inquiry.getInquiryStatus())
+                .build();
+    }
+
+    @Override
+    public InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, int page, String sort, String closed) {
+
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+        if (!userId.equals(inquiry.getInquirer().getId())) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+
+        List<Inquiry> previousInquiryList = inquiryRepository.inquirerFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String previousInquiryTitle;
+        LocalDateTime previousInquiryWriteDate;
+        if (previousInquiryList.isEmpty()) {
+            previousInquiryTitle = null;
+            previousInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = previousInquiryList.get(0);
+            previousInquiryTitle = previousInquiry.getInquiryTitle();
+            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        List<Inquiry> nextInquiryList = inquiryRepository.inquirerFindNextInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String nextInquiryTitle;
+        LocalDateTime nextInquiryWriteDate;
+        if (nextInquiryList.isEmpty()) {
+            nextInquiryTitle = null;
+            nextInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = nextInquiryList.get(0);
+            nextInquiryTitle = previousInquiry.getInquiryTitle();
+            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        Long inquiryAnswerId;
+        String answerTitle;
+        LocalDateTime answerRegistrationDate;
+        String answerContent;
+        if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+            inquiryAnswerId = null;
+            answerTitle = null;
+            answerRegistrationDate = null;
+            answerContent = null;
+        } else {
+            InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
+            inquiryAnswerId = inquiryAnswer.getId();
+            answerTitle = inquiryAnswer.getAnswerTitle();
+            answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+            answerContent = inquiryAnswer.getAnswerContent();
+        }
+
+        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
+        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+
+        return InquiryAnswerInquirerShowResponseDto.builder()
+                .page(page)
+                .sort(sort)
+                .closed(closed)
+
+                .inquiryId(inquiryId)
+                .inquiryAnswerId(inquiryAnswerId)
+
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquiryStatus(inquiry.getInquiryStatus())
+
+                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(inquiry.getStrategy().getCycle())
+                .stockList(stockList)
+                .strategyId(inquiry.getStrategy().getId())
+                .strategyName(inquiry.getStrategy().getName())
+                .statusCode(inquiry.getStrategy().getStatusCode())
+
+                .traderId(inquiry.getTraderId())
+                .traderNickname(traderNickname)
+                .traderProfileImagePath(traderProfileImagePath)
+
+                .inquiryContent(inquiry.getInquiryContent())
+
+                .answerTitle(answerTitle)
+                .answerRegistrationDate(answerRegistrationDate)
+                .answerContent(answerContent)
+
+                .previousTitle(previousInquiryTitle)
+                .previousWriteDate(previousInquiryWriteDate)
+                .nextTitle(nextInquiryTitle)
+                .nextWriteDate(nextInquiryWriteDate)
+                .build();
+    }
+
+    @Override
+    public InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, int page, String sort, String closed) {
+
+        Long userId = securityUtils.getUserIdInSecurityContext();
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+        if (!userId.equals(inquiry.getInquirer().getId())) {
+            throw new MemberBadRequestException(MemberExceptionMessage.INVALID_MEMBER.getMessage());
+        }
+
+        List<Inquiry> previousInquiryList = inquiryRepository.traderFindPreviousInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String previousInquiryTitle;
+        LocalDateTime previousInquiryWriteDate;
+        if (previousInquiryList.isEmpty()) {
+            previousInquiryTitle = null;
+            previousInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = previousInquiryList.get(0);
+            previousInquiryTitle = previousInquiry.getInquiryTitle();
+            previousInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        List<Inquiry> nextInquiryList = inquiryRepository.traderFindNextInquiry(inquiryId, userId, PageRequest.of(0, 1));
+
+        String nextInquiryTitle;
+        LocalDateTime nextInquiryWriteDate;
+        if (nextInquiryList.isEmpty()) {
+            nextInquiryTitle = null;
+            nextInquiryWriteDate = null;
+        } else {
+            Inquiry previousInquiry = nextInquiryList.get(0);
+            nextInquiryTitle = previousInquiry.getInquiryTitle();
+            nextInquiryWriteDate = previousInquiry.getInquiryRegistrationDate();
+        }
+
+        Long inquiryAnswerId;
+        String answerTitle;
+        LocalDateTime answerRegistrationDate;
+        String answerContent;
+        if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
+            inquiryAnswerId = null;
+            answerTitle = null;
+            answerRegistrationDate = null;
+            answerContent = null;
+        } else {
+            InquiryAnswer inquiryAnswer = inquiryAnswerRepository.findByInquiryId(inquiryId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
+            inquiryAnswerId = inquiryAnswer.getId();
+            answerTitle = inquiryAnswer.getAnswerTitle();
+            answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
+            answerContent = inquiryAnswer.getAnswerContent();
+        }
+
+        String traderNickname = memberRepository.findById(inquiry.getTraderId()).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다.")).getNickname();
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String methodIconPath = fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, inquiry.getStrategy().getId()));
+        StockListDto stockList = stockGetter.getStocks(inquiry.getStrategy().getId());
+
+        return InquiryAnswerTraderShowResponseDto.builder()
+                .page(page)
+                .sort(sort)
+                .closed(closed)
+
+                .inquiryId(inquiryId)
+                .inquiryAnswerId(inquiryAnswerId)
+
+                .inquiryTitle(inquiry.getInquiryTitle())
+                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
+                .inquirerNickname(inquiry.getInquirer().getNickname())
+                .inquiryStatus(inquiry.getInquiryStatus())
+
+                .methodId(inquiry.getStrategy().getMethod().getId())
+                .methodIconPath(methodIconPath)
+                .cycle(inquiry.getStrategy().getCycle())
+                .stockList(stockList)
+                .strategyId(inquiry.getStrategy().getId())
+                .strategyName(inquiry.getStrategy().getName())
+                .statusCode(inquiry.getStrategy().getStatusCode())
+
+                .traderId(inquiry.getTraderId())
+                .traderNickname(traderNickname)
+                .traderProfileImagePath(traderProfileImagePath)
+
+                .inquiryContent(inquiry.getInquiryContent())
+
+                .answerTitle(answerTitle)
+                .answerRegistrationDate(answerRegistrationDate)
+                .answerContent(answerContent)
+
+                .previousTitle(previousInquiryTitle)
+                .previousWriteDate(previousInquiryWriteDate)
+                .nextTitle(nextInquiryTitle)
+                .nextWriteDate(nextInquiryWriteDate)
+                .build();
     }
 }

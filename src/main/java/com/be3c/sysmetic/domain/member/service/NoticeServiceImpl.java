@@ -38,7 +38,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent,
                                   Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                                    List<MultipartFile> fileList, List<MultipartFile> imageList) {
+                                  List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
 

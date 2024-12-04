@@ -267,7 +267,7 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerInquirerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
@@ -467,7 +467,7 @@ public interface InquiryControllerDocs {
             @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
             @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
     })
-    ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
+    ResponseEntity<APIResponse<InquiryAnswerTraderShowResponseDto>> showTraderInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
