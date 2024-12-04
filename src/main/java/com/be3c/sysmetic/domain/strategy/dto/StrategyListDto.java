@@ -4,8 +4,10 @@ import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 public class StrategyListDto {
@@ -35,6 +37,7 @@ public class StrategyListDto {
     private String name;
     private Character cycle;
     private StockListDto stockList;
+    private Boolean isFollow;
     private Double accumulatedProfitLossRate;
     private Double mdd;
     private Double smScore;
@@ -50,6 +53,7 @@ public class StrategyListDto {
                 .name(strategy.getName())
                 .cycle(strategy.getCycle())
                 .stockList(stockList)
+                .isFollow(false)
                 .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
                 .mdd(strategy.getMdd())
                 .smScore(strategy.getSmScore())
