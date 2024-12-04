@@ -93,7 +93,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     public boolean rejectStrategyApproval(RejectStrategyApprovalDto rejectStrategyApprovalDto) {
         StrategyApprovalHistory strategyApproval = strategyApprovalRepository
                 .findByStrategyIdAndStatusCodeNotApproval(
-                        rejectStrategyApprovalDto.getApprovalId())
+                        rejectStrategyApprovalDto.getStrategyId())
                 .orElseThrow(EntityNotFoundException::new);
 
         strategyApproval.setStatusCode(Code.APPROVE_REJECT.getCode());
