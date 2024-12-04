@@ -3,9 +3,9 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.dto.RegisterRequestDto;
 import com.be3c.sysmetic.domain.member.entity.Folder;
 import com.be3c.sysmetic.domain.member.entity.Member;
-import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
+import com.be3c.sysmetic.domain.member.repository.FolderRepository;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.config.security.RedisUtils;
@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.be3c.sysmetic.global.util.file.dto.FileReferenceType.MEMBER;
 
@@ -104,7 +105,7 @@ public class RegisterServiceImpl implements RegisterService {
         return true;
     }
 
-    // 3. 이메일 인증코드 확인
+    // 0. 이메일 인증코드 확인
     @Override
     public boolean checkVerifyEmailCode(String email, String inputEmailCode) {
         // Redis에 저장된 인증코드 가져오기
@@ -112,14 +113,12 @@ public class RegisterServiceImpl implements RegisterService {
 
         // 사용자 입력 인증코드 일치 여부 확인
         if(!inputEmailCode.equals(savedAuthCode)) {
-            // 인증코드 불일치
             throw new MemberBadRequestException(MemberExceptionMessage.INVALID_EMAIL_CODE.getMessage());
         }
 
-        // 인증코드 일치하면 인증내역 삭제
-        redisUtils.deleteEmailAuthCode(email);
+        // 인증코드 일치한 경우, 인증 내역 저장 (1시간 동안 유효)
+        redisUtils.saveEmailVerifyLogExpireTime("Verify : " + email, inputEmailCode, TimeUnit.HOURS.toMillis(1));
 
-        // 인증코드 일치
         return true;
     }
 
@@ -135,7 +134,7 @@ public class RegisterServiceImpl implements RegisterService {
         return true;
     }
 
-    // 0. 회원 정보 저장 메서드
+    // 0. 회원가입 - 회원 정보 저장 메서드
     private Member saveMember(RegisterRequestDto dto) {
         try {
             Member member = Member.builder()
@@ -168,12 +167,39 @@ public class RegisterServiceImpl implements RegisterService {
         }
     }
 
+    // 0. 회원가입/비밀번호 재설정 - 이메일 인증 더블 체크 메서드
+    @Override
+    public void emailDoubleCheck(String email) {
+        String inputAuthCode;
+        String savedAuthCode;
+
+        try {
+            inputAuthCode = redisUtils.getEmailAuthCode("Verify : " + email);
+            savedAuthCode = redisUtils.getEmailAuthCode(email);
+
+        // 저장된 인증번호를 찾을 수 없는 경우 예외 발생
+        } catch (MemberBadRequestException e) {
+            throw new MemberBadRequestException(MemberExceptionMessage.UNVERIFIED_EMAIL_ERROR.getMessage());
+        }
+
+        // 인증번호가 불일치하는 경우 예외 발생
+        if(!savedAuthCode.equals(inputAuthCode)) {
+            throw new MemberBadRequestException(MemberExceptionMessage.UNVERIFIED_EMAIL_ERROR.getMessage());
+        }
+        // 인증된 이메일인 경우, 이메일 관련 인증내역 삭제
+        redisUtils.deleteEmailAuthCode(email);
+        redisUtils.deleteEmailAuthCode("Verify : " + email);
+    }
+
     // 5. 회원가입
     @Override
     @Transactional
     public boolean registerMember(RegisterRequestDto dto, MultipartFile file) {
         // 이메일 중복체크
         checkEmailDuplication(dto.getEmail());
+
+        // 이메일 인증 더블체크
+        emailDoubleCheck(dto.getEmail());
 
         // 닉네임 중복체크
         checkNicknameDuplication(dto.getNickname());

@@ -3,8 +3,6 @@ package com.be3c.sysmetic.domain.member.service;
 import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
-import com.be3c.sysmetic.global.config.security.RedisUtils;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,13 +22,14 @@ public class AccountServiceImpl implements AccountService {
 
         [비밀번호 재설정 API]
         4. 이메일 확인
-        0. 이메일 인증코드 발송 및 저장 - RegisterServiceImpl 메서드 사용
-        0. 이메일 인증코드 확인 - RegisterServiceImpl 메서드 사용
+        0. 이메일 인증코드 발송 및 저장 - RegisterServiceImpl.sendVerifyEmailCode() 사용
+        0. 이메일 인증코드 확인 - RegisterServiceImpl.checkVerifyEmailCode() 사용
         5. 비밀번호 일치 여부 확인
         6. 비밀번호 재설정
      */
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final RegisterServiceImpl registerServiceImpl;
 
     // 1. 이메일 반환 메서드
     @Override
@@ -64,7 +63,16 @@ public class AccountServiceImpl implements AccountService {
     // 6. 비밀번호 재설정
     @Override
     @Transactional
-    public boolean resetPassword(String email, String password) {
+    public boolean resetPassword(String email, String password, String rewritePassword) {
+        // 이메일 존재 확인
+        isPresentEmail(email);
+
+        // 비밀번호 일치 여부 확인
+        isPasswordMatch(password, rewritePassword);
+
+        // 이메일 인증 더블체크
+        registerServiceImpl.emailDoubleCheck(email);
+
         String encodedPassword = bCryptPasswordEncoder.encode(password);
         int updatedRows = memberRepository.updatePasswordByEmail(email, encodedPassword);
 

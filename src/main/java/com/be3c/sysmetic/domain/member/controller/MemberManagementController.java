@@ -11,6 +11,7 @@ import com.be3c.sysmetic.global.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,13 +36,9 @@ public class MemberManagementController {
     )
     @GetMapping("/admin/members")
     public ResponseEntity<APIResponse<PageResponse<MemberGetResponseDto>>> getMemberPage(@RequestParam(defaultValue = "ALL") MemberSearchRole role,
-                                                                                         @RequestParam(defaultValue = "0") Integer page,
+                                                                                         @RequestParam(defaultValue = "0") @Min(value = 0, message = "페이지 번호는 0 이상이어야 합니다.") Integer page,
                                                                                          @RequestParam(defaultValue = "ALL") MemberSearchType searchType,
                                                                                          @RequestParam(required = false) String searchKeyword) {
-        /*
-            조회 대상) all, user, trader, manager
-            검색 필터) all, email, name, nickname, phoneNumber
-        */
         PageResponse<MemberGetResponseDto> members = memberManagementService.findMemberPage(role, page, searchType, searchKeyword);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(members));
     }

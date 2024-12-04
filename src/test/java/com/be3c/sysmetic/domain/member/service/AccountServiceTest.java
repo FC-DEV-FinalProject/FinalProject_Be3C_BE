@@ -124,11 +124,12 @@ class AccountServiceTest {
     void resetPassword_ShouldReturnTrue_WhenPasswordIsUpdated() {
         // Given
         String email = "john@example.com";
-        String password = "newPassword123";
+        String password = "newPassword123!";
+        String rewritePassword = "newPassword123!";
         when(memberRepository.updatePasswordByEmail(eq(email), anyString())).thenReturn(1);
 
         // When
-        boolean result = accountService.resetPassword(email, password);
+        boolean result = accountService.resetPassword(email, password, rewritePassword);
 
         // Then
         assertThat(result).isTrue();
@@ -141,10 +142,11 @@ class AccountServiceTest {
         // Given
         String email = "john@example.com";
         String password = "newPassword123";
+        String rewritePassword = "newPassword123!";
         when(memberRepository.updatePasswordByEmail(eq(email), anyString())).thenReturn(0);
 
         // When & Then
-        assertThatThrownBy(() -> accountService.resetPassword(email, password))
+        assertThatThrownBy(() -> accountService.resetPassword(email, password, rewritePassword))
                 .isInstanceOf(MemberBadRequestException.class)
                 .hasMessage(MemberExceptionMessage.FAIL_PASSWORD_CHANGE.getMessage());
         verify(memberRepository, times(1)).updatePasswordByEmail(eq(email), anyString());

@@ -44,7 +44,7 @@ public class AccountController {
             description = "사용자가 입력한 이메일의 유효성을 확인하고 인증 코드를 발송하는 API"
     )
     @GetMapping("/auth/reset-password")
-    public ResponseEntity<APIResponse<String>> checkEmailAndSendCode(@Email(message = "{Invalid.email}") @RequestParam String email) {
+    public ResponseEntity<APIResponse<String>> checkEmailAndSendCode(@Email(message = "유효한 이메일 형식이 아닙니다.") @RequestParam String email) {
         accountService.isPresentEmail(email);
         registerService.sendVerifyEmailCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
@@ -58,8 +58,12 @@ public class AccountController {
     @PostMapping("/auth/reset-password")
     public ResponseEntity<APIResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDto resetPasswordRequestDtoRequestDto,
                                                              HttpServletRequest request) {
-        accountService.isPasswordMatch(resetPasswordRequestDtoRequestDto.getPassword(), resetPasswordRequestDtoRequestDto.getRewritePassword());
-        accountService.resetPassword(resetPasswordRequestDtoRequestDto.getEmail(), resetPasswordRequestDtoRequestDto.getPassword());
+        String email = resetPasswordRequestDtoRequestDto.getEmail();
+        String password = resetPasswordRequestDtoRequestDto.getPassword();
+        String rewritePassword = resetPasswordRequestDtoRequestDto.getRewritePassword();
+
+        accountService.isPasswordMatch(password, rewritePassword);
+        accountService.resetPassword(email, password, rewritePassword);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success());
         // todo: 2차 개발 고려(request는 ResetPasswordLg 구현 시 사용될 예정)
     }
