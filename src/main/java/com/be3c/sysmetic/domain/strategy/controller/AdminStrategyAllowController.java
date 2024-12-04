@@ -42,7 +42,7 @@ public class AdminStrategyAllowController implements AdminStrategyAllowControlle
 //    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @GetMapping("/admin/strategy")
     public ResponseEntity<APIResponse<PageResponse<AdminStrategyGetResponseDto>>> getAdminStrategy(
-            AdminStrategySearchGetDto adminStrategySearchGetDto
+            @ModelAttribute AdminStrategySearchGetDto adminStrategySearchGetDto
     ) {
         try {
             return ResponseEntity.status(HttpStatus.OK)

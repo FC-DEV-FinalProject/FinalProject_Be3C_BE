@@ -146,12 +146,14 @@ public class StockServiceImpl implements StockService {
                         USING_STATE.getCode()
                 ).orElseThrow(EntityNotFoundException::new);
 
+        log.info("stockRequestDto.getName {}", stockPutRequestDto.getName());
+
         /*
             같은 이름이 존재 = true    같은 이름이 미존재 = false
             원래 이름과 같음 = true    원래 이름과 같지 않음 = false
          */
         if(findStock.getName().equals(stockPutRequestDto.getName()) ||
-                duplCheck(stockPutRequestDto.getName())) {
+                !duplCheck(stockPutRequestDto.getName())) {
             throw new ConflictException();
         }
 

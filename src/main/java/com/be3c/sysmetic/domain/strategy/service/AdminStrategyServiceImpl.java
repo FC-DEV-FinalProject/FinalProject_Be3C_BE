@@ -3,8 +3,12 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
+import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,10 @@ import java.util.NoSuchElementException;
 public class AdminStrategyServiceImpl implements AdminStrategyService {
 
     private final StrategyApprovalRepository strategyApprovalRepository;
+
+    private final FileService fileService;
+
+    private final StockGetter stockGetter;
 
     /*
         관리자 전략 관리 페이지
@@ -50,6 +58,12 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
         if(!findPage.hasContent()) {
             throw new NoSuchElementException();
         }
+
+        findPage.getContent().forEach(strategy -> {
+            log.info("strategy Id : {}, method Id : {}", strategy.getStrategyId(), strategy.getMethodId());
+            strategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethodId())));
+            strategy.setStockList(stockGetter.getStocks(strategy.getStrategyId()));
+        });
 
         return PageResponse.<AdminStrategyGetResponseDto>builder()
                 .totalPages(findPage.getTotalPages())
