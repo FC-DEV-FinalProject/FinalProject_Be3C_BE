@@ -12,6 +12,7 @@ import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -43,6 +44,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
     private final MonthlyRepository monthlyRepository;
     private final DailyRepository dailyRepository;
+    private final StrategyViewAuthorize strategyViewAuthorize;
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final FileService fileService;
@@ -52,6 +54,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Override
     @Transactional
     public StrategyDetailDto getDetail(Long id) {
+
+        strategyViewAuthorize.Authorize(strategyRepository.findById(id).orElseThrow(NoSuchElementException::new));
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
         StrategyDetailDto detailDto = strategyDetailRepository.findPublicStrategy(id)
