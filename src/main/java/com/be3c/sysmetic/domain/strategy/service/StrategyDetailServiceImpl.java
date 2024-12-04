@@ -103,7 +103,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
-                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .strategy(strategyRepository.findById(strategyId).orElseThrow())
                 .daily(daily)
                 .date(daily.getDate())
                 .standardAmount(daily.getStandardAmount())
@@ -141,7 +141,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
-                .strategy(strategyRepository.findByIdAndOpenStatusCode(strategyId).orElseThrow())
+                .strategy(strategyRepository.findById(strategyId).orElseThrow())
                 .daily(newDaily)
                 .date(newDaily.getDate())
                 .standardAmount(newDaily.getStandardAmount())
