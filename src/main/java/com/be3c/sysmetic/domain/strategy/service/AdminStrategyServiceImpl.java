@@ -62,6 +62,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
         findPage.getContent().forEach(strategy -> {
             strategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethodId())));
             strategy.setStockList(stockGetter.getStocks(strategy.getStrategyId()));
+            strategy.setApprovalStatusCode(getApprovalStatus(strategy));
         });
 
         return PageResponse.<AdminStrategyGetResponseDto>builder()
@@ -71,6 +72,19 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
                 .totalElement(findPage.getTotalElements())
                 .content(findPage.getContent())
                 .build();
+    }
+
+    private String getApprovalStatus(AdminStrategyGetResponseDto dto) {
+        switch (dto.getApprovalStatusCode()) {
+            case "SA001":
+                return "승인요청";
+            case "SA002":
+                return "승인";
+            case "SA003":
+                return "반려";
+            default:
+                return "요청 전";
+        }
     }
 
     /*
