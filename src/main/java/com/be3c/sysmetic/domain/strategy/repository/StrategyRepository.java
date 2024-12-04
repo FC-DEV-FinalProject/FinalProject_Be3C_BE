@@ -48,7 +48,7 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             s.id = :id
         AND s.trader.id = :userId
     """)
-    Optional<Strategy> findByIdAndTraderIdAndStatusCode(
+    Optional<Strategy> findByIdAndTraderId(
             @Param("id") Long id,
             @Param("userId") Long userId
     );

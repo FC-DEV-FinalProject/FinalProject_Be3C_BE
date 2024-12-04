@@ -37,7 +37,7 @@ public class StrategyAllowApprovalServiceImpl implements StrategyAllowApprovalSe
     public boolean approveOpen(Long id) {
         Long userId = securityUtils.getUserIdInSecurityContext();
 
-        Strategy strategy = strategyRepository.findByIdAndTraderIdAndStatusCode(
+        Strategy strategy = strategyRepository.findByIdAndTraderId(
                 id,
                 userId
         ).orElseThrow(EntityNotFoundException::new);
