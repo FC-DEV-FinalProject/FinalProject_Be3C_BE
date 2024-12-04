@@ -166,9 +166,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         }
     }
 
-    // 상태 검증 - 비공개 상태만 기본정보 수정 가능
+    // 상태 검증
     private void checkStatus(String status) {
-        if(!status.equals(StrategyStatusCode.PRIVATE.name())) {
+        if(!status.equals(StrategyStatusCode.PRIVATE.name()) && !status.equals(StrategyStatusCode.RETURN.name())) {
+            // 비공개 상태가 아니고, 반려 상태가 아닐 경우 수정 불가
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
     }
