@@ -33,6 +33,8 @@ public class JwtTokenProvider {
         8. Access 토큰에서 사용자 정보 추출 메서드
         9. 요청 헤더에서 Jwt 토큰을 추출하는 메서드
         10. roleCode 를 role 로 명칭 변환 메서드
+        11. Redis에 토큰 저장
+        12. Redis에 토큰 삭제
 
         [Token 처리 과정]
         1. Access 토큰 유효성 검증
@@ -147,15 +149,16 @@ public class JwtTokenProvider {
             return false;
         } else {
             String refreshToken = redisUtils.getRefreshToken(accessToken);
+            boolean needsReissue = false;
             if(refreshToken != null) {
-                return validateToken(refreshToken);
+                needsReissue = validateToken(refreshToken);
             }
-            return false;
+            return needsReissue;
         }
     }
 
     // 7. Access 와 Refresh Token 재발급 메서드
-    public Map<String, String> reissueToken(String token) {
+    public Map<String, String> reissueToken(String oldAccessToken) {
         /*
             유효성 검사에서 true(Access 만료, Refresh 유효 상태)가 나오면,
             기존의 access 토큰에 저장된 memberId, email, role 정보를 그대로 가져와서,
@@ -164,15 +167,16 @@ public class JwtTokenProvider {
          */
         Map<String, String> tokenMap = new HashMap<>();
 
-        Claims claims = parseTokenClaims(token);
+        Claims claims = parseTokenClaims(oldAccessToken);
         Long memberId = Long.valueOf(String.valueOf(claims.get("memberId")));
         String email = (String) claims.get("email");
         String role = (String) claims.get("role");
 
-        String accessToken = generateAccessToken(memberId, email, role);
-        String refreshToken = generateMonthRefreshToken(memberId, email, role);
-        tokenMap.put("accessToken", accessToken);
-        tokenMap.put("refreshToken", refreshToken);
+        String newAccessToken = generateAccessToken(memberId, email, role);
+        String newRefreshToken = generateMonthRefreshToken(memberId, email, role);
+
+        tokenMap.put("accessToken", newAccessToken);
+        tokenMap.put("refreshToken", newRefreshToken);
 
         return tokenMap;
     }
@@ -238,5 +242,15 @@ public class JwtTokenProvider {
                 throw new IllegalArgumentException("Invalid roleCode: " + roleCode);
             }
         };
+    }
+
+    // 11. Redis에 토큰 저장
+    public void saveToken(Map<String, String> tokenMap) {
+        redisUtils.saveToken(tokenMap.get("accessToken"), tokenMap.get("refreshToken"));
+    }
+
+    // 12. Redis에서 토큰 삭제
+    public void deleteToken(String accessToken) {
+        redisUtils.deleteToken(accessToken);
     }
 }

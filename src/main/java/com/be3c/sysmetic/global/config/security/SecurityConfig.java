@@ -62,7 +62,8 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("*"); // 모든 출처 허용
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
-        configuration.setExposedHeaders(List.of("Authorization", "Authorization-refresh")); // 인증 정보 포함 허용
+        configuration.addExposedHeader("Authorization");
+//        configuration.setExposedHeaders(List.of("Authorization", "Authorization-refresh")); // 인증 정보 포함 허용
         configuration.setAllowCredentials(true); // 자격 증명 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

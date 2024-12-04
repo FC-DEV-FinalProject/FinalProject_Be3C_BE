@@ -3,6 +3,7 @@ package com.be3c.sysmetic.global.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 @TestPropertySource(locations = "classpath:application-test.properties")
 @SpringBootTest
 class JwtTokenProviderTest {
@@ -73,7 +75,6 @@ class JwtTokenProviderTest {
                 .parseSignedClaims(token) // 서명, 구조, 만료 여부를 검증
                 .getPayload();
     }
-
 
     // 토큰 검증(토큰이 제대로 생성됐는지 확인), 생성된 토큰값 확인(memberId, email, role, expiration이 제대로 설정됐는지 확인)
     @Test
