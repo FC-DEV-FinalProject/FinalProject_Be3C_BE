@@ -459,7 +459,7 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
 
-        NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = NoticeShowModifyPageResponseDto.builder()
+        return NoticeShowModifyPageResponseDto.builder()
                 .page(page)
                 .searchType(searchType)
                 .searchText(searchText)
