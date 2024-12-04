@@ -91,6 +91,8 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
      */
     @Override
     public boolean rejectStrategyApproval(RejectStrategyApprovalDto rejectStrategyApprovalDto) {
+        log.info(rejectStrategyApprovalDto.toString());
+
         StrategyApprovalHistory strategyApproval = strategyApprovalRepository
                 .findByStrategyIdAndStatusCodeNotApproval(
                         rejectStrategyApprovalDto.getStrategyId())

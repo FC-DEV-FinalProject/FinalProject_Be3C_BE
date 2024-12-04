@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -18,7 +19,8 @@ public class RejectStrategyApprovalDto {
     @JsonProperty("strategyId")
     private Long strategyId;
 
+    @NotBlank
     @JsonProperty("rejectReason")
-    @Max(50)
+    @Size(max = 50)
     private String rejectReason;
 }
