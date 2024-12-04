@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -19,7 +20,7 @@ public class MainPageAnalysisDto {
     */
 
     private String smScoreTopStrategyName;
-    private List<String> xAxis;
+    private List<LocalDate> xAxis;
     private List<Double> averageStandardAmount;
     private List<Double> accumProfitLossRate;
 }
