@@ -127,7 +127,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
 
         strategyApproval.setStatusCode(Code.APPROVE_REJECT.getCode());
         strategyApproval.setRejectReason(rejectStrategyApprovalDto.getRejectReason());
-        strategyApproval.getStrategy().setStatusCode(StrategyStatusCode.REJECTED.getCode());
+        strategyApproval.getStrategy().setStatusCode(StrategyStatusCode.RETURN.getCode());
 
         strategyApprovalRepository.save(strategyApproval);
 
