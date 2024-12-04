@@ -84,7 +84,7 @@ public class AdminStrategyAllowController implements AdminStrategyAllowControlle
     @Override
     @PatchMapping("/admin/strategy/reject")
     public ResponseEntity<APIResponse<String>> strategyReject(
-            @Valid RejectStrategyApprovalDto rejectStrategyApprovalDto
+            @Valid @RequestBody RejectStrategyApprovalDto rejectStrategyApprovalDto
     ) {
         try {
             if(adminStrategyService.rejectStrategyApproval(rejectStrategyApprovalDto)) {
