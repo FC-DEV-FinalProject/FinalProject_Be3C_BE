@@ -9,6 +9,7 @@ import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
@@ -38,42 +39,44 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final FileService fileService;
+    private final StrategyViewAuthorize strategyViewAuthorize;
     private final StrategyIndicatorsCalculator strategyIndicatorsCalculator;
 
     @Override
     @Transactional
     public StrategyDetailDto getDetail(Long id) {
-
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
 
-        return strategyDetailRepository.findPublicStrategy(id)
-                .map(strategy -> StrategyDetailDto.builder()
-                        .id(strategy.getId())
-                        .traderId(strategy.getTrader().getId())
-                        .traderNickname(strategy.getTrader().getNickname())
-                        .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
-                        .methodId(strategy.getMethod().getId())
-                        .methodName(strategy.getMethod().getName())
-                        .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
-                        .stockList(stockGetter.getStocks(strategy.getId()))
-                        .name(strategy.getName())
-                        .statusCode(strategy.getStatusCode())
-                        .cycle(strategy.getCycle())
-                        .content(strategy.getContent())
-                        .followerCount(strategy.getFollowerCount())
-                        .mdd(strategy.getMdd())
-                        .kpRatio(strategy.getKpRatio())
-                        .smScore(strategy.getSmScore())
-                        .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
-                        .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
-                        .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
-                        .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
-                        .winningRate(strategy.getWinningRate())
-                        .monthlyRecord(getMonthlyRecords(strategy.getId()))
-                        .build())
+        Strategy strategy = strategyDetailRepository.findPublicStrategy(id)
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
-    }
 
+        strategyViewAuthorize.Authorize(strategy);
+
+        return StrategyDetailDto.builder()
+                .id(strategy.getId())
+                .traderId(strategy.getTrader().getId())
+                .traderNickname(strategy.getTrader().getNickname())
+                .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                .methodId(strategy.getMethod().getId())
+                .methodName(strategy.getMethod().getName())
+                .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
+                .stockList(stockGetter.getStocks(strategy.getId()))
+                .name(strategy.getName())
+                .statusCode(strategy.getStatusCode())
+                .cycle(strategy.getCycle())
+                .content(strategy.getContent())
+                .followerCount(strategy.getFollowerCount())
+                .mdd(strategy.getMdd())
+                .kpRatio(strategy.getKpRatio())
+                .smScore(strategy.getSmScore())
+                .accumulatedProfitLossRate(strategy.getAccumulatedProfitLossRate())
+                .maximumCapitalReductionAmount(statistics.getMaximumCapitalReductionAmount())
+                .averageProfitLossRate(doubleHandler.cutDouble(statistics.getAverageProfitLossRate()))
+                .profitFactor(doubleHandler.cutDouble(statistics.getProfitFactor()))
+                .winningRate(strategy.getWinningRate())
+                .monthlyRecord(getMonthlyRecords(strategy.getId()))
+                .build();
+    }
 
     // 분석 지표 그래프 데이터 요청
     @Override
