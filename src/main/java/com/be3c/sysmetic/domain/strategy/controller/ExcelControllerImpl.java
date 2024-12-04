@@ -19,7 +19,7 @@ public class ExcelControllerImpl implements ExcelController {
 
     @Override
     @GetMapping("/daily")
-    public ResponseEntity<APIResponse<String>> getExcelExample() {
+    public ResponseEntity<APIResponse<String>> getExcelForm() {
 
         String url = excelService.getExcelFormUrl();
 
@@ -29,7 +29,7 @@ public class ExcelControllerImpl implements ExcelController {
     }
 
     @Override
-    @PostMapping("/daily/{strategyId}")
+    @PostMapping(value = "/daily/{strategyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<String>> uploadExcel(
             @RequestParam("file") MultipartFile file,
             @PathVariable Long strategyId) {

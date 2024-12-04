@@ -51,10 +51,10 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                         .id(strategy.getId())
                         .traderId(strategy.getTrader().getId())
                         .traderNickname(strategy.getTrader().getNickname())
-                        .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
+                        .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId())))
                         .methodId(strategy.getMethod().getId())
                         .methodName(strategy.getMethod().getName())
-                        .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
+                        .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId())))
                         .stockList(stockGetter.getStocks(strategy.getId()))
                         .name(strategy.getName())
                         .statusCode(strategy.getStatusCode())
@@ -74,12 +74,13 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .orElseThrow(() -> new NoSuchElementException("전략 상세 페이지가 존재하지 않습니다."));
     }
 
+
     // 분석 지표 그래프 데이터 요청
     @Override
     @Transactional
-    public StrategyAnalysisResponseDto getAnalysis(Long id, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+    public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
-        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(id, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
 
         if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
 

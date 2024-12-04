@@ -111,4 +111,8 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     Page<MyStrategyListDto> findPageMyStrategy(
             Long memberId, Pageable pageable
     );
+
+    // TODO SM Score 1위 전략 찾기
+    @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
+    String findTop1SmScore();
 }

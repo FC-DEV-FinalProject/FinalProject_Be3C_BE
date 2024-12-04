@@ -14,9 +14,9 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.security.core.parameters.P;
 
+@Slf4j
 @Configuration
 @EnableRedisRepositories
-@Slf4j
 public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String host;
@@ -31,12 +31,12 @@ public class RedisConfig {
         return createRedis(0);
     }
 
-    @Bean
+    @Bean(name = "redisTemplate0")
     @Primary
     public RedisTemplate<String, String> redisTemplate0() {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
 
-        redisTemplate.setKeySerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
 
         redisTemplate.setConnectionFactory(redisConnectionFactory0());
@@ -49,10 +49,10 @@ public class RedisConfig {
         return createRedis(1);
     }
 
-    @Bean
-    public RedisTemplate<Long, Object> redisTemplate1() {
-        RedisTemplate<Long, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new GenericJackson2JsonRedisSerializer());
+    @Bean(name = "redisTemplate1")
+    public RedisTemplate<String, String> redisTemplate1() {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory1());
         return redisTemplate;

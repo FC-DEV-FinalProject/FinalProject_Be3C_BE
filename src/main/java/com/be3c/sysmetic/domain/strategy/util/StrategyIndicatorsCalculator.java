@@ -123,14 +123,14 @@ public class StrategyIndicatorsCalculator {
         return doubleHandler.cutDouble(cdfValuePercentage);
     }
 
-    // currentCapitalReductionAmount 현재자본인하금액
+    // currentCapitalReductionAmount 현재자본인하금액 - StrategyGraphAnalysis에서 사용
     public Double calCurrentCapitalReductionAmount(Long strategyId, Double accumulatedProfitLossAmount) {
         Double maxAccumulatedProfitLossAmount = dailyRepository.findTopByStrategyIdOrderByProfitLossAmountDesc(strategyId).getAccumulatedProfitLossAmount();
 
         return accumulatedProfitLossAmount > 0 ? doubleHandler.cutDouble(accumulatedProfitLossAmount - maxAccumulatedProfitLossAmount) : 0;
     }
 
-    // averageProfitLossAmount 평균손익률
+    // averageProfitLossAmount 평균손익률 - StrategyGraphAnalysis에서 사용
     public Double calAverageProfitLossAmount(Long strategyId, Double accumulatedProfitLossAmount) {
 
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
@@ -140,7 +140,7 @@ public class StrategyIndicatorsCalculator {
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays);
     }
 
-    // averageProfitLossRate 평균손익률
+    // averageProfitLossRate 평균손익률 - StrategyGraphAnalysis에서 사용
     public Double calAverageProfitLossRate(Long strategyId, Double accumulatedProfitLossAmount){
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
 
@@ -149,7 +149,7 @@ public class StrategyIndicatorsCalculator {
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / totalTradingDays * 100);
     }
 
-    // winningRate 승률
+    // winningRate 승률 - StrategyGraphAnalysis에서 사용
     public Double calWinningRate(Long strategyId) {
         Long totalProfitDays = dailyRepository.countProfitDays(strategyId);
         Long totalTradingDays = dailyRepository.countByStrategyId(strategyId);
@@ -159,7 +159,7 @@ public class StrategyIndicatorsCalculator {
         return doubleHandler.cutDouble((double) (totalProfitDays / totalTradingDays));
     }
 
-    // profitFactor
+    // profitFactor - StrategyGraphAnalysis에서 사용
     public Double calProfitFactor(Long strategyId) {
         Double totalProfitAmount = dailyRepository.findTotalProfitAmountByStrategyId(strategyId);
         Double totalLossAmount = dailyRepository.findTotalLossAmountByStrategyId(strategyId);
@@ -169,7 +169,7 @@ public class StrategyIndicatorsCalculator {
         return totalLossAmount < 0 ? doubleHandler.cutDouble(totalProfitAmount / (totalLossAmount * -1)) : 0.0;
     }
 
-    // roa
+    // ROA - StrategyGraphAnalysis에서 사용
     public Double calRoa(Double accumulatedProfitLossAmount, Double maximumCapitalReductionAmount) {
         if (maximumCapitalReductionAmount == null || maximumCapitalReductionAmount == 0.0) return 0.0;
 
