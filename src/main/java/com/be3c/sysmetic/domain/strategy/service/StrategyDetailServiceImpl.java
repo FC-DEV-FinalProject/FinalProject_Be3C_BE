@@ -95,6 +95,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Daily daily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
         Double accumulatedProfitLossAmount = daily.getAccumulatedProfitLossAmount();
+        Double standardAmount = daily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
@@ -110,6 +111,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .profitLossRate(daily.getProfitLossRate())
                 .accumulatedProfitLossAmount(daily.getAccumulatedProfitLossAmount())
                 .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .currentCapitalReductionRate(strategyIndicatorsCalculator.calCurrentCapitalReductionRate(strategyId, standardAmount))
                 .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
                 .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
                 .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))
@@ -130,6 +132,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         Daily newDaily = dailyRepository.findByStrategyIdAndDate(strategyId, date);
         StrategyStatistics statistics = strategyStatisticsRepository.findByStrategyId(strategyId);
         Double accumulatedProfitLossAmount = statistics.getAccumulatedProfitLossAmount();
+        Double standardAmount = newDaily.getStandardAmount();
         Double maximumCapitalReductionAmount = statistics.getMaximumCapitalReductionAmount();
 
         StrategyGraphAnalysis data = StrategyGraphAnalysis.builder()
@@ -145,6 +148,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .profitLossRate(newDaily.getProfitLossRate())
                 .accumulatedProfitLossAmount(newDaily.getAccumulatedProfitLossAmount())
                 .currentCapitalReductionAmount(strategyIndicatorsCalculator.calCurrentCapitalReductionAmount(strategyId, accumulatedProfitLossAmount))
+                .currentCapitalReductionRate(strategyIndicatorsCalculator.calCurrentCapitalReductionRate(strategyId, standardAmount))
                 .averageProfitLossAmount(strategyIndicatorsCalculator.calAverageProfitLossAmount(strategyId, accumulatedProfitLossAmount))
                 .averageProfitLossRate(strategyIndicatorsCalculator.calAverageProfitLossRate(strategyId, accumulatedProfitLossAmount))
                 .winningRate(strategyIndicatorsCalculator.calWinningRate(strategyId))
