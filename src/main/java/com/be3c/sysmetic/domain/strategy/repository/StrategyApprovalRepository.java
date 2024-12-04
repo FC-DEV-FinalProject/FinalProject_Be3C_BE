@@ -51,7 +51,7 @@ public interface StrategyApprovalRepository extends JpaRepository<StrategyApprov
                 s.name,
                 m.name,
                 s.statusCode,
-                sa.statusCode,
+                coalesce(sa.statusCode, 'SA000'),
                 s.createdAt,
                 s.method.id,
                 null,

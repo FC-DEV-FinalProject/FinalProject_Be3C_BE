@@ -82,6 +82,8 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
                 return "승인";
             case "SA003":
                 return "반려";
+            case "SA000":
+                return "요청 전";
             default:
                 return "요청 전";
         }
