@@ -114,7 +114,7 @@ public class MethodServiceImpl implements MethodService {
             throw new IllegalStateException();
         }
 
-        if(duplCheck(methodPostRequestDto.getName())) {
+        if(!duplCheck(methodPostRequestDto.getName())) {
             throw new ConflictException();
         }
 
@@ -176,7 +176,7 @@ public class MethodServiceImpl implements MethodService {
         method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
 
-        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
+//        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
         return true;
     }
 

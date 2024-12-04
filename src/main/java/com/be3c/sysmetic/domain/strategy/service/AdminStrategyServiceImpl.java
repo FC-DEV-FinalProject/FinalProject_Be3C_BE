@@ -39,7 +39,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     public PageResponse<AdminStrategyGetResponseDto> findStrategyPage(
             AdminStrategySearchGetDto adminStrategySearchGetDto
     ) {
-        Pageable pageable = PageRequest.of(adminStrategySearchGetDto.getPage() - 1, 10);
+        Pageable pageable = PageRequest.of(adminStrategySearchGetDto.getPage(), 10);
 
         Page<AdminStrategyGetResponseDto> findPage = strategyApprovalRepository.findStrategiesAdminPage(
                 adminStrategySearchGetDto.getOpenStatus(),
@@ -71,7 +71,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     public Map<Long, String> StrategyApproveApplyAllow(AllowApprovalRequestDto requestDtoList) {
         HashMap<Long, String> resultMap = new HashMap<>();
 
-        for(Long id : requestDtoList.getApprovalId()) {
+        for(Long id : requestDtoList.getStrategyId()) {
             try {
                 allowApproval(id);
             } catch (EntityNotFoundException e) {
