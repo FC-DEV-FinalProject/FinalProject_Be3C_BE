@@ -1,6 +1,6 @@
 package com.be3c.sysmetic.domain.member.service;
 
-import com.be3c.sysmetic.domain.member.dto.NoticeExistFileImageRequestDto;
+import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
 import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,22 +39,17 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public boolean registerNotice(Long writerId, String noticeTitle, String noticeContent,
-                                  Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                                    List<MultipartFile> fileList, List<MultipartFile> imageList) {
+                                  Boolean isOpen,
+                                  List<MultipartFile> fileList, List<MultipartFile> imageList) {
 
         Member writer = memberRepository.findById(writerId).orElseThrow(() -> new EntityNotFoundException("회원이 없습니다."));
+
+        Boolean fileExists = (fileList != null);
+        Boolean imageExists = (imageList != null);
 
         Notice notice = Notice.createNotice(noticeTitle, noticeContent, writer, fileExists, imageExists, isOpen);
 
         noticeRepository.save(notice);
-
-        if (fileList.isEmpty() == fileExists) {
-            throw new IllegalArgumentException("파일 리스트와 fileExist 값이 맞지 않습니다.");
-        }
-
-        if (imageList.isEmpty() == imageExists) {
-            throw new IllegalArgumentException("이미지 리스트와 imageExist 값이 맞지 않습니다.");
-        }
 
         if(fileExists) {
             for (MultipartFile file : fileList) {
@@ -62,7 +59,7 @@ public class NoticeServiceImpl implements NoticeService {
 
         if(imageExists) {
             for (MultipartFile image : imageList) {
-                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+                fileService.uploadImage(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
         }
 
@@ -71,7 +68,7 @@ public class NoticeServiceImpl implements NoticeService {
 
 
     // 관리자 검색 조회
-    // 검색 (사용: title, content, all, writer) (설명: 제목, 내용, 제목+내용, 작성자)
+    // 검색 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)
     @Override
     public Page<Notice> findNoticeAdmin(String searchType, String searchText, Integer page) {
 
@@ -106,22 +103,76 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setHits(notice.getHits() + 1);
     }
 
-
-    // 문의 아이디로 문의 조회
-    @Override
-    public Notice findNoticeById(Long noticeId) {
-        return noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
-    }
-
-
     // 관리자 공지사항 수정
     @Override
     @Transactional
-    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId,
-                                Boolean fileExists, Boolean imageExists, Boolean isOpen,
-                                List<NoticeExistFileImageRequestDto> existFileDtoList, List<NoticeExistFileImageRequestDto> existImageDtoList, List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
+    public boolean modifyNotice(Long noticeId, String noticeTitle, String noticeContent, Long correctorId, Boolean isOpen,
+                                List<Long> deleteFileIdList, List<Long> deleteImageIdList,
+                                List<MultipartFile> newFileList, List<MultipartFile> newImageList) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
+
+        Boolean fileExists = notice.getFileExists();
+        if (fileExists) {
+            if (deleteFileIdList != null) {
+                List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+                List<Long> nowFileIdList = new ArrayList<>();
+                for (FileWithInfoResponse file : nowFileDtoList) {
+                    nowFileIdList.add(file.id());
+                }
+                int countFile = nowFileDtoList.size();
+                for (Long fileId : deleteFileIdList) {
+                    if (nowFileIdList.contains(fileId)) {
+                        fileService.deleteFileById(fileId);
+                        countFile--;
+                    } else {
+                        throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+                    }
+                }
+                int newFileListSize;
+                if (newFileList == null) {
+                    newFileListSize = 0;
+                } else {
+                    newFileListSize = newFileList.size();
+                }
+                countFile = countFile + newFileListSize;
+                if (countFile > 3) {
+                    throw new IllegalArgumentException("파일이 3개 이상입니다.");
+                }
+                fileExists = countFile > 0;
+            }
+        }
+
+        Boolean imageExists = notice.getImageExists();
+        if (imageExists) {
+            if (deleteImageIdList != null) {
+                List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+                List<Long> nowImageIdList = new ArrayList<>();
+                for (FileWithInfoResponse image : nowImageDtoList) {
+                    nowImageIdList.add(image.id());
+                }
+                int countImage = nowImageDtoList.size();
+                for (Long imageId : deleteImageIdList) {
+                    if (nowImageIdList.contains(imageId)) {
+                        fileService.deleteFileById(imageId);
+                        countImage--;
+                    } else {
+                        throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
+                    }
+                }
+                int newImageListSize;
+                if (newImageList == null) {
+                    newImageListSize = 0;
+                } else {
+                    newImageListSize = newImageList.size();
+                }
+                countImage = countImage + newImageListSize;
+                if (countImage > 5) {
+                    throw new IllegalArgumentException("이미지가 5개 이상입니다.");
+                }
+                imageExists = countImage > 0;
+            }
+        }
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
@@ -131,49 +182,15 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setImageExists(imageExists);
         notice.setIsOpen(isOpen);
 
-        int countFile = 0;
-        for (NoticeExistFileImageRequestDto n : existFileDtoList) {
-            if (!n.getExist()) {
-                fileService.deleteFileById(n.getFileId());
-            } else {
-                countFile++;
-            }
-        }
-
-        countFile = countFile + newFileList.size();
-        if (countFile > 3) {
-            throw new IllegalArgumentException("파일이 3개 이상입니다.");
-        }
-        if ((countFile == 0) == fileExists) {
-            throw new IllegalArgumentException("이미지 리스트와 fileExists 값이 맞지 않습니다.");
-        }
-
-        int countImage = 0;
-        for (NoticeExistFileImageRequestDto n : existImageDtoList) {
-            if (!n.getExist()) {
-                fileService.deleteFileById(n.getFileId());
-            } else {
-                countImage++;
-            }
-        }
-        countImage = countImage + newImageList.size();
-        if (countImage > 5) {
-            throw new IllegalArgumentException("이미지가 5개 이상입니다.");
-        }
-        if ((countImage == 0) == imageExists) {
-            throw new IllegalArgumentException("이미지 리스트와 imageExists 값이 맞지 않습니다.");
-        }
-
-
-        if(fileExists) {
+        if(newFileList != null) {
             for (MultipartFile file : newFileList) {
                 fileService.uploadAnyFile(file, new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
             }
         }
 
-        if(imageExists) {
+        if(newImageList != null) {
             for (MultipartFile image : newImageList) {
-                fileService.uploadAnyFile(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+                fileService.uploadImage(image, new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
             }
         }
 
@@ -199,7 +216,7 @@ public class NoticeServiceImpl implements NoticeService {
     @Transactional
     public Map<Long, String> deleteAdminNoticeList(List<Long> noticeIdList) {
 
-        if (noticeIdList == null || noticeIdList.isEmpty()) {
+        if (noticeIdList == null) {
             throw new IllegalArgumentException("공지가 한 개도 선택되지 않았습니다.");
         }
 
@@ -228,12 +245,26 @@ public class NoticeServiceImpl implements NoticeService {
         return noticeRepository.noticeSearchWithBooleanBuilder(searchText, PageRequest.of(page, 10));
     }
 
-
-    // 이전글 제목 조회
     @Override
-    public String findPreviousNoticeTitle(Long noticeId) {
-        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+    public NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice) {
 
+        return NoticeAdminListOneShowResponseDto.builder()
+                .noticeId(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .writerNickname(notice.getWriterNickname())
+                .writeDate(notice.getWriteDate())
+                .hits(notice.getHits())
+                .fileExist(notice.getFileExists())
+                .isOpen(notice.getIsOpen())
+                .build();
+    }
+
+    @Override
+    public NoticeDetailAdminShowResponseDto noticeIdToNoticeDetailAdminShowResponseDto(Long noticeId, Integer page, String searchType, String searchText) {
+
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
+
+        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
         String previousNoticeTitle;
         if (previousNoticeList.isEmpty()) {
             previousNoticeTitle = null;
@@ -241,15 +272,6 @@ public class NoticeServiceImpl implements NoticeService {
             Notice previousNotice = previousNoticeList.get(0);
             previousNoticeTitle = previousNotice.getNoticeTitle();
         }
-
-        return previousNoticeTitle;
-    }
-
-    // 이전글 작성일 조회
-    @Override
-    public LocalDateTime findPreviousNoticeWriteDate(Long noticeId) {
-        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
-
         LocalDateTime previousNoticeWriteDate;
         if (previousNoticeList.isEmpty()) {
             previousNoticeWriteDate = null;
@@ -258,14 +280,7 @@ public class NoticeServiceImpl implements NoticeService {
             previousNoticeWriteDate = previousNotice.getWriteDate();
         }
 
-        return previousNoticeWriteDate;
-    }
-
-    // 다음글 제목 조회
-    @Override
-    public String findNextNoticeTitle(Long noticeId) {
         List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
-
         String nextNoticeTitle;
         if (nextNoticeList.isEmpty()) {
             nextNoticeTitle = null;
@@ -273,15 +288,6 @@ public class NoticeServiceImpl implements NoticeService {
             Notice previousNotice = nextNoticeList.get(0);
             nextNoticeTitle = previousNotice.getNoticeTitle();
         }
-
-        return nextNoticeTitle;
-    }
-
-    // 다음글 제목 조회
-    @Override
-    public LocalDateTime findNextNoticeWriteDate(Long noticeId) {
-        List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
-
         LocalDateTime nextNoticeWriteDate;
         if (nextNoticeList.isEmpty()) {
             nextNoticeWriteDate = null;
@@ -290,6 +296,183 @@ public class NoticeServiceImpl implements NoticeService {
             nextNoticeWriteDate = previousNotice.getWriteDate();
         }
 
-        return nextNoticeWriteDate;
+        List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+        if (notice.getFileExists()) {
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+        }
+
+        List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+        if (notice.getImageExists()) {
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
+            }
+        }
+
+        return NoticeDetailAdminShowResponseDto.builder()
+                .page(page)
+                .searchType(searchType)
+                .searchText(searchText)
+                .noticeId(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .noticeContent(notice.getNoticeContent())
+                .writeDate(notice.getWriteDate())
+                .correctDate(notice.getCorrectDate())
+                .writerNickname(notice.getWriterNickname())
+                .hits(notice.getHits())
+                .fileExist(notice.getFileExists())
+                .imageExist(notice.getImageExists())
+                .isOpen(notice.getIsOpen())
+                .fileDtoList(fileDtoList)
+                .imageDtoList(imageDtoList)
+                .previousTitle(previousNoticeTitle)
+                .previousWriteDate(previousNoticeWriteDate)
+                .nextTitle(nextNoticeTitle)
+                .nextWriteDate(nextNoticeWriteDate)
+                .build();
+    }
+
+    @Override
+    public NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId, Integer page, String searchText) {
+
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
+
+        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+        String previousNoticeTitle;
+        if (previousNoticeList.isEmpty()) {
+            previousNoticeTitle = null;
+        } else {
+            Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeTitle = previousNotice.getNoticeTitle();
+        }
+        LocalDateTime previousNoticeWriteDate;
+        if (previousNoticeList.isEmpty()) {
+            previousNoticeWriteDate = null;
+        } else {
+            Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeWriteDate = previousNotice.getWriteDate();
+        }
+
+        List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+        String nextNoticeTitle;
+        if (nextNoticeList.isEmpty()) {
+            nextNoticeTitle = null;
+        } else {
+            Notice previousNotice = nextNoticeList.get(0);
+            nextNoticeTitle = previousNotice.getNoticeTitle();
+        }
+        LocalDateTime nextNoticeWriteDate;
+        if (nextNoticeList.isEmpty()) {
+            nextNoticeWriteDate = null;
+        } else {
+            Notice previousNotice = nextNoticeList.get(0);
+            nextNoticeWriteDate = previousNotice.getWriteDate();
+        }
+
+        List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+        if (notice.getFileExists()) {
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+        }
+
+        List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+        if (notice.getImageExists()) {
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
+            }
+        }
+
+        return NoticeDetailShowResponseDto.builder()
+                .page(page)
+                .searchText(searchText)
+                .noticeId(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .noticeContent(notice.getNoticeContent())
+                .writeDate(notice.getWriteDate())
+                .fileDtoList(fileDtoList)
+                .imageDtoList(imageDtoList)
+                .previousTitle(previousNoticeTitle)
+                .previousWriteDate(previousNoticeWriteDate)
+                .nextTitle(nextNoticeTitle)
+                .nextWriteDate(nextNoticeWriteDate)
+                .build();
+    }
+
+    @Override
+    public NoticeShowModifyPageResponseDto noticeIdTonoticeShowModifyPageResponseDto(Long noticeId, Integer page, String searchType, String searchText) {
+
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
+
+        List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
+        if (notice.getFileExists()) {
+            List<FileWithInfoResponse> fileList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, notice.getId()));
+
+            for (FileWithInfoResponse f : fileList) {
+                NoticeDetailFileShowResponseDto noticeDetailFileShowResponseDto = NoticeDetailFileShowResponseDto.builder()
+                        .fileId(f.id())
+                        .fileSize(f.fileSize())
+                        .originalName(f.originalName())
+                        .path(f.url())
+                        .build();
+                fileDtoList.add(noticeDetailFileShowResponseDto);
+            }
+        }
+
+        List<NoticeDetailImageShowResponseDto> imageDtoList = new ArrayList<>();
+        if (notice.getImageExists()) {
+            List<FileWithInfoResponse> imageList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, notice.getId()));
+
+            for (FileWithInfoResponse f : imageList) {
+                NoticeDetailImageShowResponseDto noticeDetailImageShowResponseDto = NoticeDetailImageShowResponseDto.builder()
+                        .fileId(f.id())
+                        .path(f.url())
+                        .build();
+                imageDtoList.add(noticeDetailImageShowResponseDto);
+            }
+        }
+
+        return NoticeShowModifyPageResponseDto.builder()
+                .page(page)
+                .searchType(searchType)
+                .searchText(searchText)
+                .noticeId(notice.getId())
+                .noticeTitle(notice.getNoticeTitle())
+                .noticeContent(notice.getNoticeContent())
+                .fileExist(notice.getFileExists())
+                .imageExist(notice.getImageExists())
+                .isOpen(notice.getIsOpen())
+                .fileDtoList(fileDtoList)
+                .imageDtoList(imageDtoList)
+                .build();
     }
 }

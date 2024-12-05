@@ -218,13 +218,13 @@ public class InquiryServiceTest {
         inquiry2.setInquiryStatus(InquiryStatus.closed);
 
         //when
-        int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquiriesAdmin(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquiriesAdmin(inquirySearch2, page-1);
+        int page = 0;
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiriesAdmin(inquirySearch1, page);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiriesAdmin(inquirySearch2, page);
 
         //then
         assertEquals(3, inquiryList1.getNumberOfElements());
-        assertEquals(inquiryRepository.findByInquiryStatus(InquiryStatus.closed, PageRequest.of(0, 100)).getTotalElements(), inquiryList2.getNumberOfElements());
+        assertEquals(inquiryRepository.findByInquiryStatus(InquiryStatus.closed, PageRequest.of(0, 100)).getTotalElements(), inquiryList2.getTotalElements());
     }
 
     @Test
@@ -257,15 +257,15 @@ public class InquiryServiceTest {
         inquiryService.registerInquiry(member2.getId(), strategy1.getId(), "질문6", "내용6");
 
         //when
-        int page = 1;
-        Page<Inquiry> inquiryList1 = inquiryService.findInquiries(inquirySearch1, page-1);
-        Page<Inquiry> inquiryList2 = inquiryService.findInquiries(inquirySearch2, page-1);
-        Page<Inquiry> inquiryList3 = inquiryService.findInquiries(inquirySearch3, page-1);
+        int page = 0;
+        Page<Inquiry> inquiryList1 = inquiryService.findInquiries(inquirySearch1, page);
+        Page<Inquiry> inquiryList2 = inquiryService.findInquiries(inquirySearch2, page);
+        Page<Inquiry> inquiryList3 = inquiryService.findInquiries(inquirySearch3, page);
 
         // then
         assertEquals("질문6", inquiryList1.getContent().get(0).getInquiryTitle());
-        assertEquals("질문2", inquiryList2.getContent().get(0).getInquiryTitle());
-        assertEquals("질문2", inquiryList3.getContent().get(0).getInquiryTitle());
+        assertEquals("질문4", inquiryList2.getContent().get(0).getInquiryTitle());
+        assertEquals("질문3", inquiryList3.getContent().get(0).getInquiryTitle());
     }
 
 

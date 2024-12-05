@@ -2,8 +2,8 @@ package com.be3c.sysmetic.domain.member.controller;
 
 import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
-import com.be3c.sysmetic.domain.member.entity.InquiryAnswer;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
+import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.service.InquiryAnswerService;
 import com.be3c.sysmetic.domain.member.service.InquiryService;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,15 +47,15 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryAdminListOneShowResponseDto>>> showAdminInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -74,10 +73,10 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryAdminListShowRequestDto.setSearchType(searchType);
         inquiryAdminListShowRequestDto.setSearchText(searchText);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiriesAdmin(inquiryAdminListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiriesAdmin(inquiryAdminListShowRequestDto, page);
 
         List<InquiryAdminListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
-                .map(InquiryController::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
+                .map(inquiryService::inquiryToInquiryAdminOneResponseDto).collect(Collectors.toList());
 
         PageResponse<InquiryAdminListOneShowResponseDto> adminInquiryPage = PageResponse.<InquiryAdminListOneShowResponseDto>builder()
                 .currentPage(page)
@@ -89,18 +88,6 @@ public class InquiryController implements InquiryControllerDocs {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(adminInquiryPage));
-    }
-
-    public static InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry) {
-
-        return InquiryAdminListOneShowResponseDto.builder()
-                .inquiryId(inquiry.getId())
-                .traderNickname(inquiry.getTraderNickname())
-                .strategyName(inquiry.getStrategyName())
-                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                .inquirerNickname(inquiry.getInquirerNickname())
-                .inquiryStatus(inquiry.getInquiryStatus())
-                .build();
     }
 
 
@@ -116,15 +103,15 @@ public class InquiryController implements InquiryControllerDocs {
     @GetMapping("/admin/qna/{qnaId}")
     public ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
             @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
             @RequestParam(value = "searchText", required = false) String searchText) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -138,59 +125,8 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-            String previousInquiryTitle = inquiryService.adminFindPreviousInquiryTitle(inquiryId);
-            LocalDateTime previousInquiryWriteDate = inquiryService.adminFindPreviousInquiryWriteDate(inquiryId);
-            String nextInquiryTitle = inquiryService.adminFindNextInquiryTitle(inquiryId);
-            LocalDateTime nextInquiryWriteDate = inquiryService.adminFindNextInquiryWriteDate(inquiryId);
 
-            Long inquiryAnswerId;
-            String answerTitle;
-            LocalDateTime answerRegistrationDate;
-            String answerContent;
-            if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
-                inquiryAnswerId = null;
-                answerTitle = null;
-                answerRegistrationDate = null;
-                answerContent = null;
-            } else {
-                InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-                inquiryAnswerId = inquiryAnswer.getId();
-                answerTitle = inquiryAnswer.getAnswerTitle();
-                answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
-                answerContent = inquiryAnswer.getAnswerContent();
-            }
-
-            InquiryAnswerAdminShowResponseDto inquiryAnswerAdminShowResponseDto = InquiryAnswerAdminShowResponseDto.builder()
-                    .page(page)
-                    .closed(closed)
-                    .searchType(searchType)
-                    .searchText(searchText)
-
-                    .inquiryId(inquiryId)
-                    .inquiryAnswerId(inquiryAnswerId)
-
-                    .inquiryTitle(inquiry.getInquiryTitle())
-                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                    .inquirerNickname(inquiry.getInquirerNickname())
-                    .inquiryStatus(inquiry.getInquiryStatus())
-
-                    // 전략 위 아이콘들
-                    .strategyName(inquiry.getStrategyName())
-                    // 트레이더의 프로필 사진
-                    .traderNickname(inquiry.getTraderNickname())
-
-                    .inquiryContent(inquiry.getInquiryContent())
-
-                    .answerTitle(answerTitle)
-                    .answerRegistrationDate(answerRegistrationDate)
-                    .answerContent(answerContent)
-
-                    .previousTitle(previousInquiryTitle)
-                    .previousWriteDate(previousInquiryWriteDate)
-                    .nextTitle(nextInquiryTitle)
-                    .nextWriteDate(nextInquiryWriteDate)
-                    .build();
+            InquiryAnswerAdminShowResponseDto inquiryAnswerAdminShowResponseDto = inquiryService.inquiryIdToInquiryAnswerAdminShowResponseDto(inquiryId, page, closed, searchType, searchText);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquiryAnswerAdminShowResponseDto));
@@ -271,17 +207,14 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
-    @GetMapping("/strategy/{strategyId}/qna-page")
+    @GetMapping("/strategy/{strategyId}/qna")
     public ResponseEntity<APIResponse<InquirySavePageShowResponseDto>> showInquirySavePage (
             @PathVariable(value = "strategyId") Long strategyId) {
 
         try {
             Strategy strategy = inquiryService.findStrategyForInquiryPage(strategyId);
 
-            InquirySavePageShowResponseDto inquirySavePageShowResponseDto = InquirySavePageShowResponseDto.builder()
-                    .strategyName(strategy.getName())
-                    .traderNickname(strategy.getTrader().getNickname())
-                    .build();
+            InquirySavePageShowResponseDto inquirySavePageShowResponseDto = inquiryService.strategyToInquirySavePageShowResponseDto(strategy);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(inquirySavePageShowResponseDto));
@@ -339,14 +272,14 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
     @GetMapping("/member/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showInquirerInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -366,10 +299,10 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
-                .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+                .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
         PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
                 .currentPage(page)
@@ -383,17 +316,6 @@ public class InquiryController implements InquiryControllerDocs {
                 .body(APIResponse.success(inquiryPage));
     }
 
-    public static InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry) {
-
-        return InquiryListOneShowResponseDto.builder()
-                .inquiryId(inquiry.getId())
-                .inquiryTitle(inquiry.getInquiryTitle())
-                .strategyName(inquiry.getStrategyName())
-                .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                .inquiryStatus(inquiry.getInquiryStatus())
-                .build();
-    }
-
 
      /*
         질문자 문의 상세 조회 API
@@ -405,16 +327,16 @@ public class InquiryController implements InquiryControllerDocs {
      @Override
 //     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
      @GetMapping("/member/qna/{qnaId}")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showInquirerInquiryDetail (
+    public ResponseEntity<APIResponse<InquiryAnswerInquirerShowResponseDto>> showInquirerInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
          InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-         if (page <= 0) {
+         if (page < 0) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
          }
 
          if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -428,72 +350,19 @@ public class InquiryController implements InquiryControllerDocs {
          }
 
          try {
-             Long userId = securityUtils.getUserIdInSecurityContext();
-             Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
-             if (!userId.equals(inquiry.getInquirer().getId())) {
-                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                         .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-             }
-
-             String previousInquiryTitle = inquiryService.inquirerFindPreviousInquiryTitle(inquiryId, userId);
-             LocalDateTime previousInquiryWriteDate = inquiryService.inquirerFindPreviousInquiryWriteDate(inquiryId, userId);
-             String nextInquiryTitle = inquiryService.inquirerFindNextInquiryTitle(inquiryId, userId);
-             LocalDateTime nextInquiryWriteDate = inquiryService.inquirerFindNextInquiryWriteDate(inquiryId, userId);
-
-             Long inquiryAnswerId;
-             String answerTitle;
-             LocalDateTime answerRegistrationDate;
-             String answerContent;
-             if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
-                 inquiryAnswerId = null;
-                 answerTitle = null;
-                 answerRegistrationDate = null;
-                 answerContent = null;
-             } else {
-                 InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-                 inquiryAnswerId = inquiryAnswer.getId();
-                 answerTitle = inquiryAnswer.getAnswerTitle();
-                 answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
-                 answerContent = inquiryAnswer.getAnswerContent();
-             }
-
-             InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
-                     .page(page)
-                     .sort(sort)
-                     .closed(closed)
-
-                     .inquiryId(inquiryId)
-                     .inquiryAnswerId(inquiryAnswerId)
-
-                     .inquiryTitle(inquiry.getInquiryTitle())
-                     .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                     .inquirerNickname(inquiry.getInquirerNickname())
-                     .inquiryStatus(inquiry.getInquiryStatus())
-
-                     // 전략 위 아이콘들
-                     .strategyName(inquiry.getStrategyName())
-                     // 트레이더의 프로필 사진
-                     .traderNickname(inquiry.getTraderNickname())
-
-                     .inquiryContent(inquiry.getInquiryContent())
-
-                     .answerTitle(answerTitle)
-                     .answerRegistrationDate(answerRegistrationDate)
-                     .answerContent(answerContent)
-
-                     .previousTitle(previousInquiryTitle)
-                     .previousWriteDate(previousInquiryWriteDate)
-                     .nextTitle(nextInquiryTitle)
-                     .nextWriteDate(nextInquiryWriteDate)
-                     .build();
+             InquiryAnswerInquirerShowResponseDto inquiryAnswerInquirerShowResponseDto = inquiryService.inquiryIdToInquiryAnswerInquirerShowResponseDto(inquiryId, page, sort, closed);
 
              return ResponseEntity.status(HttpStatus.OK)
-                     .body(APIResponse.success(inquiryAnswerShowResponseDto));
+                     .body(APIResponse.success(inquiryAnswerInquirerShowResponseDto));
          }
          catch (EntityNotFoundException e) {
              return ResponseEntity.status(HttpStatus.NOT_FOUND)
                      .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
+         }
+         catch (MemberBadRequestException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
          }
     }
 
@@ -507,18 +376,18 @@ public class InquiryController implements InquiryControllerDocs {
      */
     @Override
 //    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_USER_MANAGER")
-    @GetMapping("/member/qna/{qnaId}/modify-page")
+    @GetMapping("/member/qna/{qnaId}/modify")
     public ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
         try {
-            if (page <= 0) {
+            if (page < 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                        .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
             }
 
             if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -573,12 +442,6 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-            }
 
             if (inquiryService.modifyInquiry(
                     inquiryId,
@@ -616,12 +479,6 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable(value = "qnaId") Long inquiryId) {
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-            }
 
             if (inquiryService.deleteInquiry(inquiryId)) {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -691,14 +548,14 @@ public class InquiryController implements InquiryControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/qna")
     public ResponseEntity<APIResponse<PageResponse<InquiryListOneShowResponseDto>>> showTraderInquiry (
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -718,10 +575,10 @@ public class InquiryController implements InquiryControllerDocs {
         inquiryListShowRequestDto.setSort(sort);
         inquiryListShowRequestDto.setTab(inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page-1);
+        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
 
         List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
-                .map(InquiryController::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
+                .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
 
         PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
                 .currentPage(page)
@@ -746,16 +603,16 @@ public class InquiryController implements InquiryControllerDocs {
     @Override
 //    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_TRADER_MANAGER')")
     @GetMapping("/trader/qna/{qnaId}")
-    public ResponseEntity<APIResponse<InquiryAnswerShowResponseDto>> showTraderInquiryDetail (
+    public ResponseEntity<APIResponse<InquiryAnswerTraderShowResponseDto>> showTraderInquiryDetail (
             @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
             @RequestParam(value = "closed", defaultValue = "all") String closed) {
         InquiryStatus inquiryStatus = InquiryStatus.valueOf(closed);
 
-        if (page <= 0) {
+        if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 1 이하입니다."));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
         }
 
         if (!(closed.equals("all") || closed.equals("closed") || closed.equals("unclosed"))) {
@@ -769,72 +626,19 @@ public class InquiryController implements InquiryControllerDocs {
         }
 
         try {
-            Long userId = securityUtils.getUserIdInSecurityContext();
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
 
-            if(!Objects.equals(userId, inquiry.getTraderId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-            }
-
-            String previousInquiryTitle = inquiryService.traderFindPreviousInquiryTitle(inquiryId, userId);
-            LocalDateTime previousInquiryWriteDate = inquiryService.traderFindPreviousInquiryWriteDate(inquiryId, userId);
-            String nextInquiryTitle = inquiryService.traderFindNextInquiryTitle(inquiryId, userId);
-            LocalDateTime nextInquiryWriteDate = inquiryService.traderFindNextInquiryWriteDate(inquiryId, userId);
-
-            Long inquiryAnswerId;
-            String answerTitle;
-            LocalDateTime answerRegistrationDate;
-            String answerContent;
-            if (inquiry.getInquiryStatus() == InquiryStatus.unclosed) {
-                inquiryAnswerId = null;
-                answerTitle = null;
-                answerRegistrationDate = null;
-                answerContent = null;
-            } else {
-                InquiryAnswer inquiryAnswer = inquiryAnswerService.findThatInquiryAnswer(inquiryId);
-                inquiryAnswerId = inquiryAnswer.getId();
-                answerTitle = inquiryAnswer.getAnswerTitle();
-                answerRegistrationDate = inquiryAnswer.getAnswerRegistrationDate();
-                answerContent = inquiryAnswer.getAnswerContent();
-            }
-
-            InquiryAnswerShowResponseDto inquiryAnswerShowResponseDto = InquiryAnswerShowResponseDto.builder()
-                    .page(page)
-                    .sort(sort)
-                    .closed(closed)
-
-                    .inquiryId(inquiryId)
-                    .inquiryAnswerId(inquiryAnswerId)
-
-                    .inquiryTitle(inquiry.getInquiryTitle())
-                    .inquiryRegistrationDate(inquiry.getInquiryRegistrationDate())
-                    .inquirerNickname(inquiry.getInquirerNickname())
-                    .inquiryStatus(inquiry.getInquiryStatus())
-
-                    // 전략 위 아이콘들
-                    .strategyName(inquiry.getStrategyName())
-                    // 트레이더의 프로필 사진
-                    .traderNickname(inquiry.getTraderNickname())
-
-                    .inquiryContent(inquiry.getInquiryContent())
-
-                    .answerTitle(answerTitle)
-                    .answerRegistrationDate(answerRegistrationDate)
-                    .answerContent(answerContent)
-
-                    .previousTitle(previousInquiryTitle)
-                    .previousWriteDate(previousInquiryWriteDate)
-                    .nextTitle(nextInquiryTitle)
-                    .nextWriteDate(nextInquiryWriteDate)
-                    .build();
+            InquiryAnswerTraderShowResponseDto inquiryAnswerTraderShowResponseDto = inquiryService.inquiryIdToInquiryAnswerTraderShowResponseDto(inquiryId, page, sort, closed);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(APIResponse.success(inquiryAnswerShowResponseDto));
+                    .body(APIResponse.success(inquiryAnswerTraderShowResponseDto));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
+        }
+        catch (MemberBadRequestException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
     }
 }

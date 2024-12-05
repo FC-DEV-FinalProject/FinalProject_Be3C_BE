@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -22,6 +23,8 @@ import java.util.List;
 public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory jpaQueryFactory1;
+    private final JPAQueryFactory jpaQueryFactory2;
     private final QInquiry inquiry = QInquiry.inquiry;
 
     public Page<Inquiry> adminInquirySearchWithBooleanBuilder(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Pageable pageable) {
@@ -40,19 +43,14 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         }
 
         // 검색 (전략명, 트레이더, 질문자)
-        if (searchText != null && !searchText.isEmpty()) {
+        if (StringUtils.hasText(searchText)) {
             if (searchType.equals("strategy")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.strategyName.contains(searchText));
-                }
+                predicate.and(inquiry.strategy.name.contains(searchText));
+                predicate.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE").not());
             } else if (searchType.equals("trader")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.traderNickname.contains(searchText));
-                }
+                predicate.and(inquiry.strategy.trader.nickname.contains(searchText));
             } else if (searchType.equals("inquirer")) {
-                if (StringUtils.hasText(searchText)) {
-                    predicate.and(inquiry.inquirerNickname.contains(searchText));
-                }
+                predicate.and(inquiry.inquirer.nickname.contains(searchText));
             }
         }
 
@@ -74,6 +72,8 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
     public Page<Inquiry> inquirySearchWithBooleanBuilder(InquiryListShowRequestDto inquiryListShowRequestDto, Pageable pageable) {
 
         BooleanBuilder predicate = new BooleanBuilder();
+        BooleanBuilder predicate1 = new BooleanBuilder();
+        BooleanBuilder predicate2 = new BooleanBuilder();
 
         Long inquirerId = inquiryListShowRequestDto.getInquirerId();
         Long traderId = inquiryListShowRequestDto.getTraderId();
@@ -83,45 +83,72 @@ public class InquiryRepositoryImpl implements InquiryRepositoryCustom {
         // 질문자 별
         if (inquirerId != null) {
             predicate.and(inquiry.inquirer.id.eq(inquirerId));
+            predicate1.and(inquiry.inquirer.id.eq(inquirerId));
+            predicate2.and(inquiry.inquirer.id.eq(inquirerId));
         }
 
         // 트레이더 별
         if (traderId != null) {
             predicate.and(inquiry.traderId.eq(traderId));
+            predicate1.and(inquiry.traderId.eq(traderId));
+            predicate2.and(inquiry.traderId.eq(traderId));
         }
 
         // 전체, 답변 대기, 답변 완료
         if (tab.equals(InquiryStatus.unclosed)) {
             predicate.and(inquiry.inquiryStatus.eq(tab));
+            predicate1.and(inquiry.inquiryStatus.eq(tab));
+            predicate2.and(inquiry.inquiryStatus.eq(tab));
         } else if (tab.equals(InquiryStatus.closed)) {
             predicate.and(inquiry.inquiryStatus.eq(tab));
+            predicate1.and(inquiry.inquiryStatus.eq(tab));
+            predicate2.and(inquiry.inquiryStatus.eq(tab));
         }
 
-        QueryResults<Inquiry> results;
+        predicate1.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE").not());
+        predicate2.and(inquiry.strategy.statusCode.eq("NOT_USING_STATE"));
+
+        List<Inquiry> content = new ArrayList<>();
+        long total;
         // 정렬순 별
         if (sort.equals("registrationDate")) {
-            results = jpaQueryFactory
+            QueryResults<Inquiry> results = jpaQueryFactory
                     .selectFrom(inquiry)
                     .where(predicate)
-                    .orderBy(inquiry.inquiryRegistrationDate.desc()) // 따로 해서 최적화 가능
+                    .orderBy(inquiry.id.desc()) // 따로 해서 최적화 가능
                     .offset(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .fetchResults();
+
+            content = results.getResults();
+            total = results.getTotal();
+
         } else if (sort.equals("strategyName")) {
-            results = jpaQueryFactory
+            QueryResults<Inquiry> results1 = jpaQueryFactory1
                     .selectFrom(inquiry)
-                    .where(predicate)
-                    .orderBy(inquiry.strategy.name.asc(), inquiry.inquiryRegistrationDate.asc()) // 따로 해서 최적화 가능
+                    .where(predicate1)
+                    .orderBy(inquiry.strategy.name.asc(), inquiry.id.desc()) // 따로 해서 최적화 가능
                     .offset(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .fetchResults();
+            QueryResults<Inquiry> results2 = jpaQueryFactory2
+                    .selectFrom(inquiry)
+                    .where(predicate2)
+                    .orderBy(inquiry.id.desc()) // 따로 해서 최적화 가능
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetchResults();
+
+            List<Inquiry> content1 = results1.getResults();
+            List<Inquiry> content2 = results2.getResults();
+            content.addAll(content1);
+            content.addAll(content2);
+            long total1 = results1.getTotal();
+            long total2 = results2.getTotal();
+            total = total1 + total2;
         } else {
             throw new IllegalArgumentException("정렬순을 지정하세요");
         }
-
-
-        List<Inquiry> content = results.getResults();
-        long total = results.getTotal();
 
         return new PageImpl<>(content, pageable, total);
     }

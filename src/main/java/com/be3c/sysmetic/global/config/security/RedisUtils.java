@@ -51,7 +51,7 @@ public class RedisUtils {
 
     // [이메일 인증코드]
 
-    // 1. 인증코드 발송 내역 저장 메서드 (자동 만료 - redisUtil.setDataExpire(email, authCode, 만료시간: 1hour);)
+    // 1. 인증코드 발송 내역 저장 메서드 (1시간 후 자동 만료 - redisUtil.setDataExpire(email, authCode, 만료시간: 1hour);)
     public void saveEmailAuthCodeWithExpireTime(String email, String authCode, Long expireTime) {
         redisTemplate1.opsForValue().set(email, authCode, expireTime, TimeUnit.MILLISECONDS);
     }
@@ -68,5 +68,10 @@ public class RedisUtils {
     // 3. 인증코드 삭제 메서드 (인증 완료 시)
     public void deleteEmailAuthCode(String email) {
         redisTemplate1.delete(email);
+    }
+
+    // 0. 인증내역 저장 메서드 (1시간 후 자동 만료)
+    public void saveEmailVerifyLogExpireTime(String email, String inputAuthCode, Long expireTime) {
+        redisTemplate1.opsForValue().set(email, inputAuthCode, expireTime, TimeUnit.MILLISECONDS);
     }
 }

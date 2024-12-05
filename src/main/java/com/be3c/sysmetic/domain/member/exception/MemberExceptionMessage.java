@@ -4,6 +4,7 @@ public enum MemberExceptionMessage {
     // 회원가입 관련
     ALREADY_USE_EMAIL("이미 사용 중인 이메일입니다. 다른 이메일을 입력해 주세요."),
     INVALID_EMAIL_CODE("인증코드가 일치하지 않습니다. 올바른 인증코드로 입력해 주세요."),
+    UNVERIFIED_EMAIL_ERROR("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해 주세요."),
     REGISTRATION_FAILED("회원가입에 실패했습니다. 관리자에게 문의해 주세요."),
     NICKNAME_ALREADY_IN_USE("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요."),
 
@@ -22,7 +23,10 @@ public enum MemberExceptionMessage {
     ERROR_REDIS_EMAIL_CODE("Redis 이메일 인증코드 관련 오류 발생"),
 
     // 이메일 관련 오류
-    ERROR_EMAIL("이메일 관련 오류 발생")
+    ERROR_EMAIL("이메일 관련 오류 발생"),
+
+    // 로그인한 사람이 권한이 없는 글에 접근할 때
+    INVALID_MEMBER("유효하지 않은 회원입니다.");
     ;
 
     private final String message;

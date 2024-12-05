@@ -69,9 +69,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         strategyRepository.save(saveStrategy);
 
-        // 파일 존재할 경우 제안서 등록
-        if(file != null) {
-            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, saveStrategy.getId());
+        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, saveStrategy.getId());
+
+        if(file != null && !file.isEmpty()) {
+            // 요청 파일 존재할 경우
             fileService.uploadPdf(file, fileRequest);
         }
 
@@ -110,10 +111,24 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
 
         updateStrategyStockReferences(existingStrategy, requestDto.getStockIdList());
 
-        // 파일 존재할 경우 제안서 수정
-        if(file != null) {
-            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
-            fileService.updatePdf(file, fileRequest);
+        FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+        String existingFile = fileService.getFilePathNullable(fileRequest);
+
+        if(file == null || file.isEmpty()) {
+            // 요청 파일 존재하지 않을 경우 제안서 삭제 - FE와 논의된 사항
+            if(existingFile != null) {
+                // 등록된 파일이 존재할 경우
+                fileService.deleteFile(fileRequest);
+            }
+        } else {
+            // 요청 파일 존재할 경우 제안서 등록 또는 업데이트
+            if(existingFile != null) {
+                // 등록된 파일이 존재할 경우 업데이트
+                fileService.updatePdf(file, fileRequest);
+            } else {
+                // 등록된 파일이 존재하지 않을 경우 등록
+                fileService.uploadPdf(file, fileRequest);
+            }
         }
 
         strategyRepository.save(existingStrategy);
@@ -135,12 +150,12 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
             savedStrategy.setStatusCode(StrategyStatusCode.NOT_USING_STATE.name());
 
             // 파일 존재할 경우 제안서 삭제
-            // todo. 파일 : 제안서 필수 x 적용 필요
-//            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
-//
-//            if(fileService.getFilePath(fileRequest) != null) {
-//                fileService.deleteFile(fileRequest);
-//            }
+            FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
+            String existingFile = fileService.getFilePathNullable(fileRequest);
+
+            if(existingFile != null) {
+                fileService.deleteFile(fileRequest);
+            }
         }
     }
 
@@ -151,9 +166,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         }
     }
 
-    // 상태 검증 - 비공개 상태만 기본정보 수정 가능
+    // 상태 검증
     private void checkStatus(String status) {
-        if(!status.equals(StrategyStatusCode.PRIVATE.name())) {
+        if(!status.equals(StrategyStatusCode.PRIVATE.name()) && !status.equals(StrategyStatusCode.RETURN.name())) {
+            // 비공개 상태가 아니고, 반려 상태가 아닐 경우 수정 불가
             throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_STATUS.getMessage(), ErrorCode.DISABLED_DATA_STATUS);
         }
     }

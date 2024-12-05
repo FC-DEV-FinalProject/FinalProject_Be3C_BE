@@ -9,8 +9,6 @@ import com.be3c.sysmetic.domain.member.exception.MemberBadRequestException;
 import com.be3c.sysmetic.domain.member.exception.MemberExceptionMessage;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.global.common.response.PageResponse;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +28,12 @@ public class MemberManagementServiceImpl implements MemberManagementService {
     // 1. 회원 목록 조회
     @Override
     public PageResponse<MemberGetResponseDto> findMemberPage(MemberSearchRole role, Integer page, MemberSearchType searchType, String searchKeyword) {
-        Pageable pageable = null;
+        Pageable pageable;
 
         try {
             pageable = PageRequest.of(page, 10);
         } catch (IllegalArgumentException e) {
-            // page가 유효하지 않은 값인 경우, 예외 발생
+            // page가 유효하지 않은 경우, 예외 발생
             throw new MemberBadRequestException(MemberExceptionMessage.INVALID_PAGE.getMessage());
         }
 
