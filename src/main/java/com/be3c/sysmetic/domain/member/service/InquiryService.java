@@ -4,6 +4,7 @@ import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.InquiryStatus;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
+import com.be3c.sysmetic.global.common.response.PageResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -37,20 +38,25 @@ public interface InquiryService {
     // 검색 (전략명, 트레이더, 질문자)
     Page<Inquiry> findInquiriesAdmin(InquiryAdminListShowRequestDto inquiryAdminListShowRequestDto, Integer page);
 
-    // 문의자, 트레이더 검색 조회
-    // 정렬 순 셀렉트 박스 (최신순, 전략명)
-    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
-    Page<Inquiry> findInquiries(InquiryListShowRequestDto inquiryListShowRequestDto, Integer page);
-
     InquiryAdminListOneShowResponseDto inquiryToInquiryAdminOneResponseDto(Inquiry inquiry);
 
     InquiryAnswerAdminShowResponseDto inquiryIdToInquiryAnswerAdminShowResponseDto (Long inquiryId, Integer page, String closed, String searchType, String searchText);
 
-    InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy);
-
     InquiryListOneShowResponseDto inquiryToInquiryOneResponseDto(Inquiry inquiry);
+
+    InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy);
 
     InquiryAnswerInquirerShowResponseDto inquiryIdToInquiryAnswerInquirerShowResponseDto(Long inquiryId, Integer page, String sort, String closed);
 
     InquiryAnswerTraderShowResponseDto inquiryIdToInquiryAnswerTraderShowResponseDto(Long inquiryId, Integer page, String sort, String closed);
+
+    // 문의자 검색 조회
+    // 정렬 순 셀렉트 박스 (최신순, 전략명)
+    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    PageResponse<InquiryListOneShowResponseDto> showInquirerInquiry(Integer page, String sort, InquiryStatus inquiryStatus);
+
+    // 트레이더 검색 조회
+    // 정렬 순 셀렉트 박스 (최신순, 전략명)
+    // 답변상태 셀렉트 박스 (전체, 답변 대기, 답변 완료)
+    PageResponse<InquiryListOneShowResponseDto> showTraderInquiry(Integer page, String sort, InquiryStatus inquiryStatus);
 }

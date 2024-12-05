@@ -263,7 +263,7 @@ public class InquiryController implements InquiryControllerDocs {
 
 
     /*
-        질문자 문의 조회 / 검색 API
+        질문자 문의 조회 API
         1. 사용자 인증 정보가 없음 : FORBIDDEN
         2. 문의 데이터 조회에 성공했을 때 : OK
         3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
@@ -292,28 +292,17 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
+        try {
 
-        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
-        inquiryListShowRequestDto.setInquirerId(userId);
-        inquiryListShowRequestDto.setSort(sort);
-        inquiryListShowRequestDto.setTab(inquiryStatus);
+            PageResponse<InquiryListOneShowResponseDto> inquiryPage = inquiryService.showInquirerInquiry(page, sort, inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
-
-        List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
-                .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
-
-        PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
-                .currentPage(page)
-                .pageSize(pageSize)
-                .totalElement(inquiryList.getTotalElements())
-                .totalPages(inquiryList.getTotalPages())
-                .content(inquiryDtoList)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryPage));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(inquiryPage));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+        }
     }
 
 
@@ -568,28 +557,17 @@ public class InquiryController implements InquiryControllerDocs {
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 sort가 올바르지 않습니다."));
         }
 
-        Long userId = securityUtils.getUserIdInSecurityContext();
+        try {
 
-        InquiryListShowRequestDto inquiryListShowRequestDto = new InquiryListShowRequestDto();
-        inquiryListShowRequestDto.setTraderId(userId);
-        inquiryListShowRequestDto.setSort(sort);
-        inquiryListShowRequestDto.setTab(inquiryStatus);
+            PageResponse<InquiryListOneShowResponseDto> inquiryPage = inquiryService.showTraderInquiry(page, sort, inquiryStatus);
 
-        Page<Inquiry> inquiryList = inquiryService.findInquiries(inquiryListShowRequestDto, page);
-
-        List<InquiryListOneShowResponseDto> inquiryDtoList = inquiryList.stream()
-                .map(inquiryService::inquiryToInquiryOneResponseDto).collect(Collectors.toList());
-
-        PageResponse<InquiryListOneShowResponseDto> inquiryPage = PageResponse.<InquiryListOneShowResponseDto>builder()
-                .currentPage(page)
-                .pageSize(pageSize)
-                .totalElement(inquiryList.getTotalElements())
-                .totalPages(inquiryList.getTotalPages())
-                .content(inquiryDtoList)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(APIResponse.success(inquiryPage));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(inquiryPage));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+        }
     }
 
 
