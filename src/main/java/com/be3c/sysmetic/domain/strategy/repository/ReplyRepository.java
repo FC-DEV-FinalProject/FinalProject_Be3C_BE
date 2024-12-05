@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto(" +
-            "r.strategy.id, r.member.id,  r.member.nickname, r.content, r.createdAt, null) " +
+            "r.id, r.strategy.id, r.member.id,  r.member.nickname, r.content, r.createdAt, null) " +
             "FROM Reply r " +
             "WHERE r.member.id = :memberId and r.statusCode = :statusCode")
     Page<PageReplyResponseDto> findPageByMemberIdAndStatusCode(
@@ -27,7 +27,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     );
 
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.PageReplyResponseDto" +
-            "(r.strategy.id, r.member.id, r.member.nickname, r.content, r.createdAt, null) " +
+            "(r.id, r.strategy.id, r.member.id, r.member.nickname, r.content, r.createdAt, null) " +
             "FROM Reply r " +
             "WHERE r.strategy.id = :strategyId and r.statusCode = :statusCode")
     Page<PageReplyResponseDto> findPageByStrategyIdAndStatusCode(

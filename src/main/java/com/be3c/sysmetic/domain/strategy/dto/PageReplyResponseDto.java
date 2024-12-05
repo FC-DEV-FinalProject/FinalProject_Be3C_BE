@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 @Schema(description = "댓글 응답 정보를 담는 DTO")
 public class PageReplyResponseDto {
 
+    @Schema(description = "댓글 ID", example = "1")
+    @JsonProperty("replyId")
+    private Long replyId;
+
     @Schema(description = "전략 ID", example = "12345")
     @JsonProperty("strategyId")
     private Long strategyId;
@@ -40,7 +44,8 @@ public class PageReplyResponseDto {
     @JsonProperty("memberProfilePath")
     private String memberProfilePath;
 
-    public PageReplyResponseDto(Long strategyId, Long memberId, String memberNickname, String content, LocalDateTime replyCreatedAt, String memberProfilePath) {
+    public PageReplyResponseDto(Long replyId, Long strategyId, Long memberId, String memberNickname, String content, LocalDateTime replyCreatedAt, String memberProfilePath) {
+        this.replyId = replyId;
         this.strategyId = strategyId;
         this.memberId = memberId;
         this.memberNickname = memberNickname;
