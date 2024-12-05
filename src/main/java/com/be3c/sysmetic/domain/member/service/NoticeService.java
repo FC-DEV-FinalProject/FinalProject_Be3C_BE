@@ -43,9 +43,9 @@ public interface NoticeService {
 
     NoticeAdminListOneShowResponseDto noticeToNoticeAdminListOneShowResponseDto(Notice notice);
 
-    NoticeDetailAdminShowResponseDto noticeIdToNoticeDetailAdminShowResponseDto(Long noticeId, Integer page, String searchType, String searchText);
+    NoticeDetailAdminShowResponseDto noticeIdToNoticeDetailAdminShowResponseDto(Long noticeId);
 
-    NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId, Integer page, String searchText);
+    NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId);
 
-    NoticeShowModifyPageResponseDto noticeIdTonoticeShowModifyPageResponseDto(Long noticeId, Integer page, String searchType, String searchText);
+    NoticeShowModifyPageResponseDto noticeIdTonoticeShowModifyPageResponseDto(Long noticeId);
 }

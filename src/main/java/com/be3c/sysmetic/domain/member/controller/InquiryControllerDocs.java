@@ -79,17 +79,8 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)"),
-            @Parameter(name = "searchType", description = "검색 유형 (사용: strategy, trader, inquirer) (설명: 전략명, 트레이더, 질문자)"),
-            @Parameter(name = "searchText", description = "검색 텍스트")
-    })
     ResponseEntity<APIResponse<InquiryAnswerAdminShowResponseDto>> showAdminInquiryDetail (
-            @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "closed", required = false, defaultValue = "all") String closed,
-            @RequestParam(value = "searchType", required = false, defaultValue = "strategy") String searchType,
-            @RequestParam(value = "searchText", required = false) String searchText);
+            @PathVariable(value = "qnaId") Long inquiryId);
 
 
     // 관리자 문의 삭제 API
@@ -269,10 +260,7 @@ public interface InquiryControllerDocs {
             )
     })
     ResponseEntity<APIResponse<InquiryAnswerInquirerShowResponseDto>> showInquirerInquiryDetail (
-            @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
-            @RequestParam(value = "closed", defaultValue = "all") String closed);
+            @PathVariable(value = "qnaId") Long inquiryId);
 
 
     // 질문자 문의 수정 화면 조회 API
@@ -301,15 +289,8 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
-            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
-    })
     ResponseEntity<APIResponse<InquiryModifyPageShowResponseDto>> showInquiryModifyPage (
-            @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
-            @RequestParam(value = "closed", defaultValue = "all") String closed);
+            @PathVariable(value = "qnaId") Long inquiryId);
 
 
     // 질문자 문의 수정 API
@@ -464,13 +445,6 @@ public interface InquiryControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "sort", description = "정렬 순서 (사용: registrationDate, strategyName) (설명: '최신순', '전략명')"),
-            @Parameter(name = "closed", description = "답변 상태 탭 (사용: all, closed, unclosed) (설명: 전체, 답변완료, 답변대기)")
-    })
     ResponseEntity<APIResponse<InquiryAnswerTraderShowResponseDto>> showTraderInquiryDetail (
-            @PathVariable(value = "qnaId") Long inquiryId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "sort", defaultValue = "registrationDate") String sort,
-            @RequestParam(value = "closed", defaultValue = "all") String closed);
+            @PathVariable(value = "qnaId") Long inquiryId);
 }

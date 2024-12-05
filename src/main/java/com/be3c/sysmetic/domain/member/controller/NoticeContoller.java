@@ -56,12 +56,12 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
             @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList) {
 
-        if(fileList.size() > 3) {
+        if(fileList != null && fileList.size() > 3) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 파일이 3개 초과입니다."));
         }
 
-        if(imageList.size() > 5) {
+        if(imageList != null && imageList.size() > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 이미지가 5개 초과입니다."));
         }
@@ -155,7 +155,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -171,31 +171,18 @@ public class NoticeContoller implements NoticeControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice/{noticeId}")
     public ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
-            @RequestParam(value = "searchText", required = false) String searchText) {
-
-        if (page < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
-        }
-
-        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("titlecontent") || searchType.equals("writer"))) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
-        }
+            @PathVariable(name="noticeId") Long noticeId) {
 
         try {
 
-            NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = noticeService.noticeIdToNoticeDetailAdminShowResponseDto(noticeId, page, searchType, searchText);
+            NoticeDetailAdminShowResponseDto noticeDetailAdminShowResponseDto = noticeService.noticeIdToNoticeDetailAdminShowResponseDto(noticeId);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeDetailAdminShowResponseDto));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -211,31 +198,18 @@ public class NoticeContoller implements NoticeControllerDocs {
 //    @PreAuthorize("hasRole('ROLE_USER_MANAGER') or hasRole('ROLE_TRADER_MANAGER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/notice/{noticeId}/modify")
     public ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
-            @RequestParam(value = "searchText", required = false) String searchText) {
-
-        if (page < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
-        }
-
-        if (!(searchType.equals("title") || searchType.equals("content") || searchType.equals("titlecontent") || searchType.equals("writer"))) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "쿼리 파라미터 searchType이 올바르지 않습니다."));
-        }
+            @PathVariable(name="noticeId") Long noticeId) {
 
         try {
 
-            NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = noticeService.noticeIdTonoticeShowModifyPageResponseDto(noticeId, page, searchType, searchText);
+            NoticeShowModifyPageResponseDto noticeShowModifyPageResponseDto = noticeService.noticeIdTonoticeShowModifyPageResponseDto(noticeId);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeShowModifyPageResponseDto));
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -292,11 +266,11 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
@@ -324,7 +298,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -356,7 +330,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -419,19 +393,12 @@ public class NoticeContoller implements NoticeControllerDocs {
     @Override
     @GetMapping("/notice/{noticeId}")
     public ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(value = "searchText", required = false) String searchText) {
-
-        if (page < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "페이지가 0보다 작습니다"));
-        }
+            @PathVariable(name="noticeId") Long noticeId) {
 
         try {
             noticeService.upHits(noticeId);
 
-            NoticeDetailShowResponseDto noticeDetailShowResponseDto = noticeService.noticeIdToticeDetailShowResponseDto(noticeId, page, searchText);
+            NoticeDetailShowResponseDto noticeDetailShowResponseDto = noticeService.noticeIdToticeDetailShowResponseDto(noticeId);
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(APIResponse.success(noticeDetailShowResponseDto));
