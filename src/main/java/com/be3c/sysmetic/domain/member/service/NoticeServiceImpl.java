@@ -6,6 +6,9 @@ import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
@@ -351,6 +354,10 @@ public class NoticeServiceImpl implements NoticeService {
     public NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId, Integer page, String searchText) {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
+
+        if (!notice.getIsOpen()) {
+            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
+        }
 
         List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
         String previousNoticeTitle;

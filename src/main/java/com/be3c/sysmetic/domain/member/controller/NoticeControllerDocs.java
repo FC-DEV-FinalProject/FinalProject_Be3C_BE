@@ -310,6 +310,10 @@ public interface NoticeControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
+            ),
+            @ApiResponse(
                     responseCode = "200",
                     description = "공지사항 상세 조회 성공 (OK)"
             ),
