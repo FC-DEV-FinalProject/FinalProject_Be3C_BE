@@ -34,49 +34,67 @@ class NoticeServiceTest {
     @Autowired
     NoticeRepository noticeRepository;
 
-//    @Test
-////    @Rollback(value = false)
-//    public void dummy_data() throws Exception {
-//        Member member1 = createMember("닉네임1");
-//        Member member2 = createMember("닉네임2");
-//        Member member3 = createMember("닉네임3");
-//        Member member4 = createMember("닉네임4");
-//        Member member5 = createMember("닉네임5");
+    @Test
+    @Rollback(value = false)
+    public void dummy_data() throws Exception {
+        Member member1 = createMember("테스트1");
+        Member member2 = createMember("테스트2");
+        Member member3 = createMember("테스트3");
+        Member member4 = createMember("테스트4");
+        Member member5 = createMember("테스트5");
 //        Member member6 = createMember("닉네임6");
-//        Member member7 = createMember("닉네임7");
-//        Member member8 = createMember("닉네임8");
-//        Member member9 = createMember("닉네임9");
-//
-//        int countNotice = 1;
-//        Member member = null;
-//        Boolean isOpen = null;
-//        for(int i = 1; i <= 3; i++) {
-//            if (i == 1) { member = member7; }
-//            else if (i == 2) { member = member8; }
-//            else if (i == 3) { member = member9; }
-//            for(int j = 1; j <= 2; j++) {
-//                if (j == 1) { isOpen = false; }
-//                if (j == 2) { isOpen = true; }
-//                for(int l = 1; l <= 10; l++) {
-//                    Notice notice = Notice.builder()
-//                            .noticeTitle("공지제목" + countNotice)
-//                            .noticeContent("공지내용" + countNotice)
-//                            .writer(member)
-//                            .writerNickname(member.getNickname())
-//                            .writeDate(LocalDateTime.now())
-//                            .correctorId(member.getId())
-//                            .correctDate(LocalDateTime.now())
-//                            .hits(0L)
-//                            .fileExists(false)
-//                            .imageExists(false)
-//                            .isOpen(isOpen)
-//                            .build();
-//                    noticeRepository.save(notice);
-//                    countNotice++;
-//                }
-//            }
+//        Member member7 = createMember("테스트3");
+//        Member member8 = createMember("테스트4");
+
+//        for (int i = 1; i < 65; i++) {
+//            Member member = createMember("닉네임");
+//            Notice notice = Notice.builder()
+//                    .noticeTitle("공지제목")
+//                    .noticeContent("공지내용")
+//                    .writer(member)
+//                    .writerNickname(member.getNickname())
+//                    .writeDate(LocalDateTime.now())
+//                    .correctorId(member.getId())
+//                    .correctDate(LocalDateTime.now())
+//                    .hits(0L)
+//                    .fileExists(false)
+//                    .imageExists(false)
+//                    .isOpen(true)
+//                    .build();
+//            noticeRepository.save(notice);
 //        }
-//    }
+
+//        int countNotice = 65;
+        int countNotice = 1;
+        Member member = null;
+        Boolean isOpen = null;
+        for(int i = 3; i <= 5; i++) {
+            if (i == 3) { member = member3; }
+            else if (i == 4) { member = member4; }
+            else if (i == 5) { member = member5; }
+            for(int j = 1; j <= 2; j++) {
+                if (j == 1) { isOpen = false; }
+                if (j == 2) { isOpen = true; }
+                for(int l = 1; l <= 10; l++) {
+                    Notice notice = Notice.builder()
+                            .noticeTitle("공지제목" + countNotice)
+                            .noticeContent("공지내용" + countNotice)
+                            .writer(member)
+                            .writerNickname(member.getNickname())
+                            .writeDate(LocalDateTime.now())
+                            .correctorId(member.getId())
+                            .correctDate(LocalDateTime.now())
+                            .hits(0L)
+                            .fileExists(false)
+                            .imageExists(false)
+                            .isOpen(isOpen)
+                            .build();
+                    noticeRepository.save(notice);
+                    countNotice++;
+                }
+            }
+        }
+    }
 
     @Test
     public void 공지사항_등록() throws Exception {

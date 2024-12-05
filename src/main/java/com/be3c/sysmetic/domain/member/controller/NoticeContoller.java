@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.controller;
 import com.be3c.sysmetic.domain.member.dto.*;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.service.NoticeService;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -410,9 +411,10 @@ public class NoticeContoller implements NoticeControllerDocs {
 
     /*
         공지사항 상세 조회 API
-        1. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
-        2. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
-        3. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
+        1. 사용자 인증 정보가 없음 : FORBIDDEN
+        2. 공지사항의 상세 데이터 조회에 성공했을 때 : OK
+        3. 공지사항의 상세 데이터 조회에 실패했을 때 : NOT_FOUND
+        4. 파라미터 데이터의 형식이 올바르지 않음 : BAD_REQUEST
      */
     @Override
     @GetMapping("/notice/{noticeId}")
@@ -436,7 +438,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 }

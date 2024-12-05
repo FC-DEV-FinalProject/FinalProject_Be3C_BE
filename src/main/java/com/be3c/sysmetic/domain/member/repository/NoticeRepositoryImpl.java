@@ -62,6 +62,8 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
             predicate.andAnyOf(notice.noticeTitle.contains(searchText), notice.noticeContent.contains(searchText));
         }
 
+        predicate.and(notice.isOpen.eq(true));
+
         QueryResults<Notice> results = jpaQueryFactory
                 .selectFrom(notice)
                 .where(predicate)
