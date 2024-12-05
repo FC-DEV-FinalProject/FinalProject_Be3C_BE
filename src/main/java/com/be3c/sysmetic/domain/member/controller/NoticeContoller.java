@@ -56,12 +56,12 @@ public class NoticeContoller implements NoticeControllerDocs {
             @RequestPart(value = "fileList", required = false) List<MultipartFile> fileList,
             @RequestPart(value = "imageList", required = false) List<MultipartFile> imageList) {
 
-        if(fileList.size() > 3) {
+        if(fileList != null && fileList.size() > 3) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 파일이 3개 초과입니다."));
         }
 
-        if(imageList.size() > 5) {
+        if(imageList != null && imageList.size() > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(APIResponse.fail(ErrorCode.BAD_REQUEST, "등록하려는 이미지가 5개 초과입니다."));
         }
@@ -155,7 +155,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -195,7 +195,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -235,7 +235,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 
@@ -292,11 +292,11 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage()));
         }
     }
 
@@ -324,7 +324,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 

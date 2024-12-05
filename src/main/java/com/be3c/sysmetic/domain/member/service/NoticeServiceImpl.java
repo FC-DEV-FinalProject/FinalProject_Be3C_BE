@@ -109,73 +109,121 @@ public class NoticeServiceImpl implements NoticeService {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         Boolean fileExists = notice.getFileExists();
+
         if (fileExists) {
-            if (deleteFileIdList != null) {
-                List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
-                List<Long> nowFileIdList = new ArrayList<>();
-                for (FileWithInfoResponse file : nowFileDtoList) {
-                    nowFileIdList.add(file.id());
-                }
-                int countFile = nowFileDtoList.size();
-                for (Long fileId : deleteFileIdList) {
-                    if (nowFileIdList.contains(fileId)) {
-                        fileService.deleteFileById(fileId);
-                        countFile--;
-                    } else {
-                        throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+
+            List<FileWithInfoResponse> nowFileDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+            List<Long> nowFileIdList = new ArrayList<>();
+            for (FileWithInfoResponse file : nowFileDtoList) {
+                nowFileIdList.add(file.id());
+            }
+            int nowCountFile = nowFileDtoList.size();
+
+            if (newFileList != null) {
+                if (deleteFileIdList != null) {
+                    for (Long fileId : deleteFileIdList) {
+                        if (nowFileIdList.contains(fileId)) {
+                            fileService.deleteFileById(fileId);
+                            nowCountFile--;
+                        } else {
+                            throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+                        }
                     }
+                    int newFileListSize = newFileList.size();
+                    nowCountFile = nowCountFile + newFileListSize;
+                    if (nowCountFile > 3) {
+                        throw new IllegalArgumentException("파일이 3개 이상입니다.");
+                    }
+                    fileExists = nowCountFile > 0;
                 }
-                int newFileListSize;
-                if (newFileList == null) {
-                    newFileListSize = 0;
+            } else {
+                if (deleteFileIdList != null) {
+                    for (Long fileId : deleteFileIdList) {
+                        if (nowFileIdList.contains(fileId)) {
+                            fileService.deleteFileById(fileId);
+                            nowCountFile--;
+                        } else {
+                            throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+                        }
+                    }
+                    fileExists = nowCountFile > 0;
+                }
+            }
+        } else {
+            if (newFileList != null) {
+                if (deleteFileIdList != null) {
+                    throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
                 } else {
-                    newFileListSize = newFileList.size();
+                    fileExists = true;
                 }
-                countFile = countFile + newFileListSize;
-                if (countFile > 3) {
-                    throw new IllegalArgumentException("파일이 3개 이상입니다.");
+            } else {
+                if (deleteFileIdList != null) {
+                    throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
                 }
-                fileExists = countFile > 0;
             }
         }
 
         Boolean imageExists = notice.getImageExists();
+
         if (imageExists) {
-            if (deleteImageIdList != null) {
-                List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
-                List<Long> nowImageIdList = new ArrayList<>();
-                for (FileWithInfoResponse image : nowImageDtoList) {
-                    nowImageIdList.add(image.id());
-                }
-                int countImage = nowImageDtoList.size();
-                for (Long imageId : deleteImageIdList) {
-                    if (nowImageIdList.contains(imageId)) {
-                        fileService.deleteFileById(imageId);
-                        countImage--;
-                    } else {
-                        throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
+
+            List<FileWithInfoResponse> nowImageDtoList = fileService.getFileWithInfos(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+            List<Long> nowImageIdList = new ArrayList<>();
+            for (FileWithInfoResponse image : nowImageDtoList) {
+                nowImageIdList.add(image.id());
+            }
+            int nowCountImage = nowImageIdList.size();
+
+            if (newImageList != null) {
+                if (deleteImageIdList != null) {
+                    for (Long imageId : deleteImageIdList) {
+                        if (nowImageIdList.contains(imageId)) {
+                            fileService.deleteFileById(imageId);
+                            nowCountImage--;
+                        } else {
+                            throw new EntityNotFoundException("삭제하려는 파일이 이 공지사항에 존재하지 않습니다.");
+                        }
                     }
+                    int newImageListSize = newImageList.size();
+                    nowCountImage = nowCountImage + newImageListSize;
+                    if (nowCountImage > 5) {
+                        throw new IllegalArgumentException("이미지가 5개 이상입니다.");
+                    }
+                    imageExists = nowCountImage > 0;
                 }
-                int newImageListSize;
-                if (newImageList == null) {
-                    newImageListSize = 0;
+            } else {
+                if (deleteImageIdList != null) {
+                    for (Long imageId : deleteImageIdList) {
+                        if (nowImageIdList.contains(imageId)) {
+                            fileService.deleteFileById(imageId);
+                            nowCountImage--;
+                        } else {
+                            throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
+                        }
+                    }
+                    imageExists = nowCountImage > 0;
+                }
+            }
+        } else {
+            if (newImageList != null) {
+                if (deleteImageIdList != null) {
+                    throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
                 } else {
-                    newImageListSize = newImageList.size();
+                    imageExists = true;
                 }
-                countImage = countImage + newImageListSize;
-                if (countImage > 5) {
-                    throw new IllegalArgumentException("이미지가 5개 이상입니다.");
+            } else {
+                if (deleteImageIdList != null) {
+                    throw new EntityNotFoundException("삭제하려는 이미지가 이 공지사항에 존재하지 않습니다.");
                 }
-                imageExists = countImage > 0;
             }
         }
 
         notice.setNoticeTitle(noticeTitle);
         notice.setNoticeContent(noticeContent);
-        notice.setCorrectorId(correctorId);
-        notice.setCorrectDate(LocalDateTime.now());
         notice.setFileExists(fileExists);
         notice.setImageExists(imageExists);
+        notice.setCorrectorId(correctorId);
+        notice.setCorrectDate(LocalDateTime.now());
         notice.setIsOpen(isOpen);
 
         if(newFileList != null) {
