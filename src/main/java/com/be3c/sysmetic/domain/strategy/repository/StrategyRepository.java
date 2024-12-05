@@ -129,14 +129,14 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
     @Query(value = "SELECT s.*, " +
             "       (mdd_rank + stddev_rank + winning_rate_rank) / 3 AS average_rank " +
             "FROM strategy s " +
-            "JOIN (SELECT id, RANK() OVER (ORDER BY mdd ASC) AS mdd_rank " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY mdd DESC) AS mdd_rank " +
             "      FROM strategy) mdd_rank_tbl " +
             "ON s.id = mdd_rank_tbl.id " +
-            "JOIN (SELECT id, RANK() OVER (ORDER BY STDDEV(accumulated_profit_loss_rate) ASC) AS stddev_rank " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY STDDEV(accumulated_profit_loss_rate) DESC) AS stddev_rank " +
             "      FROM strategy " +
             "      GROUP BY id) stddev_rank_tbl " +
             "ON s.id = stddev_rank_tbl.id " +
-            "JOIN (SELECT id, RANK() OVER (ORDER BY winning_rate DESC) AS winning_rate_rank " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY winning_rate ASC) AS winning_rate_rank " +
             "      FROM strategy) winning_rate_rank_tbl " +
             "ON s.id = winning_rate_rank_tbl.id " +
             "ORDER BY average_rank ASC",
