@@ -55,7 +55,7 @@ public interface StrategySearchControllerDocs {
         algorithmSearch : 알고리즘별 전략 검색
     */
     @Operation(
-            summary = "알고리즘별 전략 - DEFENSIVE는 아직 조회 못합니다",
+            summary = "알고리즘별 전략",
             description = "전략 목록에서 항목ㅋ별 상세 조건을 검색합니다.<br><br>" +
                     "Request Param 설명 :<br><br>" +
                     "pageNum - defaultValue 0, 페이지 이동 시 값 입력 <br><br>" +
