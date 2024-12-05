@@ -150,7 +150,7 @@ public class ReplyServiceImpl implements ReplyService{
 
         Reply reply = replyRepository.findByStrategyIdAndIdAndStatusCode(
                 replyDeleteRequestDto.getStrategyId(),
-                replyDeleteRequestDto.getId(),
+                replyDeleteRequestDto.getReplyId(),
                 USING_STATE.getCode()
         ).orElseThrow(() -> new EntityNotFoundException("해당 댓글을 찾을 수 없습니다."));
 

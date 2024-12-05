@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
@@ -16,6 +17,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @Tag(name = "종목 API", description = "관리자 종목 API")
 public interface StockControllerDocs {
@@ -211,8 +214,8 @@ public interface StockControllerDocs {
             }
     )
     //    @PreAuthorize(("hasRole('MANAGER')"))
-    @DeleteMapping("/admin/stock/{id}")
-    public ResponseEntity<APIResponse<String>> deleteItem(
-            @PathVariable Long id
+    @DeleteMapping("/admin/stock")
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteItem(
+            @RequestBody StockDeleteRequestDto requestDto
     );
 }

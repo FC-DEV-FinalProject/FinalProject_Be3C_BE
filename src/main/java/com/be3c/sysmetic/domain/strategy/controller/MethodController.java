@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.MethodDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -188,17 +190,18 @@ public class MethodController implements MethodControllerDocs {
      */
 //    @DeleteMapping("/admin/method/{id:[0-9]+}")
     @Override
-    @DeleteMapping("/admin/method/{id}")
-    public ResponseEntity<APIResponse<String>> deleteMethod(
-         @PathVariable Long id
+    @DeleteMapping("/admin/method")
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteMethod(
+         @RequestBody MethodDeleteRequestDto requestDto
     ) {
         try {
-            if(methodService.deleteMethod(id)) {
+            Map<Long, String> map = methodService.deleteMethodList(requestDto);
+            if(map.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(APIResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                    .body(APIResponse.fail(ErrorCode.MULTI_STATUS));
         } catch (IllegalArgumentException |
                  DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

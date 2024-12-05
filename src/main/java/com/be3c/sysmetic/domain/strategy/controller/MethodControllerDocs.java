@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.MethodDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
@@ -16,6 +17,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @Tag(name = "매매 방식 API", description = "관리자 매매 방식 API")
 public interface MethodControllerDocs {
@@ -223,7 +226,7 @@ public interface MethodControllerDocs {
                     content = @Content(mediaType = "application/json")
             )
     })
-    public ResponseEntity<APIResponse<String>> deleteMethod(
-            @PathVariable Long id
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteMethod(
+            @RequestBody MethodDeleteRequestDto requestDto
     );
 }

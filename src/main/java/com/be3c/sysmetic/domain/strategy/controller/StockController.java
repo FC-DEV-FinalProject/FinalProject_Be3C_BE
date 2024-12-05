@@ -1,5 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockDeleteRequestDto;
 import org.springframework.http.MediaType;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
@@ -25,6 +26,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -177,17 +180,18 @@ public class StockController implements StockControllerDocs {
      */
     @Override
     //    @PreAuthorize(("hasRole('MANAGER')"))
-    @DeleteMapping("/admin/stock/{id}")
-    public ResponseEntity<APIResponse<String>> deleteItem(
-            @PathVariable Long id
+    @DeleteMapping("/admin/stock")
+    public ResponseEntity<APIResponse<Map<Long, String>>> deleteItem(
+            @RequestBody StockDeleteRequestDto requestDto
     ) {
         try {
-            if(stockService.deleteItem(id)) {
+            Map<Long, String> map = stockService.deleteItem(requestDto);
+            if(map.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(APIResponse.success());
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                    .body(APIResponse.fail(ErrorCode.MULTI_STATUS));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND));
