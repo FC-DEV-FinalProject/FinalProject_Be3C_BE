@@ -36,7 +36,6 @@ public class NoticeContoller implements NoticeControllerDocs {
     private final SecurityUtils securityUtils;
 
     private final NoticeService noticeService;
-    private final FileService fileService;
 
     private final Integer pageSize = 10; // 한 페이지 크기
 

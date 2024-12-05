@@ -7,12 +7,6 @@ import java.util.List;
 
 public interface InquiryAnswerService {
 
-    // 문의답변 단건 조회
-    InquiryAnswer findOneInquiryAnswer(Long inquiryAnswerId);
-
-    // 문의답변 전체 조회
-    List<InquiryAnswer> findAllInquiryAnswers();
-
     // 문의별 문의답변 조회
     InquiryAnswer findThatInquiryAnswer(Long inquiryId);
 

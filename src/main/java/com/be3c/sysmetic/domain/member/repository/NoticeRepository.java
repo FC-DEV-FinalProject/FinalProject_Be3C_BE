@@ -15,6 +15,7 @@ import java.util.List;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> , NoticeRepositoryCustom {
+
     // NoticeRepositoryCustom에 QueryDSL로 검색 메소드
 
     // 목록에서 삭제

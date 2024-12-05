@@ -442,12 +442,6 @@ public class InquiryController implements InquiryControllerDocs {
             @RequestBody @Valid InquiryModifyRequestDto inquiryModifyRequestDto) {
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-            }
 
             if (inquiryService.modifyInquiry(
                     inquiryId,
@@ -485,12 +479,6 @@ public class InquiryController implements InquiryControllerDocs {
             @PathVariable(value = "qnaId") Long inquiryId) {
 
         try {
-            Inquiry inquiry = inquiryService.findOneInquiry(inquiryId);
-
-            if(!Objects.equals(securityUtils.getUserIdInSecurityContext(), inquiry.getInquirer().getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(APIResponse.fail(ErrorCode.FORBIDDEN, "유효하지 않은 회원입니다."));
-            }
 
             if (inquiryService.deleteInquiry(inquiryId)) {
                 return ResponseEntity.status(HttpStatus.OK)

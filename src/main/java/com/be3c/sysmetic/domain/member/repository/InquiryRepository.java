@@ -19,32 +19,10 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
     // 상태별 문의 조회
     Page<Inquiry> findByInquiryStatus(InquiryStatus inquiryStatus, Pageable pageable);
 
-    // 일반회원별 문의 조회
-    Page<Inquiry> findByInquirerId(Long inquirerId, Pageable pageable);
-
-    // 일반회원별 상태별 문의 조회
-    Page<Inquiry> findByInquirerIdAndInquiryStatus(Long inquirerId, InquiryStatus inquiryStatus, Pageable pageable);
-
-    // 트레이더별 문의 조회
-    @Query("select i from Inquiry i where i.strategy.trader.id = :traderId")
-    Page<Inquiry> findByTraderId(@Param("traderId") Long traderId, Pageable pageable);
-
-    // 트레이더별 상태별 문의 조회
-    @Query("select i from Inquiry i where i.strategy.trader.id = :traderId and i.inquiryStatus = :inquiryStatus")
-    Page<Inquiry> findByTraderIdAndInquiryStatus(@Param("traderId") Long traderId, @Param("inquiryStatus") InquiryStatus inquiryStatus, Pageable pageable);
-
     // 목록에서 삭제
     @Modifying(clearAutomatically = true)
     @Query("delete Inquiry i where i.id in :idList")
     int bulkDelete(@Param("idList") List<Long> idList);
-
-    // 트레이더별 문의id로 조회
-    @Query("select i from Inquiry i where i.id = :inquiryId and i.traderId = :traderId order by i.id desc")
-    List<Inquiry> findInquiryByTraderIdAndInquiryId(@Param("inquiryId") Long inquiryId, @Param("traderId") Long traderId, Pageable pageable);
-
-    // 질문자별 문의id로 조회
-    @Query("select i from Inquiry i where i.id = :inquiryId and i.inquirer.id = :inquirerId order by i.id desc")
-    List<Inquiry> findInquiryByInquirerIdAndInquiryId(@Param("inquiryId") Long inquiryId, @Param("inquirerId") Long inquirerId, Pageable pageable);
 
     // 관리자 이전 문의 조회
     @Query("select i from Inquiry i where i.id < :inquiryId order by i.id desc")

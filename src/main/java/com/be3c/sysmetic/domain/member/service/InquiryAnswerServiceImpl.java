@@ -18,22 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InquiryAnswerServiceImpl implements InquiryAnswerService {
 
-    private final EntityManager em;
-
     private final InquiryAnswerRepository inquiryAnswerRepository;
     private final InquiryRepository inquiryRepository;
-
-    // 문의답변 단건 조회
-    @Override
-    public InquiryAnswer findOneInquiryAnswer(Long inquiryAnswerId) {
-        return inquiryAnswerRepository.findById(inquiryAnswerId).orElseThrow(() -> new EntityNotFoundException("문의 답변이 없습니다."));
-    }
-
-    // 문의답변 전체 조회
-    @Override
-    public List<InquiryAnswer> findAllInquiryAnswers() {
-        return inquiryAnswerRepository.findAll();
-    }
 
     // 문의별 문의답변 조회
     @Override
