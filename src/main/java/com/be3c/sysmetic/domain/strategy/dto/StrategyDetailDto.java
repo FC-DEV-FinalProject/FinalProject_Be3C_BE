@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -64,7 +65,7 @@ public class StrategyDetailDto {
     private Double averageProfitLossRate;
     private Double profitFactor;
     private Double winningRate;
-    private List<MonthlyRecord> monthlyRecord;
+    private List<YearlyRecord> monthlyRecord;
     private StrategyAnalysisResponseDto analysis;
 
     private FileWithInfoResponse fileWithInfoResponse;
