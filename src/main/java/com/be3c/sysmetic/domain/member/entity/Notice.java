@@ -23,7 +23,7 @@ public class Notice extends BaseEntity {
     @Column(name = "notice_title", nullable = false, length = 100)
     private String noticeTitle;
 
-    @Column(name = "notice_content", nullable = false, length = 2000)
+    @Column(name = "notice_content", nullable = false)
     private String noticeContent;
 
     @ManyToOne(fetch = FetchType.LAZY)

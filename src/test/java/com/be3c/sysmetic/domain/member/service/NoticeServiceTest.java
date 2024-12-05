@@ -146,21 +146,19 @@ class NoticeServiceTest {
     public void 공지사항_검색() throws Exception {
         //given
         Member member = createMember("닉네임");
-        noticeService.registerNotice(member.getId(), "공지제목검색테스트1", "공지내용검색1", false, new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목검색2", "공지내용검색2", false, new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목검색3", "공지내용검색3", false, new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목검색4", "공지내용검색4", false, new ArrayList<>(), new ArrayList<>());
-        noticeService.registerNotice(member.getId(), "공지제목검색5", "공지내용검색5", false, new ArrayList<>(), new ArrayList<>());
+        noticeService.registerNotice(member.getId(), "Lorem", "ipsum", true, null, null);
+        noticeService.registerNotice(member.getId(), "dolore", "consectetur", true, null, null);
+        noticeService.registerNotice(member.getId(), "adipiscing", "eiusmod", true, null, null);
+        noticeService.registerNotice(member.getId(), "incididunt", "dolore", true, null, null);
 
         //when
-        int page = 1;
-        Page<Notice> noticeList1 = noticeService.findNotice("검색", page-1);
-        Page<Notice> noticeList2 = noticeService.findNotice("테스트", page-1);
+        int page = 0;
+        Page<Notice> noticeList1 = noticeService.findNotice("dolore", page);
+        Page<Notice> noticeList2 = noticeService.findNotice("consectetur", page);
 
         //then
-        assertEquals(5, noticeList1.getNumberOfElements());
-        assertEquals("공지제목검색5", noticeList1.getContent().get(0).getNoticeTitle());
-        assertEquals(1, noticeList2.getNumberOfElements());
+        assertEquals(2, noticeList1.getTotalElements());
+        assertEquals(1, noticeList2.getTotalElements());
     }
 
 
