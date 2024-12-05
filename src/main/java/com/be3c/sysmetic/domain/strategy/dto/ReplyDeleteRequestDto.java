@@ -22,5 +22,5 @@ public class ReplyDeleteRequestDto {
     @Schema(description = "댓글 ID", example = "67890")
     @NotNull(message = "id는 필수 값입니다.")
     @JsonProperty("replyId")
-    private Long id;
+    private Long replyId;
 }
