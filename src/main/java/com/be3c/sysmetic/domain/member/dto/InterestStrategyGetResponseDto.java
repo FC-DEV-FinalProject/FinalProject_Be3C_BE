@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.member.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -58,7 +59,7 @@ public class InterestStrategyGetResponseDto {
         this.traderProfileImage = traderProfileImage;
         this.methodId = methodId;
         this.methodIconPath = methodIconPath;
-        this.stockIconPath = stockIconPath;
+        this.stockIconPath = new ArrayList<>();
         this.cycle = cycle;
         this.followerCount = followerCount;
         this.accumulatedProfitRatio = accumulatedProfitRatio;
