@@ -17,7 +17,7 @@ public class ReplyPostRequestDto {
 
     @Schema(description = "전략 ID", example = "12345")
     @NotNull(message = "strategyId는 필수 값입니다.")
-    @JsonProperty("strategy_id")
+    @JsonProperty("strategyId")
     private Long strategyId;
 
     @Schema(description = "댓글 내용", example = "좋은 전략이네요!")
