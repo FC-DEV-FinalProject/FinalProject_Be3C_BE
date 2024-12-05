@@ -114,7 +114,7 @@ public interface ExcelController {
             }
     )
     @GetMapping("/daily/{strategyId}")
-    ResponseEntity<APIResponse<InputStreamResource>> downloadDailyExcel(
+    ResponseEntity<InputStreamResource> downloadDailyExcel(
             @PathVariable Long strategyId);
 
     @Operation(
@@ -148,7 +148,7 @@ public interface ExcelController {
             }
     )
     @GetMapping("/daily/statistics/{strategyId}")
-    ResponseEntity<APIResponse<InputStreamResource>> downloadDailyExcelWithStatistics(
+    ResponseEntity<InputStreamResource> downloadDailyExcelWithStatistics(
             @PathVariable Long strategyId);
 
     @Operation(
@@ -182,7 +182,7 @@ public interface ExcelController {
             }
     )
     @GetMapping("/monthly/{strategyId}")
-    ResponseEntity<APIResponse<InputStreamResource>> downloadMonthlyExcel(
+    ResponseEntity<InputStreamResource> downloadMonthlyExcel(
             @PathVariable Long strategyId);
 
 }

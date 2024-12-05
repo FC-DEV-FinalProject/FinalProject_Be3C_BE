@@ -72,7 +72,7 @@ public class ExcelServiceImpl implements ExcelService {
             }
             Sheet sheet = workbook.getSheetAt(0);   // 첫번째 시트만 읽음
 
-            List<DailyTransactionInputDataDto> newDtos = new ArrayList<>(sheet.getPhysicalNumberOfRows());
+            List<DailyTransactionInputDataDto> excelData = new ArrayList<>(sheet.getPhysicalNumberOfRows());
 
             for (Row row : sheet) {
                 if (row == null || row.getRowNum() == 0) continue;  // 헤더
@@ -103,41 +103,41 @@ public class ExcelServiceImpl implements ExcelService {
                 Double depositWithdrawalAmount = doubleHandler.cutDouble(secondColumn);
                 Double profitLossAmount = doubleHandler.cutDouble(thirdColumn);
 
-                newDtos.add(new DailyTransactionInputDataDto(date, depositWithdrawalAmount, profitLossAmount));
+                excelData.add(new DailyTransactionInputDataDto(date, depositWithdrawalAmount, profitLossAmount));
             }
 
             // 저장하기
-            if(!newDtos.isEmpty()){
+            if(!excelData.isEmpty()){
                 /* 날짜 순 정렬 보장하기 */
                 boolean isSorted = true;
-                for (int i = 1; i < newDtos.size(); i++) {
-                    if (newDtos.get(i).date().isBefore(newDtos.get(i - 1).date())) {
+                for (int i = 1; i < excelData.size(); i++) {
+                    if (excelData.get(i).date().isBefore(excelData.get(i - 1).date())) {
                         isSorted = false;
                         break;
                     }
                 }
                 if (!isSorted) {
-                    newDtos.sort(Comparator.comparing(DailyTransactionInputDataDto::date));
+                    excelData.sort(Comparator.comparing(DailyTransactionInputDataDto::date));
                 }
 
 
                 /* 비교해서 save */
                 List<Daily> saveTargets = new ArrayList<>();
-                List<Daily> existingEntities = dailyRepository.findByDateGreaterThanEqualOrderByDateAsc(newDtos.get(0).date());
+                List<Daily> existingEntities = dailyRepository.findByDateGreaterThanEqualAndStrategyOrderByDateAsc(excelData.get(0).date(), strategy);
 
-                for (DailyTransactionInputDataDto newDto : newDtos) {
+                for (DailyTransactionInputDataDto excelDailyDto : excelData) {
 
-                    LocalDate newDailyDate = newDto.date();
+                    LocalDate newDailyDate = excelDailyDto.date();
 
-                    int existingIndex = Collections.binarySearch(existingEntities, newDto.toEntity(strategy));
+                    int existingIndex = Collections.binarySearch(existingEntities, excelDailyDto.toEntity(strategy));
 
                     if (existingIndex < 0) {    /* Add completely new data */
 
                         Daily daily = Daily.builder()
                                 .strategy(strategy)
                                 .date(newDailyDate)
-                                .depositWithdrawalAmount(newDto.depositWithdrawalAmount())
-                                .profitLossAmount(newDto.profitLossAmount())
+                                .depositWithdrawalAmount(excelDailyDto.depositWithdrawalAmount())
+                                .profitLossAmount(excelDailyDto.profitLossAmount())
 
                                 .principal(0.0)
                                 .currentBalance(0.0)
@@ -156,13 +156,13 @@ public class ExcelServiceImpl implements ExcelService {
                         Daily.DailyBuilder entityBuilder = Daily.builder();
                         boolean buildFlag = false;
 
-                        if (!doubleHandler.compare(newDto.depositWithdrawalAmount(), existingEntity.getDepositWithdrawalAmount())) {
-                            entityBuilder.depositWithdrawalAmount(newDto.depositWithdrawalAmount());
+                        if (!doubleHandler.compare(excelDailyDto.depositWithdrawalAmount(), existingEntity.getDepositWithdrawalAmount())) {
+                            entityBuilder.depositWithdrawalAmount(excelDailyDto.depositWithdrawalAmount());
                             buildFlag = true;
                         }
 
-                        if (!doubleHandler.compare(newDto.profitLossAmount(), existingEntity.getProfitLossAmount())) {
-                            entityBuilder.profitLossAmount(newDto.profitLossAmount());
+                        if (!doubleHandler.compare(excelDailyDto.profitLossAmount(), existingEntity.getProfitLossAmount())) {
+                            entityBuilder.profitLossAmount(excelDailyDto.profitLossAmount());
                             buildFlag = true;
                         }
 
@@ -189,7 +189,7 @@ public class ExcelServiceImpl implements ExcelService {
                 // 계산 컬럼 저장하기
                 if(!saveTargets.isEmpty()){
                     /* 계산 타겟을 추가하기 */
-                    List<Daily> calculateTargets = dailyRepository.findByDateGreaterThanEqualOrderByDateAsc(saveTargets.get(0).getDate());
+                    List<Daily> calculateTargets = dailyRepository.findByDateGreaterThanEqualAndStrategyOrderByDateAsc(saveTargets.get(0).getDate(), strategy);
                     List<Daily> calculatedTargets = new ArrayList<>(calculateTargets.size());
 
                     /* 계산하기 */
@@ -239,9 +239,16 @@ public class ExcelServiceImpl implements ExcelService {
     public InputStream downloadDailyExcel(Long strategyId) {
 
         List<Daily> entities = dailyRepository.findAllByStrategyIdOrderByDateAsc(strategyId);
+        if(entities.isEmpty())
+            throw new RuntimeException("다운로드 할 데이터가 없습니다");
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
+
+            // 날짜 형식
+            CellStyle dateCellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
 
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("날짜");
@@ -252,17 +259,23 @@ public class ExcelServiceImpl implements ExcelService {
             for (Daily daily : entities) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(daily.getDate());
+                row.getCell(0).setCellStyle(dateCellStyle); // 날짜 형식 지정
                 row.createCell(1).setCellValue(daily.getDepositWithdrawalAmount());
                 row.createCell(2).setCellValue(daily.getProfitLossAmount());
             }
 
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            workbook.write(byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                workbook.write(byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-            return new ByteArrayInputStream(byteArray);
+                return new ByteArrayInputStream(byteArray);
 
+            }catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -281,6 +294,11 @@ public class ExcelServiceImpl implements ExcelService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
 
+            // 날짜 형식
+            CellStyle dateCellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("날짜");
             headerRow.createCell(1).setCellValue("원금");
@@ -294,6 +312,7 @@ public class ExcelServiceImpl implements ExcelService {
             for (Daily daily : entities) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(daily.getDate());
+                row.getCell(0).setCellStyle(dateCellStyle); // 날짜 형식 지정
                 row.createCell(1).setCellValue(daily.getPrincipal());
                 row.createCell(2).setCellValue(daily.getDepositWithdrawalAmount());
                 row.createCell(3).setCellValue(daily.getProfitLossAmount());
@@ -322,6 +341,13 @@ public class ExcelServiceImpl implements ExcelService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Daily Transaction Data");
 
+            // 날짜 형식
+            CreationHelper createHelper = workbook.getCreationHelper();
+            CellStyle yearCellStyle = workbook.createCellStyle();
+            yearCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy"));
+            CellStyle monthCellStyle = workbook.createCellStyle();
+            monthCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("mm"));
+
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("년도");
             headerRow.createCell(1).setCellValue("월");
@@ -335,7 +361,9 @@ public class ExcelServiceImpl implements ExcelService {
             for (Monthly monthly : entities) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(monthly.getYearNumber());
+                row.getCell(0).setCellStyle(yearCellStyle);
                 row.createCell(1).setCellValue(monthly.getMonthNumber());
+                row.getCell(1).setCellStyle(monthCellStyle);
                 row.createCell(2).setCellValue(monthly.getAverageMonthlyPrincipal());
                 row.createCell(3).setCellValue(monthly.getProfitLossAmount());
                 row.createCell(4).setCellValue(monthly.getProfitLossRate());

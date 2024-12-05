@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
+import com.be3c.sysmetic.domain.strategy.util.ApprovalStatus;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -62,6 +63,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
         findPage.getContent().forEach(strategy -> {
             strategy.setMethodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, strategy.getMethodId())));
             strategy.setStockList(stockGetter.getStocks(strategy.getStrategyId()));
+            strategy.setApprovalStatusCode(getApprovalStatus(strategy));
         });
 
         return PageResponse.<AdminStrategyGetResponseDto>builder()
@@ -71,6 +73,10 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
                 .totalElement(findPage.getTotalElements())
                 .content(findPage.getContent())
                 .build();
+    }
+
+    private String getApprovalStatus(AdminStrategyGetResponseDto dto) {
+        return ApprovalStatus.getDescriptionByCode(dto.getApprovalStatusCode());
     }
 
     /*

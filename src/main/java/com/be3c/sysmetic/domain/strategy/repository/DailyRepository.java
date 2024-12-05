@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.dto.KpRatioParametersDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
+import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -270,7 +271,7 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
 
     /* 엑셀을 위한 메서드 */
     List<Daily> findAllByStrategyIdOrderByDateAsc(Long strategyId);         // 전략에서도 사용!
-    List<Daily> findByDateGreaterThanEqualOrderByDateAsc(LocalDate date);
+    List<Daily> findByDateGreaterThanEqualAndStrategyOrderByDateAsc(LocalDate date, Strategy strategy);
     Optional<Daily> findTop1ByDateBeforeOrderByDateDesc(LocalDate date);
 
 
@@ -293,6 +294,6 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     int deleteByStrategyId(Long strategyId);
 
     // 메인 페이지 평균 통합 누적 손익률
-    @Query("SELECT SUM(d.accumulatedProfitLossRate) / COUNT(d.date) FROM Daily d WHERE d.date >= :startDate GROUP BY d.date")
-    Optional<List<Double>> findAccumulatedProfitLossRates(@Param("startDate") LocalDate startDate);
+    @Query("SELECT SUM(d.accumulatedProfitLossRate) / COUNT(d.date) FROM Daily d GROUP BY d.date ORDER BY d.date ASC")
+    Optional<List<Double>> findAccumulatedProfitLossRates();
 }
