@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyStatusCode;
@@ -8,7 +7,6 @@ import com.be3c.sysmetic.domain.strategy.entity.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,91 +111,71 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
         findGraphAnalysis : 분석 그래프 데이터 - optionOne, optionTwo, period 에 해당하는 컬럼 반환
     */
     @Override
-    public StrategyAnalysisResponseDto findGraphAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
-        LocalDate latestDate = jpaQueryFactory
-                .select(strategyGraphAnalysis.date.max())
-                .from(strategyGraphAnalysis)
-                .where(strategyGraphAnalysis.strategy.id.eq(strategyId))
-                .fetchOne();
-
-        LocalDate startDate = calculateStartDate(latestDate, period);
+    public StrategyAnalysisResponseDto findGraphAnalysis(Long strategyId) {
 
         List<StrategyGraphAnalysis> result = jpaQueryFactory
                 .selectFrom(strategyGraphAnalysis)
-                .where(strategyGraphAnalysis.strategy.id.eq(strategyId),
-                        strategyGraphAnalysis.date.between(startDate, latestDate))
+                .where(strategyGraphAnalysis.strategy.id.eq(strategyId))
                 .orderBy(strategyGraphAnalysis.date.asc())
                 .fetch();
 
-        List<String> xAxis = result.stream()
+        if (result.isEmpty()) return null;
+
+        List<String> dates = result.stream()
                 .map(data -> data.getDate().toString())
                 .collect(Collectors.toList());
 
-        Map<StrategyAnalysisOption, List<Double>> yAxis = new HashMap<>();
 
-        yAxis.put(optionOne, result.stream()
-                .map(data -> getValueByOption(data, optionOne))
-                .collect(Collectors.toList()));
-
-        if (!optionOne.equals(optionTwo)) {
-            yAxis.put(optionTwo, result.stream()
-                    .map(data -> getValueByOption(data, optionTwo))
-                    .collect(Collectors.toList()));
-        }
-
-        return new StrategyAnalysisResponseDto(xAxis, yAxis);
+        return StrategyAnalysisResponseDto.builder()
+                .xAxis(dates)
+                .standardAmounts(result.stream()
+                                .map(analysis -> analysis.getStandardAmount())
+                                .collect(Collectors.toList()))
+                .currentBalance(result.stream()
+                        .map(analysis -> analysis.getCurrentBalance())
+                        .collect(Collectors.toList()))
+                .principal(result.stream()
+                        .map(analysis -> analysis.getPrincipal())
+                        .collect(Collectors.toList()))
+                .accumulatedDepositWithdrawalAmount(result.stream()
+                        .map(analysis -> analysis.getAccumulatedDepositWithdrawalAmount())
+                        .collect(Collectors.toList()))
+                .depositWithdrawalAmount(result.stream()
+                        .map(analysis -> analysis.getDepositWithdrawalAmount())
+                        .collect(Collectors.toList()))
+                .dailyProfitLossAmount(result.stream()
+                        .map(analysis -> analysis.getProfitLossAmount())
+                        .collect(Collectors.toList()))
+                .dailyProfitLossRate(result.stream()
+                        .map(analysis -> analysis.getProfitLossRate())
+                        .collect(Collectors.toList()))
+                .accumulatedProfitLossAmount(result.stream()
+                        .map(analysis -> analysis.getAccumulatedProfitLossAmount())
+                        .collect(Collectors.toList()))
+                .currentCapitalReductionAmount(result.stream()
+                        .map(analysis -> analysis.getCurrentCapitalReductionAmount())
+                        .collect(Collectors.toList()))
+                .currentCapitalReductionRate(result.stream()
+                        .map(analysis -> analysis.getCurrentCapitalReductionRate())
+                        .collect(Collectors.toList()))
+                .averageProfitLossAmount(result.stream()
+                        .map(analysis -> analysis.getAverageProfitLossAmount())
+                        .collect(Collectors.toList()))
+                .averageProfitLossRate(result.stream()
+                        .map(analysis -> analysis.getAverageProfitLossRate())
+                        .collect(Collectors.toList()))
+                .winningRate(result.stream()
+                        .map(analysis -> analysis.getWinningRate())
+                        .collect(Collectors.toList()))
+                .profitFactor(result.stream()
+                        .map(analysis -> analysis.getProfitFactor())
+                        .collect(Collectors.toList()))
+                .roa(result.stream()
+                        .map(analysis -> analysis.getRoa())
+                        .collect(Collectors.toList()))
+                .build();
     }
 
-    private LocalDate calculateStartDate(LocalDate latestDate, String period) {
-        switch (period) {
-            case "ONE_MONTH":
-                return latestDate.minusMonths(1);
-            case "THREE_MONTH":
-                return latestDate.minusMonths(3);
-            case "SIX_MONTH":
-                return latestDate.minusMonths(6);
-            case "ONE_YEAR":
-                return latestDate.minusYears(1);
-            case "ALL":
-            default:
-                return LocalDate.of(2000, 1, 1);        // 2000년 1월 1일 이후의 기간
-        }
-    }
-
-    private Double getValueByOption(StrategyGraphAnalysis data, StrategyAnalysisOption option) {
-        switch (option) {
-            case STANDARD_AMOUNT:
-                return data.getStandardAmount();
-            case CURRENT_BALANCE:
-                return data.getCurrentBalance();
-            case PRINCIPAL:
-                return data.getPrincipal();
-            case ACCUMULATED_DEPOSIT_WITHDRAWAL_AMOUNT:
-                return data.getAccumulatedDepositWithdrawalAmount();
-            case DEPOSIT_WITHDRAWAL_AMOUNT:
-                return data.getDepositWithdrawalAmount();
-            case DAILY_PROFIT_LOSS_AMOUNT:
-                return data.getProfitLossAmount();
-            case DAILY_PROFIT_LOSS_RATE:
-                return data.getProfitLossRate();
-            case ACCUMULATED_PROFIT_LOSS_AMOUNT:
-                return data.getAccumulatedProfitLossAmount();
-            case CURRENT_CAPITAL_REDUCTION_AMOUNT:
-                return data.getCurrentCapitalReductionAmount();
-            case AVERAGE_PROFIT_LOSS_AMOUNT:
-                return data.getAverageProfitLossAmount();
-            case AVERAGE_PROFIT_LOSS_RATE:
-                return data.getAverageProfitLossRate();
-            case WINNING_RATE:
-                return data.getWinningRate();
-            case PROFIT_FACTOR:
-                return data.getProfitFactor();
-            case ROA:
-                return data.getRoa();
-            default:
-                throw new IllegalArgumentException("Unknown option: " + option);
-        }
-    }
 
     // 매매방식 조건
     private BooleanBuilder getMethodCond(StrategySearchRequestDto strategySearchRequestDto) {

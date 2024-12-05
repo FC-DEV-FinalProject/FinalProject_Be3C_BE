@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
 import com.be3c.sysmetic.domain.strategy.service.StrategyDetailService;
@@ -38,15 +37,10 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
        getAnalysis : 전략 상세 페이지 그래프 데이터 요청
     */
     @Override
-    @GetMapping("/analysis")
+    @GetMapping("/analysis/{id}")
     public APIResponse<StrategyAnalysisResponseDto> getAnalysis(
-            @RequestParam("id") Long id,
-            @RequestParam(name = "optionOne", defaultValue = "ACCUMULATED_PROFIT_LOSS_RATE") StrategyAnalysisOption optionOne,
-            @RequestParam(name = "optionTwo", defaultValue = "PRINCIPAL") StrategyAnalysisOption optionTwo,
-            @RequestParam(name = "period", defaultValue = "ALL") String period) {
+            @PathVariable("id") Long id) {
 
-        StrategyAnalysisResponseDto analysis = strategyDetailService.getAnalysis(id, optionOne, optionTwo, period);
-
-        return APIResponse.success(analysis);
+        return strategyDetailService.getAnalysis(id);
     }
 }
