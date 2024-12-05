@@ -8,6 +8,7 @@ import com.be3c.sysmetic.domain.strategy.dto.ReplyPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Reply;
 import com.be3c.sysmetic.domain.strategy.repository.ReplyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
@@ -38,6 +39,8 @@ public class ReplyServiceImpl implements ReplyService{
     private final ReplyRepository replyRepository;
 
     private final StrategyRepository strategyRepository;
+
+    private final StrategyViewAuthorize strategyViewAuthorize;
 
     @Override
     public PageResponse<PageReplyResponseDto> getMyReplyPage(Integer page) {
@@ -71,6 +74,9 @@ public class ReplyServiceImpl implements ReplyService{
 
     @Override
     public PageResponse<PageReplyResponseDto> getReplyPage(Long strategyId, Integer page) {
+
+        strategyViewAuthorize.Authorize(strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new));
+
         Pageable pageable = PageRequest.of(
                 page,
                 10,

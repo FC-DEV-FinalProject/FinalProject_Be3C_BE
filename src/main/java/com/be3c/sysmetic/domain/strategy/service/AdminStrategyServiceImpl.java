@@ -3,6 +3,7 @@ package com.be3c.sysmetic.domain.strategy.service;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.StrategyApprovalHistory;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyApprovalRepository;
+import com.be3c.sysmetic.domain.strategy.util.ApprovalStatus;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
@@ -75,18 +76,7 @@ public class AdminStrategyServiceImpl implements AdminStrategyService {
     }
 
     private String getApprovalStatus(AdminStrategyGetResponseDto dto) {
-        switch (dto.getApprovalStatusCode()) {
-            case "SA001":
-                return "승인요청";
-            case "SA002":
-                return "승인";
-            case "SA003":
-                return "반려";
-            case "SA000":
-                return "요청 전";
-            default:
-                return "요청 전";
-        }
+        return ApprovalStatus.getDescriptionByCode(dto.getApprovalStatusCode());
     }
 
     /*

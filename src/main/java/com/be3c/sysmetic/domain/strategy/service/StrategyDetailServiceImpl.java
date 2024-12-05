@@ -19,6 +19,7 @@ import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
         StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
+
+        strategyViewAuthorize.Authorize(strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new));
 
         if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
 
