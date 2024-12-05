@@ -438,11 +438,7 @@ public class NoticeContoller implements NoticeControllerDocs {
         }
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(APIResponse.fail(ErrorCode.NOT_FOUND));
-        }
-        catch (StrategyBadRequestException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(e.getErrorCode(), e.getMessage()));
+                    .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
         }
     }
 }

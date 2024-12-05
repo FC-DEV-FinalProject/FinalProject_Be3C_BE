@@ -350,14 +350,6 @@ public class InquiryController implements InquiryControllerDocs {
              return ResponseEntity.status(HttpStatus.NOT_FOUND)
                      .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
          }
-         catch (MemberBadRequestException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
-         }
-         catch (StrategyBadRequestException e) {
-             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                     .body(APIResponse.fail(e.getErrorCode(), e.getMessage()));
-         }
     }
 
 
@@ -454,10 +446,6 @@ public class InquiryController implements InquiryControllerDocs {
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
-        }
-        catch (StrategyBadRequestException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(e.getErrorCode(), e.getMessage()));
         }
     }
 
@@ -626,10 +614,6 @@ public class InquiryController implements InquiryControllerDocs {
         catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(APIResponse.fail(ErrorCode.NOT_FOUND, e.getMessage()));
-        }
-        catch (MemberBadRequestException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(APIResponse.fail(ErrorCode.FORBIDDEN, e.getMessage()));
         }
     }
 }

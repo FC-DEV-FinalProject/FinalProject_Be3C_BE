@@ -1,14 +1,10 @@
 package com.be3c.sysmetic.domain.member.service;
 
 import com.be3c.sysmetic.domain.member.dto.*;
-import com.be3c.sysmetic.domain.member.entity.Inquiry;
 import com.be3c.sysmetic.domain.member.entity.Member;
 import com.be3c.sysmetic.domain.member.entity.Notice;
 import com.be3c.sysmetic.domain.member.repository.MemberRepository;
 import com.be3c.sysmetic.domain.member.repository.NoticeRepository;
-import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
-import com.be3c.sysmetic.domain.strategy.exception.StrategyExceptionMessage;
-import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.dto.FileWithInfoResponse;
@@ -22,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.be3c.sysmetic.domain.member.message.NoticeDeleteFailMessage.NOT_FOUND_NOTICE;
 
@@ -267,36 +260,28 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
-        List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
+        List<Notice> previousNoticeList = noticeRepository.findPreviousNoticeAdmin(noticeId, PageRequest.of(0, 1));
         String previousNoticeTitle;
-        if (previousNoticeList.isEmpty()) {
-            previousNoticeTitle = null;
-        } else {
-            Notice previousNotice = previousNoticeList.get(0);
-            previousNoticeTitle = previousNotice.getNoticeTitle();
-        }
         LocalDateTime previousNoticeWriteDate;
         if (previousNoticeList.isEmpty()) {
+            previousNoticeTitle = null;
             previousNoticeWriteDate = null;
         } else {
             Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeTitle = previousNotice.getNoticeTitle();
             previousNoticeWriteDate = previousNotice.getWriteDate();
         }
 
-        List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
+        List<Notice> nextNoticeList = noticeRepository.findNextNoticeAdmin(noticeId, PageRequest.of(0, 1));
         String nextNoticeTitle;
-        if (nextNoticeList.isEmpty()) {
-            nextNoticeTitle = null;
-        } else {
-            Notice previousNotice = nextNoticeList.get(0);
-            nextNoticeTitle = previousNotice.getNoticeTitle();
-        }
         LocalDateTime nextNoticeWriteDate;
         if (nextNoticeList.isEmpty()) {
+            nextNoticeTitle = null;
             nextNoticeWriteDate = null;
         } else {
-            Notice previousNotice = nextNoticeList.get(0);
-            nextNoticeWriteDate = previousNotice.getWriteDate();
+            Notice nextNotice = nextNoticeList.get(0);
+            nextNoticeTitle = nextNotice.getNoticeTitle();
+            nextNoticeWriteDate = nextNotice.getWriteDate();
         }
 
         List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
@@ -353,42 +338,30 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public NoticeDetailShowResponseDto noticeIdToticeDetailShowResponseDto(Long noticeId, Integer page, String searchText) {
 
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
-
-        if (!notice.getIsOpen()) {
-            throw new StrategyBadRequestException(StrategyExceptionMessage.INVALID_MEMBER.getMessage(), ErrorCode.FORBIDDEN);
-        }
+        Notice notice = noticeRepository.findByIdAndAndIsOpen(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
         List<Notice> previousNoticeList = noticeRepository.findPreviousNotice(noticeId, PageRequest.of(0, 1));
         String previousNoticeTitle;
-        if (previousNoticeList.isEmpty()) {
-            previousNoticeTitle = null;
-        } else {
-            Notice previousNotice = previousNoticeList.get(0);
-            previousNoticeTitle = previousNotice.getNoticeTitle();
-        }
         LocalDateTime previousNoticeWriteDate;
         if (previousNoticeList.isEmpty()) {
+            previousNoticeTitle = null;
             previousNoticeWriteDate = null;
         } else {
             Notice previousNotice = previousNoticeList.get(0);
+            previousNoticeTitle = previousNotice.getNoticeTitle();
             previousNoticeWriteDate = previousNotice.getWriteDate();
         }
 
         List<Notice> nextNoticeList = noticeRepository.findNextNotice(noticeId, PageRequest.of(0, 1));
         String nextNoticeTitle;
-        if (nextNoticeList.isEmpty()) {
-            nextNoticeTitle = null;
-        } else {
-            Notice previousNotice = nextNoticeList.get(0);
-            nextNoticeTitle = previousNotice.getNoticeTitle();
-        }
         LocalDateTime nextNoticeWriteDate;
         if (nextNoticeList.isEmpty()) {
+            nextNoticeTitle = null;
             nextNoticeWriteDate = null;
         } else {
-            Notice previousNotice = nextNoticeList.get(0);
-            nextNoticeWriteDate = previousNotice.getWriteDate();
+            Notice nextNotice = nextNoticeList.get(0);
+            nextNoticeTitle = nextNotice.getNoticeTitle();
+            nextNoticeWriteDate = nextNotice.getWriteDate();
         }
 
         List<NoticeDetailFileShowResponseDto> fileDtoList = new ArrayList<>();
