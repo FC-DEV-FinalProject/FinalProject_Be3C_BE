@@ -9,15 +9,9 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.be3c.sysmetic.domain.strategy.entity.QStrategy.strategy;
@@ -86,13 +80,8 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
                                 .desc()
                 };
                 break;
-
-            // TODO 방어형 DEFENSIVE
-            // case "DEFENSIVE":
-            //     // 누적 수익률 데이터 가져오기
-            //     NumberExpression<Double> averageProfitLossRate = strategyStatistics.averageProfitLossRate.doubleValue();
-            //
-            //
+            default :
+                return null;
         }
 
         List<Strategy> result = jpaQueryFactory
@@ -105,7 +94,6 @@ public class StrategyRepositoryImpl implements StrategyRepositoryCustom {
 
         return new PageImpl<>(result, pageable, result.size());
     }
-
 
     /*
         findGraphAnalysis : 분석 그래프 데이터 - optionOne, optionTwo, period 에 해당하는 컬럼 반환
