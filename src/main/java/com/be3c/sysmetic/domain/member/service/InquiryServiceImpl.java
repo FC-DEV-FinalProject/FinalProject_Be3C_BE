@@ -100,7 +100,7 @@ public class InquiryServiceImpl implements InquiryService {
         return true;
     }
 
-    // 질문자 삭제
+//    질문자 삭제
     @Override
     @Transactional
     public boolean deleteInquiry(Long inquiryId) {
