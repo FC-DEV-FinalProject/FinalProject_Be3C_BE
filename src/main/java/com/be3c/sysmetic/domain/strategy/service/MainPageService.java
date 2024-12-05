@@ -7,5 +7,5 @@ public interface MainPageService {
 
     MainPageDto getMain();
 
-    MainPageAnalysisDto getAnalysis(String period);
+    MainPageAnalysisDto getAnalysis();
 }

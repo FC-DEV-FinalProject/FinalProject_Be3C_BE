@@ -11,6 +11,7 @@ import com.be3c.sysmetic.global.util.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,35 +52,15 @@ public class MainPageServiceImpl implements MainPageService {
 
     @Override
     @Transactional
-    public MainPageAnalysisDto getAnalysis(String period) {
-
-        LocalDate currentDate = LocalDate.now();
-        LocalDate startDate = calculateStartDate(currentDate, period);
+    public MainPageAnalysisDto getAnalysis() {
 
         return MainPageAnalysisDto.builder()
                 .smScoreTopStrategyName(strategyRepository.findTop1SmScore().orElse(null))
-                .xAxis(strategyGraphAnalysisRepository.findDates(startDate).orElse(null))
-                .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts(startDate).orElse(null))
-                .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates(startDate).orElse(null))
+                .xAxis(strategyGraphAnalysisRepository.findDates().orElse(null))
+                .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts().orElse(null))
+                .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates().orElse(null))
                 .build();
     }
-
-    private LocalDate calculateStartDate(LocalDate currentDate, String period) {
-        switch (period) {
-            case "ONE_MONTH":
-                return currentDate.minusMonths(1);
-            case "THREE_MONTH":
-                return currentDate.minusMonths(3);
-            case "SIX_MONTH":
-                return currentDate.minusMonths(6);
-            case "ONE_YEAR":
-                return currentDate.minusYears(1);
-            case "ALL":
-            default:
-                return LocalDate.of(2000, 1, 1);        // 2000년 1월 1일 이후의 기간
-        }
-    }
-
 
     // setTop3FollowerTrader : 트레이더 팔로우 수 Top 3
     private List<TraderRankingDto> setTop3FollowerTrader(){
