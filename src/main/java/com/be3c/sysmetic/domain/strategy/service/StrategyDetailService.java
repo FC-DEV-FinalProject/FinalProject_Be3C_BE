@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyDetailDto;
 import com.be3c.sysmetic.domain.strategy.entity.Daily;
@@ -14,7 +13,7 @@ public interface StrategyDetailService {
     StrategyDetailDto getDetail(Long id);
 
     // 분석 지표 그래프 데이터 요청
-    StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period);
+    APIResponse<StrategyAnalysisResponseDto> getAnalysis(Long strategyId);
 
     // 분석 그래프 데이터 등록
     APIResponse<String> saveAnalysis(Long id, LocalDate date);

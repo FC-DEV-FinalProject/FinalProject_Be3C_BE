@@ -23,6 +23,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -107,15 +108,15 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     // 분석 지표 그래프 데이터 요청
     @Override
     @Transactional
-    public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+    public APIResponse<StrategyAnalysisResponseDto> getAnalysis(Long strategyId) {
 
-        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId);
 
         strategyViewAuthorize.Authorize(strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new));
 
-        if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
+        if (analysis == null || analysis.getXAxis().isEmpty()) return APIResponse.fail(ErrorCode.NOT_FOUND, "분석 그래프가 존재하지 않습니다.");
 
-        return analysis;
+        return APIResponse.success(analysis);
     }
 
 
