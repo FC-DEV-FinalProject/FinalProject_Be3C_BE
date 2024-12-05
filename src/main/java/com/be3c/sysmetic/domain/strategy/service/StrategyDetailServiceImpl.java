@@ -12,12 +12,14 @@ import com.be3c.sysmetic.domain.strategy.repository.*;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StockGetter;
 import com.be3c.sysmetic.domain.strategy.util.StrategyIndicatorsCalculator;
+import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.util.SecurityUtils;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
 import com.be3c.sysmetic.global.util.file.dto.FileRequest;
 import com.be3c.sysmetic.global.util.file.service.FileService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
     private final MonthlyRepository monthlyRepository;
     private final DailyRepository dailyRepository;
+    private final StrategyViewAuthorize strategyViewAuthorize;
     private final StockGetter stockGetter;
     private final DoubleHandler doubleHandler;
     private final FileService fileService;
@@ -52,6 +55,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     @Override
     @Transactional
     public StrategyDetailDto getDetail(Long id) {
+
+        strategyViewAuthorize.Authorize(strategyRepository.findById(id).orElseThrow(NoSuchElementException::new));
 
         StrategyDetailStatistics statistics = strategyStatisticsRepository.findStrategyDetailStatistics(id);
         StrategyDetailDto detailDto = strategyDetailRepository.findPublicStrategy(id)
@@ -106,6 +111,8 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
 
         StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
+
+        strategyViewAuthorize.Authorize(strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new));
 
         if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
 
