@@ -20,7 +20,8 @@ public class MainPageAnalysisDto {
     */
 
     private String smScoreTopStrategyName;
-    private List<LocalDate> xAxis;
+    private List<LocalDate> xAxisAverageStandardAmount;
     private List<Double> averageStandardAmount;
-    private List<Double> accumProfitLossRate;
+    private List<LocalDate> xAxisAccumulatedProfitLossRate;
+    private List<Double> accumulatedProfitLossRate;
 }

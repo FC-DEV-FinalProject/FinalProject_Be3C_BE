@@ -296,4 +296,8 @@ public interface DailyRepository extends JpaRepository<Daily, Long> {
     // 메인 페이지 평균 통합 누적 손익률
     @Query("SELECT SUM(d.accumulatedProfitLossRate) / COUNT(d.date) FROM Daily d GROUP BY d.date ORDER BY d.date ASC")
     Optional<List<Double>> findAccumulatedProfitLossRates();
+
+    // 메인 페이지 평균 통합 누적 손익률 날짜
+    @Query("SELECT d.date FROM Daily d GROUP BY d.date ORDER BY d.date ASC")
+    Optional<List<LocalDate>> findDates();
 }

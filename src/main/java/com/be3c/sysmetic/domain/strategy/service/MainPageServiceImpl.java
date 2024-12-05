@@ -56,9 +56,10 @@ public class MainPageServiceImpl implements MainPageService {
 
         return MainPageAnalysisDto.builder()
                 .smScoreTopStrategyName(strategyRepository.findTop1SmScore().orElse(null))
-                .xAxis(strategyGraphAnalysisRepository.findDates().orElse(null))
+                .xAxisAverageStandardAmount(strategyGraphAnalysisRepository.findDates().orElse(null))
                 .averageStandardAmount(strategyGraphAnalysisRepository.findAverageStandardAmounts().orElse(null))
-                .accumProfitLossRate(dailyRepository.findAccumulatedProfitLossRates().orElse(null))
+                .xAxisAccumulatedProfitLossRate(dailyRepository.findDates().orElse(null))
+                .accumulatedProfitLossRate(dailyRepository.findAccumulatedProfitLossRates().orElse(null))
                 .build();
     }
 
