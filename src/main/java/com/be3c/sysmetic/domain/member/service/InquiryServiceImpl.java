@@ -304,7 +304,7 @@ public class InquiryServiceImpl implements InquiryService {
         } else {
             traderNickname = trader.getNickname();
         }
-        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerAdminShowResponseDto.builder()
                 .page(page)
@@ -348,7 +348,7 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy) {
 
-        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
         String methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getId()));
         StockListDto stockList = stockGetter.getStocks(strategy.getId());
 
@@ -498,7 +498,7 @@ public class InquiryServiceImpl implements InquiryService {
         } else {
             traderNickname = trader.getNickname();
         }
-        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerInquirerShowResponseDto.builder()
                 .page(page)
@@ -623,7 +623,7 @@ public class InquiryServiceImpl implements InquiryService {
         } else {
             traderNickname = trader.getNickname();
         }
-        String traderProfileImagePath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
+        String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, inquiry.getTraderId()));
 
         return InquiryAnswerTraderShowResponseDto.builder()
                 .page(page)
