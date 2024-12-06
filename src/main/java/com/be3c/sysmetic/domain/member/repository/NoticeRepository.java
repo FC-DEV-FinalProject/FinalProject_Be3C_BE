@@ -12,11 +12,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> , NoticeRepositoryCustom {
 
     // NoticeRepositoryCustom에 QueryDSL로 검색 메소드
+
+    @Query("select n from Notice n where n.id = :noticeId and n.isOpen = true")
+    Optional<Notice> findByIdAndAndIsOpen(@Param("noticeId") Long noticeId);
 
     // 목록에서 삭제
     @Modifying(clearAutomatically = true)
@@ -26,12 +30,20 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> , NoticeRe
     // 제목으로 찾기
     List<Notice> findByNoticeTitle(String noticeTitle);
 
-    // 이전 문의 조회
+    // 관리자 이전 문의 조회
     @Query("select n from Notice n where n.id < :noticeId order by n.id desc")
+    List<Notice> findPreviousNoticeAdmin(@Param("noticeId") Long noticeId, Pageable pageable);
+
+    // 관리자 다음 문의 조회
+    @Query("select n from Notice n where n.id > :noticeId order by n.id asc")
+    List<Notice> findNextNoticeAdmin(@Param("noticeId") Long noticeId, Pageable pageable);
+
+    // 일반 이전 문의 조회
+    @Query("select n from Notice n where n.id < :noticeId and n.isOpen = true order by n.id desc")
     List<Notice> findPreviousNotice(@Param("noticeId") Long noticeId, Pageable pageable);
 
-    // 다음 문의 조회
-    @Query("select n from Notice n where n.id > :noticeId order by n.id asc")
+    // 일반 다음 문의 조회
+    @Query("select n from Notice n where n.id > :noticeId and n.isOpen = true order by n.id asc")
     List<Notice> findNextNotice(@Param("noticeId") Long noticeId, Pageable pageable);
 
     @Query("SELECT new com.be3c.sysmetic.global.util.admin.dto.AdminNoticeResponseDto(" +

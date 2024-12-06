@@ -140,15 +140,8 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "searchType", description = "검색 유형 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)"),
-            @Parameter(name = "searchText", description = "검색 텍스트")
-    })
     ResponseEntity<APIResponse<NoticeDetailAdminShowResponseDto>> showAdminNoticeDetail(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
-            @RequestParam(value = "searchText", required = false) String searchText);
+            @PathVariable(name="noticeId") Long noticeId);
 
 
     // 관리자 공지사항 수정 화면 조회 API
@@ -177,15 +170,8 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "searchType", description = "검색 유형 (사용: title, content, titlecontent, writer) (설명: 제목, 내용, 제목+내용, 작성자)"),
-            @Parameter(name = "searchText", description = "검색 텍스트")
-    })
     ResponseEntity<APIResponse<NoticeShowModifyPageResponseDto>> showModifyAdminNotice(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchType", required = false, defaultValue = "title") String searchType,
-            @RequestParam(value = "searchText", required = false) String searchText);
+            @PathVariable(name="noticeId") Long noticeId);
 
 
     // 관리자 공지사항 수정 API
@@ -310,6 +296,10 @@ public interface NoticeControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자 인증 정보가 없음 (FORBIDDEN)"
+            ),
+            @ApiResponse(
                     responseCode = "200",
                     description = "공지사항 상세 조회 성공 (OK)"
             ),
@@ -324,11 +314,6 @@ public interface NoticeControllerDocs {
                     content = @Content(schema = @Schema(implementation = APIResponse.class))
             )
     })
-    @Parameters({
-            @Parameter(name = "searchText", description = "검색 텍스트")
-    })
     ResponseEntity<APIResponse<NoticeDetailShowResponseDto>> showNoticeDetail(
-            @PathVariable(name="noticeId") Long noticeId,
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "searchText", required = false) String searchText);
+            @PathVariable(name="noticeId") Long noticeId);
 }

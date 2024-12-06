@@ -12,6 +12,9 @@ import com.be3c.sysmetic.domain.strategy.util.StrategyViewAuthorize;
 import com.be3c.sysmetic.global.common.Code;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.util.SecurityUtils;
+import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
+import com.be3c.sysmetic.global.util.file.dto.FileRequest;
+import com.be3c.sysmetic.global.util.file.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReplyServiceImpl implements ReplyService{
     private final SecurityUtils securityUtils;
+    private final FileService fileService;
 
     private final MemberRepository memberRepository;
 
@@ -91,6 +95,12 @@ public class ReplyServiceImpl implements ReplyService{
                 );
 
         if(findReplyPage.hasContent()) {
+            findReplyPage.getContent().forEach(reply -> {
+                reply.setMemberProfilePath(
+                        fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, reply.getMemberId()))
+                );
+            });
+
             return PageResponse.<PageReplyResponseDto>builder()
                     .totalElement(findReplyPage.getTotalElements())
                     .currentPage(findReplyPage.getNumber())
@@ -140,7 +150,7 @@ public class ReplyServiceImpl implements ReplyService{
 
         Reply reply = replyRepository.findByStrategyIdAndIdAndStatusCode(
                 replyDeleteRequestDto.getStrategyId(),
-                replyDeleteRequestDto.getId(),
+                replyDeleteRequestDto.getReplyId(),
                 USING_STATE.getCode()
         ).orElseThrow(() -> new EntityNotFoundException("해당 댓글을 찾을 수 없습니다."));
 

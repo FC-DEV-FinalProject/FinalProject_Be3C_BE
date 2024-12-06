@@ -16,11 +16,11 @@ public class ReplyDeleteRequestDto {
 
     @Schema(description = "전략 ID", example = "12345")
     @NotNull(message = "strategyId는 필수 값입니다.")
-    @JsonProperty("strategy_id")
+    @JsonProperty("strategyId")
     private Long strategyId;
 
     @Schema(description = "댓글 ID", example = "67890")
     @NotNull(message = "id는 필수 값입니다.")
-    @JsonProperty("id")
-    private Long id;
+    @JsonProperty("replyId")
+    private Long replyId;
 }

@@ -23,16 +23,15 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -94,7 +93,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         try {
             Long userId = securityUtils.getUserIdInSecurityContext();
 
-            HashSet<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
 
             if(interestStrategyList.contains(detailDto.getId())) {
                 detailDto.setIsFollow(true);
@@ -109,15 +108,15 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
     // 분석 지표 그래프 데이터 요청
     @Override
     @Transactional
-    public StrategyAnalysisResponseDto getAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period) {
+    public APIResponse<StrategyAnalysisResponseDto> getAnalysis(Long strategyId) {
 
-        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId, optionOne, optionTwo, period);
+        StrategyAnalysisResponseDto analysis = strategyRepository.findGraphAnalysis(strategyId);
 
         strategyViewAuthorize.Authorize(strategyRepository.findById(strategyId).orElseThrow(EntityNotFoundException::new));
 
-        if (analysis == null || analysis.getXAxis().isEmpty() || analysis.getYAxis().isEmpty()) return null;
+        if (analysis == null || analysis.getXAxis().isEmpty()) return APIResponse.fail(ErrorCode.NOT_FOUND, "분석 그래프가 존재하지 않습니다.");
 
-        return analysis;
+        return APIResponse.success(analysis);
     }
 
 
@@ -261,41 +260,60 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         return doubleHandler.cutDouble(accumulatedProfitLossAmount / maximumCapitalReductionAmount * -1);
     }
 
-    // getMonthlyRecords : 월간 분석 데이터 가져오기
-    private List<MonthlyRecord> getMonthlyRecords(Long strategyId) {
+    // getMonthlyRecords : 월간 분석 데이터 매핑
+    private List<YearlyRecord> getMonthlyRecords(Long strategyId) {
+        // 데이터 조회
+        List<MonthlyForRepo> data = monthlyRepository.findAllMonthlyRecord(strategyId);
 
-        List<MonthlyRecord> monthlyRecords = monthlyRepository.findAllMonthlyRecord(strategyId);
+        // 데이터가 없을 경우 빈 리스트 반환
+        if (data == null || data.isEmpty()) return new ArrayList<>();
 
-        // 월간 데이터가 없으면 빈 ArrayList 반환
-        if (monthlyRecords == null || monthlyRecords.isEmpty())
-            return new ArrayList<>();
+        Map<Integer, List<MonthlyRecord>> groupedByYear = new LinkedHashMap<>();
 
-        List<MonthlyRecord> result = new ArrayList<>(monthlyRecords);
-        Double ytd = 0.0;
-        Integer currentYear = monthlyRecords.get(0).getYear();
+        int currentYear = -1;
+        double ytdAccumulation = 0.0;
 
-        for (MonthlyRecord m : monthlyRecords) {
-            // 다른 년도면 YTD 추가
-            if (!m.getYear().equals(currentYear)) {
-                result.add(MonthlyRecord.builder()
-                        .year(currentYear)
-                        .month(13)
-                        .accumulatedProfitLossRate(doubleHandler.cutDouble(ytd))
-                        .build());
+        for (MonthlyForRepo monthly : data) {
+            int year = monthly.getYear();
+            double profitLossRate = monthly.getAccumulatedProfitLossRate();
 
-                currentYear = m.getYear();
-                ytd = 0.0;
+            // 연도가 변경되면 YTD 값 추가
+            if (year != currentYear) {
+                if (currentYear != -1) {
+                    groupedByYear.get(currentYear).add(
+                            MonthlyRecord.builder()
+                                    .month(13)
+                                    .value(doubleHandler.cutDouble(ytdAccumulation))
+                                    .build());
+                }
+                currentYear = year;
+                ytdAccumulation = 0.0;
+                groupedByYear.putIfAbsent(year, new ArrayList<>());
             }
-            ytd += m.getAccumulatedProfitLossRate();
+
+            ytdAccumulation += profitLossRate;
+            groupedByYear.get(year).add(
+                    MonthlyRecord.builder()
+                            .month(monthly.getMonth())
+                            .value(profitLossRate)
+                            .build());
         }
 
-        // 마지막 연도의 YTD 추가
-        result.add(MonthlyRecord.builder()
-                .year(currentYear)
-                .month(13)
-                .accumulatedProfitLossRate(doubleHandler.cutDouble(ytd))
-                .build());
+        // 마지막 연도의 YTD 데이터 추가
+        if (currentYear != -1) {
+            groupedByYear.get(currentYear).add(
+                    MonthlyRecord.builder()
+                            .month(13)
+                            .value(doubleHandler.cutDouble(ytdAccumulation))
+                            .build());
+        }
 
-        return result;
+        // Map을 YearlyRecord 리스트로 변환
+        return groupedByYear.entrySet().stream()
+                .map(entry -> YearlyRecord.builder()
+                        .year(entry.getKey())
+                        .data(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

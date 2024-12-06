@@ -1,7 +1,6 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
 
-import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisOption;
 import com.be3c.sysmetic.domain.strategy.dto.StrategyAnalysisResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StrategySearchRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
@@ -19,5 +18,5 @@ public interface StrategyRepositoryCustom {
     Page<Strategy> searchByAlgorithm(Pageable pageable, String algorithm);
 
     // findGraphAnalysis : 분석 그래프 데이터
-    StrategyAnalysisResponseDto findGraphAnalysis(Long strategyId, StrategyAnalysisOption optionOne, StrategyAnalysisOption optionTwo, String period);
+    StrategyAnalysisResponseDto findGraphAnalysis(Long strategyId);
 }

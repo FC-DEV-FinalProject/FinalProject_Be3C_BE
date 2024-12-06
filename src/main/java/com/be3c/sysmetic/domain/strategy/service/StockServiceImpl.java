@@ -1,11 +1,13 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.StockDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.StockPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Stock;
 import com.be3c.sysmetic.domain.strategy.repository.StockRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
@@ -22,6 +24,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.be3c.sysmetic.global.common.Code.USING_STATE;
 
@@ -171,17 +176,31 @@ public class StockServiceImpl implements StockService {
         4. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean deleteItem(Long id) {
+    public Map<Long, String> deleteItem(StockDeleteRequestDto idList) {
+        Map<Long, String> returnMap = new HashMap<>();
+
+        idList.getStockIdList().forEach(stockId -> {
+            try {
+                deleteStock(stockId);
+            } catch (EntityNotFoundException e) {
+                returnMap.put(stockId, e.getMessage());
+            }
+        });
+
+        return returnMap;
+    }
+
+    private String deleteStock(Long id) {
         Stock findStock = stockRepository.findByIdAndStatusCode(
-                        id,
-                        USING_STATE.getCode()
-                ).orElseThrow(EntityNotFoundException::new);
+                id,
+                USING_STATE.getCode()
+        ).orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND.getMessage()));
 
         findStock.setStatusCode(Code.NOT_USING_STATE.getCode());
         stockRepository.save(findStock);
 
         fileService.deleteFile(new FileRequest(FileReferenceType.STOCK, findStock.getId()));
 
-        return true;
+        return null;
     }
 }

@@ -49,7 +49,6 @@ public class StrategySearchController implements StrategySearchControllerDocs {
         return APIResponse.success(results);
     }
 
-
     /*
         algorithmSearch : 알고리즘별 정렬 - 계산 후 정렬 & 페이징
     */

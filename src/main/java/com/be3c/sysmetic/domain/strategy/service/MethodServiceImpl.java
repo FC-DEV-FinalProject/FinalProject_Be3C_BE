@@ -1,11 +1,13 @@
 package com.be3c.sysmetic.domain.strategy.service;
 
+import com.be3c.sysmetic.domain.strategy.dto.MethodDeleteRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPostRequestDto;
 import com.be3c.sysmetic.domain.strategy.dto.MethodPutRequestDto;
 import com.be3c.sysmetic.domain.strategy.entity.Method;
 import com.be3c.sysmetic.domain.strategy.repository.MethodRepository;
 import com.be3c.sysmetic.global.common.Code;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.exception.ConflictException;
 import com.be3c.sysmetic.global.util.file.dto.FileReferenceType;
@@ -19,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.be3c.sysmetic.global.common.Code.NOT_USING_STATE;
@@ -167,17 +171,29 @@ public class MethodServiceImpl implements MethodService {
         3. true를 반환해 성공 여부를 알린다.
      */
     @Override
-    public boolean deleteMethod(Long id) {
+    public Map<Long, String> deleteMethodList(MethodDeleteRequestDto requestDto) {
+        Map<Long, String> returnMap = new HashMap<>();
+
+        requestDto.getMethodIdList().forEach(methodId -> {
+            try {
+                deleteMethod(methodId);
+            } catch (EntityNotFoundException e) {
+                returnMap.put(methodId, e.getMessage());
+            }
+        });
+
+        return returnMap;
+    }
+
+    private void deleteMethod(Long id) {
         Method method = methodRepository.findByIdAndStatusCode(
                 id,
                 USING_STATE.getCode()
-        ).orElseThrow(EntityNotFoundException::new);
+        ).orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND.getMessage()));
 
         method.setStatusCode(NOT_USING_STATE.getCode());
         methodRepository.save(method);
 
-//        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
-        return true;
+        fileService.deleteFile(new FileRequest(FileReferenceType.METHOD, method.getId()));
     }
-
 }

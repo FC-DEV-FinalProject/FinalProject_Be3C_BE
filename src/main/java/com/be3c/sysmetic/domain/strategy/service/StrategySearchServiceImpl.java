@@ -54,15 +54,15 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                     List<String> stockIconPaths = new ArrayList<>();
 
                     stockGetter.getStocks(s.getId()).getStockIds().forEach(stockId ->
-                            stockIconPaths.add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)))
+                            stockIconPaths.add(fileService.getFilePathNullable(new FileRequest(FileReferenceType.STOCK, stockId)))
                     );
 
                     return StrategySearchResponseDto.builder()
                                     .strategyId(s.getId())
                                     .traderId(s.getTrader().getId())
                                     .traderNickname(s.getTrader().getNickname())
-                                    .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
-                                    .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
+                                    .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
+                                    .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
                                     .stockIconPath(stockIconPaths)
                                     .name(s.getName())
                                     .cycle(s.getCycle())
@@ -108,13 +108,17 @@ public class StrategySearchServiceImpl implements StrategySearchService {
 
         Page<Strategy> sPage = strategyRepository.searchByAlgorithm(pageable, String.valueOf(algorithm));
 
+        if (String.valueOf(algorithm).equals("DEFENSIVE")) {
+            sPage = strategyRepository.findDefensiveStrategies(pageable);
+        }
+
         List<StrategyAlgorithmResponseDto> strategyList = sPage.getContent()
                 .stream()
                 .map(s -> {
                     List<String> stockIconPaths = new ArrayList<>();
 
                     stockGetter.getStocks(s.getId()).getStockIds().forEach(stockId ->
-                            stockIconPaths.add(fileService.getFilePath(new FileRequest(FileReferenceType.STOCK, stockId)))
+                            stockIconPaths.add(fileService.getFilePathNullable(new FileRequest(FileReferenceType.STOCK, stockId)))
                     );
 
                     return StrategyAlgorithmResponseDto.builder()
@@ -122,10 +126,11 @@ public class StrategySearchServiceImpl implements StrategySearchService {
                             .id(s.getId())
                             .traderId(s.getTrader().getId())
                             .traderNickname(s.getTrader().getNickname())
-                            .traderProfileImage(fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
-                            .methodIconPath(fileService.getFilePath(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
+                            .traderProfileImage(fileService.getFilePathNullable(new FileRequest(FileReferenceType.MEMBER, s.getTrader().getId())))
+                            .methodIconPath(fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, s.getMethod().getId())))
                             .stockIconPath(stockIconPaths)
                             .name(s.getName())
+                            .isFollow(false)
                             .cycle(s.getCycle())
                             .accumulatedProfitLossRate(s.getAccumulatedProfitLossRate())
                             .mdd(s.getMdd())

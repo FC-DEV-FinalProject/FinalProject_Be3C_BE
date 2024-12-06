@@ -16,15 +16,6 @@ import java.time.LocalDateTime;
 @Schema(description = "관리자 문의 답변 조회 응답 DTO")
 public class InquiryAnswerInquirerShowResponseDto {
 
-    @Schema(description = "이 공지사항이 있던 페이지", example = "1")
-    private int page;
-
-    @Schema(description = "지정했던 정렬순", example = "searchType")
-    private String sort;
-
-    @Schema(description = "지정했던 답변상태", example = "searchType")
-    private String closed;
-
     @Schema(description = "문의 ID", example = "12345")
     private Long inquiryId;
 
@@ -84,11 +75,17 @@ public class InquiryAnswerInquirerShowResponseDto {
     @Schema(description = "답변 내용", example = "Here are the details of the strategy.")
     private String answerContent;
 
+    @Schema(description = "이전 문의 ID", example = "123")
+    private Long previousId;
+
     @Schema(description = "이전 문의 제목", example = "문의 제목 예")
     private String previousTitle;
 
     @Schema(description = "이전 문의 작성일시", example = "2023-11-21T10:15:30")
     private LocalDateTime previousWriteDate;
+
+    @Schema(description = "다음 문의 ID", example = "123")
+    private Long nextId;
 
     @Schema(description = "다음 문의 제목", example = "문의 제목 예")
     private String nextTitle;

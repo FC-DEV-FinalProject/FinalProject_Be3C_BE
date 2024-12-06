@@ -1,6 +1,5 @@
 package com.be3c.sysmetic.domain.strategy.repository;
 
-import com.be3c.sysmetic.domain.member.dto.InterestStrategyGetResponseDto;
 import com.be3c.sysmetic.domain.strategy.dto.*;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import org.springframework.data.domain.Page;
@@ -126,4 +125,21 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
 
     @Query(value = "SELECT s.strategy_name FROM strategy s ORDER BY s.sm_score DESC LIMIT 1", nativeQuery = true)
     Optional<String> findTop1SmScore();
+
+    @Query(value = "SELECT s.*, " +
+            "       (mdd_rank + stddev_rank + winning_rate_rank) / 3 AS average_rank " +
+            "FROM strategy s " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY mdd DESC) AS mdd_rank " +
+            "      FROM strategy) mdd_rank_tbl " +
+            "ON s.id = mdd_rank_tbl.id " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY STDDEV(accumulated_profit_loss_rate) DESC) AS stddev_rank " +
+            "      FROM strategy " +
+            "      GROUP BY id) stddev_rank_tbl " +
+            "ON s.id = stddev_rank_tbl.id " +
+            "JOIN (SELECT id, RANK() OVER (ORDER BY winning_rate ASC) AS winning_rate_rank " +
+            "      FROM strategy) winning_rate_rank_tbl " +
+            "ON s.id = winning_rate_rank_tbl.id " +
+            "ORDER BY average_rank ASC",
+            nativeQuery = true)
+    Page<Strategy> findDefensiveStrategies(Pageable pageable);
 }

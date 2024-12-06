@@ -14,15 +14,6 @@ import java.util.List;
 @Schema(description = "공지사항 수정 페이지 조회 응답 DTO")
 public class NoticeShowModifyPageResponseDto {
 
-    @Schema(description = "이 공지사항이 있던 페이지", example = "1")
-    private int page;
-
-    @Schema(description = "검색했던 검색 조건", example = "searchType")
-    private String searchType;
-
-    @Schema(description = "검색했던 검색 단어", example = "searchText")
-    private String searchText;
-
     @Schema(description = "공지사항 ID", example = "123")
     private Long noticeId;
 
