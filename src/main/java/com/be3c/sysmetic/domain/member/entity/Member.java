@@ -104,4 +104,20 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Reply> replies;
+
+    public void decreaseFollowCount() {
+        totalFollow--;
+    }
+
+    public void decreaseStrategy() {
+        totalStrategyCount--;
+    }
+
+    public void increaseFollowCount() {
+        totalFollow++;
+    }
+
+    public void increaseStrategy() {
+        totalStrategyCount++;
+    }
 }

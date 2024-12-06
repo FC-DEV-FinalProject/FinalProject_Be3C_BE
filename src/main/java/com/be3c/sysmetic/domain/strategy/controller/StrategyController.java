@@ -1,13 +1,16 @@
 package com.be3c.sysmetic.domain.strategy.controller;
 
 import com.be3c.sysmetic.domain.strategy.dto.AccountImageResponseDto;
+import com.be3c.sysmetic.domain.strategy.exception.StrategyBadRequestException;
 import com.be3c.sysmetic.domain.strategy.service.*;
 import com.be3c.sysmetic.domain.strategy.dto.*;
+import com.be3c.sysmetic.global.common.response.ErrorCode;
 import com.be3c.sysmetic.global.common.response.PageResponse;
 import com.be3c.sysmetic.global.common.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,7 @@ import java.time.LocalDate;
 @RestController
 public class StrategyController {
 
+    private final StrategyService strategyService;
     private final DailyServiceImpl dailyService;
     private final MonthlyServiceImpl monthlyService;
     private final AccountImageServiceImpl accountImageService;
@@ -73,6 +77,21 @@ public class StrategyController {
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(responseDto));
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<APIResponse<StrategyDetailDto>> getStrategy(
+            @PathVariable Long id
+    ) {
+        try {
+            StrategyDetailDto strategyDetailDto = strategyService.getStrategy(id);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(APIResponse.success(strategyDetailDto));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(APIResponse.fail(ErrorCode.BAD_REQUEST));
+        }
+    }
+
     // 통계 조회
     @Operation(
             summary = "통계 조회",
@@ -83,5 +102,4 @@ public class StrategyController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(APIResponse.success(strategyStatisticsService.findStrategyStatistics(strategyId)));
     }
-
 }

@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -76,7 +77,7 @@ public class StrategySearchServiceImpl implements StrategySearchService {
         try {
             Long userId = securityUtils.getUserIdInSecurityContext();
 
-            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+            HashSet<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
 
             strategyList.forEach(strategy -> {
                         if(interestStrategyList.contains(strategy.getStrategyId())) {
@@ -135,7 +136,7 @@ public class StrategySearchServiceImpl implements StrategySearchService {
         try {
             Long userId = securityUtils.getUserIdInSecurityContext();
 
-            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+            HashSet<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
 
             strategyList.forEach(strategy -> {
                         if(interestStrategyList.contains(strategy.getId())) {

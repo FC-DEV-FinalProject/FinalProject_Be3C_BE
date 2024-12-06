@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -93,7 +94,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         try {
             Long userId = securityUtils.getUserIdInSecurityContext();
 
-            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+            HashSet<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
 
             if(interestStrategyList.contains(detailDto.getId())) {
                 detailDto.setIsFollow(true);

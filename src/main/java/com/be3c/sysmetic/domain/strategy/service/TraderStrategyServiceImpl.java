@@ -52,8 +52,10 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
     public StrategyPostResponseDto insertStrategy(StrategyPostRequestDto requestDto, MultipartFile file) {
         checkDuplName(requestDto.getName());
 
+        Member member = findMember(securityUtils.getUserIdInSecurityContext());
+
         Strategy saveStrategy = Strategy.builder()
-                .trader(findMember(securityUtils.getUserIdInSecurityContext()))
+                .trader(member)
                 .method(findMethod(requestDto.getMethodId()))
                 .statusCode(StrategyStatusCode.PRIVATE.name())
                 .name(requestDto.getName())
@@ -77,6 +79,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
         }
 
         insertStrategyStockReference(requestDto.getStockIdList(), saveStrategy);
+        member.increaseStrategy();
 
         // 기본 전략 통계 저장
         strategyStatisticsRepository.save(new StrategyStatistics(saveStrategy));
@@ -152,6 +155,7 @@ public class TraderStrategyServiceImpl implements TraderStrategyService {
             // 파일 존재할 경우 제안서 삭제
             FileRequest fileRequest = new FileRequest(FileReferenceType.STRATEGY, existingStrategy.getId());
             String existingFile = fileService.getFilePathNullable(fileRequest);
+            savedStrategy.getTrader().decreaseStrategy();
 
             if(existingFile != null) {
                 fileService.deleteFile(fileRequest);
