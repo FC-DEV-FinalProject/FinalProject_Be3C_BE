@@ -25,6 +25,7 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     final DailyRepository dailyRepository;
     final MonthlyRepository monthlyRepository;
+    final MonthlyService monthlyService;
     final StrategyRepository strategyRepository;
     final StrategyDetailService strategyDetailService;
     final DoubleHandler doubleHandler;
@@ -185,9 +187,14 @@ public class ExcelServiceImpl implements ExcelService {
                     }
 
                 }
+                // Daily 저장
                 dailyRepository.saveAll(saveTargets);
+                // StrategyGraphAnalysis 저장
                 saveTargets.forEach(daily -> strategyDetailService.saveAnalysis(strategyId, daily.getDate()));
-
+                // Monthly 저장
+                List<LocalDate> updatedDateList = saveTargets
+                        .stream().map(Daily::getDate).collect(Collectors.toList());
+                monthlyService.updateMonthly(strategyId, updatedDateList);
 
                 // 계산 컬럼 저장하기
                 if(!saveTargets.isEmpty()){
