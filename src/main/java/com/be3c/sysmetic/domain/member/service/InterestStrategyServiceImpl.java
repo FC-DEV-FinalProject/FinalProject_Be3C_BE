@@ -233,6 +233,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         interestStrategyRepository.save(interestStrategy);
 
         strategy.increaseFollowerCount();
+        strategy.getTrader().increaseFollowCount();
 
         followStrategyLog(
                 interestStrategy.getId(),
@@ -259,6 +260,7 @@ public class InterestStrategyServiceImpl implements InterestStrategyService {
         interestStrategyRepository.save(interestStrategy);
 
         interestStrategy.getStrategy().decreaseFollowerCount();
+        interestStrategy.getStrategy().getTrader().decreaseFollowCount();
 
         followStrategyLog(
                 interestStrategy.getId(),

@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -179,13 +180,19 @@ public class MemberInfoServiceImpl implements MemberInfoService {
                     Code.USING_STATE.getCode()
             ).orElseThrow(EntityNotFoundException::new);
 
-            member.setReceiveMarketingConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveMarketingConsent()));
-            member.setReceiveInfoConsent(String.valueOf(memberPatchInfoRequestDto.getReceiveInfoConsent()));
+            if(memberPatchInfoRequestDto.getReceiveInfoConsent()) {
+                member.setReceiveInfoConsent(String.valueOf(true));
+                member.setInfoConsentDate(LocalDateTime.now());
+            }
+            if(memberPatchInfoRequestDto.getReceiveMarketingConsent()) {
+                member.setReceiveMarketingConsent(String.valueOf(true));
+                member.setMarketingConsentDate(LocalDateTime.now());
+            }
 
             return true;
         }
 
-        return false;
+        throw new IllegalArgumentException();
     }
 
     @Override
