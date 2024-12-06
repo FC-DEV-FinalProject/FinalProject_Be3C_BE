@@ -219,8 +219,8 @@ public class JwtTokenProvider {
     // 10. roleCode 를 role 로 명칭 변환 메서드
     public String roleCodeChangeRole(String roleCode) {
         /*
-            RC001 (일반회원)(USER) <-> RC003 (일반회원 관리자)(MANAGER)
-            RC002 (트레이더)(TRADER) <-> RC004 (트레이더 관리자)(MANAGER)
+            RC001 (일반회원)(USER) <-> RC003 (일반회원 관리자)(USER_MANAGER)
+            RC002 (트레이더)(TRADER) <-> RC004 (트레이더 관리자)(TRADER_MANAGER)
             RC005 (수퍼관리자)(ADMIN)
         */
         if (roleCode == null || roleCode.isEmpty()) {
@@ -235,7 +235,7 @@ public class JwtTokenProvider {
         return switch (roleCode) {
             case "RC001" -> "USER";
             case "RC002" -> "TRADER";
-            case "RC003", "RC004" -> "MANAGER";
+            case "RC003", "RC004", "USER_MANAGER", "TRADER_MANAGER" -> "MANAGER";
             case "RC005" -> "ADMIN";
             default -> {
                 log.info("올바르지 않은 roleCode값이 입력됐습니다.");
