@@ -6,6 +6,7 @@ import com.be3c.sysmetic.domain.strategy.entity.Monthly;
 import com.be3c.sysmetic.domain.strategy.entity.Strategy;
 import com.be3c.sysmetic.domain.strategy.repository.DailyRepository;
 import com.be3c.sysmetic.domain.strategy.repository.MonthlyRepository;
+import com.be3c.sysmetic.domain.strategy.repository.StrategyGraphAnalysisRepository;
 import com.be3c.sysmetic.domain.strategy.repository.StrategyRepository;
 import com.be3c.sysmetic.domain.strategy.util.DoubleHandler;
 import com.be3c.sysmetic.domain.strategy.util.StrategyCalculator;
@@ -32,6 +33,7 @@ public class ExcelServiceImpl implements ExcelService {
     final DailyRepository dailyRepository;
     final MonthlyRepository monthlyRepository;
     final StrategyRepository strategyRepository;
+    final StrategyDetailService strategyDetailService;
     final DoubleHandler doubleHandler;
     final StrategyCalculator strategyCalculator;
     final S3Service s3Service;
@@ -184,6 +186,7 @@ public class ExcelServiceImpl implements ExcelService {
 
                 }
                 dailyRepository.saveAll(saveTargets);
+                saveTargets.forEach(daily -> strategyDetailService.saveAnalysis(strategyId, daily.getDate()));
 
 
                 // 계산 컬럼 저장하기
