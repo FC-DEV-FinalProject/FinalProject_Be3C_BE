@@ -287,11 +287,9 @@ public class NoticeServiceImpl implements NoticeService {
 
                 if (notice.getFileExists()) {
                     fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
-                    System.out.println("noticeId: " + noticeId);
                 }
                 if (notice.getImageExists()) {
                     fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
-                    System.out.println("noticeId: " + noticeId);
                 }
             }
             catch (EntityNotFoundException e) {
