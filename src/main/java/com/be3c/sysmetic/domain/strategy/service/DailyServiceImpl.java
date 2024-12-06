@@ -148,7 +148,9 @@ public class DailyServiceImpl implements DailyService {
         if(countDaily == 0) {
             // 모든 일간분석 데이터 삭제시 월간분석 데이터 삭제
             monthlyRepository.deleteAllByStrategyId(strategyId);
-            // 전략 통계 데이터 초기화
+            // 전략 통계 데이터 선 삭제
+            statisticsRepository.deleteByStrategyId(strategyId);
+            // 전략 통계 데이터 후 초기화
             statisticsRepository.save(new StrategyStatistics(exitingStrategy));
             // 분석 그래프 데이터 삭제
             strategyGraphAnalysisRepository.deleteAllByStrategyId(strategyId);
