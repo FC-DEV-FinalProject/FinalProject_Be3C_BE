@@ -1,6 +1,20 @@
+# temp
+image/
+
 # app properties
 database.properties
 cloud.properties
+application-test.properties
+jwt.properties
+
+### Mac ###
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+# QueryDSL Q파일 경로
+src/main/generated/
 
 HELP.md
 build/
