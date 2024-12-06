@@ -19,6 +19,7 @@ public interface StrategyStatisticsRepository extends JpaRepository<StrategyStat
     Optional<StrategyStatistics> findByStrategyId(Long strategyId);
 
     @Modifying
+    @Query("DELETE FROM StrategyStatistics s WHERE s.strategy.id = :strategyId")
     void deleteByStrategyId(Long strategyId);
 
     // 알고리즘별 전략 목록에서 사용!
