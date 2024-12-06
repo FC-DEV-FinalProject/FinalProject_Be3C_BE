@@ -70,13 +70,8 @@ public class JwtTokenProvider {
 
     // 1. Token 생성 메서드
     public String generateToken(Long memberId, String email, String roleCode, long expiration) {
-        String role = null;
-        if (roleCode.startsWith("RC")) {
-            // "RC"로 시작하는 경우, roleCode를 role로 변경
-            role = roleCodeChangeRole(roleCode);
-        } else {
-            role = roleCode;
-        }
+        // roleCode를 role로 변경
+        String role = roleCodeChangeRole(roleCode);
 
         Date now = new Date();
         Date tokenExpires = new Date(now.getTime() + expiration);
