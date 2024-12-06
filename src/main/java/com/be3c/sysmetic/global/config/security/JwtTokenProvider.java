@@ -253,4 +253,17 @@ public class JwtTokenProvider {
     public void deleteToken(String accessToken) {
         redisUtils.deleteToken(accessToken);
     }
+
+
+    // 토큰에서 이메일 반환
+    public String getUsernameFromToken(String token) {
+
+        Claims claims = Jwts.parser()
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return (String) claims.get("email");
+    }
 }
