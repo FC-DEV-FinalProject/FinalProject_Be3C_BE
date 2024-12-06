@@ -93,7 +93,7 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
         try {
             Long userId = securityUtils.getUserIdInSecurityContext();
 
-            List<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
+            HashSet<Long> interestStrategyList = interestStrategyRepository.findAllByMemberId(userId);
 
             if(interestStrategyList.contains(detailDto.getId())) {
                 detailDto.setIsFollow(true);

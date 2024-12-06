@@ -31,9 +31,7 @@ public class StrategyDetailController implements StrategyDetailControllerDocs {
         return APIResponse.success(strategyDetailDto);
     }
 
-
     /*
-
        getAnalysis : 전략 상세 페이지 그래프 데이터 요청
     */
     @Override
