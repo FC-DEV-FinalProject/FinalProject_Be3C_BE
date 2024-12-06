@@ -1,20 +1,41 @@
 package com.be3c.sysmetic.global.config;
 
+import com.be3c.sysmetic.global.config.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class AuditorAwareImpl implements AuditorAware<String> {
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String memberId = "";
-        memberId = "security 구현 후 수정";
-        if(authentication != null)
-            memberId = authentication.getName();    // UserDetails의 getUsername() 반환값 -- email
-        return Optional.of(memberId);
+
+        String token = resolveTokenFromHeader();
+
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+
+            return jwtTokenProvider.getUsernameFromToken(token).describeConstable();
+        }
+
+        return Optional.empty();
+    }
+
+    private String resolveTokenFromHeader() {
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String bearerToken = request.getHeader("Authorization");
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
     }
 }
