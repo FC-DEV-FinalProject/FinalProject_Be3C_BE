@@ -29,4 +29,27 @@ public interface StrategyStatisticsRepository extends JpaRepository<StrategyStat
     @Query("SELECT new com.be3c.sysmetic.domain.strategy.dto.StrategyDetailStatistics(s.maximumCapitalReductionAmount, s.averageProfitLossRate, s.profitFactor, s.winningRate) "
         + "FROM StrategyStatistics s WHERE s.strategy.id = :strategyId")
     StrategyDetailStatistics findStrategyDetailStatistics(@Param("strategyId") Long strategyId);
+
+    @Modifying
+    @Query("UPDATE StrategyStatistics s SET " +
+            "s.currentCapitalReductionAmount = :currentCapitalReductionAmount, " +
+            "s.currentCapitalReductionRate = :currentCapitalReductionRate, " +
+            "s.averageProfitLossAmount = :averageProfitLossAmount, " +
+            "s.averageProfitLossRate = :averageProfitLossRate, " +
+            "s.winningRate = :winningRate, " +
+            "s.profitFactor = :profitFactor, " +
+            "s.roa = :roa, " +
+            "s.maximumCapitalReductionAmount = :maximumCapitalReductionAmount " +
+            "WHERE s.strategy.id = :strategyId")
+    void updateIndicators(
+            @Param("strategyId") Long strategyId,
+            @Param("currentCapitalReductionAmount") Double currentCapitalReductionAmount,
+            @Param("currentCapitalReductionRate") Double currentCapitalReductionRate,
+            @Param("averageProfitLossAmount") Double averageProfitLossAmount,
+            @Param("averageProfitLossRate") Double averageProfitLossRate,
+            @Param("winningRate") Double winningRate,
+            @Param("profitFactor") Double profitFactor,
+            @Param("roa") Double roa,
+            @Param("maximumCapitalReductionAmount") Double maximumCapitalReductionAmount);
+
 }

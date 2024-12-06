@@ -154,6 +154,17 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .build();
 
         strategyGraphAnalysisRepository.save(data);
+        strategyStatisticsRepository.updateIndicators(
+                data.getStrategy().getId(),
+                data.getCurrentCapitalReductionAmount(),
+                data.getCurrentCapitalReductionRate(),
+                data.getAverageProfitLossAmount(),
+                data.getAverageProfitLossRate(),
+                data.getWinningRate(),
+                data.getProfitFactor(),
+                data.getRoa(),
+                data.getMaximumCapitalReductionAmount()
+        );
         return APIResponse.success("분석 지표 그래프 데이터 생성 성공");
     }
 
@@ -192,9 +203,21 @@ public class StrategyDetailServiceImpl implements StrategyDetailService {
                 .profitFactor(strategyIndicatorsCalculator.calProfitFactor(strategyId))
                 .roa(strategyIndicatorsCalculator.calRoa(accumulatedProfitLossAmount, maximumCapitalReductionAmount))
                 .maximumCapitalReductionAmount(maximumCapitalReductionAmount)
+
                 .build();
 
         strategyGraphAnalysisRepository.save(data);
+        strategyStatisticsRepository.updateIndicators(
+                data.getStrategy().getId(),
+                data.getCurrentCapitalReductionAmount(),
+                data.getCurrentCapitalReductionRate(),
+                data.getAverageProfitLossAmount(),
+                data.getAverageProfitLossRate(),
+                data.getWinningRate(),
+                data.getProfitFactor(),
+                data.getRoa(),
+                data.getMaximumCapitalReductionAmount()
+        );
         return APIResponse.success("분석 지표 그래프 데이터 생성 성공");
     }
 
