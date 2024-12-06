@@ -67,7 +67,7 @@ public class MemberManagementServiceImpl implements MemberManagementService {
         );
 
         // 현재 회원등급
-        MemberRole currentRoleCode = null;
+        MemberRole currentRoleCode;
         if(member.getRoleCode().startsWith("RC")) {
             currentRoleCode = MemberRole.getEnumRole(member.getRoleCode());
         } else {
