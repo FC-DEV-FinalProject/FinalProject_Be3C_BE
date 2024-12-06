@@ -38,7 +38,7 @@ public class NoticeModifyRequestDto {
     private Boolean isOpen;
 
     @Schema(description = "공지사항에서 삭제된 파일의 id 리스트", example = "[1,2,3]")
-    private List<Long> deletFileIdList;
+    private List<Long> deleteFileIdList;
 
     @Schema(description = "공지사항에서 삭제된 이미지의 id 리스트", example = "[1,2,3]")
     private List<Long> deleteImageIdList;

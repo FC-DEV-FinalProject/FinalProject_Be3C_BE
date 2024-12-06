@@ -2,6 +2,7 @@ package com.be3c.sysmetic.domain.strategy.repository;
 
 import com.be3c.sysmetic.domain.strategy.entity.StrategyGraphAnalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -33,15 +34,9 @@ public interface StrategyGraphAnalysisRepository extends JpaRepository<StrategyG
     Double findMaximumCapitalReductionAmountBeforeDate(@Param("strategyId") Long strategyId, @Param("date") LocalDate date);
 
     // 전략 삭제 시 전체 삭제
+    @Modifying
+    @Query("DELETE FROM StrategyGraphAnalysis s WHERE s.strategy.id = :strategyId")
     void deleteAllByStrategyId(Long strategyId);
-
-    // 시작 날짜 찾기
-    @Query("SELECT MIN(s.date) FROM StrategyGraphAnalysis s")
-    Optional<LocalDate> findStartDate();
-
-    // 마지막 날짜 찾기
-    @Query("SELECT MAX(s.date) FROM StrategyGraphAnalysis s")
-    Optional<LocalDate> findLastDate();
 
     // 전체 날짜 찾기
     @Query("SELECT s.date FROM StrategyGraphAnalysis s GROUP BY s.date ORDER BY s.date ASC")

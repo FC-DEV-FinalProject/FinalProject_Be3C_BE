@@ -68,6 +68,10 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long>, Inquiry
     @Query("DELETE FROM Inquiry i WHERE i.strategy.id = :strategyId")
     void deleteByStrategyId(@Param("strategyId") Long strategyId);
 
+    @Modifying
+    @Query("DELETE FROM Inquiry i WHERE i.inquirer.id = :memberId or i.traderId = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
+
     @Query("SELECT count(*) FROM Inquiry i JOIN InquiryAnswer a ON a.id = i.inquiryAnswer.id")
     Long countAnsweredInquiry();
 }
