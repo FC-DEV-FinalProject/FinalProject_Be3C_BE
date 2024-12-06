@@ -345,7 +345,7 @@ public class InquiryServiceImpl implements InquiryService {
     public InquirySavePageShowResponseDto strategyToInquirySavePageShowResponseDto(Strategy strategy) {
 
         String traderProfileImagePath = fileService.getFilePath(new FileRequest(FileReferenceType.MEMBER, strategy.getTrader().getId()));
-        String methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getId()));
+        String methodIconPath = fileService.getFilePathNullable(new FileRequest(FileReferenceType.METHOD, strategy.getMethod().getId()));
         StockListDto stockList = stockGetter.getStocks(strategy.getId());
 
         return InquirySavePageShowResponseDto.builder()
