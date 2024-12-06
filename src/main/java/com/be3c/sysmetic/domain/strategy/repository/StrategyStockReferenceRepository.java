@@ -18,6 +18,8 @@ public interface StrategyStockReferenceRepository extends JpaRepository<Strategy
     """)
     List<Long> findStockIdsByStrategyId(Long strategyId);
 
+    @Modifying
+    @Query("DELETE FROM StrategyStockReference s WHERE s.strategy.id = :strategyId")
     void deleteByStrategyId(Long strategyId);
 
     @Modifying

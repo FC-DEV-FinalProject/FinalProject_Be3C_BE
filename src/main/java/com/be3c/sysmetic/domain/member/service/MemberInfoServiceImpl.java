@@ -72,6 +72,8 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
     private final AccountImageRepository accountImageRepository;
 
+    private final StrategyGraphAnalysisRepository strategyGraphAnalysisRepository;
+
     private final ReplyRepository replyRepository;
 
     private final StrategyApprovalRepository strategyApprovalRepository;
@@ -224,7 +226,9 @@ public class MemberInfoServiceImpl implements MemberInfoService {
 
         // strategy 삭제
         strategyList.forEach(strategy -> {
+            log.info("strategy id : {}", strategy.getId());
             strategyStatisticsRepository.deleteByStrategyId(strategy.getId());
+            strategyGraphAnalysisRepository.deleteAllByStrategyId(strategy.getId());
             dailyRepository.deleteByStrategyId(strategy.getId());
             monthlyRepository.deleteByStrategyId(strategy.getId());
             strategyStockReferenceRepository.deleteByStrategyId(strategy.getId());
@@ -244,6 +248,8 @@ public class MemberInfoServiceImpl implements MemberInfoService {
         });
 
         folderRepository.deleteByMemberId(member.getId());
+        inquiryAnswerRepository.deleteByMemberId(member.getId());
+        inquiryRepository.deleteByMemberId(member.getId());
 
         memberRepository.delete(member);
     }
