@@ -248,7 +248,7 @@ public class NoticeContoller implements NoticeControllerDocs {
                     noticeModifyRequestDto.getNoticeContent(),
                     userId,
                     noticeModifyRequestDto.getIsOpen(),
-                    noticeModifyRequestDto.getDeletFileIdList(),
+                    noticeModifyRequestDto.getDeleteFileIdList(),
                     noticeModifyRequestDto.getDeleteImageIdList(),
                     newFileList,
                     newImageList)) {
