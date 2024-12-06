@@ -257,6 +257,13 @@ public class NoticeServiceImpl implements NoticeService {
 
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 없습니다."));
 
+        if (notice.getImageExists()) {
+            fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+        }
+        if (notice.getFileExists()) {
+            fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+        }
+
         noticeRepository.delete(notice);
 
         return true;
@@ -276,7 +283,16 @@ public class NoticeServiceImpl implements NoticeService {
 
         for (Long noticeId : noticeIdList) {
             try {
-                noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+                Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("문의가 없습니다."));
+
+                if (notice.getFileExists()) {
+                    fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_FILE, noticeId));
+                    System.out.println("noticeId: " + noticeId);
+                }
+                if (notice.getImageExists()) {
+                    fileService.deleteFiles(new FileRequest(FileReferenceType.NOTICE_BOARD_IMAGE, noticeId));
+                    System.out.println("noticeId: " + noticeId);
+                }
             }
             catch (EntityNotFoundException e) {
                 failDelete.put(noticeId, NOT_FOUND_NOTICE.getMessage());
